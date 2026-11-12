@@ -1,0 +1,13 @@
+.DS_Store
+node_modules/
+
+# Dados reais nunca entram no repositório: relatórios do CRM, planilhas, backups e listas exportadas pela ferramenta.
+# Só os arquivos fictícios de tests/dados/ são versionados.
+*.xls
+*.xlsx
+*.csv
+*.parquet
+*backup*.json
+vezen-*.json
+estimador-ti-*.json
+!tests/dados/*.csv

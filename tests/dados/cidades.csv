@@ -1,0 +1,13 @@
+Empresa;CNPJ;Setor;Estado;Cidade;Ano;Receita líquida (R$);Funcionários;Funcionários de TI;Gasto de TI real (R$)
+Cidade 1;;Indústria;SP;SAO PAULO;2025;270000000;300;8;4536000
+Cidade 2;;Indústria;SP;SAO PAULO;2025;403211152;390;9;4892736
+Cidade 3;;Indústria;SP;SAO PAULO;2025;415440937;480;10;5685713
+Cidade 4;;Indústria;SP;SAO PAULO;2025;441758560;570;11;7193610
+Cidade 5;;Indústria;SP;SAO PAULO;2025;638025500;660;12;7190827
+Cidade 6;;Indústria;SP;SAO PAULO;2025;755846820;750;13;11604708
+Cidade 7;;Indústria;SP;Campinas;2025;451089474;840;14;4328414
+Cidade 8;;Indústria;SP;Campinas;2025;506261924;930;15;3714221
+Cidade 9;;Indústria;SP;Campinas;2025;690871055;1020;16;7337847
+Cidade 10;;Indústria;SP;Campinas;2025;705634383;1110;17;6000129
+Cidade 11;;Indústria;SP;Campinas;2025;616169071;1200;18;4954554
+Cidade 12;;Indústria;SP;Campinas;2025;756701213;1290;19;8153365
