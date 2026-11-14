@@ -202,6 +202,12 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Recolhida continua ao recarregar', await p.evaluate(() => document.documentElement.dataset.lateral === 'recolhida'));
   await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
   ok('Expandir de novo', await p.evaluate(() => !document.documentElement.dataset.lateral && document.querySelector('.lateral').getBoundingClientRect().width > 200 && localStorage.getItem('vezen.lateral') === 'aberta'));
+  // nova análise pela barra lateral, de qualquer tela; recolhida, vira só o ícone
+  await p.click('#nav .lat-nova'); await p.waitForTimeout(300);
+  ok('Barra lateral: Nova análise abre uma análise nova a partir de qualquer tela', (await p.evaluate(() => location.hash)).startsWith('#/analise/') && await p.locator('#sec-objetivo.pede').count() === 1 && await p.locator('#nav .lat-nova').isVisible());
+  await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
+  ok('Recolhida: Nova análise vira só o ícone, com o nome na dica e para leitores de tela', await p.evaluate(() => { const b = document.querySelector('#nav .lat-nova'); return b.dataset.tip === 'Nova análise' && b.textContent.trim() === 'Nova análise' && b.getBoundingClientRect().width <= 48; }));
+  await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
   // área estreita: o cartão fica preso embaixo da tela, com os valores à vista sem rolar
   await ir('#/analise/' + await p.evaluate(() => S.empresas[0].id));
   await p.setViewportSize({ width: 1000, height: 760 }); await p.waitForTimeout(250);
@@ -235,8 +241,8 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.click('[data-acao=menu-empresas]'); await p.click('#pop [data-acao=modelo]'); await p.waitForTimeout(500);
   const mod = await motor(() => { const r = calc(UI.atual.dados); return { nome: UI.atual.dados.nome, ic: r.ic, alerta: r.alerta, avisos: r.avisos.length, sujo: UI.sujo, salva: !!empresaSalva() }; });
   ok('Empresa modelo abre como análise nova, sem alterações pendentes', mod.nome === 'Banco do Brasil' && !mod.salva && !mod.sujo, JSON.stringify(mod));
-  ok('Empresa modelo: confiança de 80 ou mais e nenhum aviso sobre os dados', mod.ic >= 80 && mod.avisos === 0, String(mod.ic));
-  ok('Empresa modelo: aviso com as fontes oficiais', await p.locator('.nota-modelo a[href*="api.mziq.com"]').count() === 2 && (await txt('#ws-meta')).includes('Empresa modelo'));
+  ok('Empresa modelo: confiança de 80 ou mais, sem aviso nem alerta de divergência sobre os dados', mod.ic >= 80 && mod.avisos === 0 && !mod.alerta, String(mod.ic));
+  ok('Empresa modelo: aviso com as fontes oficiais, só os dois documentos', await p.locator('.nota-modelo a[href*="api.mziq.com"]').count() === 2 && await p.locator('.nota-modelo li').count() === 2 && (await txt('#ws-meta')).includes('Empresa modelo'));
   ok('Receita de banco pede o último ano fechado, e o Porte não traz texto explicativo', (await txt('label[for=f-faturamento]')).includes('último ano fechado') && await p.locator('#sec-porte .sf-desc').count() === 0, await txt('label[for=f-faturamento]'));
   ok('Empresa modelo: o que estimar já escolhido e dados com origem oficial', await p.locator('#sec-objetivo.pede').count() === 0 && (await motor(() => [UI.atual.dados.funcionarios, ...UI.atual.dados.gastosReais].every(x => x.o === 'oficial'))));
   await salvarOk(300);
@@ -251,14 +257,17 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.waitForTimeout(200);
   await p.check('input[data-objetivo][value=ti]'); await p.fill('#f-nome', 'Teste Sem Dado'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.fill('#f-funcionarios', '500'); await p.waitForTimeout(300);
   const vis = async c => await p.locator(`.sem-dado[data-campo=${c}]`).count() === 1 && await p.locator(`.sem-dado[data-campo=${c}]`).isVisible();
-  ok('Campos vazios que entram na conta mostram “Falta informar”, em vermelho, desde o início', (await Promise.all(['faturamento', 'usuarios', 'unidades', 'profTI', 'crescFunc', 'gastosReais', 'gastoDeclarado'].map(vis))).every(Boolean) && (await txt('.sem-dado[data-campo=usuarios]')) === 'Falta informar' && await p.locator('.sem-dado[data-campo=usuarios]').evaluate(e => getComputedStyle(e).color) === await tok('--crit'));
+  const campoCor = (c, prop) => p.locator(`#f-${c}`).evaluate((e, k) => getComputedStyle(e)[k], prop);
+  ok('Campos vazios que entram na conta têm o botão “Sem dado?” desde o início', (await Promise.all(['faturamento', 'usuarios', 'unidades', 'profTI', 'crescFunc', 'gastosReais', 'gastoDeclarado'].map(vis))).every(Boolean) && (await txt('.sem-dado[data-campo=usuarios]')) === 'Sem dado?');
+  ok('O próprio campo que falta muda de cor (fundo e borda vermelhos) e o botão fica neutro', await campoCor('usuarios', 'borderTopColor') === await tok('--crit') && await campoCor('usuarios', 'backgroundColor') === await tok('--crit-f') && await p.locator('.sem-dado[data-campo=usuarios]').evaluate(e => getComputedStyle(e).color) === await tok('--cinza'));
+  ok('Campo com valor segue com a cor normal', await campoCor('funcionarios', 'borderTopColor') !== await tok('--crit') && await campoCor('funcionarios', 'backgroundColor') !== await tok('--crit-f'));
   const faltam0 = await pend();
   ok('O topo da análise diz quantos campos faltam', (await txt('.chip-falta')) === 'Faltam ' + faltam0.length + ' campos', await txt('#ws-meta'));
   ok('Campo com valor mostra a origem, não o motivo', !(await vis('funcionarios')) && await p.locator('.origem[data-alvo="campo:funcionarios"]').isVisible());
   ok('Salário só pede motivo quando há equipe de TI; adições e contratos só em listada e público', !(await vis('salarioTI')) && await p.locator('.sem-dado[data-campo=adicoes], .sem-dado[data-campo=contratos]').count() === 0);
   ok('Registro, tecnologias e grupo ficam sem o botão', await p.locator('.sem-dado[data-campo=vagasTI], .sem-dado[data-campo=digital], .sem-dado[data-campo=grupo]').count() === 0);
   await p.click('.sem-dado[data-campo=usuarios]'); await p.waitForTimeout(100);
-  ok('Menu de usuários: não encontrei e não divulga', await p.locator('#pop [data-s]').count() === 2 && await p.locator('#pop [data-s=nao-se-aplica]').count() === 0);
+  ok('Menu de usuários: não encontrado e não divulga', await p.locator('#pop [data-s]').count() === 2 && await p.locator('#pop [data-s=nao-se-aplica]').count() === 0);
   await p.keyboard.press('Escape'); await p.waitForTimeout(100);
   await p.click('.sem-dado[data-campo=unidades]'); await p.waitForTimeout(100);
   ok('Menu de unidades traz também “Não se aplica”', await p.locator('#pop [data-s]').count() === 3 && await p.locator('#pop [data-s=nao-se-aplica]').count() === 1);
@@ -267,7 +276,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const antes = await p.locator('#painel .pmd button[data-campo=faturamento]').count();
   await p.click('.sem-dado[data-campo=faturamento]'); await p.click('#pop [data-s=nao-divulga]'); await p.waitForTimeout(200);
   ok('O cartão deixa de sugerir o que a pessoa já explicou', antes === 1 && await p.locator('#painel .pmd button[data-campo=faturamento]').count() === 0, String(antes));
-  await p.click('.sem-dado[data-campo=usuarios]'); await p.click('#pop [data-s=nao-achei]'); await p.waitForTimeout(150);
+  await p.click('.sem-dado[data-campo=usuarios]'); await p.click('#pop [data-s=nao-encontrado]'); await p.waitForTimeout(150);
   const cor = c => p.locator(`.sem-dado[data-campo=${c}]`).evaluate(e => getComputedStyle(e).color);
   ok('As cores seguem o sentido: âmbar para o que falta e foi explicado, verde para o que não se aplica', (await cor('usuarios')) === await tok('--aviso') && (await cor('faturamento')) === await tok('--aviso') && (await cor('unidades')) === await tok('--ok'));
   await p.click('.sem-dado[data-campo=profTI]'); await p.click('#pop [data-s=nao-se-aplica]'); await p.waitForTimeout(150);
@@ -275,17 +284,18 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Digitar um valor tira o motivo e mostra a origem', (await motor(() => UI.atual.dados.semDado.profTI)) === undefined && await p.locator('.origem[data-alvo="campo:profTI"]').isVisible() && !(await vis('profTI')));
   ok('Com equipe de TI, o salário passa a pedir o motivo', await vis('salarioTI'));
   await p.fill('#f-profTI', ''); await p.waitForTimeout(200);
-  ok('Apagar o valor volta a faltar informar, sem o motivo antigo', (await txt('.sem-dado[data-campo=profTI]')) === 'Falta informar' && !(await vis('salarioTI')));
+  ok('Apagar o valor volta a faltar informar, sem o motivo antigo, e o campo volta a ficar vermelho', (await txt('.sem-dado[data-campo=profTI]')) === 'Sem dado?' && await campoCor('profTI', 'borderTopColor') === await tok('--crit') && !(await vis('salarioTI')));
   // não é opcional: salvar e copiar o resumo ficam bloqueados enquanto faltar
   const faltam = await pend();
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
   ok('Salvar com campo faltando é bloqueado, sem opção de salvar assim mesmo', !(await motor(() => !!empresaSalva())) && (await txt('#toast')).includes(`Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0);
-  ok('O bloqueio leva ao primeiro campo que falta e marca os campos em vermelho', await p.evaluate(() => document.activeElement.classList.contains('sdc-falta')) && await p.locator('#form.revisando').count() === 1 && await p.locator('#f-faturamento').count() === 1);
+  const focoNoPendente = () => p.evaluate(() => { const a = document.activeElement; return a.tagName === 'INPUT' && !!a.closest('.campo').querySelector('.sem-dado[data-estado="pendente"]'); });
+  ok('O bloqueio leva ao primeiro campo que falta, que já está em vermelho', await focoNoPendente() && await p.evaluate(() => getComputedStyle(document.activeElement).borderTopColor) === await tok('--crit'));
   ok('Copiar o resumo com campo faltando também é bloqueado', await (async () => { await p.click('#painel [data-acao=resumo]'); await p.waitForTimeout(300); return await p.locator('#dlg[open]').count() === 0 && (await txt('#toast')).includes('Faltam'); })());
   await p.click('.chip-falta'); await p.waitForTimeout(300);
-  ok('O aviso no topo também leva ao campo que falta', await p.evaluate(() => document.activeElement.classList.contains('sdc-falta')));
+  ok('O aviso no topo também leva ao campo que falta', await focoNoPendente());
   for (const c of faltam) { await p.click(`.sem-dado[data-campo=${c}]`); await p.click('#pop [data-s]:first-of-type'); await p.waitForTimeout(100); }
-  ok('Tudo explicado: nada falta e o aviso do topo some', (await pend()).length === 0 && await p.locator('.chip-falta').count() === 0 && await p.locator('.sdc-falta:not([hidden])').count() === 0);
+  ok('Tudo explicado: nada falta, nenhum campo em vermelho e o aviso do topo some', (await pend()).length === 0 && await p.locator('.chip-falta').count() === 0 && await p.locator('.sem-dado[data-estado="pendente"]').count() === 0 && await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === 0);
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
   ok('Sem nada faltando, salva direto', await p.locator('#dlg[open]').count() === 0 && (await txt('#ws-meta')).includes('Salva em'));
   ok('Os motivos ficam salvos com a empresa', await p.evaluate(() => { const e = JSON.parse(localStorage.getItem('estimador-ti.v1')).empresas.find(x => x.dados.nome === 'Teste Sem Dado'); return e.dados.semDado.faturamento === 'nao-divulga' && e.dados.semDado.unidades === 'nao-se-aplica'; }));
@@ -308,30 +318,42 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/empresas'); await p.click('.lista-emp .emp-nome >> nth=-1'); await p.waitForTimeout(500);
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(200); await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(300);
 
-  // tecnologias: busca com lista de seleção múltipla, no lugar da grade de marcações abertas
+  // tecnologias: busca em camadas (categoria, depois tecnologias; digitando, todas de uma vez) com seleção múltipla
   await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(400);
-  const nTec = await motor(() => TECNOLOGIAS.reduce((n, g) => n + g.itens.length, 0));
   if (!(await p.evaluate(() => document.querySelector('#sec-mais').open))) await p.click('#sec-mais summary');
   ok('Tecnologias: sem a grade de marcações abertas, só a busca', await p.locator('#sec-mais .chip').count() === 0 && await p.locator('#tec-lista').isHidden() && (await p.locator('#tec-combo').evaluate(e => e.getBoundingClientRect().height)) < 60);
+  const nCat = await motor(() => TECNOLOGIAS.length), nCat0 = await motor(() => TECNOLOGIAS[0].itens.length), nome0 = await motor(() => TECNOLOGIAS[0].g);
+  const visTec = s => p.locator(`#tec-lista ${s}:visible`).count();
   await p.click('#tec-busca'); await p.waitForTimeout(150);
-  ok('Tecnologias: clicar na busca abre a lista com todas as opções', await p.locator('#tec-lista').isVisible() && await p.locator('#tec-lista .tec-op').count() === nTec && (await p.getAttribute('#tec-busca', 'aria-expanded')) === 'true', String(nTec));
+  ok('Tecnologias: clicar na busca abre a lista, que começa pelas categorias', await p.locator('#tec-lista').isVisible() && (await visTec('.tec-cat')) === nCat && (await visTec('.tec-op')) === 0 && (await p.getAttribute('#tec-busca', 'aria-expanded')) === 'true', String(nCat));
+  await p.click('#tec-lista .tec-cat[data-i="0"]'); await p.waitForTimeout(150);
+  ok('Tecnologias: entrar numa categoria mostra só as tecnologias dela, com o botão de voltar', (await visTec('.tec-cat')) === 0 && (await visTec('.tec-op')) === nCat0 && (await txt('#tec-lista .tec-voltar')) === nome0 && await p.locator('#tec-lista .tec-voltar').isVisible());
+  await p.click('#tec-lista .tec-voltar'); await p.waitForTimeout(150);
+  ok('Tecnologias: voltar mostra as categorias de novo, e o foco volta à categoria', (await visTec('.tec-cat')) === nCat && (await visTec('.tec-op')) === 0 && await p.evaluate(() => document.activeElement.classList.contains('tec-cat') && document.activeElement.dataset.i === '0'));
   await p.fill('#tec-busca', 'sap'); await p.waitForTimeout(100);
-  ok('Tecnologias: a busca vale também para os exemplos', await p.locator('#tec-lista .tec-op:not([hidden])').count() === 1 && (await txt('#tec-lista .tec-op:not([hidden])')).includes('ERP de grande porte') && await p.locator('#tec-lista .tec-grupo:not([hidden])').count() === 1);
+  ok('Tecnologias: digitar busca em todas as categorias de uma vez, com a categoria ao lado de cada resultado e sem subtítulos', (await visTec('.tec-op')) === 1 && (await txt('#tec-lista .tec-op:visible')).includes('ERP de grande porte') && (await txt('#tec-lista .tec-op:visible em')) === nome0 && (await visTec('.tec-cat')) === 0 && await p.locator('#tec-lista .tec-grupo').count() === 0 && await p.locator('#tec-lista .tec-voltar').isHidden());
   await p.fill('#tec-busca', 'xyzxyz'); await p.waitForTimeout(100);
   ok('Tecnologias: busca sem resultado avisa', await p.locator('#tec-lista .tec-vazio').isVisible());
   await p.fill('#tec-busca', 'sistemas internos'); await p.waitForTimeout(100);
-  await p.click('#tec-lista .tec-op:not([hidden]) >> nth=0'); await p.waitForTimeout(150);
+  await p.click('#tec-lista .tec-op:visible >> nth=0'); await p.waitForTimeout(150);
   ok('Tecnologias: marcar guarda, mostra a marca e conta, e a lista continua aberta', (await motor(() => UI.atual.dados.tecnologias.join())) === 'dev-interno' && await p.locator('#tec-tags .tag-tec').count() === 1 && (await txt('#tec-n')) === '1 tecnologia marcada' && await p.locator('#tec-lista').isVisible());
   ok('Tecnologias: sistemas próprios sem equipe de TI mostram a dica de sempre', (await txt('#tec-dicas')).includes('equipe de TI'));
-  await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+  await p.keyboard.press('Escape'); await p.waitForTimeout(350);
   ok('Tecnologias: Esc fecha a lista, limpa a busca e volta ao campo', await p.locator('#tec-lista').isHidden() && (await p.inputValue('#tec-busca')) === '' && await p.evaluate(() => document.activeElement.id === 'tec-busca'));
   await p.keyboard.press('ArrowDown'); await p.waitForTimeout(100);
-  ok('Tecnologias: seta para baixo abre a lista e vai à primeira opção', await p.locator('#tec-lista').isVisible() && await p.evaluate(() => document.activeElement.dataset.tec === 'erp'));
+  ok('Tecnologias: seta para baixo abre a lista e vai à primeira categoria', await p.locator('#tec-lista').isVisible() && await p.evaluate(() => document.activeElement.classList.contains('tec-cat') && document.activeElement.dataset.i === '0'));
+  await p.keyboard.press('Enter'); await p.waitForTimeout(150);
+  ok('Tecnologias: Enter na categoria entra nela e vai à primeira tecnologia', (await visTec('.tec-cat')) === 0 && await p.evaluate(() => document.activeElement.dataset.tec === 'erp'));
   await p.keyboard.press('Enter'); await p.waitForTimeout(100);
-  ok('Tecnologias: Enter marca a opção em foco', (await motor(() => UI.atual.dados.tecnologias.sort().join())) === 'dev-interno,erp' && (await txt('#tec-n')) === '2 tecnologias marcadas');
-  await p.mouse.click(5, 300); await p.waitForTimeout(100);
+  ok('Tecnologias: Enter marca a tecnologia em foco', (await motor(() => UI.atual.dados.tecnologias.sort().join())) === 'dev-interno,erp' && (await txt('#tec-n')) === '2 tecnologias marcadas');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(150);
+  ok('Tecnologias: Esc dentro de uma categoria sobe uma camada, e a categoria mostra quantas estão marcadas', await p.locator('#tec-lista').isVisible() && (await visTec('.tec-cat')) === nCat && (await txt('#tec-lista .tec-cat[data-i="0"] .tec-n')) === '1');
+  await p.keyboard.press('Escape'); await p.waitForTimeout(350);
+  ok('Tecnologias: Esc nas categorias fecha a lista', await p.locator('#tec-lista').isHidden());
+  await p.click('#tec-busca'); await p.waitForTimeout(100);
+  await p.mouse.click(5, 300); await p.waitForTimeout(350);
   ok('Tecnologias: clicar fora fecha a lista', await p.locator('#tec-lista').isHidden());
-  await p.click('#tec-tags .tag-tec[data-id=erp]'); await p.click('#tec-tags .tag-tec[data-id=dev-interno]'); await p.waitForTimeout(150);
+  await p.click('#tec-tags .tag-tec[data-id=erp]'); await p.click('#tec-tags .tag-tec[data-id=dev-interno]'); await p.waitForTimeout(350);
   ok('Tecnologias: clicar na marca remove, sem abrir a lista', (await motor(() => UI.atual.dados.tecnologias.length)) === 0 && await p.locator('#tec-tags .tag-tec').count() === 0 && await p.locator('#tec-lista').isHidden() && (await txt('#tec-n')) === 'só registro');
   await salvarOk(200);
 

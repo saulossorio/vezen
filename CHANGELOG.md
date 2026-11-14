@@ -2,6 +2,23 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [1.7.0] - 2026-11-14
+
+### Adicionado
+- **Glossário**, na barra lateral: as siglas e os termos da ferramenta em ordem alfabética, cada um com o significado, a utilidade e o site oficial, com busca e filtro por categoria. No texto, as siglas e os termos sublinhados (FGV, Brasscom, CNPJ, MEI, receita líquida...) abrem uma janelinha com a mesma definição do glossário, e dali dá para ir ao verbete. Funciona pelo teclado.
+- **Excel (.xlsx)** como formato principal para baixar, gerado sem biblioteca: as empresas (abas “Empresas” e “Dados e motivos”) e cada lista importada. Os valores saem como número, com formato de reais. O CSV passa para o menu de opções, e o backup em JSON fica como arquivo técnico para restaurar o Vezen.
+- **Nova análise** no alto da barra lateral, de qualquer tela. Com a barra recolhida, vira só o ícone.
+- **Transições curtas** nas janelinhas, nos diálogos, na troca de tela e nas mudanças de estado (cor do campo, marcas das tecnologias, categorias). Quem pede menos animação recebe tudo na hora.
+- **Ajuste de tamanho para bancos muito grandes** (parâmetro `escala.bancos`, explicado na Metodologia): o gasto por usuário e por receita cai conforme o banco cresce. Foi calibrado com os documentos oficiais do Banco do Brasil (2025) e do Santander Brasil (2024). Bancos médios, outros setores e o parâmetro zerado seguem como antes.
+- Testes `motor-bancos`, `tela-glossario` e `tela-transicoes`.
+
+### Alterado
+- O campo que falta informar muda de cor no próprio campo, com fundo e borda vermelhos. O botão embaixo dele fica neutro, “Sem dado?”.
+- Quando uma média de mercado se afasta de um dado real, o aviso só diz qual é e quanto dá, e que o resultado segue o dado real. Ele não manda mais conferir os dados.
+- A busca de tecnologias é em camadas: primeiro a categoria, depois as tecnologias dela. Digitar busca em todas de uma vez, com a categoria ao lado do resultado, sem subtítulos dentro da lista.
+- Os textos não usam primeira pessoa: “Não encontrei” virou “Não encontrado”, e “Não sei” virou “Sem informação”. O motivo salvo antes como “não achei” passa para “não encontrado” sozinho.
+- A empresa modelo (Banco do Brasil) fica com confiança 95 e sem alerta de divergência. A nota sobre o alerta saiu da lista de fontes.
+
 ## [1.6.0] - 2026-11-14
 
 ### Alterado

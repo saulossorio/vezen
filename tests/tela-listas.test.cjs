@@ -1,6 +1,7 @@
 // Listas (uma planilha estimada de uma vez), empresas (busca, filtros, seleção, comparação, backup), navegação pelo endereço, tema escuro e menu do celular.
 const { chromium } = require('playwright-core');
 const fs = require('fs'), path = require('path'), os = require('os');
+const { lerZip, abaXlsx, nomesAbas } = require('./zip.cjs');
 const D = path.join(__dirname, 'dados'), TMP = os.tmpdir();
 const URL = 'file://' + path.join(__dirname, '..', 'index.html');
 const ok = [], falhas = [];
@@ -52,8 +53,16 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   const antes = await txt(p, '.kpi >> nth=1');
   await p.selectOption('#lr-modo', 'padrao'); await p.waitForTimeout(300);
   check('tipo de estimativa recalcula a lista', (await txt(p, '.kpi >> nth=1')) !== antes && (await p.evaluate(() => S.listas[0].modo)) === 'padrao');
-  // baixar resultados
-  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('[data-acao=csv-lista]')]);
+  // baixar resultados: Excel no botão do cabeçalho, CSV no menu de opções
+  check('cabeçalho da lista: baixar Excel como botão principal e CSV só no menu', await p.locator('.acoes [data-acao=xlsx-lista]').count() === 1 && await p.locator('.acoes [data-acao=csv-lista]').count() === 0);
+  const [dlx] = await Promise.all([p.waitForEvent('download'), p.click('[data-acao=xlsx-lista]')]);
+  const xl = fs.readFileSync(await dlx.path());
+  const zx = lerZip(xl), linhasX = abaXlsx(zx, 1);
+  check('Excel da lista: arquivo .xlsx de verdade, com a aba da lista', /\.xlsx$/.test(dlx.suggestedFilename()) && xl.slice(0, 2).toString() === 'PK' && !!zx['[Content_Types].xml'] && !!zx['xl/styles.xml'] && nomesAbas(zx).length === 1, dlx.suggestedFilename());
+  check('Excel da lista: cabeçalho com as colunas de resultado e uma linha por empresa', /Investimento em TI, valor central \(R\$\)/.test(linhasX[0].join('|')) && /Índice de confiança/.test(linhasX[0].join('|')) && linhasX.length === 16, String(linhasX.length));
+  check('Excel da lista: valores são números de verdade, não texto', linhasX.slice(1).some(l => l.some(c => typeof c === 'number' && c > 1e5)) && /<c r="[A-Z]+2" s="2"><v>\d+/.test(zx['xl/worksheets/sheet1.xml'].toString('utf8')));
+  await p.click('[data-acao=menu-lista]'); await p.waitForTimeout(150);
+  const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#pop [data-acao=csv-lista]')]);
   const rcsv = fs.readFileSync(await dl.path(), 'utf8').replace(/^﻿/, '').split('\r\n');
   check('CSV da lista', rcsv.length === 16 && /Investimento em TI, valor central \(R\$\).*Estimativa conservadora \(R\$\).*Índice de confiança/.test(rcsv[0]) && rcsv.some(l => l.includes('faltam dados de porte')), rcsv[0]);
   // salvar duas em Empresas
@@ -97,6 +106,15 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   check('setas andam pelo menu', await p.evaluate(() => document.activeElement && document.activeElement.dataset.acao === 'dup-emp'));
   await p.keyboard.press('Escape'); await p.waitForTimeout(100);
   check('Esc fecha o menu e devolve o foco', await p.locator('#pop').count() === 0 && await p.evaluate(() => document.activeElement && document.activeElement.dataset.acao === 'menu-emp'));
+  // exportar as empresas: Excel como formato principal (duas abas), backup JSON no menu da barra lateral
+  const [dex] = await Promise.all([p.waitForEvent('download'), p.click('#app [data-acao=exp-xlsx]')]);
+  const zE = lerZip(fs.readFileSync(await dex.path())), abaE = abaXlsx(zE, 1), abaM = abaXlsx(zE, 2);
+  check('Excel das empresas: duas abas, Empresas e Dados e motivos', /\.xlsx$/.test(dex.suggestedFilename()) && nomesAbas(zE).join() === 'Empresas,Dados e motivos', nomesAbas(zE).join());
+  check('Excel das empresas: uma linha por empresa, com os resultados como número', abaE.length === 3 && abaE[0].includes('Empresa') && abaE.slice(1).every(l => l.some(c => typeof c === 'number' && c > 1e5)), String(abaE.length));
+  check('Excel das empresas: a aba de dados traz os dados informados, com origem e motivos', abaM.length > 3 && /Origem|origem/.test(abaM[0].join('|')), abaM[0].join('|'));
+  await p.click('#lat-pe [data-acao=exp-menu]'); await p.waitForTimeout(200);
+  check('Barra lateral: Exportar oferece Excel e backup', await p.locator('#pop [data-acao=exp-xlsx]').count() === 1 && await p.locator('#pop [data-acao=exp-json]').count() === 1 && /Excel/.test(await txt(p, '#pop [data-acao=exp-xlsx]')) && /Backup/.test(await txt(p, '#pop [data-acao=exp-json]')));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(250);
   // backup: exportar e importar juntando
   await p.click('[data-acao=menu-empresas]');
   const [db] = await Promise.all([p.waitForEvent('download'), p.click('#pop [data-acao=exp-json]')]);

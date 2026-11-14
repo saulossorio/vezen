@@ -64,7 +64,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   const pad = await txt(p, '#cal-padrao');
   check('resumo dos ajustes por cidade (receita)', /Ajuste por cidade: 18 cidades com valor próprio, as demais cidades do estado juntas e 17 setores dentro de cidades\./.test(pad));
   check('resumo dos ajustes por cidade (TI)', /Ajuste por cidade: 6 cidades com valor próprio, as demais cidades do estado juntas e 7 setores dentro de cidades\./.test(pad));
-  check('seguros e outros com a correção geral', /Seguros e serviços financeiros ?× 0,46 geral/.test(pad) && /Outros ou não sei ?× 0,46 geral/.test(pad), (pad.match(/Gasto de TI.{0,700}/) || [''])[0].slice(0, 700));
+  check('seguros e outros com a correção geral', /Seguros e serviços financeiros ?× 0,46 geral/.test(pad) && /Outros ou sem informação ?× 0,46 geral/.test(pad), (pad.match(/Gasto de TI.{0,700}/) || [''])[0].slice(0, 700));
   check('tabela por cidade fechada', await p.locator('#cal-padrao details.cal-local').count() === 1 && !(await p.locator('#cal-padrao details.cal-local').evaluate(e => e.open)));
   await p.click('#cal-padrao details.cal-local summary'); await p.waitForTimeout(150);
   const celulas = tr => [...tr.cells].map(c => c.textContent.trim()).join('|');
@@ -123,7 +123,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   // 8. celular
   await p.setViewportSize({ width: 375, height: 800 }); await p.waitForTimeout(200);
   check('celular sem rolagem lateral (análise)', await p.evaluate(() => document.documentElement.scrollWidth) <= 375);
-  await p.click('[data-acao=menu-analise]'); await p.click('#pop [data-acao=descartar]'); await p.waitForTimeout(150); if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Descartar")');
+  await p.click('[data-acao=menu-analise]'); await p.click('#pop [data-acao=descartar]'); await p.waitForTimeout(150); if (await p.locator('#dlg[open]').count()) { await p.click('#dlg button:has-text("Descartar")'); await p.waitForTimeout(400); }
   await ir('#/calibracao');
   await p.click('#cal-padrao details.cal-local summary'); await p.waitForTimeout(150);
   check('celular sem rolagem lateral (calibração)', await p.evaluate(() => document.documentElement.scrollWidth) <= 375, String(await p.evaluate(() => document.documentElement.scrollWidth)));
