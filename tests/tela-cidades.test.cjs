@@ -6,8 +6,9 @@ const URL = 'file://' + path.join(__dirname, '..', 'index.html');
 const ok = [], falhas = [];
 const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (info ? ' — ' + info : '')); };
 const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
-// salvar: se o verificador listar campos sem resposta, segue com “Salvar assim mesmo”
-const salvarAnalise = async (p, espera = 300) => { await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(150); if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Salvar assim mesmo")'); await p.waitForTimeout(espera); };
+// campo vazio sem motivo bloqueia salvar e copiar o resumo: nos testes que não são do marcador, todos os pendentes recebem um motivo
+const explicar = p => p.evaluate(() => { const d = UI.atual.dados; d.semDado = d.semDado || {}; for (const c of pendentes(d)) d.semDado[c] = CAMPOS_SEM_DADO[c].ops[0]; atualizarSemDado(); atualizarCabecalho(); });
+const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(espera); };
 const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace(/\./g, '').replace(',', '.') : NaN; };
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' });
@@ -50,7 +51,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   check('cabeçalho com a cidade', /São Paulo\/SP/.test(await txt(p, '#ws-meta')), await txt(p, '#ws-meta'));
   check('correção do gasto de TI com a cidade', /Setor × 0,31; São Paulo × 1,09\./.test(det), (det.match(/Correção da calibração.{0,220}/) || [''])[0]);
   check('receita estimada com ajuste local', /Ajuste local da base: São Paulo × 1,12; mesmo setor em São Paulo × 0,88/.test(det), (det.match(/Ajuste local.{0,80}/) || [''])[0]);
-  await p.click('#res-resumo [data-acao=resumo]'); await p.waitForTimeout(300);
+  await explicar(p); await p.click('#res-resumo [data-acao=resumo]'); await p.waitForTimeout(300);
   const res = await p.inputValue('#txt-resumo');
   await p.keyboard.press('Escape'); await p.waitForTimeout(150);
   check('resumo: cidade no título', /Serviços[^.\n]*, São Paulo\/SP\. Vezen,/.test(res), res.split('\n')[1]);

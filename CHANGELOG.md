@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [1.6.0] - 2026-11-14
+
+### Alterado
+- **Nenhum campo que entra na conta é opcional:** ou tem valor, ou a pessoa diz por quê. O campo vazio sem motivo mostra “Falta informar”, em vermelho, e o topo da análise conta quantos faltam. Enquanto faltar algum, não dá para salvar nem copiar o resumo. Saiu o “Salvar assim mesmo”.
+- As cores dos motivos seguem o sentido: vermelho é falta informar, âmbar é “Não encontrado” e “Não divulga”, verde é “Não se aplica”.
+- As ajudas dos campos dizem o que o campo é e o que informar. Fórmulas e multiplicadores ficam na Metodologia, e a ajuda tem o link “Como entra na conta”, que abre a seção certa (`#/metodologia/<seção>`).
+- A empresa modelo ficou completa: receita (resultado da intermediação financeira mais receita de serviços) e agências com os valores oficiais, e motivo no que os documentos do banco não trazem. A confiança é 85, com o alerta de estimativas divergentes, esperado em bancos.
+
 ## [1.5.0] - 2026-11-14
 
 ### Alterado

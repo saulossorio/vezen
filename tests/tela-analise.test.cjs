@@ -20,8 +20,9 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const orig = async (c, o) => { await p.click(`[data-acao=origem][data-alvo="campo:${c}"]`); await p.click(`#pop [data-o=${o}]`); };
   const motor = expr => p.evaluate(expr);
   const txt = async s => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
-  // salvar: se o verificador listar campos sem resposta, segue com “Salvar assim mesmo”
-  const salvarOk = async (espera = 200) => { await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(150); if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Salvar assim mesmo")'); await p.waitForTimeout(espera); };
+  // campo vazio sem motivo bloqueia salvar e copiar o resumo: nos testes que não são do marcador, todos os pendentes recebem um motivo
+  const explicar = () => p.evaluate(() => { const d = UI.atual.dados; d.semDado = d.semDado || {}; for (const c of pendentes(d)) d.semDado[c] = CAMPOS_SEM_DADO[c].ops[0]; atualizarSemDado(); atualizarCabecalho(); });
+  const salvarOk = async (espera = 200) => { await explicar(); await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(espera); };
 
   // 1. receita bruta antiga, oficial: conversão, ano e comparação (caso E da Metodologia)
   await p.click('#app [data-acao=nova]'); await p.waitForTimeout(200);
@@ -67,6 +68,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.click('#painel details.cr-dicas > summary'); await p.fill('#f-funcionarios', '2.000'); await p.waitForTimeout(150);
   ok('Desktop: cartão preso no topo ao rolar', await p.evaluate(() => getComputedStyle(document.querySelector('.resumo-lado')).position === 'sticky' && getComputedStyle(document.querySelector('.cr-abrir')).display === 'none'));
   // resumo para copiar
+  await explicar();
   await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
   const res = await p.inputValue('#txt-resumo');
   for (const t of ['1. Receita líquida no Brasil (2026, BRL): R$ 469,41 mi (calculada a partir de dado oficial)', 'faturamento bruto de 2024', 'tirando 18%', '2. Estimativa Conservadora – investimento em TI:', '3. Estimativa Geral – investimento em TI:', '4. Fontes, cálculos e observações', 'com os salários da equipe de TI', 'estão incluídos', 'Faturamento global: não utilizado', 'Conversão de moeda: nenhuma', 'Metodologia:', 'Benchmarks: FGV-EAESP', 'Limitações:'])
@@ -82,6 +84,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const z2 = await motor(() => calc(UI.atual.dados).resumo);
   ok('Sem salários: escolha salva na análise', (await motor(() => UI.atual.dados.salariosTI)) === 'sem' && z2.comSalarios === false);
   ok('Sem salários: cartão mostra a geral sem a equipe', (await txt('#painel .cr-dois div:nth-child(1) b')) === await p.evaluate(v => fmtRS(v), z2.geralSem));
+  await explicar();
   await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
   await p.click('#dlg .seg-sal .seg-op:has(input[value=com])'); await p.waitForTimeout(100);
   ok('Trocar no resumo atualiza o texto', (await p.inputValue('#txt-resumo')).includes('com os salários da equipe de TI'));
@@ -140,6 +143,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Resultado: nota do câmbio', (await p.textContent('#res-receita')).includes('PTAX de 31/12/2025'));
   ok('Resultado: parte da receita no topo', (await txt('#res-estimativa .numeros')).includes('receita de R$'));
   ok('Resultado: receita líquida no topo quando a análise estima a receita', (await txt('#res-receita-num')).startsWith(await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v))));
+  await explicar();
   await p.click('#res-resumo [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
   const res2 = await p.inputValue('#txt-resumo'); fs.writeFileSync(path.join(os.tmpdir(), 'vezen-resumo-D.txt'), res2);
   ok('Resumo D: receita estimada marcada como não oficial', res2.includes('ESTIMADA pela ferramenta, não é dado oficial'));
@@ -231,7 +235,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.click('[data-acao=menu-empresas]'); await p.click('#pop [data-acao=modelo]'); await p.waitForTimeout(500);
   const mod = await motor(() => { const r = calc(UI.atual.dados); return { nome: UI.atual.dados.nome, ic: r.ic, alerta: r.alerta, avisos: r.avisos.length, sujo: UI.sujo, salva: !!empresaSalva() }; });
   ok('Empresa modelo abre como análise nova, sem alterações pendentes', mod.nome === 'Banco do Brasil' && !mod.salva && !mod.sujo, JSON.stringify(mod));
-  ok('Empresa modelo: confiança de 80 ou mais, sem alertas nem avisos', mod.ic >= 80 && !mod.alerta && mod.avisos === 0 && await p.locator('#painel .alerta').count() === 0, String(mod.ic));
+  ok('Empresa modelo: confiança de 80 ou mais e nenhum aviso sobre os dados', mod.ic >= 80 && mod.avisos === 0, String(mod.ic));
   ok('Empresa modelo: aviso com as fontes oficiais', await p.locator('.nota-modelo a[href*="api.mziq.com"]').count() === 2 && (await txt('#ws-meta')).includes('Empresa modelo'));
   ok('Receita de banco pede o último ano fechado, e o Porte não traz texto explicativo', (await txt('label[for=f-faturamento]')).includes('último ano fechado') && await p.locator('#sec-porte .sf-desc').count() === 0, await txt('label[for=f-faturamento]'));
   ok('Empresa modelo: o que estimar já escolhido e dados com origem oficial', await p.locator('#sec-objetivo.pede').count() === 0 && (await motor(() => [UI.atual.dados.funcionarios, ...UI.atual.dados.gastosReais].every(x => x.o === 'oficial'))));
@@ -240,13 +244,16 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/empresas'); await p.click('[data-acao=menu-empresas]'); await p.click('#pop [data-acao=modelo]'); await p.waitForTimeout(400);
   ok('Empresa modelo salva: abrir de novo leva à mesma análise, sem duplicar', (await p.evaluate(() => location.hash)) === '#/analise/' + idModelo && (await p.evaluate(() => S.empresas.filter(e => e.dados.modelo).length)) === 1);
 
-  // campo sem valor: o motivo explícito no lugar do branco
+  // campo sem valor: ou tem valor, ou tem um motivo explícito; senão falta informar, e isso bloqueia salvar e copiar o resumo
   const pend = () => motor(() => pendentes(UI.atual.dados));
-  ok('Empresa modelo: só receita e agências pendentes, o resto com motivo', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === 'faturamento,unidades|contratos,gastoDeclarado,profTI,usuarios');
+  const tok = t => p.evaluate(t => { const e = document.createElement('i'); e.style.color = `var(${t})`; document.body.appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; }, t);
+  ok('Empresa modelo completa: nada faltando, motivo só no que os documentos não trazem', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === '|contratos,gastoDeclarado,profTI,usuarios' && await p.locator('.chip-falta').count() === 0);
   await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.waitForTimeout(200);
   await p.check('input[data-objetivo][value=ti]'); await p.fill('#f-nome', 'Teste Sem Dado'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.fill('#f-funcionarios', '500'); await p.waitForTimeout(300);
   const vis = async c => await p.locator(`.sem-dado[data-campo=${c}]`).count() === 1 && await p.locator(`.sem-dado[data-campo=${c}]`).isVisible();
-  ok('Botão “Sem dado?” nos campos vazios que entram na conta', (await Promise.all(['faturamento', 'usuarios', 'unidades', 'profTI', 'crescFunc', 'gastosReais', 'gastoDeclarado'].map(vis))).every(Boolean));
+  ok('Campos vazios que entram na conta mostram “Falta informar”, em vermelho, desde o início', (await Promise.all(['faturamento', 'usuarios', 'unidades', 'profTI', 'crescFunc', 'gastosReais', 'gastoDeclarado'].map(vis))).every(Boolean) && (await txt('.sem-dado[data-campo=usuarios]')) === 'Falta informar' && await p.locator('.sem-dado[data-campo=usuarios]').evaluate(e => getComputedStyle(e).color) === await tok('--crit'));
+  const faltam0 = await pend();
+  ok('O topo da análise diz quantos campos faltam', (await txt('.chip-falta')) === 'Faltam ' + faltam0.length + ' campos', await txt('#ws-meta'));
   ok('Campo com valor mostra a origem, não o motivo', !(await vis('funcionarios')) && await p.locator('.origem[data-alvo="campo:funcionarios"]').isVisible());
   ok('Salário só pede motivo quando há equipe de TI; adições e contratos só em listada e público', !(await vis('salarioTI')) && await p.locator('.sem-dado[data-campo=adicoes], .sem-dado[data-campo=contratos]').count() === 0);
   ok('Registro, tecnologias e grupo ficam sem o botão', await p.locator('.sem-dado[data-campo=vagasTI], .sem-dado[data-campo=digital], .sem-dado[data-campo=grupo]').count() === 0);
@@ -260,30 +267,46 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const antes = await p.locator('#painel .pmd button[data-campo=faturamento]').count();
   await p.click('.sem-dado[data-campo=faturamento]'); await p.click('#pop [data-s=nao-divulga]'); await p.waitForTimeout(200);
   ok('O cartão deixa de sugerir o que a pessoa já explicou', antes === 1 && await p.locator('#painel .pmd button[data-campo=faturamento]').count() === 0, String(antes));
+  await p.click('.sem-dado[data-campo=usuarios]'); await p.click('#pop [data-s=nao-achei]'); await p.waitForTimeout(150);
+  const cor = c => p.locator(`.sem-dado[data-campo=${c}]`).evaluate(e => getComputedStyle(e).color);
+  ok('As cores seguem o sentido: âmbar para o que falta e foi explicado, verde para o que não se aplica', (await cor('usuarios')) === await tok('--aviso') && (await cor('faturamento')) === await tok('--aviso') && (await cor('unidades')) === await tok('--ok'));
   await p.click('.sem-dado[data-campo=profTI]'); await p.click('#pop [data-s=nao-se-aplica]'); await p.waitForTimeout(150);
   await p.fill('#f-profTI', '12'); await p.waitForTimeout(200);
   ok('Digitar um valor tira o motivo e mostra a origem', (await motor(() => UI.atual.dados.semDado.profTI)) === undefined && await p.locator('.origem[data-alvo="campo:profTI"]').isVisible() && !(await vis('profTI')));
   ok('Com equipe de TI, o salário passa a pedir o motivo', await vis('salarioTI'));
   await p.fill('#f-profTI', ''); await p.waitForTimeout(200);
-  ok('Apagar o valor volta a pedir o motivo, sem o antigo', (await txt('.sem-dado[data-campo=profTI]')) === 'Sem dado?' && !(await vis('salarioTI')));
-  // verificador ao salvar
+  ok('Apagar o valor volta a faltar informar, sem o motivo antigo', (await txt('.sem-dado[data-campo=profTI]')) === 'Falta informar' && !(await vis('salarioTI')));
+  // não é opcional: salvar e copiar o resumo ficam bloqueados enquanto faltar
   const faltam = await pend();
-  await p.click('#ws-acoes [data-acao=salvar]'); await p.locator('#dlg[open]').waitFor();
-  ok('Salvar com campos sem resposta abre o verificador, com a lista', (await txt('#dlg h2')) === 'Faltam ' + faltam.length + ' campos' && await p.locator('#dlg li').count() === faltam.length, await txt('#dlg h2'));
-  await p.click('#dlg button:has-text("Revisar")'); await p.waitForTimeout(400);
-  ok('Revisar não salva, destaca o que falta e leva ao primeiro campo', !(await motor(() => !!empresaSalva())) && await p.locator('.sem-dado.revisar:not([hidden])').count() === faltam.length && await p.evaluate(() => document.activeElement.classList.contains('sem-dado')));
-  for (const c of faltam) { await p.click(`.sem-dado[data-campo=${c}]`); await p.click('#pop [data-s]:first-of-type'); await p.waitForTimeout(100); }
-  ok('Tudo explicado: nada pendente', (await pend()).length === 0 && await p.locator('.sem-dado.revisar:not([hidden])').count() === 0);
-  const cores = await p.evaluate(() => ['nao-achei', 'nao-divulga', 'nao-se-aplica'].map(k => { const b = document.querySelector('.sem-dado.sdc-' + k + ':not([hidden])'); return b ? getComputedStyle(b).color : null; }));
-  ok('Motivos com cores próprias e visíveis, como os botões de origem', cores.every(Boolean) && new Set(cores).size === 3 && !cores.includes(await p.evaluate(() => getComputedStyle(document.body).color)), cores.join(' | '));
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
-  ok('Sem pendências, salva direto', await p.locator('#dlg[open]').count() === 0 && (await txt('#ws-meta')).includes('Salva em'));
+  ok('Salvar com campo faltando é bloqueado, sem opção de salvar assim mesmo', !(await motor(() => !!empresaSalva())) && (await txt('#toast')).includes(`Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0);
+  ok('O bloqueio leva ao primeiro campo que falta e marca os campos em vermelho', await p.evaluate(() => document.activeElement.classList.contains('sdc-falta')) && await p.locator('#form.revisando').count() === 1 && await p.locator('#f-faturamento').count() === 1);
+  ok('Copiar o resumo com campo faltando também é bloqueado', await (async () => { await p.click('#painel [data-acao=resumo]'); await p.waitForTimeout(300); return await p.locator('#dlg[open]').count() === 0 && (await txt('#toast')).includes('Faltam'); })());
+  await p.click('.chip-falta'); await p.waitForTimeout(300);
+  ok('O aviso no topo também leva ao campo que falta', await p.evaluate(() => document.activeElement.classList.contains('sdc-falta')));
+  for (const c of faltam) { await p.click(`.sem-dado[data-campo=${c}]`); await p.click('#pop [data-s]:first-of-type'); await p.waitForTimeout(100); }
+  ok('Tudo explicado: nada falta e o aviso do topo some', (await pend()).length === 0 && await p.locator('.chip-falta').count() === 0 && await p.locator('.sdc-falta:not([hidden])').count() === 0);
+  await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
+  ok('Sem nada faltando, salva direto', await p.locator('#dlg[open]').count() === 0 && (await txt('#ws-meta')).includes('Salva em'));
   ok('Os motivos ficam salvos com a empresa', await p.evaluate(() => { const e = JSON.parse(localStorage.getItem('estimador-ti.v1')).empresas.find(x => x.dados.nome === 'Teste Sem Dado'); return e.dados.semDado.faturamento === 'nao-divulga' && e.dados.semDado.unidades === 'nao-se-aplica'; }));
+  await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
+  ok('Sem nada faltando, o resumo abre, com a linha dos dados sem informação', /Dados sem informação: .*Receita anual \(não divulga\)/.test(await p.inputValue('#txt-resumo')));
+  await p.click('#dlg button:has-text("Fechar")');
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(500);
   ok('Resultado: dados usados dizem por que faltam, com a cor do motivo', /não divulga/i.test(await txt('#res-dados')) && /não se aplica/i.test(await txt('#res-dados')) && await p.locator('#res-dados .o-chip.sdc-nao-divulga').count() >= 1);
-  await p.click('#res-resumo [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
-  ok('Resumo: linha com os dados sem informação', /Dados sem informação: .*Receita anual \(não divulga\)/.test(await p.inputValue('#txt-resumo')));
-  await p.click('#dlg button:has-text("Fechar")');
+
+  // ajuda dos campos: diz o que o campo é; como entra na conta fica na Metodologia
+  await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(400);
+  const ajudas = await motor(() => Object.keys(AJUDA).map(k => [k, textoAjuda(k, dadosVazios())]));
+  ok('Ajudas sem fórmula nem multiplicadores, curtas', ajudas.every(([k, t]) => t && !/[×÷]|multiplic/i.test(t) && t.length < 260), ajudas.filter(([k, t]) => /[×÷]|multiplic/i.test(t) || t.length >= 260).map(x => x[0]).join());
+  await p.click('button.ajuda[data-chave=digital]'); await p.waitForTimeout(150);
+  ok('Ajuda da intensidade digital começa dizendo o que é, sem os multiplicadores', (await txt('#pop')).includes('Quanto o negócio depende de tecnologia') && !(await txt('#pop')).includes('0,8') && await p.locator('#pop a[href="#/metodologia/met-ajustes"]').count() === 1);
+  await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+  await ir('#/metodologia/met-ajustes'); await p.waitForTimeout(1600);
+  ok('A Metodologia abre na seção da ajuda e traz os multiplicadores', Math.abs(await p.locator('#met-ajustes').evaluate(e => e.getBoundingClientRect().top)) < 140 && (await txt('#met-ajustes')).includes('Intensidade digital') && /baixa 0,80/.test(await txt('#met-ajustes')));
+  ok('A Metodologia explica o mínimo de usuários e o salário de referência', /50 usuários/.test(await txt('#met-caminhos')) && /média nacional/.test(await txt('#met-caminhos')));
+  await ir('#/empresas'); await p.click('.lista-emp .emp-nome >> nth=-1'); await p.waitForTimeout(500);
+  await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(200); await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(300);
 
   // tecnologias: busca com lista de seleção múltipla, no lugar da grade de marcações abertas
   await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(400);

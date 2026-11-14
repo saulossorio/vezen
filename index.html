@@ -49,7 +49,6 @@
   --sombra-g: 0 16px 48px oklch(0.2 0.01 210 / 0.16), 0 2px 6px oklch(0.2 0.01 210 / 0.08);
   --veu: oklch(0.2 0.01 210 / 0.28);
   /* gráficos (validados para daltonismo: verde e azul com rótulo sempre) */
-  --nd: #6d28d9; --na: #be185d; /* motivos sem dado: não divulga e não se aplica (não encontrei usa o azul de --info) */
   --acento: #4d7c0f;
   --acento-faixa: oklch(0.93 0.07 128);
   --mod: #4d7c0f;
@@ -83,7 +82,6 @@
   --sombra-p: 0 1px 2px oklch(0 0 0 / 0.4);
   --sombra-g: 0 16px 48px oklch(0 0 0 / 0.5), 0 2px 6px oklch(0 0 0 / 0.3);
   --veu: oklch(0.05 0.01 210 / 0.6);
-  --nd: #c4b5fd; --na: #f9a8d4;
   --acento: #62982a;
   --acento-faixa: oklch(0.36 0.06 130);
   --mod: #62982a;
@@ -418,8 +416,13 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .origem .chev { width: 12px; height: 12px; opacity: .7; }
 .origem:hover { border-color: var(--linha-forte); }
 .origem.o-vazio { color: var(--cinza); background: none; border-style: dashed; border-color: var(--linha-forte); font-weight: 550; }
-.sdc-nao-achei { color: var(--info); } .sdc-nao-divulga { color: var(--nd); } .sdc-nao-se-aplica { color: var(--na); }
-.origem.sem-dado.revisar { color: var(--aviso); background: var(--aviso-f); border-color: var(--aviso-b); }
+/* motivos: as cores seguem o sentido. Vermelho é falta informar; âmbar é dado que falta e foi explicado; verde é não se aplica */
+.sdc-falta { color: var(--crit); }
+.sdc-nao-achei, .sdc-nao-divulga { color: var(--aviso); }
+.sdc-nao-se-aplica { color: var(--ok); }
+.origem.sdc-falta { background: var(--crit-f); border-color: var(--crit-b); }
+.chip-falta { border: 0; background: none; padding: 0; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.revisando .campo:has(.origem.sdc-falta:not([hidden])) .entrada input { border-color: var(--crit); }
 .reais-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .campo .dica { margin-top: 0; }
 .linha-dupla { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
@@ -2933,7 +2936,7 @@ function estadoAtual() {
 function chipEstado() { const e = estadoAtual(); return `<span class="estado ${e.cls}"><i aria-hidden="true"></i>${esc(e.txt)}</span>`; }
 function metaEmpresa(d) {
   const partes = [d.modelo ? 'Empresa modelo' : '', d.setor || d.natureza ? esc(nomeSetor(d)) : '', esc(lugarTxt(d)), d.cnpj ? 'CNPJ ' + esc(d.cnpj) : ''].filter(Boolean).map(x => `<span>${x}</span>`);
-  return partes.join('') + chipEstado();
+  return partes.join('') + chipEstado() + chipFaltam(d);
 }
 function acoesAnalise() {
   const salvo = empresaSalva(), limpo = !!salvo && !UI.sujo;
@@ -2951,7 +2954,7 @@ function atualizarCabecalho() {
   document.title = (d.nome.trim() || 'Nova análise') + ' | Vezen';
   renderNav();
 }
-async function salvarEmpresa() {
+function salvarEmpresa() {
   const emp = UI.atual; if (!emp) return false;
   if (!emp.dados.nome.trim()) {
     const foco = () => { const n = $('#f-nome'), v = $('#v-nome'); if (v) v.textContent = 'Informe o nome da empresa para salvar.'; if (n) n.focus(); };
@@ -2965,7 +2968,7 @@ async function salvarEmpresa() {
     toast('Escolha o que esta análise vai estimar');
     return false;
   }
-  if (!(await verificarPendencias())) return false;
+  if (faltaCampo()) return false;
   const agora = new Date().toISOString();
   if (!empresaSalva()) emp.criadoEm = agora;
   emp.alteradoEm = agora;
@@ -2974,6 +2977,7 @@ async function salvarEmpresa() {
   const i = S.empresas.findIndex(x => x.id === emp.id), copia = copiar(emp);
   if (i >= 0) S.empresas[i] = copia; else S.empresas.push(copia);
   UI.sujo = false; UI.revisar = false;
+  const fr = $('#form'); if (fr) fr.classList.remove('revisando');
   salvar(); atualizarCabecalho(); atualizarSemDado();
   toast(persistente ? 'Empresa salva' : 'Salva só nesta sessão: o navegador não permite gravar');
   return true;
@@ -3003,20 +3007,20 @@ const EMPRESA_MODELO = {
   id: 'bb-2025',
   dados: {
     nome: 'Banco do Brasil', cnpj: '00.000.000/0001-91', natureza: 'publico', tipoPublico: 'estatal', setor: 'banco', uf: 'DF', municipio: 'Brasília',
-    funcionarios: { v: 85206, o: 'oficial' }, crescFunc: { v: -1.6, o: 'oficial' }, digital: 'alta',
+    fatAno: '2025', faturamento: { v: 73.9e9, o: 'oficial' }, funcionarios: { v: 85206, o: 'oficial' }, unidades: { v: 3955, o: 'oficial' }, crescFunc: { v: -1.6, o: 'oficial' },
     tecnologias: ['dev-interno', 'app-cliente', 'api', 'nuvem', 'ia'],
     gastosReais: [{ ano: 2024, v: 6.2e9, o: 'oficial' }, { ano: 2025, v: 6.8e9, o: 'oficial' }],
-    // não aparecem nos dois documentos usados; receita e agências existem, mas ficaram vazias de propósito (veja a nota das fontes)
+    // não aparecem nos dois documentos usados
     semDado: { usuarios: 'nao-achei', profTI: 'nao-achei', contratos: 'nao-achei', gastoDeclarado: 'nao-achei' },
     fatEstimar: false, modo: 'base', modelo: 'bb-2025'
   },
   fontes: [
     { doc: 'Relatório da Administração 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/637e45ff-9331-d07c-5fde-606c69e1bfe1?origin=2',
-      usa: 'gasto de TI de 2025' },
+      usa: 'receita (resultado da intermediação financeira, R$ 39,1 bi, mais receita de serviços, R$ 34,8 bi) e gasto de TI de 2025' },
     { doc: 'Análise do Desempenho do 4º trimestre de 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/0c488fdf-d384-201d-b5f8-37a795f1ac43?origin=2',
-      usa: 'funcionários e gasto de TI de 2024' }
+      usa: 'funcionários, agências e gasto de TI de 2024' }
   ],
-  nota: 'Receita e agências ficaram vazias de propósito: a conta por elas passa muito do gasto de TI publicado.'
+  nota: 'O alerta de estimativas divergentes aparece porque, em bancos, os cálculos pela receita e pelos usuários passam muito do gasto de TI publicado.'
 };
 function notaModelo(d) {
   if (d.modelo !== EMPRESA_MODELO.id) return '';
@@ -3058,40 +3062,46 @@ window.addEventListener('beforeunload', e => { if (UI.sujo || (UI.par && parMuda
 
 /* ---------- campos ---------- */
 // ajuda de cada campo: o que é e como entra na conta (os links de onde encontrar vêm junto)
+// cada ajuda diz o que o campo é e o que informar; como o número entra na conta fica na Metodologia (link no fim da ajuda)
 const AJUDA = {
-  cnpj: 'Use o CNPJ da matriz no Brasil. A lupa dentro do campo busca na Receita Federal (pela BrasilAPI) o nome, o estado, o município, o porte e os sócios que são empresas. A busca só acontece quando você clica.',
-  uf: 'Define o salário de TI usado no cálculo pela equipe e o ajuste regional no cálculo por usuários.',
-  natureza: 'Diz quais dados costumam ser públicos e liga regras próprias: listadas usam o balanço, subsidiárias podem ter a TI gerida na matriz, órgãos públicos usam contratos.',
-  setor: 'Escolhe as médias de mercado usadas no cálculo: quanto o setor gasta com TI em % da receita e por usuário de computador.',
-  faturamento: 'Receita da operação no Brasil. A pesquisa da FGV mede o gasto de TI sobre a receita líquida; faturamento bruto é convertido tirando os impostos sobre vendas. Valor de ano anterior é levado ao ano atual.',
-  funcionarios: 'Funcionários no Brasil. Servem para estimar os usuários de computador e, se você pedir, a receita.',
-  usuarios: d => `Pessoas que usam computador no trabalho. Se ficar vazio, usamos funcionários × a média do setor (${nf(P().setores[linhaDe(d)].u, 2)}). O cálculo por usuários só vale a partir de 50 usuários.`,
-  unidades: () => 'Lojas, fábricas, filiais ou centros de distribuição. Mais unidades pedem mais infraestrutura: ' + P().modificadores.unidades.map((u, i, a) => (i === a.length - 1 ? `${nf(u.de, 0)} ou mais` : `${i ? nf(u.de, 0) + ' a ' : 'até '}${nf(a[i + 1].de - 1, 0)}`) + ' × ' + nf(u.v, 1)).join('; ') + '.',
-  profTI: 'Pessoas na equipe interna de TI, contando desenvolvedores. Com elas, calculamos o gasto pela equipe: salário × encargos ÷ a parte da equipe no gasto de TI.',
-  salarioTI: 'Salário médio mensal da equipe de TI. Se ficar vazio, usamos a média do estado.',
-  digital: () => { const m = P().modificadores.digital; return `Ajusta os cálculos pela receita e por usuários: baixa × ${nf(m.baixa, 1)}, média × ${nf(m.media, 1)}, alta × ${nf(m.alta, 1)}. No automático, startups, empresas de tecnologia, varejo com muitas vendas online e educação a distância ficam em alta.`; },
-  crescFunc: () => { const m = P().modificadores; return `Crescimento do número de funcionários em 12 meses. Acima de ${nf(m.crescimentoLimiar, 0)}%, multiplica por ${nf(m.crescimentoFator, 1)}; também entra na taxa de crescimento da projeção.`; },
+  cnpj: 'CNPJ da matriz no Brasil. A lupa dentro do campo busca nome, estado, município, porte e sócios na Receita Federal (pela BrasilAPI), só quando você clica.',
+  uf: 'Estado onde fica a sede da empresa no Brasil.',
+  natureza: 'O tipo da empresa: privada de médio ou grande porte, pequena, listada na bolsa, startup, subsidiária de multinacional, setor público ou terceiro setor.',
+  setor: 'Área em que a empresa atua, pela atividade principal (o CNPJ mostra o código).',
+  faturamento: 'Quanto a empresa vendeu no último ano fechado, só no Brasil. Prefira a receita líquida, já sem os impostos sobre vendas; se só achar o faturamento bruto, marque “Faturamento bruto”. Informe também o ano do valor.',
+  funcionarios: 'Número de funcionários da empresa no Brasil.',
+  usuarios: 'Pessoas que usam computador no trabalho. Quase nunca é público: se não achar, a ferramenta supõe um valor pelo setor, que aparece em cinza no campo.',
+  unidades: 'Lojas, fábricas, filiais ou centros de distribuição da empresa.',
+  profTI: 'Pessoas da equipe interna de TI, contando quem desenvolve sistemas.',
+  salarioTI: 'Salário médio mensal da equipe de TI. Se não souber, a ferramenta usa a média do estado.',
+  digital: 'Quanto o negócio depende de tecnologia: baixa, média ou alta. No automático, a ferramenta marca alta para startups, empresas de tecnologia, varejo com muitas vendas online e educação a distância.',
+  crescFunc: 'Quanto o número de funcionários mudou nos últimos 12 meses, em %. Pode ser negativo.',
   vagasTI: 'Vagas abertas na área de TI. Só registro: não entra na conta.',
-  gastosReais: 'Gasto de TI real de anos anteriores, publicado ou declarado. O último ano é levado até hoje pela taxa de crescimento; dois anos ou mais definem essa taxa.',
-  gastoDeclarado: 'Gasto de TI do ano atual divulgado pela empresa. Se informado, ele vira o resultado e os outros cálculos ficam só para comparação.',
-  adicoes: 'Intangível e imobilizado de informática adicionados no ano (notas do balanço). O investimento costuma ser uma parte fixa do gasto de TI, e o resultado nunca fica abaixo dele.',
-  contratos: 'Contratos e despesas de TI do ano (portal da transparência). Somados ao custo da equipe interna, dão o gasto de TI do órgão.',
-  enquadramento: 'MEI, ME, EPP ou Simples. Sem receita, a ferramenta usa o meio da faixa legal; liga as regras de pequena empresa.',
-  tiMatriz: () => `Quando a TI é paga e gerida pela matriz no exterior, os cálculos pela receita e por usuários são multiplicados por ${nf(P().modificadores.tiMatriz, 1)}.`,
-  globalRec: 'Receita do grupo no mundo, na moeda original. Entra como referência a mais na estimativa da receita brasileira e nunca substitui uma receita oficial do Brasil.',
+  gastosReais: 'Quanto a empresa gastou de fato com TI em cada ano, quando publica ou declara (relatório anual, balanço, portal da transparência). Informe o ano e o valor; dá para adicionar vários anos.',
+  gastoDeclarado: 'Quanto a empresa diz que gasta com TI no ano atual. Quando informado, vira o resultado.',
+  adicoes: 'Quanto a empresa adicionou no ano em software (intangível) e em equipamentos de informática (imobilizado), nas notas do balanço.',
+  contratos: 'Valor dos contratos e despesas de TI do ano, publicados no portal da transparência.',
+  enquadramento: 'Porte legal da empresa: MEI, ME (microempresa), EPP (pequeno porte) ou Simples, sem saber qual.',
+  tiMatriz: 'Onde ficam o orçamento e a gestão de TI de uma subsidiária: no Brasil ou na matriz, no exterior.',
+  globalRec: 'Receita total do grupo no mundo, na moeda em que o grupo publica.',
   globalPart: 'Parte da receita do grupo que vem do Brasil, se a empresa divulgar (relatório anual, apresentação a investidores).',
-  globalFunc: 'Funcionários do grupo no mundo. Sem a participação do Brasil, ela é estimada por funcionários no Brasil ÷ funcionários no mundo.',
-  grupo: 'O conjunto de empresas com o mesmo dono ou controladora. A TI pode ser comprada e gerida pelo grupo: aí o gasto desta empresa parece menor, e a decisão de compra pode estar na controladora. Só registro.',
-  tecnologias: 'Marque o que a empresa usa. Fica salvo, mas não muda o valor: o que pesa no cálculo é a equipe de TI e a intensidade digital. Sites como BuiltWith e Wappalyzer mostram as tecnologias de um site; vagas abertas costumam citar os sistemas.',
-  origens: 'Marque de onde veio cada número. Dados mais confiáveis pesam mais no cálculo e deixam a faixa mais estreita. Sem origem marcada, o número conta como Estimativa de terceiros.'
+  globalFunc: 'Total de funcionários do grupo no mundo.',
+  grupo: 'Nome da controladora ou do conjunto de empresas com o mesmo dono. Só registro.',
+  tecnologias: 'Sistemas e serviços de tecnologia que a empresa usa. Busque pelo nome ou por um exemplo (SAP, Salesforce, AWS) e marque os que encontrar. Fica salvo, mas não muda o valor.',
+  origens: 'De onde veio cada número, para saber o quanto confiar nele. Sem origem marcada, o número conta como Estimativa de terceiros.'
 };
+// seção da Metodologia que explica como cada campo entra na conta
+const AJUDA_MET = { uf: 'met-ajustes', natureza: 'met-setores', setor: 'met-setores', faturamento: 'met-receita', funcionarios: 'met-caminhos', usuarios: 'met-caminhos', unidades: 'met-ajustes', profTI: 'met-caminhos', salarioTI: 'met-caminhos',
+  digital: 'met-ajustes', crescFunc: 'met-ajustes', gastosReais: 'met-caminhos', gastoDeclarado: 'met-caminhos', adicoes: 'met-caminhos', contratos: 'met-caminhos', enquadramento: 'met-pequenas', tiMatriz: 'met-ajustes',
+  globalRec: 'met-receita', globalPart: 'met-receita', globalFunc: 'met-receita', origens: 'met-incerteza' };
 const textoAjuda = (k, d) => { const a = AJUDA[k]; return typeof a === 'function' ? a(d) : a || ''; };
 const botaoAjuda = (chave, rot) => `<button type="button" class="ajuda" data-acao="ajuda" data-chave="${chave}" data-rot="${esc(rot)}" aria-label="Sobre ${esc(rot)}" aria-haspopup="dialog" aria-expanded="false">${ico('ajuda')}</button>`;
 function abrirAjuda(btn) {
   const d = UI.atual ? UI.atual.dados : dadosVazios(), k = btn.dataset.chave, ls = linksCampo(k, d);
-  const corpo = k === 'origens' ? `<ul class="lista-orig">${ORIGENS.map(([v, t, desc]) => `<li><span class="o-chip o-${v}">${ico(ICO_ORIGEM[v])}</span><div><b>${t}</b><span>${desc}</span></div></li>`).join('')}</ul>` : `<p>${esc(textoAjuda(k, d))}</p>`;
+  const corpo = k === 'origens' ? `<p>${esc(textoAjuda(k, d))}</p><ul class="lista-orig">${ORIGENS.map(([v, t, desc]) => `<li><span class="o-chip o-${v}">${ico(ICO_ORIGEM[v])}</span><div><b>${t}</b><span>${desc}</span></div></li>`).join('')}</ul>` : `<p>${esc(textoAjuda(k, d))}</p>`;
   const links = ls.length ? `<b style="font-size:.84rem">Onde encontrar</b><ul>${ls.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.nome)}</a><span class="selo ${l.selo === 'Oficial' ? 'oficial' : 'agregador'}">${esc(SELO_TXT[l.selo] || l.selo)}</span></li>`).join('')}</ul><p class="pop-nota">Fontes oficiais primeiro. Os links abrem em outra aba.</p>` : '';
-  abrirPop(btn, `<h4>${esc(btn.dataset.rot)}<button type="button" class="btn fant ico-so peq" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>${corpo}${links}`, { cls: 'pop-ajuda', papel: 'dialog', rotulo: btn.dataset.rot });
+  const met = AJUDA_MET[k] ? `<p class="pop-nota"><a href="#/metodologia/${AJUDA_MET[k]}" target="_blank" rel="noopener">Como entra na conta</a></p>` : '';
+  abrirPop(btn, `<h4>${esc(btn.dataset.rot)}<button type="button" class="btn fant ico-so peq" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>${corpo}${links}${met}`, { cls: 'pop-ajuda', papel: 'dialog', rotulo: btn.dataset.rot });
 }
 // origem do dado: um botão pequeno abaixo do campo, que só aparece quando há valor
 function botaoOrigem(alvo, o, temValor) {
@@ -3134,7 +3144,7 @@ const CAMPOS_SEM_DADO = {
   gastosReais: { rot: () => 'Gasto de TI real de anos anteriores', tem: d => (d.gastosReais || []).some(x => temValor(x)), ops: MOTIVOS },
   gastoDeclarado: { rot: () => 'Gasto de TI declarado do ano atual', tem: tem1('gastoDeclarado'), ops: MOTIVOS }
 };
-// 'valor' (respondido com número), um motivo, 'pendente' (vazio sem motivo) ou null (não se pede neste caso)
+// 'valor' (respondido com número), um motivo, 'pendente' (vazio e sem motivo: falta informar) ou null (não se pede neste caso)
 function estadoSemDado(d, c) {
   const x = CAMPOS_SEM_DADO[c]; if (!x || (x.vale && !x.vale(d))) return null;
   if (x.tem(d)) return 'valor';
@@ -3142,11 +3152,15 @@ function estadoSemDado(d, c) {
 }
 const pendentes = d => Object.keys(CAMPOS_SEM_DADO).filter(c => estadoSemDado(d, c) === 'pendente');
 const textoSemDado = (d, c) => { const s = SEM_DADO[(d.semDado || {})[c]]; return s ? s.rot.toLowerCase() : ''; };
-const chipSemDado = (d, c) => { const e = (d.semDado || {})[c], s = SEM_DADO[e]; return s ? `<span class="o-chip sdc-${e}">${ico(s.ico)}${s.rot}</span>` : ''; };
+// as cores seguem o sentido: vermelho é falta informar, âmbar é dado que falta e foi explicado, verde é não se aplica
+const chipSemDado = (d, c) => {
+  const e = estadoSemDado(d, c), s = SEM_DADO[e];
+  return s ? `<span class="o-chip sdc-${e}">${ico(s.ico)}${s.rot}</span>` : e === 'pendente' ? `<span class="o-chip sdc-falta">${ico('alerta')}Falta informar</span>` : '';
+};
 // botão abaixo do campo vazio, no lugar do botão de origem (que só aparece com valor)
 function botaoSemDado(c, d) {
-  const e = estadoSemDado(d, c), s = SEM_DADO[e], rev = !s && UI.revisar;
-  return `<button type="button" class="origem sem-dado ${s ? 'sdc-' + e : 'o-vazio'}${rev ? ' revisar' : ''}" data-acao="sem-dado" data-campo="${c}" data-estado="${e || ''}" aria-haspopup="menu" aria-expanded="false" ${e === 'pendente' || s ? '' : 'hidden'} data-tip="Sem valor: diga por quê">${ico(s ? s.ico : 'ajuda')}${s ? s.rot : 'Sem dado?'}${ico('chev', 'chev')}</button>`;
+  const e = estadoSemDado(d, c), s = SEM_DADO[e], falta = e === 'pendente';
+  return `<button type="button" class="origem sem-dado ${s ? 'sdc-' + e : 'sdc-falta'}" data-acao="sem-dado" data-campo="${c}" data-estado="${e || ''}" aria-haspopup="menu" aria-expanded="false" ${falta || s ? '' : 'hidden'} data-tip="${falta ? 'Preencha o campo ou diga por que não há dado' : 'Por que está sem valor'}">${ico(s ? s.ico : 'alerta')}${s ? s.rot : 'Falta informar'}${ico('chev', 'chev')}</button>`;
 }
 function abrirSemDado(btn) {
   const c = btn.dataset.campo, d = UI.atual.dados, atual = (d.semDado || {})[c] || '';
@@ -3168,26 +3182,31 @@ function atualizarSemDado() {
     const e = estadoSemDado(d, c);
     if (e === 'valor' && d.semDado[c]) delete d.semDado[c];
     $$(`.sem-dado[data-campo="${c}"]`).forEach(b => {
-      if (b.dataset.estado === String(e || '') && b.classList.contains('revisar') === (e === 'pendente' && !!UI.revisar)) return;
+      if (b.dataset.estado === String(e || '')) return;
       const foco = document.activeElement === b; b.outerHTML = botaoSemDado(c, d);
       if (foco) { const n = document.querySelector(`.sem-dado[data-campo="${c}"]`); if (n && !n.hidden) n.focus(); }
     });
   }
 }
-// ao salvar: campo vazio sem motivo é revisado, para ninguém pular um dado que tem
-async function verificarPendencias() {
-  const d = UI.atual.dados, pend = pendentes(d); if (!pend.length) return true;
-  const r = await perguntar(`<h2>${pend.length === 1 ? 'Falta 1 campo' : 'Faltam ' + pend.length + ' campos'}</h2><p>Preencha ou diga por que não há dado:</p><ul>${pend.map(c => `<li>${esc(CAMPOS_SEM_DADO[c].rot(d))}</li>`).join('')}</ul>`,
-    [['Salvar assim mesmo', 'salvar'], ['Revisar', 'revisar', 'prim']]);
-  if (r === 'salvar') return true;
+// campo vazio sem motivo não passa: nem para salvar, nem para o resumo
+function faltaCampo() {
+  const n = pendentes(UI.atual.dados).length; if (!n) return false;
+  toast(`${n === 1 ? 'Falta 1 campo' : 'Faltam ' + n + ' campos'}: preencha ou diga por que não há dado`);
   revisarPendencias();
-  return false;
+  return true;
 }
 function revisarPendencias() {
   UI.revisar = true;
-  const ir = () => { atualizarSemDado(); const b = $('.sem-dado.revisar:not([hidden])'); if (b) { const det = b.closest('details'); if (det) det.open = true; b.scrollIntoView({ block: 'center', behavior: reduzMov() ? 'auto' : 'smooth' }); b.focus({ preventScroll: true }); } };
+  const ir = () => {
+    const f = $('#form'); if (f) f.classList.add('revisando');
+    const b = $('.sem-dado.sdc-falta:not([hidden])'); if (!b) return;
+    const det = b.closest('details'); if (det) det.open = true;
+    b.scrollIntoView({ block: 'center', behavior: reduzMov() ? 'auto' : 'smooth' }); b.focus({ preventScroll: true });
+  };
   if (UI.rota.aba === 'resultado') { navegar(`#/analise/${UI.atual.id}`); setTimeout(ir, 60); } else ir();
 }
+// no topo da análise, sempre à vista enquanto faltar algo
+const chipFaltam = d => { const n = pendentes(d).length; return n ? `<button type="button" class="estado erro chip-falta" data-acao="revisar"><i aria-hidden="true"></i>${n === 1 ? 'Falta 1 campo' : 'Faltam ' + n + ' campos'}</button>` : ''; };
 // a busca do CNPJ só acontece quando a pessoa pede: lupa para buscar, setas para atualizar o que já veio da Receita
 function botaoCNPJ(d) {
   const ja = !!(d.cnpjInfo && Object.keys(d.cnpjInfo).length), rot = ja ? 'Atualizar com os dados da Receita Federal' : 'Buscar os dados deste CNPJ na Receita Federal';
@@ -3758,7 +3777,7 @@ TELAS.analise = {
     const emp = UI.atual, d = emp.dados, res = r.aba === 'resultado', id = encodeURIComponent(emp.id);
     return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">${esc(d.nome.trim() || 'Nova análise')}</h1><div class="ws-meta" id="ws-meta">${metaEmpresa(d)}</div></div><div class="acoes" id="ws-acoes">${acoesAnalise()}</div></header>
     <nav class="abas" aria-label="Partes da análise"><a href="#/analise/${id}"${res ? '' : ' aria-current="page"'}>${ico('analise')}Dados</a><a href="#/analise/${id}/resultado"${res ? ' aria-current="page"' : ''}>${ico('detalhe')}Resultado</a></nav>
-    ${res ? corpoResultado(emp) : `<div class="ws-corpo"><div class="grade-ws"><form class="form-ws" id="form" autocomplete="off" onsubmit="return false" novalidate>${formAnalise()}</form><aside class="resumo-lado" aria-label="Estimativa"><div class="cartao-res" id="painel"></div><p class="sr" id="anuncio" aria-live="polite"></p></aside></div></div>`}`;
+    ${res ? corpoResultado(emp) : `<div class="ws-corpo"><div class="grade-ws"><form class="form-ws${UI.revisar ? ' revisando' : ''}" id="form" autocomplete="off" onsubmit="return false" novalidate>${formAnalise()}</form><aside class="resumo-lado" aria-label="Estimativa"><div class="cartao-res" id="painel"></div><p class="sr" id="anuncio" aria-live="polite"></p></aside></div></div>`}`;
   },
   depois(r) {
     if (r.aba === 'resultado') { depoisResultado(); return; }
@@ -3789,6 +3808,7 @@ acoes({
   'buscar-cnpj': () => consultarCNPJ(),
   'tec-abrir': () => { if (tecAberta()) fecharTec(true); else { abrirTec(); $('#tec-busca').focus(); } },
   'tec-remover': b => { const d = UI.atual.dados; d.tecnologias = (d.tecnologias || []).filter(x => x !== b.dataset.id); marcarAlterado(); atualizarTecUI(); atualizarPainel(); const c = $('#tec-busca'); if (c) c.focus(); },
+  'revisar': () => revisarPendencias(),
   'sem-dado': b => abrirSemDado(b),
   'sem-dado-escolher': b => escolherSemDado(b.dataset.campo, b.dataset.s),
   'buscar-ptax': () => buscarPTAX(),
@@ -4190,7 +4210,7 @@ function textoResumo(d, r) {
   return L.join('\n');
 }
 function abrirResumo() {
-  if (!UI.atual) return;
+  if (!UI.atual || faltaCampo()) return;
   const d = UI.atual.dados, r = calc(d);
   if (r.vazio) return toast('Preencha um dado de porte para gerar o resumo.');
   const dlg = dialogoTexto('Resumo para copiar', '<p>No formato do resumo do time: receita líquida, estimativas Conservadora e Geral, e as fontes, cálculos e limitações. Cole no CRM, num e-mail ou numa proposta.</p>',
@@ -5643,7 +5663,8 @@ function telaTestes() {
   }
   return h;
 }
-TELAS.metodologia = { titulo: 'Metodologia', render: () => telaMetodologia() };
+// #/metodologia/<seção> abre já na seção (as ajudas dos campos apontam para cá)
+TELAS.metodologia = { titulo: 'Metodologia', render: () => telaMetodologia(), depois: r => { if (r.id) setTimeout(() => { if (document.getElementById(r.id)) ACOES.rolar({ dataset: { alvo: r.id } }); }, 80); } };
 TELAS.testes = { titulo: 'Testes de aceitação', render: () => telaTestes() };
 acoes({ 'rodar-testes': () => renderAqui() });
 </script>
