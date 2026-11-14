@@ -228,7 +228,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const mod = await motor(() => { const r = calc(UI.atual.dados); return { nome: UI.atual.dados.nome, ic: r.ic, alerta: r.alerta, avisos: r.avisos.length, sujo: UI.sujo, salva: !!empresaSalva() }; });
   ok('Empresa modelo abre como análise nova, sem alterações pendentes', mod.nome === 'Banco do Brasil' && !mod.salva && !mod.sujo, JSON.stringify(mod));
   ok('Empresa modelo: confiança de 80 ou mais, sem alertas nem avisos', mod.ic >= 80 && !mod.alerta && mod.avisos === 0 && await p.locator('#painel .alerta').count() === 0, String(mod.ic));
-  ok('Empresa modelo: aviso com as fontes oficiais', await p.locator('.nota-modelo a[href*="api.mziq.com"]').count() === 2 && await p.locator('.nota-modelo a[href*="ri.bb.com.br"]').count() === 1 && (await txt('#ws-meta')).includes('Empresa modelo'));
+  ok('Empresa modelo: aviso com as fontes oficiais', await p.locator('.nota-modelo a[href*="api.mziq.com"]').count() === 2 && (await txt('#ws-meta')).includes('Empresa modelo'));
   ok('Empresa modelo: o que estimar já escolhido e dados com origem oficial', await p.locator('#sec-objetivo.pede').count() === 0 && (await motor(() => [UI.atual.dados.funcionarios, ...UI.atual.dados.gastosReais].every(x => x.o === 'oficial'))));
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
   const idModelo = await p.evaluate(() => UI.atual.id);

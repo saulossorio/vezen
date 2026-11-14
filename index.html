@@ -2998,18 +2998,15 @@ const EMPRESA_MODELO = {
   },
   fontes: [
     { doc: 'Relatório da Administração 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/637e45ff-9331-d07c-5fde-606c69e1bfe1?origin=2',
-      usa: 'R$ 6,8 bilhões investidos em tecnologia em 2025 e 93% das transações feitas em canais digitais' },
+      usa: 'gasto de TI de 2025' },
     { doc: 'Análise do Desempenho do 4º trimestre de 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/0c488fdf-d384-201d-b5f8-37a795f1ac43?origin=2',
-      usa: '85.206 funcionários em dezembro de 2025 e 86.574 um ano antes (tabela 31) e o investimento em tecnologia de cada trimestre, que soma R$ 6,2 bilhões em 2024 (figura 54)' }
-  ],
-  ri: 'https://ri.bb.com.br/informacoes-financeiras/central-de-resultados/'
+      usa: 'funcionários e gasto de TI de 2024' }
+  ]
 };
 function notaModelo(d) {
   if (d.modelo !== EMPRESA_MODELO.id) return '';
-  return `<section class="nota-modelo" aria-label="Empresa modelo">${ico('lampada')}<div><p><b>Empresa modelo.</b> Dados públicos do Banco do Brasil, tirados dos documentos oficiais do banco. O gasto de TI publicado pesa quase sozinho no cálculo e deixa a confiança alta.${empresaSalva() ? '' : ' Mude o que quiser: nada é salvo até você clicar em Salvar.'}</p>
-    <details><summary>Fontes e escolhas</summary><ul>${EMPRESA_MODELO.fontes.map(f => `<li><a href="${f.url}" target="_blank" rel="noopener">${esc(f.doc)}</a>: ${esc(f.usa)}.</li>`).join('')}
-    <li>A receita ficou de fora: em bancos, a conta pela receita (margem financeira de R$ 103,1 bilhões mais R$ 34,8 bilhões de serviços em 2025, na mesma Análise do Desempenho) dá várias vezes o gasto real publicado e baixaria a confiança.</li>
-    <li>Os documentos ficam na <a href="${EMPRESA_MODELO.ri}" target="_blank" rel="noopener">central de resultados do Banco do Brasil</a>.</li></ul></details></div></section>`;
+  return `<section class="nota-modelo" aria-label="Empresa modelo">${ico('lampada')}<div><p><b>Empresa modelo:</b> Banco do Brasil, com dados oficiais.</p>
+    <details><summary>Fontes</summary><ul>${EMPRESA_MODELO.fontes.map(f => `<li><a href="${f.url}" target="_blank" rel="noopener">${esc(f.doc)}</a>: ${esc(f.usa)}.</li>`).join('')}</ul></details></div></section>`;
 }
 // abre a análise salva da empresa modelo, se houver; se não, uma nova com os dados dela
 async function abrirEmpresaModelo() {
@@ -4116,7 +4113,7 @@ function telaEmpresas() {
   if (!n) return cab + `<div class="vazio"><h2>Nenhuma empresa ainda</h2><p>Comece pela análise de uma empresa ou estime uma lista inteira de uma vez. A estimativa aparece enquanto você preenche os dados.</p>
     <ol class="passos-vazio"><li><b>Uma empresa</b>Nome e um dado de porte, como receita ou funcionários. Com o CNPJ, a ferramenta busca o resto.</li><li><b>Uma lista</b>Uma planilha do CRM ou do Excel com várias empresas, estimadas de uma vez.</li><li><b>Backup</b>Já usou o Vezen em outro computador? Importe o backup exportado lá.</li></ol>
     <div class="acoes"><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button><a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn" data-acao="importar">${ico('subir')}Importar backup</button></div>
-    <p class="vazio-modelo">Quer ver antes um exemplo pronto? <button type="button" class="link-btn" data-acao="modelo">Abra a empresa modelo</button>, o Banco do Brasil com dados públicos e confiança alta.</p></div>`;
+    <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button></p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
     <label class="busca"><span class="sr">Buscar</span>${ico('busca')}<input type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
@@ -4212,7 +4209,7 @@ TELAS.empresas = {
   }
 };
 acoes({
-  'menu-empresas': b => abrirMenuAcoes(b, [['modelo', 'Abrir a empresa modelo', 'lampada'], '-', ['exp-json', 'Exportar backup', 'baixar'], ['importar', 'Importar backup', 'subir'], '-', ['exp-csv', 'Baixar tabela das empresas (CSV)', 'tabela']]),
+  'menu-empresas': b => abrirMenuAcoes(b, [['modelo', 'Empresa modelo', 'lampada'], '-', ['exp-json', 'Exportar backup', 'baixar'], ['importar', 'Importar backup', 'subir'], '-', ['exp-csv', 'Baixar tabela das empresas (CSV)', 'tabela']]),
   'menu-emp': b => abrirMenuAcoes(b, [['abrir-emp', 'Abrir', 'editar', `data-id="${b.dataset.id}"`], ['dup-emp', 'Duplicar', 'copiar', `data-id="${b.dataset.id}"`], '-', ['del-emp', 'Excluir', 'lixo', `data-id="${b.dataset.id}"`, 'perigo']]),
   'abrir-emp': b => navegar('#/analise/' + encodeURIComponent(b.dataset.id)),
   'dup-emp': b => duplicarEmpresa(b.dataset.id),

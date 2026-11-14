@@ -20,7 +20,7 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 5. **Uma lista:** em **Listas**, escolha uma planilha (relatório do CRM, Excel, CSV ou Parquet), confira o que cada coluna é e veja todas as empresas estimadas. Filtre, baixe os resultados em CSV, abra qualquer empresa como análise ou salve as escolhidas em Empresas.
 6. Exporte um backup de vez em quando, pela barra lateral: se os dados do navegador forem apagados, as análises e as listas se perdem.
 
-**Empresa modelo:** para ver a ferramenta funcionando antes de usar com as suas empresas, abra a empresa modelo pelo menu de **Empresas** (ou pelo link na tela vazia). É o Banco do Brasil, com funcionários e gasto de TI tirados dos documentos oficiais do banco, e confiança alta. As fontes ficam no aviso no topo da análise.
+**Empresa modelo:** um exemplo pronto (Banco do Brasil, com dados oficiais), no menu de **Empresas**.
 
 **Calibração** mostra os três tipos de estimativa e os dados de cada um. **Parâmetros** mostra e permite mudar os números usados nas contas. **Metodologia** explica cada fórmula. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
 
