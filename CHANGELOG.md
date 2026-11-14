@@ -2,6 +2,17 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [1.8.0] - 2026-11-14
+
+### Adicionado
+- **Período do valor da receita:** ao lado do ano, o campo **Período** diz quantos meses o valor cobre: 12 (ano fechado), 9, 6 ou 3, como nos balanços trimestrais e semestrais e no IF.data. A ferramenta leva o valor a 12 meses (multiplica por 12 e divide pelos meses, sem ajuste de sazonalidade) antes do crescimento até o ano da estimativa, e cada mês que falta soma 0,02 à incerteza da receita (parâmetro `receita.sMeses`, editável em Parâmetros). Antes, um valor de 3 ou 6 meses entrava como se fosse de um ano inteiro. As análises salvas ficam em 12 meses e não mudam de valor.
+- **Filtro por letra no Glossário**, como num dicionário: Todas e A a Z, combinado com a busca e a categoria. As letras sem termo ficam apagadas, e a barra fica à vista ao rolar a lista.
+- Teste `motor-periodo`.
+
+### Alterado
+- Os rótulos da receita não falam mais em “último ano fechado” (“Receita (IF.data)”, “Receita líquida”, “Prêmios emitidos”...), e o aviso do ano atual deixou de mandar usar o último ano fechado: agora manda marcar o período.
+- A Metodologia, o resultado, o resumo e a ajuda da receita contam a conversão para 12 meses.
+
 ## [1.7.0] - 2026-11-14
 
 ### Adicionado

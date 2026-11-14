@@ -46,6 +46,15 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Dica explica a conversão e o ano', dica.includes('tirando 18%') && dica.includes('Valor de 2024 levado a 2026'), dica);
   ok('Receita usada = 469,41 mi', (await motor(() => calc(UI.atual.dados).receita.usada.v)).toFixed(0) === '469409000');
   ok('Campo mostra a receita líquida usada e a origem', (await txt('#rec-usada')).includes('R$ 469,41 mi') && (await txt('#rec-usada')).includes('Oficial'));
+  // período do valor: balanço trimestral ou semestral entra levado a 12 meses
+  ok('Período do valor: seletor com 12 meses (ano fechado) como padrão', (await p.inputValue('#f-fatMeses')) === '12' && await p.locator('#f-fatMeses option').count() === 4 && (await txt('#f-fatMeses option:checked')).includes('ano fechado'));
+  await p.selectOption('#f-fatMeses', '6'); await p.waitForTimeout(250);
+  const dicaP = await p.textContent('#dica-rec');
+  ok('6 meses: a dica diz que o valor vai a 12 meses e depois ao ano da estimativa', dicaP.includes('Valor de 6 meses de 2024 levado a 12 meses (× 2,00)') && dicaP.includes('a 2026'), dicaP);
+  ok('6 meses: a receita usada dobra e o período fica salvo', (await motor(() => calc(UI.atual.dados).receita.usada.v)).toFixed(0) === '938818000' && (await txt('#rec-usada')).includes('R$ 938,82 mi') && (await motor(() => UI.atual.dados.fatMeses)) === '6');
+  ok('6 meses: a Metodologia e o resumo contam a conversão', await motor(() => { const r = calc(UI.atual.dados), h = blocoReceitaDet(r), s = textoResumo(UI.atual.dados, r); return /Levado a 12 meses/.test(h) && /× 2,00/.test(h) && /calculada a partir de/.test(s) && /receita de 6 meses levada a 12 meses/.test(s); }));
+  await p.selectOption('#f-fatMeses', '12'); await p.waitForTimeout(250);
+  ok('Voltar a 12 meses volta a receita, sem aviso de conversão', (await motor(() => calc(UI.atual.dados).receita.usada.v)).toFixed(0) === '469409000' && !(await p.textContent('#dica-rec')).includes('12 meses (×'));
   ok('Só investimento em TI: o cartão não mostra a receita', await p.locator('#painel #cr-receita').count() === 0);
   await p.check('input[data-objetivo][value=ti-receita]'); await p.waitForTimeout(250);
   ok('Escolha feita: seção sem destaque', await p.locator('#sec-objetivo.pede').count() === 0 && (await motor(() => UI.atual.dados.fatEstimar)) === true);
@@ -98,7 +107,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.fill('#f-nome', 'Subsidiária Teste'); await p.selectOption('#f-natureza', 'subsidiaria'); await p.selectOption('#f-setor', 'industria'); await p.selectOption('#f-uf', 'SP');
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(200);
   ok('Salvar sem escolher o que estimar: pede a escolha', (await txt('#toast')).includes('Escolha o que esta análise vai estimar') && !(await txt('#ws-meta')).includes('Salva em') && await p.evaluate(() => document.activeElement && document.activeElement.matches('input[data-objetivo]')));
-  ok('Rótulo da receita para subsidiária', (await p.textContent('label[for=f-faturamento]')).includes('Receita anual no Brasil'));
+  ok('Rótulo da receita para subsidiária', (await p.textContent('label[for=f-faturamento]')).includes('Receita no Brasil'));
   await p.fill('#f-funcionarios', '1.200'); await orig('funcionarios', 'terceiros');
   await p.check('input[data-objetivo][value=ti-receita]'); await p.waitForTimeout(250);
   ok('Bloco da receita global aparece', await p.locator('.rec-global').count() === 1);
@@ -243,7 +252,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Empresa modelo abre como análise nova, sem alterações pendentes', mod.nome === 'Banco do Brasil' && !mod.salva && !mod.sujo, JSON.stringify(mod));
   ok('Empresa modelo: confiança de 80 ou mais, sem aviso nem alerta de divergência sobre os dados', mod.ic >= 80 && mod.avisos === 0 && !mod.alerta, String(mod.ic));
   ok('Empresa modelo: aviso com as fontes oficiais, só os dois documentos', await p.locator('.nota-modelo a[href*="api.mziq.com"]').count() === 2 && await p.locator('.nota-modelo li').count() === 2 && (await txt('#ws-meta')).includes('Empresa modelo'));
-  ok('Receita de banco pede o último ano fechado, e o Porte não traz texto explicativo', (await txt('label[for=f-faturamento]')).includes('último ano fechado') && await p.locator('#sec-porte .sf-desc').count() === 0, await txt('label[for=f-faturamento]'));
+  ok('Receita de banco pede a linha do IF.data sem falar em ano fechado, e o Porte não traz texto explicativo', (await txt('label[for=f-faturamento]')) === 'Receita (IF.data)' && await p.locator('#sec-porte .sf-desc').count() === 0, await txt('label[for=f-faturamento]'));
   ok('Empresa modelo: o que estimar já escolhido e dados com origem oficial', await p.locator('#sec-objetivo.pede').count() === 0 && (await motor(() => [UI.atual.dados.funcionarios, ...UI.atual.dados.gastosReais].every(x => x.o === 'oficial'))));
   await salvarOk(300);
   const idModelo = await p.evaluate(() => UI.atual.id);
@@ -276,7 +285,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const antes = await p.locator('#painel .pmd button[data-campo=faturamento]').count();
   await p.click('.sem-dado[data-campo=faturamento]'); await p.click('#pop [data-s=nao-divulga]'); await p.waitForTimeout(200);
   ok('O cartão deixa de sugerir o que a pessoa já explicou', antes === 1 && await p.locator('#painel .pmd button[data-campo=faturamento]').count() === 0, String(antes));
-  await p.click('.sem-dado[data-campo=usuarios]'); await p.click('#pop [data-s=nao-encontrado]'); await p.waitForTimeout(150);
+  await p.click('.sem-dado[data-campo=usuarios]'); await p.click('#pop [data-s=nao-encontrado]'); await p.waitForTimeout(450); // as cores mudam aos poucos
   const cor = c => p.locator(`.sem-dado[data-campo=${c}]`).evaluate(e => getComputedStyle(e).color);
   ok('As cores seguem o sentido: âmbar para o que falta e foi explicado, verde para o que não se aplica', (await cor('usuarios')) === await tok('--aviso') && (await cor('faturamento')) === await tok('--aviso') && (await cor('unidades')) === await tok('--ok'));
   await p.click('.sem-dado[data-campo=profTI]'); await p.click('#pop [data-s=nao-se-aplica]'); await p.waitForTimeout(150);
@@ -300,7 +309,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Sem nada faltando, salva direto', await p.locator('#dlg[open]').count() === 0 && (await txt('#ws-meta')).includes('Salva em'));
   ok('Os motivos ficam salvos com a empresa', await p.evaluate(() => { const e = JSON.parse(localStorage.getItem('estimador-ti.v1')).empresas.find(x => x.dados.nome === 'Teste Sem Dado'); return e.dados.semDado.faturamento === 'nao-divulga' && e.dados.semDado.unidades === 'nao-se-aplica'; }));
   await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
-  ok('Sem nada faltando, o resumo abre, com a linha dos dados sem informação', /Dados sem informação: .*Receita anual \(não divulga\)/.test(await p.inputValue('#txt-resumo')));
+  ok('Sem nada faltando, o resumo abre, com a linha dos dados sem informação', /Dados sem informação: .*Receita \(não divulga\)/.test(await p.inputValue('#txt-resumo')));
   await p.click('#dlg button:has-text("Fechar")');
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(500);
   ok('Resultado: dados usados dizem por que faltam, com a cor do motivo', /não divulga/i.test(await txt('#res-dados')) && /não se aplica/i.test(await txt('#res-dados')) && await p.locator('#res-dados .o-chip.sdc-nao-divulga').count() >= 1);

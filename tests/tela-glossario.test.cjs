@@ -52,9 +52,32 @@ const PERMITIDAS = new Set([
   check('Categoria filtra os termos', await p.locator('.gl-item:not([hidden])').count() === await motor(() => GLOSSARIO.filter(g => g.c === 'ti').length) && await p.locator('.gl-item:not([hidden])[data-cat="ti"]').count() > 20);
   await p.selectOption('#gl-cat', ''); await p.waitForTimeout(100);
 
+  // filtro por letra, como as abas de um dicionário
+  const comLetra = await motor(() => { const n = {}; for (const g of GLOSSARIO) { const l = glLetra(g); n[l] = (n[l] || 0) + 1; } return n; });
+  check('Letras: Todas e A a Z, com as sem termo apagadas', await p.locator('.gl-lt').count() === 27 && await p.locator('.gl-lt:not(:disabled)').count() === Object.keys(comLetra).length + 1 && await p.locator('.gl-lt[data-l="K"]:disabled').count() === 1 && (await p.getAttribute('.gl-todas', 'aria-pressed')) === 'true');
+  await p.click('.gl-lt[data-l="C"]'); await p.waitForTimeout(250);
+  check('Letra C: só os termos que começam com C, com o contador e a letra marcada', await p.locator('.gl-item:not([hidden])').count() === comLetra.C && await p.locator('.gl-item:not([hidden])[data-l="C"]').count() === comLetra.C && (await txt(p, '#gl-conta')) === `${comLetra.C} de ${dados.n} termos` && await p.locator('.gl-grupo:not([hidden])').count() === 1 && (await p.getAttribute('.gl-lt[data-l="C"]', 'aria-pressed')) === 'true' && (await p.getAttribute('.gl-todas', 'aria-pressed')) === 'false');
+  await p.fill('#gl-busca', 'sistema'); await p.waitForTimeout(150);
+  check('Letra e busca se combinam, e as letras sem resultado na busca ficam apagadas', await p.locator('.gl-item:not([hidden])').count() >= 1 && await p.locator('.gl-item:not([hidden]):not([data-l="C"])').count() === 0 && await p.locator('.gl-lt[data-l="K"]:disabled').count() === 1 && await p.locator('.gl-lt:not(:disabled)').count() < Object.keys(comLetra).length + 1);
+  await p.fill('#gl-busca', ''); await p.waitForTimeout(100);
+  await p.selectOption('#gl-cat', 'ti'); await p.waitForTimeout(150);
+  check('Letra e categoria se combinam', await p.locator('.gl-item:not([hidden])').count() === await motor(() => GLOSSARIO.filter(g => g.c === 'ti' && glLetra(g) === 'C').length) && await p.locator('.gl-item:not([hidden]):not([data-cat="ti"])').count() === 0);
+  await p.selectOption('#gl-cat', ''); await p.waitForTimeout(100);
+  await p.click('.gl-lt[data-l="C"]'); await p.waitForTimeout(250);
+  check('Clicar de novo na letra mostra tudo', await p.locator('.gl-item:not([hidden])').count() === dados.n && (await p.getAttribute('.gl-todas', 'aria-pressed')) === 'true');
+  await p.click('.gl-lt[data-l="M"]'); await p.click('.gl-todas'); await p.waitForTimeout(250);
+  check('Todas desfaz a letra', await p.locator('.gl-item:not([hidden])').count() === dados.n && await p.locator('.gl-lt[aria-pressed="true"]').count() === 1);
+  await p.focus('.gl-lt[data-l="B"]'); await p.keyboard.press('Enter'); await p.waitForTimeout(250);
+  check('A letra funciona pelo teclado', await p.locator('.gl-item:not([hidden])[data-l="B"]').count() === comLetra.B && await p.locator('.gl-item:not([hidden]):not([data-l="B"])').count() === 0);
+  check('A barra de letras fica à vista ao rolar a lista', await p.evaluate(() => getComputedStyle(document.querySelector('.gl-letras')).position === 'sticky'));
+  await p.click('.gl-todas'); await p.waitForTimeout(150);
+
   // 3. chegar por um termo: rola até ele, destaca e dá foco
   await ir('#/glossario/cnpj'); await p.waitForTimeout(1200);
   check('Endereço com o termo: rola até ele e dá foco', await p.evaluate(() => { const r = document.getElementById('gl-cnpj').getBoundingClientRect(); return document.activeElement.id === 'gl-cnpj' && r.top >= 0 && r.bottom <= innerHeight; }));
+  await ir('#/glossario'); await p.fill('#gl-busca', 'xyzxyz'); await ir('#/glossario/mei'); await p.waitForTimeout(1000);
+  await ir('#/glossario'); await p.click('.gl-lt[data-l="C"]'); await ir('#/glossario/mei'); await p.waitForTimeout(1000);
+  check('Endereço com o termo desfaz a letra que o escondia', await p.locator('#gl-mei:not([hidden])').count() === 1 && (await p.getAttribute('.gl-todas', 'aria-pressed')) === 'true');
   await ir('#/glossario'); await p.fill('#gl-busca', 'xyzxyz'); await ir('#/glossario/mei'); await p.waitForTimeout(1000);
   check('Endereço com o termo desfaz a busca que o escondia', await p.locator('#gl-mei:not([hidden])').count() === 1 && (await p.inputValue('#gl-busca')) === '');
 

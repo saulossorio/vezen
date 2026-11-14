@@ -843,6 +843,13 @@ tr.r-falha td { background: var(--crit-f); }
 .pop-termo h4 { align-items: flex-start; }
 .pop-termo h4 small { display: block; margin-top: 1px; font-weight: 450; font-size: .8rem; color: var(--cinza); line-height: 1.35; }
 .pop-termo .pop-def { margin: 0; }
+/* filtro por letra, como as abas de um dicionário: fica à vista enquanto a lista rola */
+.gl-letras { position: sticky; top: var(--topo-fixo, 0px); z-index: 6; display: flex; flex-wrap: wrap; gap: 2px; margin: 0 0 8px; padding: 8px 0; background: var(--fundo); border-bottom: 1px solid var(--linha-suave); }
+.gl-lt { min-width: 32px; height: 32px; padding: 0 8px; border: 1px solid transparent; border-radius: var(--raio-p); background: none; color: var(--tinta); font-size: .9rem; font-weight: 600; cursor: pointer; transition: background-color var(--dur), border-color var(--dur), color var(--dur); }
+.gl-lt:hover:not(:disabled) { background: var(--hover); }
+.gl-lt[aria-pressed="true"] { background: var(--marca-f); border-color: var(--marca-b); }
+.gl-lt:disabled { color: var(--cinza2); opacity: .5; cursor: default; }
+.gl-todas { padding: 0 12px; font-weight: 550; }
 .gl-conta { margin: 0 0 6px; font-size: .88rem; }
 .gl-grupo[hidden], .gl-item[hidden] { display: none; }
 .gl-letra { margin: 24px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--linha); font-size: .95rem; font-weight: 650; color: var(--cinza); }
@@ -1153,6 +1160,7 @@ const CONFIG = {
         'receita.sGlobal': { fonte: 'Suposição inicial', aprox: true },
         'receita.prodBR': { fonte: 'Suposição inicial: sem dado público. A participação divulgada pela empresa é melhor', aprox: true },
         'receita.sDed': { fonte: 'Suposição inicial', aprox: true },
+        'receita.sMeses': { fonte: 'Suposição inicial', aprox: true },
         'estimativas.conservadora': { fonte: 'Regra da ferramenta' }
       },
       parametros: {
@@ -1225,7 +1233,7 @@ const CONFIG = {
         },
         crescimento: { gSetor: 0.08, cenario: 0.04, horizonte: 5, histMin: -0.20, histMax: 0.50, funcMin: -0.10, funcMax: 0.40 },
         calibracao: { minEmpresas: 10, K: 5, minGrupo: 5, meta: 0.80 },
-        receita: { g: 0.07, sFunc: 0.75, sGlobal: 0.60, prodBR: 1.0, sDed: 0.08 },
+        receita: { g: 0.07, sFunc: 0.75, sGlobal: 0.60, prodBR: 1.0, sDed: 0.08, sMeses: 0.02 },
         estimativas: { conservadora: 0.25 },
         links: [
           { id: 'receita', nome: 'Consulta CNPJ (Receita Federal)', url: 'https://solucoes.receita.fazenda.gov.br/servicos/cnpjreva/cnpjreva_solicitacao.asp', selo: 'Oficial' },
@@ -1329,11 +1337,13 @@ function receitaEmpresa(d, P, c) {
   const out = { usada: null, modo: null, informada: null, caminhos: [], estimativa: null, avisos: [], comparacao: false };
   const crescer = a => { const dt = a > 1900 && a < ano ? ano - a : 0; return { dt, f: Math.pow(1 + R.g, dt) }; };
   const fat = valorPos(d.faturamento);
-  // 1. valor informado: bruta vira líquida pelas deduções do setor; valor de ano anterior é levado ao ano da estimativa
+  // 1. valor informado: bruta vira líquida pelas deduções do setor; valor de menos de 12 meses (balanço trimestral ou semestral) é levado a 12 meses, sem ajuste de sazonalidade;
+  // valor de ano anterior é levado ao ano da estimativa
   if (fat) {
     const bruta = d.fatTipo === 'bruta' && (L.ded || 0) > 0, ded = bruta ? L.ded : 0, cr = crescer(+d.fatAno), liq = fat * (1 - ded);
-    out.informada = { valor: fat, bruta, ded, liq, ano: +d.fatAno || null, dt: cr.dt, fator: cr.f, v: liq * cr.f, o: d.faturamento.o || 'terceiros',
-      s: Math.sqrt(sOrig(d.faturamento.o) ** 2 + (bruta ? R.sDed ** 2 : 0) + cr.dt * I.sigmaG ** 2) };
+    const mm = Math.round(+d.fatMeses), meses = mm >= 1 && mm <= 12 ? mm : 12, fm = 12 / meses; // período fora de 1 a 12 vale como 12
+    out.informada = { valor: fat, bruta, ded, liq, meses, fm, ano: +d.fatAno || null, dt: cr.dt, fator: cr.f, v: liq * fm * cr.f, o: d.faturamento.o || 'terceiros',
+      s: Math.sqrt(sOrig(d.faturamento.o) ** 2 + (bruta ? R.sDed ** 2 : 0) + ((12 - meses) * (R.sMeses ?? 0)) ** 2 + cr.dt * I.sigmaG ** 2) };
   }
   // 2. estimativa da ferramenta, só quando pedida
   if (d.fatEstimar) {
@@ -2509,7 +2519,7 @@ function salvar(alterou = true) {
 }
 function dadosVazios() {
   const f = () => ({ v: '', o: '' });
-  return { nome: '', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', faturamento: f(), fatAno: String(ANO - 1), fatTipo: 'liquida', fatEstimar: null, funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
+  return { nome: '', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', faturamento: f(), fatAno: String(ANO - 1), fatMeses: '12', fatTipo: 'liquida', fatEstimar: null, funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
     unidades: f(), enquadramento: '', tipoPublico: '', adicoes: f(), contratos: f(), tiMatriz: '', digital: '', tecnologias: [], tecOutras: '', crescFunc: f(), vagasTI: '',
     gastosReais: [], gastoDeclarado: f(), gManual: '', extras: {}, viaCNPJ: {}, cnpjInfo: {},
     globalRec: f(), globalMoeda: 'USD', globalAno: String(ANO - 1), globalTaxa: '', globalTaxaFonte: '', globalFunc: f(), globalPart: f(), salariosTI: 'com', modo: 'base', semDado: {} };
@@ -3017,7 +3027,7 @@ function graficoCurva(d, res) {
   const pts = [], ctxC = contexto(modoDe(d));
   for (let i = 0; i <= 80; i++) {
     const x = Math.pow(10, Math.log10(x0) + i / 80 * (Math.log10(x1) - Math.log10(x0)));
-    const c = { fatTipo: d.fatTipo, fatAno: d.fatAno, natureza: d.natureza, setor: d.setor, uf: d.uf, digital: d.digital, tiMatriz: d.tiMatriz, unidades: d.unidades, crescFunc: d.crescFunc, extras: d.extras };
+    const c = { fatTipo: d.fatTipo, fatAno: d.fatAno, fatMeses: d.fatMeses, natureza: d.natureza, setor: d.setor, uf: d.uf, digital: d.digital, tiMatriz: d.tiMatriz, unidades: d.unidades, crescFunc: d.crescFunc, extras: d.extras };
     if (modo === 'func') { c.funcionarios = { v: x, o: d.funcionarios.o }; if (rpf) c.faturamento = { v: rpf * x, o: d.faturamento.o }; }
     else { c.faturamento = { v: x, o: d.faturamento.o }; c.enquadramento = ''; }
     const r = calcular(c, ...ctxC);
@@ -3244,7 +3254,7 @@ const AJUDA = {
   uf: 'Estado onde fica a sede da empresa no Brasil.',
   natureza: 'O tipo da empresa: privada de médio ou grande porte, pequena, listada na bolsa, startup, subsidiária de multinacional, setor público ou terceiro setor.',
   setor: 'Área em que a empresa atua, pela atividade principal (o CNPJ mostra o código).',
-  faturamento: 'Quanto a empresa vendeu no último ano fechado, só no Brasil. Prefira a receita líquida, já sem os impostos sobre vendas; se só achar o faturamento bruto, marque “Faturamento bruto”. Informe também o ano do valor.',
+  faturamento: 'Quanto a empresa vendeu no Brasil no período informado. Prefira a receita líquida, sem os impostos sobre vendas; se só achar o faturamento bruto, marque “Faturamento bruto”. Informe o ano e o período (12, 9, 6 ou 3 meses): o valor é levado a 12 meses.',
   funcionarios: 'Número de funcionários da empresa no Brasil.',
   usuarios: 'Pessoas que usam computador no trabalho. Quase nunca é público: se não achar, a ferramenta supõe um valor pelo setor, que aparece em cinza no campo.',
   unidades: 'Lojas, fábricas, filiais ou centros de distribuição da empresa.',
@@ -3408,13 +3418,13 @@ function campoExtra(d, k, rot, tipo, papel, ops) {
 }
 function rotulos(d) {
   const n = d.natureza, s = d.setor, orgao = ehOrgaoPublico(d);
-  let fat = n === 'subsidiaria' ? 'Receita anual no Brasil' : 'Receita anual', tipo = true, bancos = '';
+  let fat = n === 'subsidiaria' ? 'Receita no Brasil' : 'Receita', tipo = true, bancos = '';
   if (orgao) { fat = 'Orçamento total'; tipo = false; }
-  else if (n === 'listada') { fat = 'Receita líquida do último ano fechado'; tipo = false; }
+  else if (n === 'listada') { fat = 'Receita líquida'; tipo = false; }
   else if (n === 'terceiro') { fat = 'Receitas e recursos recebidos'; tipo = false; }
-  else if (s === 'banco') { fat = 'Receita do último ano fechado (IF.data)'; tipo = false; bancos = 'Use o acumulado de 12 meses e sempre a mesma linha do balanço, por exemplo margem financeira mais receitas de serviços e seguros.'; }
-  else if (s === 'seguradora') { fat = 'Prêmios emitidos no último ano fechado'; tipo = false; }
-  else if (s === 'operadora') { fat = 'Receita de contraprestações do último ano fechado'; tipo = false; }
+  else if (s === 'banco') { fat = 'Receita (IF.data)'; tipo = false; bancos = 'Use sempre a mesma linha do balanço, por exemplo margem financeira mais receitas de serviços e seguros.'; }
+  else if (s === 'seguradora') { fat = 'Prêmios emitidos'; tipo = false; }
+  else if (s === 'operadora') { fat = 'Receita de contraprestações'; tipo = false; }
   let func = 'Funcionários';
   if (n === 'subsidiaria') func = 'Funcionários no Brasil';
   else if (n === 'terceiro') func = 'Trabalhadores';
@@ -3429,23 +3439,27 @@ function rotulos(d) {
   return { fat, func, un, us, tipo, bancos, orgao, estimavel: !orgao && n !== 'terceiro' };
 }
 
-/* ---------- receita: valor informado (líquida ou bruta, de um ano) e, se pedido, a estimativa da ferramenta ---------- */
+/* ---------- receita: valor informado (líquida ou bruta, de 12 meses ou de parte do ano) e, se pedido, a estimativa da ferramenta ---------- */
+// o valor pode cobrir um ano fechado ou só parte dele (balanço trimestral ou semestral, IF.data): o período diz quantos meses, e o cálculo leva o valor a 12 meses
+const PERIODOS_VALOR = [['12', '12 meses (ano fechado)'], ['9', '9 meses'], ['6', '6 meses'], ['3', '3 meses']];
 function campoReceita(d, R) {
   const f = d.faturamento || { v: '', o: '' }, L = P().setores[linhaDe(d)], tipo = d.fatTipo === 'bruta' ? 'bruta' : 'liquida';
   const seg = R.tipo && (L.ded || 0) > 0 ? `<span class="seg" role="radiogroup" aria-label="O valor informado é">${[['liquida', 'Receita líquida'], ['bruta', 'Faturamento bruto']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="fatTipo" value="${v}" data-simples="fatTipo" ${tipo === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>` : '';
   return `<div class="campo largo"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}${d.fatEstimar ? ' <span class="mudo">(se tiver)</span>' : ''}</label>${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
     <div class="entrada com-pre"><span class="pre">R$</span><input type="text" inputmode="decimal" id="f-faturamento" data-campo="faturamento" data-parte="v" value="${esc(fmtIn(f.v))}" autocomplete="off"></div>
-    <div class="linha-dupla">${seg}<label class="ano">Ano do valor <input type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" value="${esc(d.fatAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></label>${botaoOrigem('campo:faturamento', f.o, temValor(f))}${botaoSemDado('faturamento', d)}</div>
+    <div class="linha-dupla">${seg}<label class="ano">Ano do valor <input type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" value="${esc(d.fatAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></label>${R.orgao ? '' : `<label class="ano">Período <select id="f-fatMeses" data-simples="fatMeses">${PERIODOS_VALOR.map(([v, t]) => `<option value="${v}"${String(d.fatMeses || '12') === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>`}${botaoOrigem('campo:faturamento', f.o, temValor(f))}${botaoSemDado('faturamento', d)}</div>
     <div class="campo-pe"><span class="dica" id="dica-rec">${dicaReceita(d, R)}</span></div><div class="campo-pe" id="rec-usada"></div><p class="valid" id="v-faturamento"></p>
     ${R.estimavel ? `<div id="rec-est" class="calc-caixa" ${d.fatEstimar ? '' : 'hidden'}></div>${d.fatEstimar && d.natureza === 'subsidiaria' ? blocoGlobal(d) : ''}` : ''}</div>`;
 }
 function dicaReceita(d, R) {
-  const Pm = contexto(modoDe(d))[0], L = Pm.setores[linhaDe(d)], g = Pm.receita.g, a = +d.fatAno, out = [];
+  const Pm = contexto(modoDe(d))[0], L = Pm.setores[linhaDe(d)], g = Pm.receita.g, a = +d.fatAno, m = Math.round(+d.fatMeses) >= 1 && Math.round(+d.fatMeses) <= 12 ? Math.round(+d.fatMeses) : 12, out = [];
   if (R.orgao) return 'Órgão público não usa % da receita: o orçamento fica só registrado.';
   if (R.bancos) out.push(R.bancos);
   if (R.tipo && (L.ded || 0) > 0 && d.fatTipo === 'bruta') out.push(`O faturamento bruto vira receita líquida tirando ${fmtPct(L.ded, 0)} de impostos sobre vendas (média do setor, aproximada).`);
-  if (R.estimavel) out.push(a > 1900 && a < ANO ? `Valor de ${a} levado a ${ANO} com crescimento de ${fmtPct(g, 0)} ao ano.` : a > 1900 ? '' : `Sem ano: considerado de ${ANO}.`);
-  if (a >= ANO && valorPos(d.faturamento)) out.push('O ano atual ainda não fechou: se o valor for parcial, use o último ano fechado.');
+  const cresce = a > 1900 && a < ANO;
+  if (m < 12) out.push(`Valor de ${m} meses${a > 1900 ? ' de ' + a : ''} levado a 12 meses (× ${nf(12 / m, 2)})${cresce && R.estimavel ? `, e a ${ANO} com crescimento de ${fmtPct(g, 0)} ao ano` : ''}.`);
+  else if (R.estimavel) out.push(cresce ? `Valor de ${a} levado a ${ANO} com crescimento de ${fmtPct(g, 0)} ao ano.` : a > 1900 ? '' : `Sem ano: considerado de ${ANO}.`);
+  if (a >= ANO && m === 12 && valorPos(d.faturamento)) out.push('O ano atual ainda não fechou: se o valor cobre só parte do ano, marque o período.');
   return out.filter(Boolean).join(' ');
 }
 // receita global do grupo: só para subsidiárias, como referência a mais na estimativa da receita brasileira
@@ -4173,7 +4187,7 @@ function listaDados(d, r) {
   const R = rotulos(d), out = [];
   const add = (c, rot, i, fmt, extra = '') => { const f = d[c], ok = f && f.v !== '' && f.v != null && isFinite(+f.v); out.push({ c, rot, i, val: ok ? fmt(+f.v) : null, o: ok ? (f.o || '') : null, extra }); };
   const rc = r.receita || {}, inf = rc.informada;
-  add('faturamento', R.fat, 'moeda', fmtRS, inf ? [inf.bruta ? `bruto; líquida ≈ ${fmtRS(inf.liq)}` : '', inf.ano ? 'de ' + inf.ano + (inf.dt ? `; em ${ANO} ≈ ${fmtRS(inf.v)}` : '') : ''].filter(Boolean).join('; ')
+  add('faturamento', R.fat, 'moeda', fmtRS, inf ? [inf.bruta ? `bruto; líquida ≈ ${fmtRS(inf.liq)}` : '', inf.ano || inf.meses < 12 ? [inf.ano ? 'de ' + inf.ano : '', inf.meses < 12 ? inf.meses + ' meses, levados a 12' : ''].filter(Boolean).join(', ') + (inf.dt || inf.meses < 12 ? `; em ${ANO} ≈ ${fmtRS(inf.v)}` : '') : ''].filter(Boolean).join('; ')
     : rc.usada ? `≈ ${fmtRS(rc.usada.v)} ${rc.modo === 'enquadramento' ? 'pelo enquadramento ' + r.enq : 'estimada pela ferramenta'}` : rc.estimativa ? `≈ ${fmtRS(rc.estimativa.v)} estimada (referência)` : '');
   add('funcionarios', R.func, 'equipe', v => nf(v, 0));
   add('usuarios', R.us, 'monitor', v => nf(v, 0), !valorPos(d.usuarios) && r.usuarios != null ? `≈ ${nf(r.usuarios, 0)} pelos funcionários` : '');
@@ -4195,7 +4209,7 @@ function dadosUsados(r, d) {
 }
 function subReceita(r) {
   const rc = r.receita;
-  return { informada: `O valor informado, convertido em receita líquida e levado a ${ANO} quando preciso.${rc.comparacao ? ' A estimativa da ferramenta aparece só para comparação.' : ''}`,
+  return { informada: `O valor informado, convertido em receita líquida de 12 meses e levado a ${ANO} quando preciso.${rc.comparacao ? ' A estimativa da ferramenta aparece só para comparação.' : ''}`,
     estimada: 'Estimada pela ferramenta a partir dos dados da empresa: não é dado oficial.', combinada: 'O valor informado juntado com a estimativa da ferramenta, pela precisão de cada um.',
     enquadramento: 'Sem receita informada: o meio da faixa legal do enquadramento.' }[rc.modo] || 'A estimativa da ferramenta, só como referência.';
 }
@@ -4203,8 +4217,9 @@ function blocoReceitaDet(r) {
   const rec = r.receita, u = rec.usada, est = rec.estimativa, inf = rec.informada, h = [];
   if (u) h.push(`<div class="rec-top"><b>${fmtRS(u.v)}</b>${origemChip(origemReceita(rec))}<span class="mudo">em ${ANO}, com faixa provável de ${fmtRS(u.p10)} a ${fmtRS(u.p90)}</span></div>`);
   if (inf) {
-    const ls = [linhaEtapa('Valor informado', `${inf.bruta ? 'Faturamento bruto' : 'Receita líquida'}${inf.ano ? ' de ' + inf.ano : ''}; ${ROT_ORIGEM[inf.o]}`, fmtRS(inf.valor))];
+    const ls = [linhaEtapa('Valor informado', `${inf.bruta ? 'Faturamento bruto' : 'Receita líquida'}${inf.ano ? ' de ' + inf.ano : ''}${inf.meses < 12 ? ', ' + inf.meses + ' meses' : ''}; ${ROT_ORIGEM[inf.o]}`, fmtRS(inf.valor))];
     if (inf.bruta) ls.push(linhaEtapa('Menos impostos sobre vendas', `Deduções médias do setor: ${fmtPct(inf.ded, 0)} da receita bruta (ICMS, IPI, PIS/Cofins, ISS). Aproximado.`, '× ' + nf(1 - inf.ded, 2)));
+    if (inf.meses < 12) ls.push(linhaEtapa('Levado a 12 meses', `O período cobre ${inf.meses} meses, e o valor é multiplicado por 12 ÷ ${inf.meses}. Não há ajuste de sazonalidade: a incerteza cresce ${nf((12 - inf.meses) * ((r.Pm || P()).receita.sMeses || 0), 2)}.`, '× ' + nf(inf.fm, 2)));
     if (inf.dt) ls.push(linhaEtapa(`Levado a ${ANO}`, `${inf.dt} ${inf.dt > 1 ? 'anos' : 'ano'} de crescimento a ${fmtPct((r.Pm || P()).receita.g, 0)} ao ano.`, '× ' + nf(inf.fator, 3)));
     ls.push(linhaEtapa(rec.modo === 'informada' ? 'Receita líquida usada' : 'Receita líquida informada', '', fmtRS(inf.v), rec.modo === 'informada' ? 'total' : ''));
     h.push(`<ol class="etapas">${ls.join('')}</ol>`);
@@ -4356,7 +4371,7 @@ function textoResumo(d, r) {
   L.push(`Investimento em TI estimado para ${ANO} (${nomeModo(r.modoCalc).toLowerCase()}). ${nomeSetor(d)}${lugarTxt(d) ? ', ' + lugarTxt(d) : ''}. Vezen, ${dataBR(new Date().toISOString())}.`, '');
   // 1. receita líquida
   let r1 = 'não informada e não estimada';
-  if (u && rec.modo === 'informada') r1 = `${fmtRS(u.v)} (${inf.bruta || inf.dt ? 'calculada a partir de ' : ''}${NATUREZA_REC[inf.o] || NATUREZA_REC.terceiros})`;
+  if (u && rec.modo === 'informada') r1 = `${fmtRS(u.v)} (${inf.bruta || inf.dt || inf.meses < 12 ? 'calculada a partir de ' : ''}${NATUREZA_REC[inf.o] || NATUREZA_REC.terceiros})`;
   else if (u && rec.modo === 'estimada') r1 = `${fmtRS(u.v)} (ESTIMADA pela ferramenta, não é dado oficial; faixa provável de ${fmtRS(u.p10)} a ${fmtRS(u.p90)})`;
   else if (u && rec.modo === 'combinada') r1 = `${fmtRS(u.v)} (valor informado, ${NATUREZA_REC[inf.o] || NATUREZA_REC.terceiros}, juntado com a estimativa da ferramenta; não é dado oficial)`;
   else if (u && rec.modo === 'enquadramento') r1 = `${fmtRS(u.v)} (meio da faixa legal do enquadramento ${r.enq}, de ${fmtRS(r.faixaEnq.min)} a ${fmtRS(r.faixaEnq.max)}; não é dado oficial)`;
@@ -4412,6 +4427,7 @@ function textoResumo(d, r) {
   const lim = [`confiança ${r.ic} de 100 (${r.icNivel})`, `faixa provável de 80%: ${fmtRS(r.p10)} a ${fmtRS(r.p90)}`];
   if (!r.temReal) lim.push('sem gasto de TI real ou declarado da empresa: o resultado depende de médias de mercado');
   if (u && rec.modo !== 'informada') lim.push('receita estimada, não oficial');
+  if (inf && rec.modo === 'informada' && inf.meses < 12) lim.push(`receita de ${inf.meses} meses levada a 12 meses, sem ajuste de sazonalidade`);
   if (usados.some(e => ['terceiros', 'palpite'].includes(e.origem))) lim.push('há dados de terceiros ou palpites');
   lim.push(r.modoCalc === 'padrao' ? (calR.publica ? 'calibração padrão feita com uma amostra de empresas, que pode não representar todos os setores e lugares' : `calibração padrão feita com empresas${ufsTexto(calR)}`) : r.modoCalc === 'propria' ? `minha calibração feita com ${nf(contagemMinha().total, 0)} empresas informadas por você` : 'sem calibração (fórmulas base)');
   b('Limitações: ' + lim.join('; ') + '.');
@@ -5350,6 +5366,7 @@ const PARAMS_ESCALARES = {
   'receita.sGlobal': { nome: 'Incerteza da participação do Brasil pelos funcionários', unid: 'sigma', minEx: 0, max: 3, desc: 'Usada quando a participação do Brasil na receita global é estimada pela proporção de funcionários.' },
   'receita.prodBR': { nome: 'Receita por funcionário no Brasil ÷ média do grupo', unid: 'x', minEx: 0, max: 5, desc: 'Multiplica a participação estimada pelos funcionários. Abaixo de 1,0: cada funcionário no Brasil gera menos receita que a média do grupo.' },
   'receita.sDed': { nome: 'Incerteza da conversão de bruta para líquida', unid: 'sigma', min: 0, max: 1, desc: 'Somada à incerteza da receita quando o valor informado é faturamento bruto.' },
+  'receita.sMeses': { nome: 'Incerteza por mês que falta no período', unid: 'sigma', min: 0, max: 0.2, desc: 'Cada mês que falta para completar 12 meses soma isto à incerteza da receita, pela sazonalidade que o período parcial não mostra.' },
   'estimativas.conservadora': { nome: 'Percentil da estimativa conservadora', unid: 'pct', min: 0.05, max: 0.5, desc: 'Com 25%, a estimativa conservadora é o valor que o gasto real supera em 3 de cada 4 casos. Menor: mais conservadora.' },
   'calibracao.minEmpresas': { nome: 'Mínimo de empresas para calibrar', unid: 'int', min: 1, max: 1000, desc: 'Com menos empresas válidas com gasto real, a ferramenta não sugere correção nem mostra o acerto medido.' },
   'calibracao.K': { nome: 'Peso da correção geral na correção de cada setor', unid: 'num', min: 0, max: 100, desc: 'Setores com poucas empresas puxam a sua correção para a correção geral. Maior: a correção de cada setor fica mais parecida com a geral.' },
@@ -5539,7 +5556,7 @@ function secReceita(Pm) {
     + `<div class="par-leg"><p><b>Receita por funcionário:</b> derivada da pesquisa FGV (usuários por funcionário × gasto por usuário ÷ % da receita). Nos tipos “Calibração padrão” e “Minha calibração”, ela, o crescimento e a incerteza da receita vêm das empresas da calibração, e o ajuste de porte também, quando há empresas suficientes (aba Calibração).</p><p><b>Deduções:</b> impostos sobre vendas e devoluções, em % da receita bruta. Aproximadas: variam com o regime tributário.</p><p><b>Vazio:</b> o setor não tem referência e a receita não é estimada.</p></div>`
     + `<div class="tab-wrap"><table class="par-tab"><thead><tr><th>Setor</th><th>Receita líquida por funcionário, por ano</th><th>Deduções da receita bruta</th></tr></thead><tbody>${linhas}</tbody></table></div>`
     + `<h3>Ajuste de porte na receita por funcionário</h3><p class="passo-intro">Empresas maiores geram mais receita por funcionário. Padrão: ajuste no gasto por usuário ÷ ajuste no % da receita (FGV).</p><div class="tab-wrap"><table class="par-tab"><thead><tr><th>Faixa</th><th>Usuários</th><th>Ajuste</th></tr></thead><tbody>${pt}</tbody></table></div>`
-    + ['receita.g', 'receita.sFunc', 'receita.sGlobal', 'receita.prodBR', 'receita.sDed'].map(linhaPar).join('');
+    + ['receita.g', 'receita.sFunc', 'receita.sGlobal', 'receita.prodBR', 'receita.sDed', 'receita.sMeses'].map(linhaPar).join('');
 }
 function secEstimativas() {
   return introPar('Como saem as duas estimativas do resumo do time.', 'Painel, resultado detalhado e resumo para copiar. Não muda o valor central.', 'A estimativa conservadora sobe, ficando mais perto do valor central.')
@@ -5718,9 +5735,9 @@ function metReceita(Pm) {
   const linhas = Object.values(Pm.setores).filter(x => x.rpe).map(x => [esc(x.nome), fmtRS(x.rpe), x.ded ? fmtPct(x.ded, 0) : '—']);
   return `<p>O caminho E1 usa a receita líquida da operação no Brasil, porque a pesquisa da FGV mede o gasto de TI sobre a receita líquida. Regra de prioridade: <b>dado oficial informado nunca é trocado por estimativa</b>, e estimativa nunca aparece como dado oficial.</p>
   <h3>Valor informado</h3>
-  ${fx(`${vv('Receita', 'líquida')} = ${vv('Faturamento', 'bruto')} × (1 − ${vv('d', 'setor')})`)}${fx(`${vv('Receita', ANO)} = ${vv('Receita', 'ano do dado')} × (1 + ${nf(R.g, 2)})<sup>${vv('anos')}</sup>`)}
-  ${fx(`${vv('σ', 'receita')} = √(${vv('σ', 'origem')}² + ${nf(R.sDed, 2)}² + ${vv('anos')} × ${nf(I.sigmaG, 2)}²)`)}
-  <p>${vv('d', 'setor')} são as deduções médias da receita bruta (impostos sobre vendas e devoluções; aproximado) e só entram quando o valor é faturamento bruto, assim como o termo ${nf(R.sDed, 2)}. O crescimento de ${fmtPct(R.g, 0)} ao ano fica perto do crescimento nominal do PIB.</p>
+  ${fx(`${vv('Receita', 'líquida')} = ${vv('Faturamento', 'bruto')} × (1 − ${vv('d', 'setor')})`)}${fx(`${vv('Receita', '12 meses')} = ${vv('Receita', 'período')} × 12 ÷ ${vv('meses')}`)}${fx(`${vv('Receita', ANO)} = ${vv('Receita', 'ano do dado')} × (1 + ${nf(R.g, 2)})<sup>${vv('anos')}</sup>`)}
+  ${fx(`${vv('σ', 'receita')} = √(${vv('σ', 'origem')}² + ${nf(R.sDed, 2)}² + ((12 − ${vv('meses')}) × ${nf(R.sMeses, 2)})² + ${vv('anos')} × ${nf(I.sigmaG, 2)}²)`)}
+  <p>${vv('d', 'setor')} são as deduções médias da receita bruta (impostos sobre vendas e devoluções; aproximado) e só entram quando o valor é faturamento bruto, assim como o termo ${nf(R.sDed, 2)}. O crescimento de ${fmtPct(R.g, 0)} ao ano fica perto do crescimento nominal do PIB. ${vv('meses')} é o período que o valor cobre: 12 para um ano fechado, ou 9, 6 ou 3 quando o dado vem de um balanço trimestral ou semestral. Um período menor é multiplicado por 12 ÷ ${vv('meses')}, sem ajuste de sazonalidade, e cada mês que falta soma ${nf(R.sMeses, 2)} à incerteza (o termo do período, zero em 12 meses).</p>
   <h3>Estimativa da ferramenta (opcional)</h3><p>Só quando você marca “Estimar a receita”. Até três caminhos, juntados como as médias de mercado: média em logaritmo pesada pela precisão, com ${vv('ρ')} = ${nf(I.rho, 2)}.</p>
   ${fx(`${vv('R', 'F')} = ${vv('Funcionários')} × ${vv('rpf', 'setor')} × ${vv('f', 'R')}`)}
   ${fx(`${vv('R', 'G')} = ${vv('Receita global')} × ${vv('câmbio')} × ${vv('participação')} × (1 + ${nf(R.g, 2)})<sup>${vv('anos')}</sup>`)}
@@ -6279,12 +6296,12 @@ const glNomeCat = c => (GL_CATS.find(x => x[0] === c) || [0, ''])[1];
 const glHost = u => { try { const x = new URL(u), h = x.hostname.replace(/^www\d?\./, ''), c = x.pathname.replace(/\/$/, ''); return !c ? h : (h + c).length <= 36 ? h + c : h + '/…'; } catch (e) { return u; } };
 
 /* ---------- tela Glossário: lista em ordem alfabética, com busca e categoria ---------- */
-UI.gl = { q: '', cat: '' };
+UI.gl = { q: '', cat: '', letra: '' };
 const glLetra = g => { const c = norm(g.t).charAt(0).toUpperCase(); return /[A-Z]/.test(c) ? c : '#'; };
 const glOrdem = () => [...GLOSSARIO].sort((a, b) => a.t.localeCompare(b.t, 'pt-BR', { sensitivity: 'base', numeric: true }));
 const glBusca = g => norm([g.t, g.n, ...(g.a || []), g.d, g.u, glNomeCat(g.c)].filter(Boolean).join(' '));
 function glItem(g) {
-  return `<article class="gl-item" id="gl-${g.id}" data-cat="${g.c}" data-q="${esc(glBusca(g))}" data-termo-proprio="${g.id}">
+  return `<article class="gl-item" id="gl-${g.id}" data-cat="${g.c}" data-l="${glLetra(g)}" data-q="${esc(glBusca(g))}" data-termo-proprio="${g.id}">
     <div class="gl-cab" data-sem-termos><h3>${esc(g.t)}</h3>${g.n ? `<span class="gl-nome">${esc(g.n)}</span>` : ''}<span class="selo gl-cat">${esc(glNomeCat(g.c))}</span></div>
     <p class="gl-def">${esc(g.d)}</p>
     ${g.u ? `<p class="gl-linha"><b>Utilidade</b>${esc(g.u)}</p>` : ''}
@@ -6300,15 +6317,21 @@ function telaGlossario() {
     <label class="busca"><span class="sr">Buscar termo</span>${ico('busca')}<input type="search" id="gl-busca" data-gl-busca value="${esc(f.q)}" placeholder="Buscar termo" autocomplete="off"></label>
     <select id="gl-cat" data-gl-cat aria-label="Categoria"><option value="">Todas as categorias</option>${GL_CATS.map(([id, nome]) => `<option value="${id}"${id === f.cat ? ' selected' : ''}>${esc(nome)}</option>`).join('')}</select>
   </div>
+  <nav class="gl-letras" aria-label="Filtrar por letra"><button type="button" class="gl-lt gl-todas" data-acao="gl-letra" data-l="" aria-pressed="${!f.letra}">Todas</button>${[...new Set([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', ...grupos.keys()])].map(l => `<button type="button" class="gl-lt" data-acao="gl-letra" data-l="${l}" aria-pressed="${f.letra === l}">${l}</button>`).join('')}</nav>
   <p class="mudo gl-conta" id="gl-conta" role="status"></p>
   <div id="gl-lista">${[...grupos].map(([l, itens]) => `<section class="gl-grupo" aria-label="${l}"><h2 class="gl-letra" data-sem-termos>${l}</h2>${itens.map(glItem).join('')}</section>`).join('')}</div>
   <p class="vazio-busca" id="gl-vazio" hidden>Nenhum termo encontrado.</p>`;
 }
-// mostra só os termos que combinam com a busca e a categoria
+// mostra só os termos que combinam com a busca, a categoria e a letra; as letras sem termo nessa busca ficam apagadas
 function glFiltrar() {
-  const q = norm(UI.gl.q), cat = UI.gl.cat; let n = 0;
-  $$('.gl-item').forEach(el => { const ok = (!cat || el.dataset.cat === cat) && (!q || el.dataset.q.includes(q)); el.hidden = !ok; if (ok) n++; });
+  const q = norm(UI.gl.q), cat = UI.gl.cat, letra = UI.gl.letra, comTermo = new Set(); let n = 0;
+  $$('.gl-item').forEach(el => {
+    const base = (!cat || el.dataset.cat === cat) && (!q || el.dataset.q.includes(q)), ok = base && (!letra || el.dataset.l === letra);
+    if (base) comTermo.add(el.dataset.l);
+    el.hidden = !ok; if (ok) n++;
+  });
   $$('.gl-grupo').forEach(s => { s.hidden = !$$('.gl-item:not([hidden])', s).length; });
+  $$('.gl-lt').forEach(b => { const l = b.dataset.l; b.disabled = !!l && !comTermo.has(l); b.setAttribute('aria-pressed', String(l === letra)); });
   const c = $('#gl-conta'), v = $('#gl-vazio');
   if (c) c.textContent = n === GLOSSARIO.length ? plural(n, 'termo', 'termos') : `${n} de ${GLOSSARIO.length} termos`;
   if (v) v.hidden = n > 0;
@@ -6316,7 +6339,7 @@ function glFiltrar() {
 // chegando de uma sigla do texto: rola até o termo e o destaca por um instante
 function glIrPara(id) {
   const el = document.getElementById('gl-' + id); if (!el) return;
-  if (el.hidden) { UI.gl = { q: '', cat: '' }; const b = $('#gl-busca'), s = $('#gl-cat'); if (b) b.value = ''; if (s) s.value = ''; glFiltrar(); }
+  if (el.hidden) { UI.gl = { q: '', cat: '', letra: '' }; const b = $('#gl-busca'), s = $('#gl-cat'); if (b) b.value = ''; if (s) s.value = ''; glFiltrar(); }
   el.scrollIntoView({ block: 'center', behavior: reduzMov() ? 'auto' : 'smooth' });
   el.setAttribute('tabindex', '-1'); el.focus({ preventScroll: true });
   el.classList.remove('destaque'); void el.offsetWidth; el.classList.add('destaque');
@@ -6336,7 +6359,8 @@ function abrirTermo(btn) {
   abrirPop(btn, `<div data-termo-proprio="${g.id}"><h4><span>${esc(g.t)}${g.n ? ` <small>${esc(g.n)}</small>` : ''}</span><button type="button" class="btn fant ico-so peq" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>
     <p class="pop-def">${esc(g.d)}</p><p class="pop-nota"><a href="#/glossario/${g.id}">Ver no glossário</a></p></div>`, { cls: 'pop-ajuda pop-termo', papel: 'dialog', rotulo: g.t });
 }
-acoes({ 'glossario-termo': b => abrirTermo(b) });
+// a letra escolhida filtra a lista; clicar de novo nela, ou em Todas, mostra tudo
+acoes({ 'glossario-termo': b => abrirTermo(b), 'gl-letra': b => { UI.gl.letra = b.dataset.l && b.dataset.l !== UI.gl.letra ? b.dataset.l : ''; glFiltrar(); const l = $('#gl-lista'); if (l) surgir(l); } });
 
 /* ---------- siglas e termos do texto viram link para a definição ---------- */
 // Só o primeiro de cada termo em cada bloco (seção, painel, janelinha), para o texto não ficar todo sublinhado; "TI" aparece uma vez por tela.
