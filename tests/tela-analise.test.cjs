@@ -37,6 +37,8 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await orig('faturamento', 'oficial');
   ok('Origem marcada aparece no botão', (await txt('[data-alvo="campo:faturamento"]')).includes('Oficial') && (await motor(() => UI.atual.dados.faturamento.o)) === 'oficial');
   ok('Seletor líquida/bruta aparece', await p.locator('.seg input[name=fatTipo]').count() === 2);
+  await p.fill('#f-fatAno', String(new Date().getFullYear())); await p.waitForTimeout(100);
+  ok('Ano atual no valor da receita avisa que pode ser parcial', (await p.textContent('#dica-rec')).includes('ainda não fechou'));
   await p.click('.seg-op:has(input[value=bruta])'); await p.fill('#f-fatAno', '2024');
   await p.fill('#f-funcionarios', '2.000'); await orig('funcionarios', 'agregador'); await p.waitForTimeout(150);
   const dica = await p.textContent('#dica-rec');
@@ -231,6 +233,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Empresa modelo abre como análise nova, sem alterações pendentes', mod.nome === 'Banco do Brasil' && !mod.salva && !mod.sujo, JSON.stringify(mod));
   ok('Empresa modelo: confiança de 80 ou mais, sem alertas nem avisos', mod.ic >= 80 && !mod.alerta && mod.avisos === 0 && await p.locator('#painel .alerta').count() === 0, String(mod.ic));
   ok('Empresa modelo: aviso com as fontes oficiais', await p.locator('.nota-modelo a[href*="api.mziq.com"]').count() === 2 && (await txt('#ws-meta')).includes('Empresa modelo'));
+  ok('Receita de banco pede o último ano fechado, e o Porte não traz texto explicativo', (await txt('label[for=f-faturamento]')).includes('último ano fechado') && await p.locator('#sec-porte .sf-desc').count() === 0, await txt('label[for=f-faturamento]'));
   ok('Empresa modelo: o que estimar já escolhido e dados com origem oficial', await p.locator('#sec-objetivo.pede').count() === 0 && (await motor(() => [UI.atual.dados.funcionarios, ...UI.atual.dados.gastosReais].every(x => x.o === 'oficial'))));
   await salvarOk(300);
   const idModelo = await p.evaluate(() => UI.atual.id);
@@ -271,14 +274,43 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Revisar não salva, destaca o que falta e leva ao primeiro campo', !(await motor(() => !!empresaSalva())) && await p.locator('.sem-dado.revisar:not([hidden])').count() === faltam.length && await p.evaluate(() => document.activeElement.classList.contains('sem-dado')));
   for (const c of faltam) { await p.click(`.sem-dado[data-campo=${c}]`); await p.click('#pop [data-s]:first-of-type'); await p.waitForTimeout(100); }
   ok('Tudo explicado: nada pendente', (await pend()).length === 0 && await p.locator('.sem-dado.revisar:not([hidden])').count() === 0);
+  const cores = await p.evaluate(() => ['nao-achei', 'nao-divulga', 'nao-se-aplica'].map(k => { const b = document.querySelector('.sem-dado.sdc-' + k + ':not([hidden])'); return b ? getComputedStyle(b).color : null; }));
+  ok('Motivos com cores próprias e visíveis, como os botões de origem', cores.every(Boolean) && new Set(cores).size === 3 && !cores.includes(await p.evaluate(() => getComputedStyle(document.body).color)), cores.join(' | '));
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
   ok('Sem pendências, salva direto', await p.locator('#dlg[open]').count() === 0 && (await txt('#ws-meta')).includes('Salva em'));
   ok('Os motivos ficam salvos com a empresa', await p.evaluate(() => { const e = JSON.parse(localStorage.getItem('estimador-ti.v1')).empresas.find(x => x.dados.nome === 'Teste Sem Dado'); return e.dados.semDado.faturamento === 'nao-divulga' && e.dados.semDado.unidades === 'nao-se-aplica'; }));
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(500);
-  ok('Resultado: dados usados dizem por que faltam', (await txt('#res-dados')).includes('não divulga') && (await txt('#res-dados')).includes('não se aplica'));
+  ok('Resultado: dados usados dizem por que faltam, com a cor do motivo', /não divulga/i.test(await txt('#res-dados')) && /não se aplica/i.test(await txt('#res-dados')) && await p.locator('#res-dados .o-chip.sdc-nao-divulga').count() >= 1);
   await p.click('#res-resumo [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
   ok('Resumo: linha com os dados sem informação', /Dados sem informação: .*Receita anual \(não divulga\)/.test(await p.inputValue('#txt-resumo')));
   await p.click('#dlg button:has-text("Fechar")');
+
+  // tecnologias: busca com lista de seleção múltipla, no lugar da grade de marcações abertas
+  await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(400);
+  const nTec = await motor(() => TECNOLOGIAS.reduce((n, g) => n + g.itens.length, 0));
+  if (!(await p.evaluate(() => document.querySelector('#sec-mais').open))) await p.click('#sec-mais summary');
+  ok('Tecnologias: sem a grade de marcações abertas, só a busca', await p.locator('#sec-mais .chip').count() === 0 && await p.locator('#tec-lista').isHidden() && (await p.locator('#tec-combo').evaluate(e => e.getBoundingClientRect().height)) < 60);
+  await p.click('#tec-busca'); await p.waitForTimeout(150);
+  ok('Tecnologias: clicar na busca abre a lista com todas as opções', await p.locator('#tec-lista').isVisible() && await p.locator('#tec-lista .tec-op').count() === nTec && (await p.getAttribute('#tec-busca', 'aria-expanded')) === 'true', String(nTec));
+  await p.fill('#tec-busca', 'sap'); await p.waitForTimeout(100);
+  ok('Tecnologias: a busca vale também para os exemplos', await p.locator('#tec-lista .tec-op:not([hidden])').count() === 1 && (await txt('#tec-lista .tec-op:not([hidden])')).includes('ERP de grande porte') && await p.locator('#tec-lista .tec-grupo:not([hidden])').count() === 1);
+  await p.fill('#tec-busca', 'xyzxyz'); await p.waitForTimeout(100);
+  ok('Tecnologias: busca sem resultado avisa', await p.locator('#tec-lista .tec-vazio').isVisible());
+  await p.fill('#tec-busca', 'sistemas internos'); await p.waitForTimeout(100);
+  await p.click('#tec-lista .tec-op:not([hidden]) >> nth=0'); await p.waitForTimeout(150);
+  ok('Tecnologias: marcar guarda, mostra a marca e conta, e a lista continua aberta', (await motor(() => UI.atual.dados.tecnologias.join())) === 'dev-interno' && await p.locator('#tec-tags .tag-tec').count() === 1 && (await txt('#tec-n')) === '1 tecnologia marcada' && await p.locator('#tec-lista').isVisible());
+  ok('Tecnologias: sistemas próprios sem equipe de TI mostram a dica de sempre', (await txt('#tec-dicas')).includes('equipe de TI'));
+  await p.keyboard.press('Escape'); await p.waitForTimeout(100);
+  ok('Tecnologias: Esc fecha a lista, limpa a busca e volta ao campo', await p.locator('#tec-lista').isHidden() && (await p.inputValue('#tec-busca')) === '' && await p.evaluate(() => document.activeElement.id === 'tec-busca'));
+  await p.keyboard.press('ArrowDown'); await p.waitForTimeout(100);
+  ok('Tecnologias: seta para baixo abre a lista e vai à primeira opção', await p.locator('#tec-lista').isVisible() && await p.evaluate(() => document.activeElement.dataset.tec === 'erp'));
+  await p.keyboard.press('Enter'); await p.waitForTimeout(100);
+  ok('Tecnologias: Enter marca a opção em foco', (await motor(() => UI.atual.dados.tecnologias.sort().join())) === 'dev-interno,erp' && (await txt('#tec-n')) === '2 tecnologias marcadas');
+  await p.mouse.click(5, 300); await p.waitForTimeout(100);
+  ok('Tecnologias: clicar fora fecha a lista', await p.locator('#tec-lista').isHidden());
+  await p.click('#tec-tags .tag-tec[data-id=erp]'); await p.click('#tec-tags .tag-tec[data-id=dev-interno]'); await p.waitForTimeout(150);
+  ok('Tecnologias: clicar na marca remove, sem abrir a lista', (await motor(() => UI.atual.dados.tecnologias.length)) === 0 && await p.locator('#tec-tags .tag-tec').count() === 0 && await p.locator('#tec-lista').isHidden() && (await txt('#tec-n')) === 'só registro');
+  await salvarOk(200);
 
   // 8. celular
   await p.setViewportSize({ width: 375, height: 800 });

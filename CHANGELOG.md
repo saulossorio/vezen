@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [1.5.0] - 2026-11-14
+
+### Alterado
+- **Tecnologias:** no lugar de 36 marcações abertas, uma busca com lista de seleção múltipla. A lista só abre quando a pessoa pede, a busca vale também para os exemplos (SAP, Salesforce...) e as escolhidas ficam como marcas que se removem com um clique. Funciona pelo teclado.
+- Os motivos “Não encontrado”, “Não divulga” e “Não se aplica” ganharam cores próprias, como os botões de origem, no botão, no menu e em Dados usados.
+- A receita pede o último ano fechado: listadas, bancos, seguradoras e operadoras deixam de falar em “ano”, e o IF.data traz a dica de usar o acumulado de 12 meses. Um valor com o ano em curso avisa que pode ser parcial.
+- O Porte perdeu o texto explicativo abaixo do título.
+
 ## [1.4.0] - 2026-11-14
 
 ### Adicionado

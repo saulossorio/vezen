@@ -49,6 +49,7 @@
   --sombra-g: 0 16px 48px oklch(0.2 0.01 210 / 0.16), 0 2px 6px oklch(0.2 0.01 210 / 0.08);
   --veu: oklch(0.2 0.01 210 / 0.28);
   /* gráficos (validados para daltonismo: verde e azul com rótulo sempre) */
+  --nd: #6d28d9; --na: #be185d; /* motivos sem dado: não divulga e não se aplica (não encontrei usa o azul de --info) */
   --acento: #4d7c0f;
   --acento-faixa: oklch(0.93 0.07 128);
   --mod: #4d7c0f;
@@ -82,6 +83,7 @@
   --sombra-p: 0 1px 2px oklch(0 0 0 / 0.4);
   --sombra-g: 0 16px 48px oklch(0 0 0 / 0.5), 0 2px 6px oklch(0 0 0 / 0.3);
   --veu: oklch(0.05 0.01 210 / 0.6);
+  --nd: #c4b5fd; --na: #f9a8d4;
   --acento: #62982a;
   --acento-faixa: oklch(0.36 0.06 130);
   --mod: #62982a;
@@ -416,7 +418,7 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .origem .chev { width: 12px; height: 12px; opacity: .7; }
 .origem:hover { border-color: var(--linha-forte); }
 .origem.o-vazio { color: var(--cinza); background: none; border-style: dashed; border-color: var(--linha-forte); font-weight: 550; }
-.origem.sem-dado.sd-ok { color: var(--tinta); }
+.sdc-nao-achei { color: var(--info); } .sdc-nao-divulga { color: var(--nd); } .sdc-nao-se-aplica { color: var(--na); }
 .origem.sem-dado.revisar { color: var(--aviso); background: var(--aviso-f); border-color: var(--aviso-b); }
 .reais-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .campo .dica { margin-top: 0; }
@@ -436,17 +438,22 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .reais-linha { display: grid; grid-template-columns: 92px minmax(0, 1fr) auto auto; gap: 8px; align-items: center; }
 .reais-cab { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 8px; font-size: .8rem; color: var(--cinza); }
 @media (max-width: 520px) { .reais-linha { grid-template-columns: 76px minmax(0, 1fr) auto; } .reais-linha .origem { grid-column: 2; justify-self: start; } }
-.tec-grupos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 22px; }
-@media (max-width: 760px) { .tec-grupos { grid-template-columns: minmax(0, 1fr); } }
-.tec-g h4 { display: flex; align-items: center; gap: 7px; font-size: .86rem; color: var(--cinza); margin-bottom: 8px; }
-.tec-g h4 small { margin-left: 2px; background: var(--marca-f); color: var(--link); border-radius: 999px; padding: 0 7px; font-weight: 650; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 11px; border: 1px solid var(--linha-forte); border-radius: 999px; font-size: .84rem; cursor: pointer; background: var(--superficie); user-select: none; }
-.chip input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.chip .ico { width: 14px; height: 14px; display: none; }
-.chip.on { background: var(--marca-f); border-color: var(--marca-b); color: var(--link); font-weight: 600; }
-.chip.on .ico { display: inline; }
-.chip:has(input:focus-visible) { outline: 2px solid var(--foco); outline-offset: 2px; }
+.tec-combo { position: relative; }
+.tec-combo .acao-dentro .ico { transition: transform var(--dur); }
+.tec-combo.aberto .acao-dentro .ico { transform: rotate(180deg); }
+.tec-lista { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 40; max-height: min(340px, 52vh); overflow-y: auto; overscroll-behavior: contain; background: var(--superficie); border: 1px solid var(--linha-forte); border-radius: var(--raio); box-shadow: var(--sombra-g); padding: 4px 6px 6px; }
+.tec-grupo h4 { display: flex; align-items: center; gap: 7px; position: sticky; top: -4px; z-index: 1; margin: 0; padding: 8px 6px 4px; background: var(--superficie); font-size: .78rem; font-weight: 600; color: var(--cinza); }
+.tec-op { display: flex; align-items: center; gap: 9px; padding: 6px 8px; border-radius: var(--raio-p); cursor: pointer; font-size: .9rem; }
+.tec-op:hover { background: var(--hover); }
+.tec-op:has(input:focus-visible) { outline: 2px solid var(--foco); outline-offset: -2px; background: var(--hover); }
+.tec-op > span { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 8px; min-width: 0; }
+.tec-op small { color: var(--cinza); font-size: .78rem; }
+.tec-vazio { margin: 0; padding: 10px 8px; color: var(--cinza); font-size: .9rem; }
+.tec-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.tec-tags:empty { display: none; }
+.tag-tec { display: inline-flex; align-items: center; gap: 5px; padding: 3px 7px 3px 11px; border: 1px solid var(--marca-b); border-radius: 999px; background: var(--marca-f); color: var(--link); font-size: .84rem; font-weight: 600; cursor: pointer; }
+.tag-tec:hover { background: var(--marca-ativa); }
+.tag-tec .ico { width: 13px; height: 13px; }
 .rodape-form { display: flex; justify-content: flex-end; align-items: center; gap: 12px; flex-wrap: wrap; padding: 4px 0 0; }
 
 /* cartão de resultado ao lado do formulário */
@@ -3135,14 +3142,15 @@ function estadoSemDado(d, c) {
 }
 const pendentes = d => Object.keys(CAMPOS_SEM_DADO).filter(c => estadoSemDado(d, c) === 'pendente');
 const textoSemDado = (d, c) => { const s = SEM_DADO[(d.semDado || {})[c]]; return s ? s.rot.toLowerCase() : ''; };
+const chipSemDado = (d, c) => { const e = (d.semDado || {})[c], s = SEM_DADO[e]; return s ? `<span class="o-chip sdc-${e}">${ico(s.ico)}${s.rot}</span>` : ''; };
 // botão abaixo do campo vazio, no lugar do botão de origem (que só aparece com valor)
 function botaoSemDado(c, d) {
   const e = estadoSemDado(d, c), s = SEM_DADO[e], rev = !s && UI.revisar;
-  return `<button type="button" class="origem sem-dado ${s ? 'sd-ok' : 'o-vazio'}${rev ? ' revisar' : ''}" data-acao="sem-dado" data-campo="${c}" data-estado="${e || ''}" aria-haspopup="menu" aria-expanded="false" ${e === 'pendente' || s ? '' : 'hidden'} data-tip="Sem valor: diga por quê">${ico(s ? s.ico : 'ajuda')}${s ? s.rot : 'Sem dado?'}${ico('chev', 'chev')}</button>`;
+  return `<button type="button" class="origem sem-dado ${s ? 'sdc-' + e : 'o-vazio'}${rev ? ' revisar' : ''}" data-acao="sem-dado" data-campo="${c}" data-estado="${e || ''}" aria-haspopup="menu" aria-expanded="false" ${e === 'pendente' || s ? '' : 'hidden'} data-tip="Sem valor: diga por quê">${ico(s ? s.ico : 'ajuda')}${s ? s.rot : 'Sem dado?'}${ico('chev', 'chev')}</button>`;
 }
 function abrirSemDado(btn) {
   const c = btn.dataset.campo, d = UI.atual.dados, atual = (d.semDado || {})[c] || '';
-  abrirPop(btn, CAMPOS_SEM_DADO[c].ops.map(k => `<button type="button" class="mi" role="menuitemradio" aria-checked="${atual === k}" data-acao="sem-dado-escolher" data-campo="${c}" data-s="${k}"><span>${ico(SEM_DADO[k].ico)}</span><span><b>${SEM_DADO[k].menu}</b><small>${SEM_DADO[k].sub}</small></span></button>`).join('')
+  abrirPop(btn, CAMPOS_SEM_DADO[c].ops.map(k => `<button type="button" class="mi" role="menuitemradio" aria-checked="${atual === k}" data-acao="sem-dado-escolher" data-campo="${c}" data-s="${k}"><span class="sdc-${k}">${ico(SEM_DADO[k].ico)}</span><span><b>${SEM_DADO[k].menu}</b><small>${SEM_DADO[k].sub}</small></span></button>`).join('')
     + (atual ? `<button type="button" class="mi" role="menuitem" data-acao="sem-dado-escolher" data-campo="${c}" data-s=""><span>${ico('desfazer')}</span><span><b>Limpar</b></span></button>` : ''), { rotulo: 'Por que está sem valor' });
 }
 function escolherSemDado(c, s) {
@@ -3210,11 +3218,11 @@ function rotulos(d) {
   const n = d.natureza, s = d.setor, orgao = ehOrgaoPublico(d);
   let fat = n === 'subsidiaria' ? 'Receita anual no Brasil' : 'Receita anual', tipo = true, bancos = '';
   if (orgao) { fat = 'Orçamento total'; tipo = false; }
-  else if (n === 'listada') { fat = 'Receita líquida (ano mais recente)'; tipo = false; }
+  else if (n === 'listada') { fat = 'Receita líquida do último ano fechado'; tipo = false; }
   else if (n === 'terceiro') { fat = 'Receitas e recursos recebidos'; tipo = false; }
-  else if (s === 'banco') { fat = 'Receitas do ano (IF.data)'; tipo = false; bancos = 'Use sempre a mesma linha do balanço, por exemplo margem financeira mais receitas de serviços e seguros.'; }
-  else if (s === 'seguradora') { fat = 'Prêmios emitidos'; tipo = false; }
-  else if (s === 'operadora') { fat = 'Receita de contraprestações'; tipo = false; }
+  else if (s === 'banco') { fat = 'Receita do último ano fechado (IF.data)'; tipo = false; bancos = 'Use o acumulado de 12 meses e sempre a mesma linha do balanço, por exemplo margem financeira mais receitas de serviços e seguros.'; }
+  else if (s === 'seguradora') { fat = 'Prêmios emitidos no último ano fechado'; tipo = false; }
+  else if (s === 'operadora') { fat = 'Receita de contraprestações do último ano fechado'; tipo = false; }
   let func = 'Funcionários';
   if (n === 'subsidiaria') func = 'Funcionários no Brasil';
   else if (n === 'terceiro') func = 'Trabalhadores';
@@ -3245,6 +3253,7 @@ function dicaReceita(d, R) {
   if (R.bancos) out.push(R.bancos);
   if (R.tipo && (L.ded || 0) > 0 && d.fatTipo === 'bruta') out.push(`O faturamento bruto vira receita líquida tirando ${fmtPct(L.ded, 0)} de impostos sobre vendas (média do setor, aproximada).`);
   if (R.estimavel) out.push(a > 1900 && a < ANO ? `Valor de ${a} levado a ${ANO} com crescimento de ${fmtPct(g, 0)} ao ano.` : a > 1900 ? '' : `Sem ano: considerado de ${ANO}.`);
+  if (a >= ANO && valorPos(d.faturamento)) out.push('O ano atual ainda não fechou: se o valor for parcial, use o último ano fechado.');
   return out.filter(Boolean).join(' ');
 }
 // receita global do grupo: só para subsidiárias, como referência a mais na estimativa da receita brasileira
@@ -3331,24 +3340,67 @@ function dicasTecnologia(d) {
   if (nDig >= 3 && !d.digital && nivelDigitalAuto(d) !== 'alta') out.push(`<div class="dica-acao">${ico('lampada')}<span>${nDig} sinais de empresa digital marcados, e a intensidade digital está em <b>média</b> (automática). Se a empresa for muito digital, use <b>alta</b>: multiplica por ${nf(P().modificadores.digital.alta, 1)} os cálculos pela receita e por usuários.</span><button type="button" class="btn peq" data-acao="digital-alta">Usar alta</button></div>`);
   return out.join('');
 }
+// as escolhidas ficam como marcas pequenas, que se removem com um clique
+const marcasTec = d => TECNOLOGIAS.flatMap(g => g.itens).filter(([id]) => (d.tecnologias || []).includes(id))
+  .map(([id, nome]) => `<button type="button" class="tag-tec" data-acao="tec-remover" data-id="${id}" aria-label="Remover ${esc(nome)}">${esc(nome)}${ico('x')}</button>`).join('');
+// busca com lista de seleção múltipla: a lista só aparece quando a pessoa pede, e a busca vale também para os exemplos (SAP, Salesforce...)
 function blocoTecnologias(d) {
   const sel = new Set(d.tecnologias || []);
-  const grupos = TECNOLOGIAS.map(g => {
-    const k = g.itens.filter(([id]) => sel.has(id)).length;
-    return `<div class="tec-g"><h4>${ico(g.i, 'p')}${esc(g.g)}<small ${k ? '' : 'hidden'}>${k}</small></h4><div class="chips">${g.itens.map(([id, nome, ex]) => `<label class="chip${sel.has(id) ? ' on' : ''}"${ex ? ` data-tip="${esc('Ex.: ' + ex)}"` : ''}><input type="checkbox" data-tec="${id}" ${sel.has(id) ? 'checked' : ''}>${ico('check')}${esc(nome)}</label>`).join('')}</div></div>`;
-  }).join('');
-  return `<div class="largo"><div class="campo-rot"><span class="rot">Tecnologias que a empresa usa</span>${botaoAjuda('tecnologias', 'Tecnologias')}</div>
-    <div class="tec-grupos">${grupos}</div>
-    <div class="campo" style="margin-top:14px"><div class="campo-rot"><label for="f-tecOutras">Outras tecnologias</label></div><input type="text" id="f-tecOutras" data-simples="tecOutras" value="${esc(d.tecOutras || '')}" placeholder="Ex.: ServiceNow, Zendesk" autocomplete="off"></div>
+  const grupos = TECNOLOGIAS.map(g => `<div class="tec-grupo"><h4>${ico(g.i, 'p')}${esc(g.g)}</h4>${g.itens.map(([id, nome, ex]) =>
+    `<label class="tec-op" data-q="${esc(norm([nome, ex, g.g].join(' ')))}"><input type="checkbox" data-tec="${id}" tabindex="-1" ${sel.has(id) ? 'checked' : ''}><span>${esc(nome)}${ex ? `<small>${esc(ex)}</small>` : ''}</span></label>`).join('')}</div>`).join('');
+  return `<div class="largo"><div class="campo-rot"><label for="tec-busca">Tecnologias que a empresa usa</label>${botaoAjuda('tecnologias', 'Tecnologias')}</div>
+    <div class="tec-combo" id="tec-combo"><div class="entrada com-acao"><input type="text" id="tec-busca" data-tec-busca role="combobox" aria-expanded="false" aria-controls="tec-lista" aria-autocomplete="list" placeholder="Buscar: ERP, nuvem, SAP, CRM..." autocomplete="off">
+      <button type="button" class="acao-dentro" data-acao="tec-abrir" tabindex="-1" aria-label="Mostrar a lista de tecnologias">${ico('chev', 'chev')}</button></div>
+      <div class="tec-lista" id="tec-lista" role="group" aria-label="Tecnologias" hidden>${grupos}<p class="tec-vazio" hidden>Nenhuma tecnologia encontrada.</p></div></div>
+    <p class="sr" id="tec-aviso" aria-live="polite"></p>
+    <div class="tec-tags" id="tec-tags">${marcasTec(d)}</div>
+    <div class="campo" style="margin-top:12px"><div class="campo-rot"><label for="f-tecOutras">Outras tecnologias</label></div><input type="text" id="f-tecOutras" data-simples="tecOutras" value="${esc(d.tecOutras || '')}" placeholder="Ex.: ServiceNow, Zendesk" autocomplete="off"></div>
     <div id="tec-dicas" style="display:grid;gap:8px;margin-top:10px">${dicasTecnologia(d)}</div></div>`;
 }
-function atualizarTecUI(t) {
-  const d = UI.atual.dados, n = (d.tecnologias || []).length;
-  if (t) t.closest('.chip').classList.toggle('on', t.checked);
-  $$('.tec-g').forEach(g => { const k = g.querySelectorAll('input[data-tec]:checked').length, s = g.querySelector('h4 small'); if (s) { s.textContent = k; s.hidden = !k; } });
+function atualizarTecUI() {
+  const d = UI.atual.dados, sel = new Set(d.tecnologias || []), n = sel.size;
+  $$('input[data-tec]').forEach(i => { i.checked = sel.has(i.dataset.tec); });
+  const tg = $('#tec-tags'); if (tg) tg.innerHTML = marcasTec(d);
   const tn = $('#tec-n'); if (tn) tn.textContent = n ? plural(n, 'tecnologia marcada', 'tecnologias marcadas') : 'só registro';
   const td = $('#tec-dicas'); if (td) td.innerHTML = dicasTecnologia(d);
 }
+const tecAberta = () => { const l = $('#tec-lista'); return !!l && !l.hidden; };
+function abrirTec() {
+  const l = $('#tec-lista'); if (!l || !l.hidden) return;
+  l.hidden = false; $('#tec-combo').classList.add('aberto'); $('#tec-busca').setAttribute('aria-expanded', 'true');
+  // a lista abre para baixo: se não couber na tela, a página desce o que faltar
+  const falta = $('#tec-busca').getBoundingClientRect().bottom + Math.min(340, innerHeight * 0.52) + 24 - innerHeight;
+  if (falta > 0) window.scrollBy({ top: falta, behavior: reduzMov() ? 'auto' : 'smooth' });
+}
+function fecharTec(focar) {
+  const l = $('#tec-lista'); if (!l || l.hidden) return;
+  l.hidden = true; $('#tec-combo').classList.remove('aberto'); const b = $('#tec-busca'); b.setAttribute('aria-expanded', 'false');
+  if (b.value) { b.value = ''; filtrarTec(''); }
+  if (focar) b.focus();
+}
+// só entra na lista o que tem todas as palavras da busca, no nome, nos exemplos ou no grupo
+function filtrarTec(q) {
+  const ps = norm(q).split(/\s+/).filter(Boolean); let achou = 0;
+  $$('#tec-lista .tec-op').forEach(op => { const ok = ps.every(p => op.dataset.q.includes(p)); op.hidden = !ok; if (ok) achou++; });
+  $$('#tec-lista .tec-grupo').forEach(g => { g.hidden = !g.querySelector('.tec-op:not([hidden])'); });
+  const v = $('#tec-lista .tec-vazio'); if (v) v.hidden = !!achou;
+  const av = $('#tec-aviso'); if (av) av.textContent = ps.length ? (achou ? plural(achou, 'tecnologia encontrada', 'tecnologias encontradas') : 'Nenhuma tecnologia encontrada') : '';
+}
+// setas andam pela lista, Enter marca ou desmarca e Esc fecha
+function teclasTec(e) {
+  const ops = $$('#tec-lista .tec-op:not([hidden]) input'), i = ops.indexOf(document.activeElement), noCampo = e.target.id === 'tec-busca';
+  if (e.key === 'Escape' && tecAberta()) { e.preventDefault(); e.stopPropagation(); return fecharTec(true); }
+  if (e.key === 'Tab') return fecharTec();
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Home' || e.key === 'End') {
+    if (noCampo && e.key !== 'ArrowDown') return;
+    e.preventDefault(); abrirTec(); if (!ops.length) return;
+    if (e.key === 'ArrowUp' && i <= 0) return $('#tec-busca').focus();
+    ops[e.key === 'Home' ? 0 : e.key === 'End' ? ops.length - 1 : Math.min(ops.length - 1, i + (e.key === 'ArrowDown' ? 1 : -1))].focus();
+  }
+  if (e.key === 'Enter' && e.target.matches('input[data-tec]')) { e.preventDefault(); e.target.click(); }
+}
+// clicar fora fecha a lista
+document.addEventListener('pointerdown', e => { if (tecAberta() && !e.target.closest('#tec-combo')) fecharTec(); });
 // grupo econômico: sugestão pelos sócios que são empresas no CNPJ
 function campoGrupo(d) {
   const v = (d.extras || {}).grupo ?? '', socios = ((d.cnpjInfo || {}).sociosPJ || []).filter(nm => norm(nm) !== norm(v));
@@ -3411,7 +3463,7 @@ function formAnalise() {
   const objetivo = `<section class="secao-form objetivo${obj ? '' : ' pede'}" id="sec-objetivo" aria-labelledby="sec-objetivo-t"><div class="sf-cab"><h2 id="sec-objetivo-t">${ico('lista')}O que esta análise vai estimar</h2>${obj ? '' : '<span class="sf-prog">escolha para começar</span>'}</div>
     <div class="objetivos" role="radiogroup" aria-labelledby="sec-objetivo-t">${[['ti', 'Investimento em TI', 'Quando você já tem a receita ou não precisa dela. Se tiver a receita, informe: ela entra na conta.'], ['ti-receita', 'Receita líquida e investimento em TI', 'A ferramenta estima também a receita, pelos funcionários e pelo setor. Se você tiver um valor, ele entra junto.']].map(([v, t, sub]) => `<label class="obj-op"><input type="radio" name="objetivo" value="${v}" data-objetivo ${obj === v ? 'checked' : ''}><span><b>${t}</b><small>${sub}</small></span></label>`).join('')}</div></section>`;
   return notaModelo(d) + objetivo + secao('sec-ident', 'id', 'Identificação', '', ident, preenchido(d, ['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio']) + ' de 6')
-    + secao('sec-porte', 'porte', 'Porte', 'Receita e funcionários são o que mais pesa quando não há gasto de TI conhecido.', porte)
+    + secao('sec-porte', 'porte', 'Porte', '', porte)
     + secao('sec-ti', 'sinal', 'Equipe e sinais de TI', '', ti)
     + secao('sec-gasto', 'historico', 'Gasto de TI conhecido', 'Dados reais da empresa pesam mais que as médias de mercado e estreitam a faixa.', gasto)
     + `<details class="secao-form" id="sec-mais"${nTec || (d.extras && Object.values(d.extras).some(v => v !== '' && v != null)) ? ' open' : ''}><summary><div class="sf-cab"><h2>${ico('chip')}Mais sobre a empresa</h2><span class="sf-prog"><span id="tec-n">${nTec ? plural(nTec, 'tecnologia marcada', 'tecnologias marcadas') : 'só registro'}</span> ${ico('chev', 'chev')}</span></div></summary><p class="sf-desc">Ficam salvos com a análise, mas não mudam o valor.</p><div class="grade-campos">${mais}</div></details>`
@@ -3601,6 +3653,7 @@ function adicionarAno() {
 }
 function aoDigitarAnalise(e) {
   const t = e.target;
+  if (t.hasAttribute('data-tec-busca')) { abrirTec(); return filtrarTec(t.value); }
   if (UI.rota.aba === 'resultado') {
     if (t.id === 'g-manual') { const g = parseBR(t.value); UI.atual.dados.gManual = Number.isNaN(g) ? '' : g; marcarAlterado(); atualizarProjecao(); }
     return;
@@ -3715,7 +3768,11 @@ TELAS.analise = {
   },
   input: aoDigitarAnalise,
   change: aoMudarAnalise,
-  keydown(e) { if (e.key === 'Enter' && e.target.id === 'f-cnpj') { e.preventDefault(); consultarCNPJ(); } }
+  click(e) { if (e.target.closest('#tec-busca')) abrirTec(); },
+  keydown(e) {
+    if (e.target.closest('#tec-combo')) return teclasTec(e);
+    if (e.key === 'Enter' && e.target.id === 'f-cnpj') { e.preventDefault(); consultarCNPJ(); }
+  }
 };
 acoes({
   'nova': () => novaAnalise(),
@@ -3730,6 +3787,8 @@ acoes({
   'origem': b => abrirOrigem(b),
   'origem-escolher': b => escolherOrigem(b.dataset.alvo, b.dataset.o),
   'buscar-cnpj': () => consultarCNPJ(),
+  'tec-abrir': () => { if (tecAberta()) fecharTec(true); else { abrirTec(); $('#tec-busca').focus(); } },
+  'tec-remover': b => { const d = UI.atual.dados; d.tecnologias = (d.tecnologias || []).filter(x => x !== b.dataset.id); marcarAlterado(); atualizarTecUI(); atualizarPainel(); const c = $('#tec-busca'); if (c) c.focus(); },
   'sem-dado': b => abrirSemDado(b),
   'sem-dado-escolher': b => escolherSemDado(b.dataset.campo, b.dataset.s),
   'buscar-ptax': () => buscarPTAX(),
@@ -3904,7 +3963,7 @@ function listaDados(d, r) {
 function dadosUsados(r, d) {
   return `<div class="dados-grade">${listaDados(d, r).map(x => x.val != null
     ? `<div class="dado"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.val}</b>${origemChip(x.o)}${x.extra ? `<small>${esc(x.extra)}</small>` : ''}</div>`
-    : `<div class="dado falta"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.extra ? esc(x.extra) : textoSemDado(d, x.c) || 'não informado'}</b></div>`).join('')}</div>`;
+    : `<div class="dado falta"><small>${ico(x.i)}${esc(x.rot)}</small>${x.extra ? `<b>${esc(x.extra)}</b>` : chipSemDado(d, x.c) || '<b>não informado</b>'}</div>`).join('')}</div>`;
 }
 function subReceita(r) {
   const rc = r.receita;
