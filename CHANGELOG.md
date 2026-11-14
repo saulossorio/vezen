@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [1.8.1] - 2026-11-14
+
+### Alterado
+- **Metodologia:** a Visão geral traz a conta inteira em cinco passos (receita, caminhos com médias de mercado, caminhos com dados reais, junção e resultado), cada um com o link para a seção que detalha. E1 e E2 passaram a mostrar o ajuste dos bancos muito grandes (f esc), que antes só aparecia em “Porte, região e ajustes”. A receita vem antes dos caminhos, e o próximo melhor dado depois dos resultados. No celular, as fórmulas quebram em linhas em vez de ficar cortadas.
+
 ## [1.8.0] - 2026-11-14
 
 ### Adicionado

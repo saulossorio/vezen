@@ -813,8 +813,18 @@ tr.fora td { opacity: .55; }
 .larg { min-width: 220px; }
 .fx { margin: 10px 0; padding: 10px 14px; border-left: 3px solid var(--marca); background: var(--suave); border-radius: 0 var(--raio-p) var(--raio-p) 0; overflow-x: auto; font-family: 'Cambria Math', 'STIX Two Math', Georgia, serif; font-size: 1.04rem; white-space: nowrap; }
 .fx var { font-style: italic; }
+/* no celular a fórmula quebra nos espaços entre os termos, em vez de ficar cortada */
+@media (max-width: 600px) { .fx { white-space: normal; overflow-wrap: anywhere; } }
 .fx sub { font-size: .7em; }
 .fluxo { display: flex; align-items: stretch; gap: 6px; flex-wrap: wrap; margin: 12px 0 16px; }
+/* a conta inteira, em passos numerados: é uma sequência de verdade */
+.met-conta { list-style: none; counter-reset: passo; padding: 0; margin: 8px 0 18px; display: grid; gap: 10px; }
+.met-conta > li { counter-increment: passo; position: relative; min-width: 0; margin: 0; padding: 12px 16px 6px 50px; border: 1px solid var(--linha); border-radius: var(--raio); background: var(--superficie); }
+.met-conta > li::before { content: counter(passo); position: absolute; left: 14px; top: 12px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--marca-f); border: 1px solid var(--marca-b); font-size: .8rem; font-weight: 650; color: var(--tinta); }
+.met-conta-cab { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.met-conta-cab a { font-size: .85rem; }
+.met-conta .fx { margin: 6px 0; }
+.met-conta p { margin: 6px 0 8px; font-size: .88rem; }
 .fluxo .no { flex: 1 1 150px; border: 1px solid var(--linha); border-radius: var(--raio); padding: 10px 12px; background: var(--superficie); display: flex; flex-direction: column; gap: 4px; font-size: .86rem; color: var(--cinza); }
 .fluxo .no b { display: flex; gap: 7px; align-items: center; color: var(--tinta); font-size: .9rem; }
 .fluxo .no.destaque { background: var(--marca-f); border-color: var(--marca-b); }
@@ -5700,12 +5710,21 @@ const vv = (x, sub) => `<var>${x}</var>${sub ? `<sub>${sub}</sub>` : ''}`;
 const fx = html => `<div class="fx">${html}</div>`;
 const tabM = (cab, linhas, cls = '') => `<div class="tab-wrap"><table class="${cls}"><thead><tr>${cab.map((c, i) => `<th class="${i && /^[\d.,+−\-×÷%R$ ]/.test(String(linhas[0] ? linhas[0][i] : '')) ? 'n' : ''}">${c}</th>`).join('')}</tr></thead><tbody>${linhas.map(l => `<tr>${l.map((c, i) => `<td class="${i && /^[\d.,+−\-×÷%R$ ]/.test(String(c)) ? 'n' : ''}">${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 const SEC_MET = [
-  ['met-visao', 'detalhe', 'Visão geral'], ['met-caminhos', 'lista', 'Os sete caminhos'], ['met-receita', 'moeda', 'Receita líquida'], ['met-ajustes', 'ajuste', 'Porte, região e ajustes'],
+  ['met-visao', 'detalhe', 'Visão geral'], ['met-receita', 'moeda', 'Receita líquida'], ['met-caminhos', 'lista', 'Os sete caminhos'], ['met-ajustes', 'ajuste', 'Porte, região e ajustes'],
   ['met-incerteza', 'terceiros', 'Incerteza de cada caminho'], ['met-juncao', 'peso', 'Como os caminhos se juntam'], ['met-faixa', 'faixa', 'Faixa e confiança'], ['met-estimativas', 'desce', 'Conservadora, geral e sem salários'],
-  ['met-pmd', 'lampada', 'Próximo melhor dado'], ['met-projecao', 'projecao', 'Projeção'], ['met-categorias', 'pizza', 'Divisão por categoria'],
+  ['met-projecao', 'projecao', 'Projeção'], ['met-categorias', 'pizza', 'Divisão por categoria'], ['met-pmd', 'lampada', 'Próximo melhor dado'],
   ['met-base', 'empresas', 'Tipos de estimativa e calibração'], ['met-calibracao', 'calib', 'Correção do gasto de TI'], ['met-pequenas', 'porte', 'Pequenas empresas'], ['met-setores', 'setor', 'Parâmetros por setor'], ['met-testes', 'testes', 'Testes de aceitação']
 ];
-function metVisao() {
+function metVisao(Pm) {
+  const E = Pm.equipe, I = Pm.incertezas, q = Pm.estimativas.conservadora, menos = x => nf(x, 4).replace('-', '−');
+  const passo = (t, alvo, fs, nota = '') => `<li><div class="met-conta-cab" data-sem-termos><b>${t}</b><a href="#/metodologia/${alvo}" data-acao="rolar" data-alvo="${alvo}">Detalhes</a></div>${fs.map(f => fx(f)).join('')}${nota ? `<p class="mudo">${nota}</p>` : ''}</li>`;
+  const conta = `<h3>A conta inteira</h3><ol class="met-conta">
+    ${passo('Receita líquida', 'met-receita', [`${vv('Receita')} = ${vv('Valor')} × (1 − ${vv('d', 'setor')}) × 12 ÷ ${vv('meses')} × (1 + ${vv('g')})<sup>${vv('anos')}</sup>`], `${vv('d', 'setor')} só entra quando o valor é faturamento bruto. Sem valor informado, a receita é estimada (pelos funcionários, pela receita global ou pelo enquadramento).`)}
+    ${passo('Caminhos com médias de mercado', 'met-caminhos', [`${vv('E', '1')} = ${vv('Receita')} × ${vv('p', 'setor')} × ${vv('f', '1')} × ${vv('M', 'aj')} × ${vv('f', 'esc')}`, `${vv('E', '2')} = ${vv('Usuários')} × ${vv('CAPU', 'setor')} × ${vv('f', '2')} × ${vv('I', 'ef')} × ${vv('M', 'aj')} × ${vv('f', 'esc')}`, `${vv('E', '3')} = ${vv('Profissionais')} × ${vv('Salário')} × 12 × ${nf(E.fatorCLT, 1)} ÷ ${vv('s', 'pessoal')}`, `${vv('E', '5')} = ${vv('Adições')} ÷ ${vv('s', 'capex')}`], `${vv('f', '1')}, ${vv('f', '2')}, ${vv('I', 'ef')}, ${vv('M', 'aj')} e ${vv('f', 'esc')} estão em “Porte, região e ajustes”. ${vv('f', 'esc')} vale 1 fora dos bancos muito grandes.`)}
+    ${passo('Caminhos com dados reais da empresa', 'met-caminhos', [`${vv('E', '0')} = ${vv('Gasto real', 'último ano')} × (1 + ${vv('g')})<sup>${vv('anos')}</sup>`, `${vv('E', '4p')} = ${vv('Contratos')} + ${vv('Custo da equipe')}`, `${vv('E', '4')} = ${vv('Gasto declarado do ano')}`])}
+    ${passo('Junção dos caminhos', 'met-juncao', [`ln ${vv('M')} = Σ ${vv('w', 'i')} · ln ${vv('E', 'i')} ÷ Σ ${vv('w', 'i')},&nbsp; ${vv('E')} ∈ {${vv('E', '1')}, ${vv('E', '2')}, ${vv('E', '3')}, ${vv('E', '5')}},&nbsp; ${vv('w')} = 1 ÷ ${vv('σ')}²`, `ln ${vv('F')} = Σ ${vv('w', 'j')} · ln ${vv('X', 'j')} ÷ Σ ${vv('w', 'j')},&nbsp; ${vv('X')} ∈ {${vv('M')} × ${vv('k')}, ${vv('E', '0')}, ${vv('E', '4p')}}`], `${vv('σ')} é a incerteza de cada caminho (seção “Incerteza de cada caminho”). ${vv('k')} só existe nos tipos calibrados. Com ${vv('E', '4')}, ${vv('F')} = ${vv('E', '4')}.`)}
+    ${passo('Resultado', 'met-faixa', [`${vv('Geral')} = ${vv('F')},&nbsp;&nbsp; ${vv('Conservadora')} = ${vv('F')} · e<sup>${menos(zNormal(q))} · ${vv('σ', 'final')}</sup>`, `${vv('P', '10')} = ${vv('F')} · e<sup>−${nf(Z90, 4)} · ${vv('σ', 'final')}</sup>,&nbsp;&nbsp; ${vv('P', '90')} = ${vv('F')} · e<sup>+${nf(Z90, 4)} · ${vv('σ', 'final')}</sup>`, `${vv('Confiança')} = 100 · (${nf(I.escalaZero, 2)} − ${vv('σ', 'final')}) ÷ (${nf(I.escalaZero, 2)} − ${nf(I.escalaCem, 2)})`])}
+  </ol>`;
   const no = (i, t, s, cls = '') => `<div class="no ${cls}"><b>${ico(i)}${t}</b><span>${s}</span></div>`, seta = `<span class="seta">${ico('seta')}</span>`;
   return `<p>A estimativa sai de fórmulas e médias públicas, sem IA. Cada tipo de dado da empresa abre um caminho até o gasto de TI; os caminhos são juntados pela precisão de cada um, e o resultado vem com uma faixa provável.</p>
   <div class="fluxo">${no('analise', 'Dados da empresa', 'Receita, funcionários, equipe de TI, gastos reais, com a origem de cada número.')}${seta}
@@ -5713,6 +5732,7 @@ function metVisao() {
     ${no('peso', 'Etapa 1', 'Junta as médias de mercado (E1, E2, E3, E5) em M, já com a calibração.')}${seta}
     ${no('peso', 'Etapa 2', 'Junta M com os dados reais (E0, E4p) e chega ao valor central F.')}${seta}
     ${no('faixa', 'Faixa e confiança', 'P10 a P90 a partir da incerteza final; índice de 0 a 100.', 'destaque')}</div>
+  ${conta}
   <ul><li>Todas as contas de incerteza são feitas em logaritmo natural (ln): o erro é proporcional ao valor. Uma incerteza σ de 0,10 equivale a cerca de ±10%; de 0,70, a ficar entre a metade e o dobro.</li>
   <li>Se houver gasto de TI declarado do ano (E4), ele substitui a estimativa e os outros caminhos aparecem só para comparação.</li>
   <li>Valores nominais, em reais. Ano de referência: o ano atual (${ANO}); valores de anos anteriores são levados até ele. Moeda estrangeira é convertida pela PTAX de fechamento do último dia útil de dezembro do ano do dado, nunca pela cotação de hoje.</li>
@@ -5721,9 +5741,9 @@ function metVisao() {
 function metCaminhos(Pm) {
   const E = Pm.equipe, I = Pm.incertezas;
   const caso = (cod, nome, f, quando, sig) => `<h3>${icoCaminho({ cod, modelo: !['E0', 'E4', 'E4p'].includes(cod) })} ${cod}: ${nome}</h3>${f}<p class="mudo" style="margin:0">${quando}</p><p class="mudo" style="margin:2px 0 0">${sig}</p>`;
-  return `<p>Cada caminho só entra quando os dados dele existem. ${vv('M', 'aj')} é o total dos ajustes da empresa; ${vv('f', '1')}, ${vv('f', '2')} e ${vv('I', 'ef')} estão em “Porte, região e ajustes”.</p>
-  ${caso('E1', 'pela receita', fx(`${vv('E', '1')} = ${vv('Receita', 'líquida')} × ${vv('p', 'setor')} × ${vv('f', '1')} × ${vv('M', 'aj')}`), 'Precisa da receita líquida (informada, estimada pela ferramenta ou, nas pequenas, pelo enquadramento) e de um setor com % da receita definido. Órgão público não usa. Ver “Receita líquida”.', `Incerteza: ${vv('σ', 'E1')} do setor (nas pequenas, mais ${nf(I.extraPequena, 2)}) combinada com a incerteza da receita.`)}
-  ${caso('E2', 'pelo número de usuários', fx(`${vv('E', '2')} = ${vv('Usuários')} × ${vv('CAPU', 'setor')} × ${vv('f', '2')} × ${vv('I', 'ef')} × ${vv('M', 'aj')}`) + fx(`${vv('Usuários')} = informado, ou ${vv('Funcionários')} × ${vv('u', 'setor')}`), 'Só a partir de 50 usuários, fora das regras de pequena empresa e em setor com gasto por usuário (CAPU) definido.', `Incerteza do modelo: ${vv('σ', 'E2')} do setor.`)}
+  return `<p>Cada caminho só entra quando os dados dele existem. ${vv('M', 'aj')} é o total dos ajustes da empresa; ${vv('f', '1')}, ${vv('f', '2')}, ${vv('I', 'ef')} e ${vv('f', 'esc')} estão em “Porte, região e ajustes”. ${vv('f', 'esc')} só existe nos bancos muito grandes; nos demais, vale 1.</p>
+  ${caso('E1', 'pela receita', fx(`${vv('E', '1')} = ${vv('Receita', 'líquida')} × ${vv('p', 'setor')} × ${vv('f', '1')} × ${vv('M', 'aj')} × ${vv('f', 'esc')}`), 'Precisa da receita líquida (informada, estimada pela ferramenta ou, nas pequenas, pelo enquadramento) e de um setor com % da receita definido. Órgão público não usa. Ver “Receita líquida”.', `Incerteza: ${vv('σ', 'E1')} do setor (nas pequenas, mais ${nf(I.extraPequena, 2)}) combinada com a incerteza da receita.`)}
+  ${caso('E2', 'pelo número de usuários', fx(`${vv('E', '2')} = ${vv('Usuários')} × ${vv('CAPU', 'setor')} × ${vv('f', '2')} × ${vv('I', 'ef')} × ${vv('M', 'aj')} × ${vv('f', 'esc')}`) + fx(`${vv('Usuários')} = informado, ou ${vv('Funcionários')} × ${vv('u', 'setor')}`), 'Só a partir de 50 usuários, fora das regras de pequena empresa e em setor com gasto por usuário (CAPU) definido.', `Incerteza do modelo: ${vv('σ', 'E2')} do setor.`)}
   ${caso('E3', 'pela equipe de TI', fx(`${vv('E', '3')} = ${vv('Profissionais')} × ${vv('Salário')} × 12 × ${nf(E.fatorCLT, 1)} ÷ ${vv('s', 'pessoal')}`), `Salário: o informado; senão, o da UF; senão, a média nacional (${fmtRS(Pm.regional.mediaNacional)}). ${vv('s', 'pessoal')} = ${fmtPct(E.sPessoal, 0)} nas médias e grandes e ${fmtPct(E.sPessoalPequena, 0)} nas pequenas. ${nf(E.fatorCLT, 1)} é o custo total de um profissional dividido pelo salário.`, `Incerteza do modelo: ${nf(I.sE3, 2)}.`)}
   ${caso('E5', 'pelos investimentos no balanço', fx(`${vv('E', '5')} = ${vv('Adições')} ÷ ${vv('s', 'capex')}`), `Só listadas. ${vv('s', 'capex')} = ${fmtPct(E.sCapex, 0)} (${fmtPct(E.sCapexBancos, 0)} em bancos). Sem gasto declarado, o resultado nunca fica abaixo das adições.`, `Incerteza do modelo: ${nf(I.sE5, 2)}.`)}
   ${caso('E4p', 'pelos contratos de TI', fx(`${vv('E', '4p')} = ${vv('Contratos')} + ${vv('Custo da equipe')}`) + fx(`${vv('E', '4p')} = ${vv('Contratos')} ÷ (1 − ${vv('s', 'pessoal')})`), 'Setor público. A primeira forma vale quando há equipe de TI informada (custo da equipe como em E3); a segunda, quando não há.', `Incerteza do modelo: ${nf(I.sE4p, 2)}.`)}
@@ -5756,7 +5776,7 @@ function metReceita(Pm) {
 function metEstimativas(Pm) {
   const q = Pm.estimativas.conservadora, eq = Pm.categorias.find(c => c.id === 'equipe');
   return `<p>O resumo no formato do time traz duas estimativas. Em cada análise, uma opção escolhe se elas incluem os salários da equipe de TI; o padrão é incluir.</p>
-  ${fx(`${vv('Geral')} = ${vv('F')}`)}${fx(`${vv('Conservadora')} = ${vv('F')} · e<sup>${nf(zNormal(q), 4)} · ${vv('σ', 'final')}</sup>&nbsp; (percentil ${nf(q * 100, 0)})`)}${fx(`${vv('Sem salários de TI')} = ${vv('Estimativa')} × (1 − ${vv('s', 'equipe')})`)}
+  ${fx(`${vv('Geral')} = ${vv('F')}`)}${fx(`${vv('Conservadora')} = ${vv('F')} · e<sup>${nf(zNormal(q), 4).replace('-', '−')} · ${vv('σ', 'final')}</sup>&nbsp; (percentil ${nf(q * 100, 0)})`)}${fx(`${vv('Sem salários de TI')} = ${vv('Estimativa')} × (1 − ${vv('s', 'equipe')})`)}
   <ul><li>Geral é o valor central: metade das empresas parecidas gasta mais, metade gasta menos.</li>
   <li>Conservadora é o percentil ${nf(q * 100, 0)} da faixa provável: em ${nf((1 - q) * 100, 0)} de cada 100 casos o gasto real fica acima dela.</li>
   <li>${vv('s', 'equipe')} é a fatia “Equipe interna” da divisão por categoria: ${eq ? fmtPct(eq.mg, 0) + ' nas médias e grandes e ' + fmtPct(eq.peq, 0) + ' nas pequenas' : 'não definida'}. A opção “Sem salários de TI” tira essa parte.</li>
