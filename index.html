@@ -365,6 +365,14 @@ textarea.prompt { min-height: 260px; font-size: .88rem; }
 .sf-cab h2 .ico { color: var(--cinza); }
 .sf-prog { font-size: .8rem; color: var(--cinza); white-space: nowrap; }
 .sf-desc { color: var(--cinza); font-size: .88rem; margin: -8px 0 16px; }
+.nota-modelo { display: flex; gap: 10px; align-items: flex-start; padding: 12px 16px; border: 1px solid var(--marca-b); border-radius: var(--raio-g); background: var(--marca-f); font-size: .9rem; }
+.nota-modelo > .ico { color: var(--link); margin-top: 2px; }
+.nota-modelo p { margin: 0; }
+.nota-modelo details { margin-top: 6px; }
+.nota-modelo summary { cursor: pointer; color: var(--link); font-weight: 600; width: fit-content; }
+.nota-modelo ul { margin: 6px 0 0; padding-left: 18px; color: var(--cinza); }
+.nota-modelo li { margin: 4px 0; }
+.vazio .vazio-modelo { margin: 18px auto 0; max-width: 560px; color: var(--cinza); font-size: .92rem; }
 .objetivo .sf-cab { margin-bottom: 12px; }
 .objetivo.pede { border-color: var(--marca-b); box-shadow: 0 0 0 3px var(--marca-f); }
 .objetivo.pede .sf-prog { color: var(--link); font-weight: 600; }
@@ -2913,7 +2921,7 @@ function estadoAtual() {
 }
 function chipEstado() { const e = estadoAtual(); return `<span class="estado ${e.cls}"><i aria-hidden="true"></i>${esc(e.txt)}</span>`; }
 function metaEmpresa(d) {
-  const partes = [d.setor || d.natureza ? esc(nomeSetor(d)) : '', esc(lugarTxt(d)), d.cnpj ? 'CNPJ ' + esc(d.cnpj) : ''].filter(Boolean).map(x => `<span>${x}</span>`);
+  const partes = [d.modelo ? 'Empresa modelo' : '', d.setor || d.natureza ? esc(nomeSetor(d)) : '', esc(lugarTxt(d)), d.cnpj ? 'CNPJ ' + esc(d.cnpj) : ''].filter(Boolean).map(x => `<span>${x}</span>`);
   return partes.join('') + chipEstado();
 }
 function acoesAnalise() {
@@ -2968,17 +2976,51 @@ async function confirmarSaida() {
   if (resp === 'descartar') { UI.sujo = false; return true; }
   return false;
 }
-async function novaAnalise(dados) {
+// limpo: a análise abre sem pedir confirmação ao sair, como a empresa modelo, que pode ser aberta de novo a qualquer hora
+async function novaAnalise(dados, limpo = false) {
   if (!(await confirmarSaida())) return;
-  UI.atual = novaEmpresa(); UI.sujo = !!dados; UI.sugestao = null; UI.cnpjMsg = '';
+  UI.atual = novaEmpresa(); UI.sujo = !!dados && !limpo; UI.sugestao = null; UI.cnpjMsg = '';
   if (dados) UI.atual.dados = Object.assign(dadosVazios(), dados);
   navegar('#/analise/' + UI.atual.id);
   setTimeout(() => { const o = $('#sec-objetivo input'); if (o && !dados) o.focus(); }, 0);
 }
+/* ---------- empresa modelo: um caso real, com dados públicos e fontes oficiais, para ver a ferramenta funcionando ---------- */
+// Banco do Brasil, com os números dos documentos do próprio banco. O gasto real de TI publicado deixa a confiança alta.
+// Ao atualizar com documentos novos, confira que a confiança continua em 80 ou mais (o teste tela-analise confere).
+const EMPRESA_MODELO = {
+  id: 'bb-2025',
+  dados: {
+    nome: 'Banco do Brasil', cnpj: '00.000.000/0001-91', natureza: 'publico', tipoPublico: 'estatal', setor: 'banco', uf: 'DF', municipio: 'Brasília',
+    funcionarios: { v: 85206, o: 'oficial' }, crescFunc: { v: -1.6, o: 'oficial' }, digital: 'alta',
+    tecnologias: ['dev-interno', 'app-cliente', 'api', 'nuvem', 'ia'],
+    gastosReais: [{ ano: 2024, v: 6.2e9, o: 'oficial' }, { ano: 2025, v: 6.8e9, o: 'oficial' }],
+    fatEstimar: false, modo: 'base', modelo: 'bb-2025'
+  },
+  fontes: [
+    { doc: 'Relatório da Administração 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/637e45ff-9331-d07c-5fde-606c69e1bfe1?origin=2',
+      usa: 'R$ 6,8 bilhões investidos em tecnologia em 2025 e 93% das transações feitas em canais digitais' },
+    { doc: 'Análise do Desempenho do 4º trimestre de 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/0c488fdf-d384-201d-b5f8-37a795f1ac43?origin=2',
+      usa: '85.206 funcionários em dezembro de 2025 e 86.574 um ano antes (tabela 31) e o investimento em tecnologia de cada trimestre, que soma R$ 6,2 bilhões em 2024 (figura 54)' }
+  ],
+  ri: 'https://ri.bb.com.br/informacoes-financeiras/central-de-resultados/'
+};
+function notaModelo(d) {
+  if (d.modelo !== EMPRESA_MODELO.id) return '';
+  return `<section class="nota-modelo" aria-label="Empresa modelo">${ico('lampada')}<div><p><b>Empresa modelo.</b> Dados públicos do Banco do Brasil, tirados dos documentos oficiais do banco. O gasto de TI publicado pesa quase sozinho no cálculo e deixa a confiança alta.${empresaSalva() ? '' : ' Mude o que quiser: nada é salvo até você clicar em Salvar.'}</p>
+    <details><summary>Fontes e escolhas</summary><ul>${EMPRESA_MODELO.fontes.map(f => `<li><a href="${f.url}" target="_blank" rel="noopener">${esc(f.doc)}</a>: ${esc(f.usa)}.</li>`).join('')}
+    <li>A receita ficou de fora: em bancos, a conta pela receita (margem financeira de R$ 103,1 bilhões mais R$ 34,8 bilhões de serviços em 2025, na mesma Análise do Desempenho) dá várias vezes o gasto real publicado e baixaria a confiança.</li>
+    <li>Os documentos ficam na <a href="${EMPRESA_MODELO.ri}" target="_blank" rel="noopener">central de resultados do Banco do Brasil</a>.</li></ul></details></div></section>`;
+}
+// abre a análise salva da empresa modelo, se houver; se não, uma nova com os dados dela
+async function abrirEmpresaModelo() {
+  const salva = S.empresas.find(e => e.dados && e.dados.modelo === EMPRESA_MODELO.id);
+  if (salva) return navegar('#/analise/' + encodeURIComponent(salva.id));
+  await novaAnalise(copiar(EMPRESA_MODELO.dados), true);
+}
 async function duplicarEmpresa(id) {
   if (!(await confirmarSaida())) return;
   const o = S.empresas.find(x => x.id === id), n = novaEmpresa();
-  n.dados = copiar(o.dados); n.dados.nome = (n.dados.nome || '') + ' (cópia)'; n.foraCalibracao = o.foraCalibracao;
+  n.dados = copiar(o.dados); n.dados.nome = (n.dados.nome || '') + ' (cópia)'; n.foraCalibracao = o.foraCalibracao; delete n.dados.modelo;
   UI.atual = n; UI.sujo = true; UI.sugestao = null; UI.cnpjMsg = '';
   navegar('#/analise/' + n.id); toast('Cópia aberta. Ajuste e salve para incluir na lista.');
 }
@@ -3286,7 +3328,7 @@ function formAnalise() {
   const obj = d.fatEstimar === true ? 'ti-receita' : d.fatEstimar === false ? 'ti' : '';
   const objetivo = `<section class="secao-form objetivo${obj ? '' : ' pede'}" id="sec-objetivo" aria-labelledby="sec-objetivo-t"><div class="sf-cab"><h2 id="sec-objetivo-t">${ico('lista')}O que esta análise vai estimar</h2>${obj ? '' : '<span class="sf-prog">escolha para começar</span>'}</div>
     <div class="objetivos" role="radiogroup" aria-labelledby="sec-objetivo-t">${[['ti', 'Investimento em TI', 'Quando você já tem a receita ou não precisa dela. Se tiver a receita, informe: ela entra na conta.'], ['ti-receita', 'Receita líquida e investimento em TI', 'A ferramenta estima também a receita, pelos funcionários e pelo setor. Se você tiver um valor, ele entra junto.']].map(([v, t, sub]) => `<label class="obj-op"><input type="radio" name="objetivo" value="${v}" data-objetivo ${obj === v ? 'checked' : ''}><span><b>${t}</b><small>${sub}</small></span></label>`).join('')}</div></section>`;
-  return objetivo + secao('sec-ident', 'id', 'Identificação', '', ident, preenchido(d, ['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio']) + ' de 6')
+  return notaModelo(d) + objetivo + secao('sec-ident', 'id', 'Identificação', '', ident, preenchido(d, ['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio']) + ' de 6')
     + secao('sec-porte', 'porte', 'Porte', 'Receita e funcionários são o que mais pesa quando não há gasto de TI conhecido.', porte)
     + secao('sec-ti', 'sinal', 'Equipe e sinais de TI', '', ti)
     + secao('sec-gasto', 'historico', 'Gasto de TI conhecido', 'Dados reais da empresa pesam mais que as médias de mercado e estreitam a faixa.', gasto)
@@ -3592,6 +3634,7 @@ TELAS.analise = {
 };
 acoes({
   'nova': () => novaAnalise(),
+  'modelo': () => abrirEmpresaModelo(),
   'salvar': () => salvarEmpresa(),
   'descartar': () => descartar(),
   'excluir-atual': () => excluirEmpresa(UI.atual.id),
@@ -4072,7 +4115,8 @@ function telaEmpresas() {
     <div class="acoes"><a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button>${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
   if (!n) return cab + `<div class="vazio"><h2>Nenhuma empresa ainda</h2><p>Comece pela análise de uma empresa ou estime uma lista inteira de uma vez. A estimativa aparece enquanto você preenche os dados.</p>
     <ol class="passos-vazio"><li><b>Uma empresa</b>Nome e um dado de porte, como receita ou funcionários. Com o CNPJ, a ferramenta busca o resto.</li><li><b>Uma lista</b>Uma planilha do CRM ou do Excel com várias empresas, estimadas de uma vez.</li><li><b>Backup</b>Já usou o Vezen em outro computador? Importe o backup exportado lá.</li></ol>
-    <div class="acoes"><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button><a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn" data-acao="importar">${ico('subir')}Importar backup</button></div></div>`;
+    <div class="acoes"><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button><a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn" data-acao="importar">${ico('subir')}Importar backup</button></div>
+    <p class="vazio-modelo">Quer ver antes um exemplo pronto? <button type="button" class="link-btn" data-acao="modelo">Abra a empresa modelo</button>, o Banco do Brasil com dados públicos e confiança alta.</p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
     <label class="busca"><span class="sr">Buscar</span>${ico('busca')}<input type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
@@ -4168,7 +4212,7 @@ TELAS.empresas = {
   }
 };
 acoes({
-  'menu-empresas': b => abrirMenuAcoes(b, [['exp-json', 'Exportar backup', 'baixar'], ['importar', 'Importar backup', 'subir'], '-', ['exp-csv', 'Baixar tabela das empresas (CSV)', 'tabela']]),
+  'menu-empresas': b => abrirMenuAcoes(b, [['modelo', 'Abrir a empresa modelo', 'lampada'], '-', ['exp-json', 'Exportar backup', 'baixar'], ['importar', 'Importar backup', 'subir'], '-', ['exp-csv', 'Baixar tabela das empresas (CSV)', 'tabela']]),
   'menu-emp': b => abrirMenuAcoes(b, [['abrir-emp', 'Abrir', 'editar', `data-id="${b.dataset.id}"`], ['dup-emp', 'Duplicar', 'copiar', `data-id="${b.dataset.id}"`], '-', ['del-emp', 'Excluir', 'lixo', `data-id="${b.dataset.id}"`, 'perigo']]),
   'abrir-emp': b => navegar('#/analise/' + encodeURIComponent(b.dataset.id)),
   'dup-emp': b => duplicarEmpresa(b.dataset.id),

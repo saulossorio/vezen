@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [1.3.0] - 2026-11-14
+
+### Adicionado
+- **Empresa modelo:** o Banco do Brasil, com dados públicos e confiança alta, para ver a ferramenta funcionando. Abre pelo menu de Empresas ou pelo link na tela vazia, como uma análise nova que só é salva se a pessoa quiser. Funcionários e gasto de TI de 2024 e 2025 vêm dos documentos oficiais do banco, citados no aviso no topo da análise.
+
 ## [1.2.0] - 2026-11-12
 
 Ajustes de uso pedidos depois do redesenho, e a calibração embutida passa a ser só parâmetros. As estimativas não mudaram.

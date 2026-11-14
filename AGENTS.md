@@ -52,6 +52,7 @@ Para achar algo, busque pelo nome: `calcular`, `receitaEmpresa`, `calibrarBase`,
 - **Ações.** Botões usam `data-acao="nome"`, e a função fica registrada com `acoes({ nome: ... })` no bloco da tela. Não crie um `addEventListener` por botão.
 - **Redesenhar.** `render()` redesenha a tela; `renderAqui()` mantém a rolagem. Na análise, digitar só atualiza o cartão (`atualizarPainel`), para não perder o foco do campo.
 - **Análise.** A primeira escolha é o que estimar (`dados.fatEstimar`: `true` para receita líquida e investimento em TI, `false` só para TI, `null` enquanto ninguém escolheu; salvar pede a escolha). O cartão mostra a receita só quando `fatEstimar` é `true`. A consulta do CNPJ só acontece pela lupa dentro do campo ou pelo Enter, nunca sozinha.
+- **Empresa modelo.** `EMPRESA_MODELO`, no bloco `ui-analise`, é um caso real com dados públicos: o Banco do Brasil, com funcionários e gasto de TI dos documentos oficiais do banco e as fontes no aviso da análise. Só entra número de documento oficial, com a fonte citada. Ao atualizar com documentos de um ano novo, a confiança precisa continuar em 80 ou mais, sem alertas (o teste `tela-analise` confere). Abrir de novo leva à análise salva, se houver.
 - **Cartão e largura.** A grade da análise fica num contêiner (`.ws-corpo`) e se adapta pela largura dele, não da janela: com espaço, o cartão fica ao lado e acompanha a rolagem; em área estreita, vira uma barra presa embaixo da tela com os valores, e “Detalhes” abre o resto. A barra lateral recolhida (`data-lateral="recolhida"` no `<html>`, guardada em `vezen.lateral`) dá mais espaço ao conteúdo.
 - **Nova tela.** Registre em `TELAS`, ponha o link em `renderNav()` e escreva o teste de tela dela.
 
@@ -118,4 +119,5 @@ O dono do produto escreve em espanhol. Responda em espanhol, curto: a conclusão
 
 - **Correção do gasto de TI por caminho de cálculo.** Hoje a correção é só por setor, mas na base do CRM cada caminho se afasta do gasto declarado de um jeito diferente.
 - **Tecnologias da empresa.** Falta decidir se elas devem mudar a intensidade digital automática.
+- **Fórmulas de bancos.** No Banco do Brasil (a empresa modelo), a conta pela receita (margem financeira mais serviços) dá cerca de 6 vezes o gasto de TI publicado pelo banco, e a conta por usuários cerca de 3 vezes. Vale revisar com o dono do produto a receita usada em bancos e o gasto por usuário do setor.
 - **Integração com o Canis.** A aba de dados financeiros do Canis guarda faturamento e investimento em TI com fonte e confiança, e é ali que as estimativas do Vezen devem entrar.
