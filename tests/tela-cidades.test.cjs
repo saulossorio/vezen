@@ -6,6 +6,8 @@ const URL = 'file://' + path.join(__dirname, '..', 'index.html');
 const ok = [], falhas = [];
 const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (info ? ' — ' + info : '')); };
 const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
+// salvar: se o verificador listar campos sem resposta, segue com “Salvar assim mesmo”
+const salvarAnalise = async (p, espera = 300) => { await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(150); if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Salvar assim mesmo")'); await p.waitForTimeout(espera); };
 const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace(/\./g, '').replace(',', '.') : NaN; };
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' });
@@ -40,7 +42,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   check('cidade sem valor próprio usa demais cidades', loc && loc.partes.length === 1 && loc.partes[0].rot === 'demais cidades de SP' && Math.abs(loc.f - 0.6739) < 1e-4, JSON.stringify(loc));
   await p.fill('#f-municipio', 'São Paulo'); await p.press('#f-municipio', 'Tab');
   await p.check('input[data-objetivo][value=ti-receita]'); await p.waitForTimeout(1200);
-  await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
+  await salvarAnalise(p);
 
   // 2. resultado e resumo
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(800);

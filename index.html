@@ -416,6 +416,9 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .origem .chev { width: 12px; height: 12px; opacity: .7; }
 .origem:hover { border-color: var(--linha-forte); }
 .origem.o-vazio { color: var(--cinza); background: none; border-style: dashed; border-color: var(--linha-forte); font-weight: 550; }
+.origem.sem-dado.sd-ok { color: var(--tinta); }
+.origem.sem-dado.revisar { color: var(--aviso); background: var(--aviso-f); border-color: var(--aviso-b); }
+.reais-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .campo .dica { margin-top: 0; }
 .linha-dupla { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .linha-dupla .ano { display: inline-flex; align-items: center; gap: 6px; font-size: .88rem; color: var(--cinza); }
@@ -874,6 +877,7 @@ tr.r-falha td { background: var(--crit-f); }
 <symbol id="i-servicos" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L4 17l3 3 5.2-5.2a4 4 0 0 0 5.3-5.3l-2.6 2.6-2.4-.6-.6-2.4z"/></symbol>
 <symbol id="i-atualizar" viewBox="0 0 24 24"><path d="M19.5 10.5A7.6 7.6 0 0 0 6 7.2L4.5 9"/><path d="M4.5 4.8V9h4.2"/><path d="M4.5 13.5A7.6 7.6 0 0 0 18 16.8l1.5-1.8"/><path d="M19.5 19.2V15h-4.2"/></symbol>
 <symbol id="i-painel" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></symbol>
+<symbol id="i-nada" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></symbol>
 <symbol id="i-busca" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.4-4.4"/></symbol>
 <symbol id="i-calendario" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></symbol>
 <symbol id="i-calc" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h3.5"/></symbol>
@@ -2413,7 +2417,7 @@ function dadosVazios() {
   return { nome: '', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', faturamento: f(), fatAno: String(ANO - 1), fatTipo: 'liquida', fatEstimar: null, funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
     unidades: f(), enquadramento: '', tipoPublico: '', adicoes: f(), contratos: f(), tiMatriz: '', digital: '', tecnologias: [], tecOutras: '', crescFunc: f(), vagasTI: '',
     gastosReais: [], gastoDeclarado: f(), gManual: '', extras: {}, viaCNPJ: {}, cnpjInfo: {},
-    globalRec: f(), globalMoeda: 'USD', globalAno: String(ANO - 1), globalTaxa: '', globalTaxaFonte: '', globalFunc: f(), globalPart: f(), salariosTI: 'com', modo: 'base' };
+    globalRec: f(), globalMoeda: 'USD', globalAno: String(ANO - 1), globalTaxa: '', globalTaxaFonte: '', globalFunc: f(), globalPart: f(), salariosTI: 'com', modo: 'base', semDado: {} };
 }
 function novaEmpresa() { const t = new Date().toISOString(); return { id: uid(), criadoEm: t, alteradoEm: t, dados: dadosVazios() }; }
 
@@ -2911,7 +2915,7 @@ function graficoComparacao(rs) {
 /* ---------- análise aberta: rascunho, salvar, descartar ---------- */
 // a análise aberta é uma cópia; só entra na lista e na calibração quando a pessoa clica em "Salvar"
 function empresaSalva() { return UI.atual ? S.empresas.find(x => x.id === UI.atual.id) || null : null; }
-function abrirRascunho(emp) { UI.atual = copiar(emp); UI.sujo = false; UI.sugestao = null; UI.cnpjMsg = ''; }
+function abrirRascunho(emp) { UI.atual = copiar(emp); UI.sujo = false; UI.sugestao = null; UI.cnpjMsg = ''; UI.revisar = false; }
 function marcarAlterado() { UI.sujo = true; atualizarCabecalho(); }
 function estadoAtual() {
   const s = empresaSalva();
@@ -2940,7 +2944,7 @@ function atualizarCabecalho() {
   document.title = (d.nome.trim() || 'Nova análise') + ' | Vezen';
   renderNav();
 }
-function salvarEmpresa() {
+async function salvarEmpresa() {
   const emp = UI.atual; if (!emp) return false;
   if (!emp.dados.nome.trim()) {
     const foco = () => { const n = $('#f-nome'), v = $('#v-nome'); if (v) v.textContent = 'Informe o nome da empresa para salvar.'; if (n) n.focus(); };
@@ -2954,6 +2958,7 @@ function salvarEmpresa() {
     toast('Escolha o que esta análise vai estimar');
     return false;
   }
+  if (!(await verificarPendencias())) return false;
   const agora = new Date().toISOString();
   if (!empresaSalva()) emp.criadoEm = agora;
   emp.alteradoEm = agora;
@@ -2961,8 +2966,8 @@ function salvarEmpresa() {
   emp.resultado = r.vazio ? null : { F: r.F, p10: r.p10, p90: r.p90, ic: r.ic, sigma: r.sigmaFinal, data: agora };
   const i = S.empresas.findIndex(x => x.id === emp.id), copia = copiar(emp);
   if (i >= 0) S.empresas[i] = copia; else S.empresas.push(copia);
-  UI.sujo = false;
-  salvar(); atualizarCabecalho();
+  UI.sujo = false; UI.revisar = false;
+  salvar(); atualizarCabecalho(); atualizarSemDado();
   toast(persistente ? 'Empresa salva' : 'Salva só nesta sessão: o navegador não permite gravar');
   return true;
 }
@@ -2979,7 +2984,7 @@ async function confirmarSaida() {
 // limpo: a análise abre sem pedir confirmação ao sair, como a empresa modelo, que pode ser aberta de novo a qualquer hora
 async function novaAnalise(dados, limpo = false) {
   if (!(await confirmarSaida())) return;
-  UI.atual = novaEmpresa(); UI.sujo = !!dados && !limpo; UI.sugestao = null; UI.cnpjMsg = '';
+  UI.atual = novaEmpresa(); UI.sujo = !!dados && !limpo; UI.sugestao = null; UI.cnpjMsg = ''; UI.revisar = false;
   if (dados) UI.atual.dados = Object.assign(dadosVazios(), dados);
   navegar('#/analise/' + UI.atual.id);
   setTimeout(() => { const o = $('#sec-objetivo input'); if (o && !dados) o.focus(); }, 0);
@@ -2994,6 +2999,8 @@ const EMPRESA_MODELO = {
     funcionarios: { v: 85206, o: 'oficial' }, crescFunc: { v: -1.6, o: 'oficial' }, digital: 'alta',
     tecnologias: ['dev-interno', 'app-cliente', 'api', 'nuvem', 'ia'],
     gastosReais: [{ ano: 2024, v: 6.2e9, o: 'oficial' }, { ano: 2025, v: 6.8e9, o: 'oficial' }],
+    // não aparecem nos dois documentos usados; receita e agências existem, mas ficaram vazias de propósito (veja a nota das fontes)
+    semDado: { usuarios: 'nao-achei', profTI: 'nao-achei', contratos: 'nao-achei', gastoDeclarado: 'nao-achei' },
     fatEstimar: false, modo: 'base', modelo: 'bb-2025'
   },
   fontes: [
@@ -3001,12 +3008,13 @@ const EMPRESA_MODELO = {
       usa: 'gasto de TI de 2025' },
     { doc: 'Análise do Desempenho do 4º trimestre de 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/0c488fdf-d384-201d-b5f8-37a795f1ac43?origin=2',
       usa: 'funcionários e gasto de TI de 2024' }
-  ]
+  ],
+  nota: 'Receita e agências ficaram vazias de propósito: a conta por elas passa muito do gasto de TI publicado.'
 };
 function notaModelo(d) {
   if (d.modelo !== EMPRESA_MODELO.id) return '';
   return `<section class="nota-modelo" aria-label="Empresa modelo">${ico('lampada')}<div><p><b>Empresa modelo:</b> Banco do Brasil, com dados oficiais.</p>
-    <details><summary>Fontes</summary><ul>${EMPRESA_MODELO.fontes.map(f => `<li><a href="${f.url}" target="_blank" rel="noopener">${esc(f.doc)}</a>: ${esc(f.usa)}.</li>`).join('')}</ul></details></div></section>`;
+    <details><summary>Fontes</summary><ul>${EMPRESA_MODELO.fontes.map(f => `<li><a href="${f.url}" target="_blank" rel="noopener">${esc(f.doc)}</a>: ${esc(f.usa)}.</li>`).join('')}<li>${esc(EMPRESA_MODELO.nota)}</li></ul></details></div></section>`;
 }
 // abre a análise salva da empresa modelo, se houver; se não, uma nova com os dados dela
 async function abrirEmpresaModelo() {
@@ -3018,7 +3026,7 @@ async function duplicarEmpresa(id) {
   if (!(await confirmarSaida())) return;
   const o = S.empresas.find(x => x.id === id), n = novaEmpresa();
   n.dados = copiar(o.dados); n.dados.nome = (n.dados.nome || '') + ' (cópia)'; n.foraCalibracao = o.foraCalibracao; delete n.dados.modelo;
-  UI.atual = n; UI.sujo = true; UI.sugestao = null; UI.cnpjMsg = '';
+  UI.atual = n; UI.sujo = true; UI.sugestao = null; UI.cnpjMsg = ''; UI.revisar = false;
   navegar('#/analise/' + n.id); toast('Cópia aberta. Ajuste e salve para incluir na lista.');
 }
 async function excluirEmpresa(id) {
@@ -3095,6 +3103,83 @@ function escolherOrigem(alvo, o) {
   const b = document.querySelector(`.origem[data-alvo="${alvo}"]`); if (b) { b.outerHTML = botaoOrigem(alvo, o, true); const n = document.querySelector(`.origem[data-alvo="${alvo}"]`); if (n) n.focus(); }
   atualizarPainel();
 }
+/* ---------- campo sem valor: a pessoa diz por quê, em vez de deixar em branco ---------- */
+// Não achou, a empresa não divulga ou não se aplica. Fica em dados.semDado e não muda a conta: só registra o que foi procurado.
+// Vale para os campos que entram na conta e podem faltar; o que é só registro (vagas, tecnologias, grupo) ou tem valor padrão fica de fora.
+const SEM_DADO = {
+  'nao-achei': { rot: 'Não encontrado', menu: 'Não encontrei', sub: 'Procurei e não achei', ico: 'busca' },
+  'nao-divulga': { rot: 'Não divulga', menu: 'A empresa não divulga', sub: 'Dado não publicado', ico: 'cadeado' },
+  'nao-se-aplica': { rot: 'Não se aplica', menu: 'Não se aplica', sub: 'A empresa não tem isso', ico: 'nada' }
+};
+const MOTIVOS = ['nao-achei', 'nao-divulga'], MOTIVOS_3 = [...MOTIVOS, 'nao-se-aplica'];
+const tem1 = c => d => temValor(d[c]);
+// rot: nome na lista de pendências; vale: quando faz sentido pedir; tem: já respondido com valor; ops: motivos aceitos
+const CAMPOS_SEM_DADO = {
+  faturamento: { rot: d => rotulos(d).fat, vale: d => !rotulos(d).orgao, tem: tem1('faturamento'), ops: MOTIVOS },
+  funcionarios: { rot: d => rotulos(d).func, tem: tem1('funcionarios'), ops: MOTIVOS },
+  usuarios: { rot: d => rotulos(d).us, tem: tem1('usuarios'), ops: MOTIVOS },
+  unidades: { rot: d => rotulos(d).un, tem: tem1('unidades'), ops: MOTIVOS_3 },
+  adicoes: { rot: () => 'Adições em software e equipamentos', vale: d => d.natureza === 'listada', tem: tem1('adicoes'), ops: MOTIVOS },
+  contratos: { rot: () => 'Contratos e despesas de TI', vale: d => d.natureza === 'publico', tem: tem1('contratos'), ops: MOTIVOS },
+  profTI: { rot: () => 'Profissionais de TI', tem: tem1('profTI'), ops: MOTIVOS_3 },
+  salarioTI: { rot: () => 'Salário médio da equipe de TI', vale: d => temValor(d.profTI), tem: tem1('salarioTI'), ops: MOTIVOS_3 },
+  crescFunc: { rot: () => 'Crescimento de funcionários', tem: tem1('crescFunc'), ops: MOTIVOS },
+  gastosReais: { rot: () => 'Gasto de TI real de anos anteriores', tem: d => (d.gastosReais || []).some(x => temValor(x)), ops: MOTIVOS },
+  gastoDeclarado: { rot: () => 'Gasto de TI declarado do ano atual', tem: tem1('gastoDeclarado'), ops: MOTIVOS }
+};
+// 'valor' (respondido com número), um motivo, 'pendente' (vazio sem motivo) ou null (não se pede neste caso)
+function estadoSemDado(d, c) {
+  const x = CAMPOS_SEM_DADO[c]; if (!x || (x.vale && !x.vale(d))) return null;
+  if (x.tem(d)) return 'valor';
+  const s = (d.semDado || {})[c]; return x.ops.includes(s) ? s : 'pendente';
+}
+const pendentes = d => Object.keys(CAMPOS_SEM_DADO).filter(c => estadoSemDado(d, c) === 'pendente');
+const textoSemDado = (d, c) => { const s = SEM_DADO[(d.semDado || {})[c]]; return s ? s.rot.toLowerCase() : ''; };
+// botão abaixo do campo vazio, no lugar do botão de origem (que só aparece com valor)
+function botaoSemDado(c, d) {
+  const e = estadoSemDado(d, c), s = SEM_DADO[e], rev = !s && UI.revisar;
+  return `<button type="button" class="origem sem-dado ${s ? 'sd-ok' : 'o-vazio'}${rev ? ' revisar' : ''}" data-acao="sem-dado" data-campo="${c}" data-estado="${e || ''}" aria-haspopup="menu" aria-expanded="false" ${e === 'pendente' || s ? '' : 'hidden'} data-tip="Sem valor: diga por quê">${ico(s ? s.ico : 'ajuda')}${s ? s.rot : 'Sem dado?'}${ico('chev', 'chev')}</button>`;
+}
+function abrirSemDado(btn) {
+  const c = btn.dataset.campo, d = UI.atual.dados, atual = (d.semDado || {})[c] || '';
+  abrirPop(btn, CAMPOS_SEM_DADO[c].ops.map(k => `<button type="button" class="mi" role="menuitemradio" aria-checked="${atual === k}" data-acao="sem-dado-escolher" data-campo="${c}" data-s="${k}"><span>${ico(SEM_DADO[k].ico)}</span><span><b>${SEM_DADO[k].menu}</b><small>${SEM_DADO[k].sub}</small></span></button>`).join('')
+    + (atual ? `<button type="button" class="mi" role="menuitem" data-acao="sem-dado-escolher" data-campo="${c}" data-s=""><span>${ico('desfazer')}</span><span><b>Limpar</b></span></button>` : ''), { rotulo: 'Por que está sem valor' });
+}
+function escolherSemDado(c, s) {
+  const d = UI.atual.dados; d.semDado = d.semDado || {};
+  if (s) d.semDado[c] = s; else delete d.semDado[c];
+  marcarAlterado(); fecharPop(); atualizarSemDado();
+  const n = document.querySelector(`.sem-dado[data-campo="${c}"]`); if (n && !n.hidden) n.focus();
+  atualizarPainel();
+}
+// mantém os botões em dia com os valores: aparecem só em campo vazio e o motivo cai quando a pessoa digita um valor
+function atualizarSemDado() {
+  const d = UI.atual && UI.atual.dados; if (!d) return;
+  d.semDado = d.semDado || {};
+  for (const c of Object.keys(CAMPOS_SEM_DADO)) {
+    const e = estadoSemDado(d, c);
+    if (e === 'valor' && d.semDado[c]) delete d.semDado[c];
+    $$(`.sem-dado[data-campo="${c}"]`).forEach(b => {
+      if (b.dataset.estado === String(e || '') && b.classList.contains('revisar') === (e === 'pendente' && !!UI.revisar)) return;
+      const foco = document.activeElement === b; b.outerHTML = botaoSemDado(c, d);
+      if (foco) { const n = document.querySelector(`.sem-dado[data-campo="${c}"]`); if (n && !n.hidden) n.focus(); }
+    });
+  }
+}
+// ao salvar: campo vazio sem motivo é revisado, para ninguém pular um dado que tem
+async function verificarPendencias() {
+  const d = UI.atual.dados, pend = pendentes(d); if (!pend.length) return true;
+  const r = await perguntar(`<h2>${pend.length === 1 ? 'Falta 1 campo' : 'Faltam ' + pend.length + ' campos'}</h2><p>Preencha ou diga por que não há dado:</p><ul>${pend.map(c => `<li>${esc(CAMPOS_SEM_DADO[c].rot(d))}</li>`).join('')}</ul>`,
+    [['Salvar assim mesmo', 'salvar'], ['Revisar', 'revisar', 'prim']]);
+  if (r === 'salvar') return true;
+  revisarPendencias();
+  return false;
+}
+function revisarPendencias() {
+  UI.revisar = true;
+  const ir = () => { atualizarSemDado(); const b = $('.sem-dado.revisar:not([hidden])'); if (b) { const det = b.closest('details'); if (det) det.open = true; b.scrollIntoView({ block: 'center', behavior: reduzMov() ? 'auto' : 'smooth' }); b.focus({ preventScroll: true }); } };
+  if (UI.rota.aba === 'resultado') { navegar(`#/analise/${UI.atual.id}`); setTimeout(ir, 60); } else ir();
+}
 // a busca do CNPJ só acontece quando a pessoa pede: lupa para buscar, setas para atualizar o que já veio da Receita
 function botaoCNPJ(d) {
   const ja = !!(d.cnpjInfo && Object.keys(d.cnpjInfo).length), rot = ja ? 'Atualizar com os dados da Receita Federal' : 'Buscar os dados deste CNPJ na Receita Federal';
@@ -3107,7 +3192,7 @@ function campoNum(d, c, rot, opt = {}) {
   const f = d[c] || { v: '', o: '' }, cls = (opt.pre ? ' com-pre' : '') + (opt.un ? ' com-suf' : '');
   return `<div class="campo${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${AJUDA[c] ? botaoAjuda(c, rot) : ''}</div>
     <div class="entrada${cls}">${opt.pre ? `<span class="pre">${opt.pre}</span>` : ''}<input type="text" inputmode="decimal" id="f-${c}" data-campo="${c}" data-parte="v" value="${esc(fmtIn(f.v))}" ${opt.ph ? `placeholder="${esc(opt.ph)}"` : ''} autocomplete="off">${opt.un ? `<span class="suf">${opt.un}</span>` : ''}</div>
-    <div class="campo-pe">${botaoOrigem('campo:' + c, f.o, temValor(f))}${opt.dica ? `<span class="dica">${opt.dica}</span>` : ''}</div><p class="valid" id="v-${c}"></p></div>`;
+    <div class="campo-pe">${botaoOrigem('campo:' + c, f.o, temValor(f))}${CAMPOS_SEM_DADO[c] ? botaoSemDado(c, d) : ''}${opt.dica ? `<span class="dica">${opt.dica}</span>` : ''}</div><p class="valid" id="v-${c}"></p></div>`;
 }
 function campoTexto(d, c, rot, opt = {}) {
   return `<div class="campo${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${opt.ajuda ? botaoAjuda(c, rot) : ''}</div><input type="text" id="f-${c}" data-simples="${c}" value="${esc(d[c])}" ${opt.extra || ''} autocomplete="off">${opt.pe ? `<div class="campo-pe">${opt.pe}</div>` : ''}${opt.dica ? `<div class="campo-pe"><span class="dica">${opt.dica}</span></div>` : ''}<p class="valid" id="v-${c}">${opt.valid || ''}</p></div>`;
@@ -3150,7 +3235,7 @@ function campoReceita(d, R) {
   const seg = R.tipo && (L.ded || 0) > 0 ? `<span class="seg" role="radiogroup" aria-label="O valor informado é">${[['liquida', 'Receita líquida'], ['bruta', 'Faturamento bruto']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="fatTipo" value="${v}" data-simples="fatTipo" ${tipo === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>` : '';
   return `<div class="campo largo"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}${d.fatEstimar ? ' <span class="mudo">(se tiver)</span>' : ''}</label>${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
     <div class="entrada com-pre"><span class="pre">R$</span><input type="text" inputmode="decimal" id="f-faturamento" data-campo="faturamento" data-parte="v" value="${esc(fmtIn(f.v))}" autocomplete="off"></div>
-    <div class="linha-dupla">${seg}<label class="ano">Ano do valor <input type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" value="${esc(d.fatAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></label>${botaoOrigem('campo:faturamento', f.o, temValor(f))}</div>
+    <div class="linha-dupla">${seg}<label class="ano">Ano do valor <input type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" value="${esc(d.fatAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></label>${botaoOrigem('campo:faturamento', f.o, temValor(f))}${botaoSemDado('faturamento', d)}</div>
     <div class="campo-pe"><span class="dica" id="dica-rec">${dicaReceita(d, R)}</span></div><div class="campo-pe" id="rec-usada"></div><p class="valid" id="v-faturamento"></p>
     ${R.estimavel ? `<div id="rec-est" class="calc-caixa" ${d.fatEstimar ? '' : 'hidden'}></div>${d.fatEstimar && d.natureza === 'subsidiaria' ? blocoGlobal(d) : ''}` : ''}</div>`;
 }
@@ -3310,7 +3395,7 @@ function formAnalise() {
     + `<div class="campo"><div class="campo-rot"><label for="f-vagasTI">Vagas de TI abertas</label>${botaoAjuda('vagasTI', 'Vagas de TI')}</div><input type="text" inputmode="numeric" id="f-vagasTI" data-simples="vagasTI" value="${esc(d.vagasTI)}" autocomplete="off"></div>`;
   const gasto = `<div class="campo largo"><div class="campo-rot"><span class="rot">Gasto de TI real de anos anteriores</span>${botaoAjuda('gastosReais', 'Gasto real')}</div>
       <div class="reais">${reais.length ? '<div class="reais-cab"><span>Ano</span><span>Valor</span></div>' : ''}${reais.map((x, i) => `<div class="reais-linha"><input type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano)}"><div class="entrada com-pre"><span class="pre">R$</span><input type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || 'ano')}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}"></div>${botaoOrigem('real:' + i, x.o, temValor(x))}${btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq perigo')}</div>`).join('')}
-      <div><button type="button" class="btn peq" data-acao="add-real">${ico('mais')}Adicionar ano</button></div></div><p class="valid" id="v-reais"></p></div>`
+      <div class="reais-acoes"><button type="button" class="btn peq" data-acao="add-real">${ico('mais')}Adicionar ano</button>${botaoSemDado('gastosReais', d)}</div></div><p class="valid" id="v-reais"></p></div>`
     + campoNum(d, 'gastoDeclarado', 'Gasto de TI declarado do ano atual', { pre: 'R$', largo: true })
     + `<div class="campo largo"><label class="chk-linha"><input type="checkbox" id="f-usarCalib" data-usar-calib ${emp.foraCalibracao ? '' : 'checked'}><span>Usar esta empresa na minha calibração<span class="dica">Desmarque se o gasto real for duvidoso ou se esta empresa não deve influenciar a correção das outras. Vale depois de salvar.</span></span></label></div>`;
   // só registro: não muda a conta
@@ -3398,6 +3483,8 @@ function listaPmd(pmd) {
 }
 // com a área estreita o cartão fica preso embaixo da tela, só com os valores; este botão abre o resto
 const botaoCartao = ab => `<button type="button" class="cr-abrir btn peq" data-acao="cartao-abrir" aria-expanded="${ab}" aria-label="${ab ? 'Mostrar menos da estimativa' : 'Ver detalhes da estimativa'}"><span class="cr-abrir-rot">${ab ? 'Menos' : 'Detalhes'}</span>${ico('chev', 'chev')}</button>`;
+// o que mais aumentaria a confiança, sem o que a pessoa já disse que não achou, que a empresa não divulga ou que não se aplica
+const proximosDados = (d, r) => proximoMelhorDado(d, ...contexto(r.modoCalc), r).filter(p => !(d.semDado || {})[p.id === 'gastoReal' ? 'gastosReais' : p.id]);
 const ANIM = { id: null, mostrado: null, raf: 0 };
 let ultimoAnuncio = '', tmAnuncio = 0;
 function anunciar(t) { if (t === ultimoAnuncio) return; ultimoAnuncio = t; clearTimeout(tmAnuncio); tmAnuncio = setTimeout(() => { const el = $('#anuncio'); if (el) el.textContent = t; }, 700); }
@@ -3426,7 +3513,8 @@ function atualizarPainel() {
   $$('.valid[id^="v-"]').forEach(x => { const k = x.id.slice(2); if (k !== 'cnpj' && k !== 'municipio' && k !== 'nome') x.textContent = v[k] || ''; });
   const vc = $('#v-cnpj'); if (vc) vc.innerHTML = [v.cnpj || UI.cnpjMsg, v.cnpjFilial].filter(Boolean).join('<br>');
   atualizarReceitaUI(d, r);
-  const pmd = proximoMelhorDado(d, ...contexto(r.modoCalc), r), m = modoDe(d);
+  atualizarSemDado();
+  const pmd = proximosDados(d, r), m = modoDe(d);
   // recomendações num acordeão fechado: úteis, mas discretas
   const blocoPmd = pmd.length ? `<details class="cr-bloco cr-dicas" data-dicas${UI.dicasAbertas ? ' open' : ''}><summary>${ico('lampada')}<span>Como aumentar a confiança</span><span class="ganho">até +${Math.max(...pmd.map(p => p.ganho))}</span>${ico('chev', 'chev')}</summary>${listaPmd(pmd)}</details>` : '';
   // o que a pessoa escolheu no começo decide o que o cartão mostra: só o investimento em TI ou também a receita líquida
@@ -3642,6 +3730,8 @@ acoes({
   'origem': b => abrirOrigem(b),
   'origem-escolher': b => escolherOrigem(b.dataset.alvo, b.dataset.o),
   'buscar-cnpj': () => consultarCNPJ(),
+  'sem-dado': b => abrirSemDado(b),
+  'sem-dado-escolher': b => escolherSemDado(b.dataset.campo, b.dataset.s),
   'buscar-ptax': () => buscarPTAX(),
   'usar-sug': () => { const d = UI.atual.dados, s = UI.sugestao; if (s.natureza) { d.natureza = s.natureza; if (s.tipoPublico != null) d.tipoPublico = s.tipoPublico; } if (s.setor) d.setor = s.setor; UI.sugestao = null; marcarAlterado(); rerenderAnalise(); },
   'ignorar-sug': () => { UI.sugestao = null; rerenderAnalise(); },
@@ -3794,7 +3884,7 @@ function numerosTecnicos(r) {
 }
 function listaDados(d, r) {
   const R = rotulos(d), out = [];
-  const add = (c, rot, i, fmt, extra = '') => { const f = d[c], ok = f && f.v !== '' && f.v != null && isFinite(+f.v); out.push({ rot, i, val: ok ? fmt(+f.v) : null, o: ok ? (f.o || '') : null, extra }); };
+  const add = (c, rot, i, fmt, extra = '') => { const f = d[c], ok = f && f.v !== '' && f.v != null && isFinite(+f.v); out.push({ c, rot, i, val: ok ? fmt(+f.v) : null, o: ok ? (f.o || '') : null, extra }); };
   const rc = r.receita || {}, inf = rc.informada;
   add('faturamento', R.fat, 'moeda', fmtRS, inf ? [inf.bruta ? `bruto; líquida ≈ ${fmtRS(inf.liq)}` : '', inf.ano ? 'de ' + inf.ano + (inf.dt ? `; em ${ANO} ≈ ${fmtRS(inf.v)}` : '') : ''].filter(Boolean).join('; ')
     : rc.usada ? `≈ ${fmtRS(rc.usada.v)} ${rc.modo === 'enquadramento' ? 'pelo enquadramento ' + r.enq : 'estimada pela ferramenta'}` : rc.estimativa ? `≈ ${fmtRS(rc.estimativa.v)} estimada (referência)` : '');
@@ -3808,13 +3898,13 @@ function listaDados(d, r) {
   if (d.natureza === 'publico') add('contratos', 'Contratos e despesas de TI', 'governo', fmtRS);
   add('gastoDeclarado', 'Gasto de TI declarado do ano', 'doc', fmtRS);
   const rs = r.reais || [], u = rs[rs.length - 1];
-  out.push({ rot: 'Gasto de TI real', i: 'historico', val: u ? fmtRS(u.v) + ' em ' + u.ano : null, o: u ? (u.o || '') : null, extra: rs.length > 1 ? rs.length + ' anos informados' : '' });
+  out.push({ c: 'gastosReais', rot: 'Gasto de TI real', i: 'historico', val: u ? fmtRS(u.v) + ' em ' + u.ano : null, o: u ? (u.o || '') : null, extra: rs.length > 1 ? rs.length + ' anos informados' : '' });
   return out;
 }
 function dadosUsados(r, d) {
   return `<div class="dados-grade">${listaDados(d, r).map(x => x.val != null
     ? `<div class="dado"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.val}</b>${origemChip(x.o)}${x.extra ? `<small>${esc(x.extra)}</small>` : ''}</div>`
-    : `<div class="dado falta"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.extra ? esc(x.extra) : 'não informado'}</b></div>`).join('')}</div>`;
+    : `<div class="dado falta"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.extra ? esc(x.extra) : textoSemDado(d, x.c) || 'não informado'}</b></div>`).join('')}</div>`;
 }
 function subReceita(r) {
   const rc = r.receita;
@@ -3881,7 +3971,7 @@ function secaoRes(id, icone, tit, sub, corpo, extra = '') {
 function corpoResultado(emp) {
   const d = emp.dados, r = calc(d), id = encodeURIComponent(emp.id);
   if (r.vazio) return `<div class="vazio"><h2>${esc(r.msgVazio)}</h2><p>Volte aos dados e preencha a receita, os funcionários, a equipe de TI ou um gasto real.</p><div class="acoes"><a class="btn prim" href="#/analise/${id}">${ico('voltar')}Voltar aos dados</a></div></div>`;
-  const pmd = proximoMelhorDado(d, ...contexto(r.modoCalc), r), W = larguraGraf(240), temRec = r.receita && (r.receita.usada || r.receita.estimativa);
+  const pmd = proximosDados(d, r), W = larguraGraf(240), temRec = r.receita && (r.receita.usada || r.receita.estimativa);
   const secoes = [
     ['res-estimativa', 'Estimativa', heroResultado(r, d)],
     ['res-resumo', 'Para o resumo', secaoRes('res-resumo', 'faixa', 'Estimativas para o resumo', `Geral é o valor central. Conservadora é o percentil ${Math.round(r.resumo.q * 100)}: em ${Math.round((1 - r.resumo.q) * 100)} de cada 100 casos o gasto real fica acima dela. Salários de outras áreas, RH e administrativo nunca entram; os da equipe de TI entram conforme a opção ao lado.`, graficoEstimativas(r), `<div class="acoes">${seletorSalarios(r.resumo.comSalarios, '-res')}<button type="button" class="btn" data-acao="resumo">${ico('copiar')}Copiar resumo</button></div>`)],
@@ -4030,6 +4120,8 @@ function textoResumo(d, r) {
   b(`Premissas: ${r.mods.map(m => m.nome.toLowerCase() + ' × ' + nf(m.v, 2)).join('; ') || 'sem ajustes da empresa'}; total dos ajustes × ${nf(r.Mmod, 2)}${r.pequena ? '; regras de pequena empresa' : ''}.`);
   const dados = listaDados(d, r).filter(x => x.val != null).map(x => `${x.rot}: ${x.val} (${ROT_ORIGEM[x.o] || ROT_ORIGEM.terceiros})`);
   if (dados.length) b('Dados da empresa e origem: ' + dados.join('; ') + '.');
+  const semDado = listaDados(d, r).filter(x => x.val == null && x.c && textoSemDado(d, x.c)).map(x => `${x.rot} (${textoSemDado(d, x.c)})`);
+  if (semDado.length) b('Dados sem informação: ' + semDado.join('; ') + '.');
   const lim = [`confiança ${r.ic} de 100 (${r.icNivel})`, `faixa provável de 80%: ${fmtRS(r.p10)} a ${fmtRS(r.p90)}`];
   if (!r.temReal) lim.push('sem gasto de TI real ou declarado da empresa: o resultado depende de médias de mercado');
   if (u && rec.modo !== 'informada') lim.push('receita estimada, não oficial');

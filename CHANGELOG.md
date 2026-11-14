@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [1.4.0] - 2026-11-14
+
+### Adicionado
+- **Campo sem valor:** em vez de ficar em branco, cada campo que entra na conta ganha o botão “Sem dado?”, no lugar do botão de origem. A pessoa diz por quê: não encontrei, a empresa não divulga ou não se aplica. O motivo fica salvo com a empresa, aparece em Dados usados e no resumo, e o cartão deixa de sugerir esse dado. Não muda a estimativa.
+- **Verificador ao salvar:** lista os campos vazios sem motivo. Dá para revisar, com os pendentes destacados, ou salvar assim mesmo.
+
+### Alterado
+- A empresa modelo traz o motivo dos dados que os documentos do banco não têm. Receita e agências ficam pendentes de propósito.
+
 ## [1.3.0] - 2026-11-14
 
 ### Adicionado

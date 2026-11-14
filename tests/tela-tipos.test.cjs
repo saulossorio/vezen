@@ -7,6 +7,8 @@ const URL = 'file://' + path.join(__dirname, '..', 'index.html');
 const ok = [], falhas = [];
 const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (info ? ' — ' + info : '')); };
 const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
+// salvar: se o verificador listar campos sem resposta, segue com “Salvar assim mesmo”
+const salvarAnalise = async (p, espera = 300) => { await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(150); if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Salvar assim mesmo")'); await p.waitForTimeout(espera); };
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' });
   const ctx = await b.newContext({ viewport: { width: 1360, height: 900 }, acceptDownloads: true });
@@ -43,7 +45,7 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   // gasto real de 2025 para a análise entrar na minha calibração depois
   await p.click('[data-acao=add-real]'); await p.waitForTimeout(200);
   await p.fill('[data-real="0"][data-parte="ano"]', '2025'); await p.fill('[data-real="0"][data-parte="v"]', '4.000.000'); await p.waitForTimeout(300);
-  await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(400);
+  await salvarAnalise(p, 400);
 
   // tela de calibração
   await ir(p, '#/calibracao');
@@ -109,7 +111,7 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   check('resumo: tipo e outros tipos', /Tipo de estimativa: minha calibração, com as empresas informadas por você \(.*\).*Pelos outros tipos: fórmulas base, Geral R\$ .* calibração padrão, Geral R\$/.test(res), (res.match(/- Tipo de estimativa.*/) || [''])[0].slice(0, 300));
   check('resumo: limitações', /minha calibração feita com 20 empresas informadas por você/.test(res));
   await p.keyboard.press('Escape'); await p.waitForTimeout(200);
-  await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
+  await salvarAnalise(p);
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(500);
   check('resultado: chip e seletor', await p.locator('#res-estimativa .chip-modo.minha').count() === 1 && await p.locator('#res-estimativa input[data-modo]').count() === 3);
   const etapas = (await p.evaluate(() => [...document.querySelectorAll('.etapas')].map(e => e.textContent).join(' '))).replace(/\s+/g, ' ');
