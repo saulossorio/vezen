@@ -376,20 +376,9 @@ textarea.prompt { min-height: 260px; font-size: .88rem; }
 .nota-modelo ul { margin: 6px 0 0; padding-left: 18px; color: var(--cinza); }
 .nota-modelo li { margin: 4px 0; }
 .vazio .vazio-modelo { margin: 18px auto 0; max-width: 560px; color: var(--cinza); font-size: .92rem; }
-.objetivo .sf-cab { margin-bottom: 12px; }
-.objetivo.pede { border-color: var(--marca-b); box-shadow: 0 0 0 3px var(--marca-f); }
-.objetivo.pede .sf-prog { color: var(--link); font-weight: 600; }
-.objetivos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.obj-op { display: flex; gap: 10px; align-items: flex-start; padding: 11px 13px; border: 1px solid var(--linha-forte); border-radius: var(--raio); background: var(--superficie); cursor: pointer; }
-.obj-op input { margin-top: 3px; }
-.obj-op b { display: block; font-size: .95rem; }
-.obj-op small { display: block; color: var(--cinza); font-size: .8rem; line-height: 1.35; margin-top: 2px; }
-.obj-op:hover { border-color: var(--cinza2); }
-.obj-op:has(input:checked) { border-color: var(--marca-b); background: var(--marca-f); }
-.obj-op:has(input:focus-visible) { outline: 2px solid var(--foco); outline-offset: 2px; }
 .grade-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
 .grade-campos .largo { grid-column: 1 / -1; }
-@container ws (max-width: 560px) { .grade-campos, .objetivos { grid-template-columns: minmax(0, 1fr); } }
+@container ws (max-width: 560px) { .grade-campos { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 640px) { .grade-campos { grid-template-columns: minmax(0, 1fr); } }
 details.secao-form > summary { list-style: none; }
 details.secao-form > summary::-webkit-details-marker { display: none; }
@@ -906,7 +895,7 @@ dialog#dlg.saindo::backdrop { opacity: 0; transition: opacity 110ms ease-in; }
 /* campos, botões e marcas: a cor muda aos poucos quando o estado muda */
 input[type="text"], input[type="search"], input:not([type]), select, textarea { transition: border-color var(--dur), background-color var(--dur), box-shadow var(--dur); }
 .campo-rot label, .dado, .dado b { transition: color var(--dur), background-color var(--dur), border-color var(--dur); }
-.origem, .lat-item, .lat-sub, .modo-op, .obj-op, .tag-tec, .tec-cat, .tec-op, .tec-voltar, .estado, .estado i, .chip-falta { transition: color var(--dur), background-color var(--dur), border-color var(--dur), opacity var(--dur), transform var(--dur); }
+.origem, .lat-item, .lat-sub, .modo-op, .tag-tec, .tec-cat, .tec-op, .tec-voltar, .estado, .estado i, .chip-falta { transition: color var(--dur), background-color var(--dur), border-color var(--dur), opacity var(--dur), transform var(--dur); }
 .tag-tec.saindo { opacity: 0; transform: scale(.9); pointer-events: none; }
 /* seções que abrem e fecham: onde o navegador sabe animar a altura, anima; nos outros, abre direto */
 details { interpolate-size: allow-keywords; }
@@ -1510,7 +1499,7 @@ function calcular(d, P, opts = {}) {
   };
 
   // E1: receita líquida (informada, estimada pela ferramenta ou pelo enquadramento)
-  const rec = receitaEmpresa(d, P, { ano, L, linhaId, func, usInf, pequena, enq, banda, sOrig, estimar: usaPct ? !fat || !!d.fatEstimar : !!d.fatEstimar }); // nos métodos por percentual a receita informada vale como está, e só é estimada quando falta
+  const rec = receitaEmpresa(d, P, { ano, L, linhaId, func, usInf, pequena, enq, banda, sOrig, estimar: usaPct ? !fat : !!d.fatEstimar }); // a interface pede sempre a estimativa (fatEstimar fica true); os casos de aceitação A a E fixam o flag. Nos métodos por percentual a informada vale como está
   const rotRec = { informada: 'Receita líquida', enquadramento: 'Receita estimada pelo enquadramento ' + enq, estimada: 'Receita líquida estimada pela ferramenta', combinada: 'Receita líquida (informada e estimada)' }[rec.modo] || 'Receita líquida';
   const e2Ativo = usuarios != null && usuarios >= 50 && L.capu != null && !pequena;
   rec.e1Fora = rec.soFuncionarios && e2Ativo && L.p != null; // estimada só pelos funcionários: o E2 já usa esse dado
@@ -2517,14 +2506,13 @@ function migrar(o) {
   // a antiga correção pelas empresas salvas deu lugar à minha calibração, que é refeita sozinha
   if (o.calibracao) { const c = o.calibracao; Object.assign(n.calibracao, { base: c.base || null, mapaUlt: c.mapaUlt || null, minhas: Array.isArray(c.minhas) ? c.minhas : [], direta: c.direta && typeof c.direta === 'object' && c.direta.pg > 0 ? c.direta : null }); }
   n.ultimoBackup = o.ultimoBackup || null; n.ultimaAlteracao = o.ultimaAlteracao || null;
-  // análises salvas antes do tipo de estimativa seguem com as fórmulas base, para não mudar de valor; o antigo tipo “Calibrada” é a calibração padrão.
-  // As salvas antes da escolha do que estimar ficam como estavam: com a receita só se a caixa “Estimar a receita” estava marcada.
+  // análises salvas antes do tipo de estimativa seguem com o Método Vezen; o antigo tipo “Calibrada” é o CR1.
   n.empresas.forEach(e => {
     if (!e.dados) return;
     // o motivo “Não encontrado” já se chamou de outro jeito
     if (e.dados.semDado) for (const k of Object.keys(e.dados.semDado)) if (e.dados.semDado[k] === 'nao-achei') e.dados.semDado[k] = 'nao-encontrado';
     if (e.dados.modo === undefined) e.dados.modo = 'base'; if (e.dados.modo === 'calibrada') e.dados.modo = 'padrao';
-    if (typeof e.dados.fatEstimar !== 'boolean') e.dados.fatEstimar = !!e.dados.fatEstimar;
+    e.dados.fatEstimar = true; // desde a 2.1.0 toda análise mostra a receita, informada ou estimada
     e.dados = Object.assign(dadosVazios(), e.dados);
   });
   return n;
@@ -2542,7 +2530,7 @@ function salvar(alterou = true) {
 }
 function dadosVazios() {
   const f = () => ({ v: '', o: '' });
-  return { nome: '', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', faturamento: f(), fatAno: String(ANO - 1), fatMeses: '12', fatTipo: 'liquida', fatEstimar: null, funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
+  return { nome: '', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', faturamento: f(), fatAno: String(ANO - 1), fatMeses: '12', fatTipo: 'liquida', fatEstimar: true, funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
     unidades: f(), enquadramento: '', tipoPublico: '', adicoes: f(), contratos: f(), tiMatriz: '', digital: '', tecnologias: [], tecOutras: '', crescFunc: f(), vagasTI: '',
     gastosReais: [], gastoDeclarado: f(), gManual: '', extras: {}, viaCNPJ: {}, cnpjInfo: {},
     globalRec: f(), globalMoeda: 'USD', globalAno: String(ANO - 1), globalTaxa: '', globalTaxaFonte: '', globalFunc: f(), globalPart: f(), salariosTI: 'com', modo: 'base', semDado: {} };
@@ -3181,12 +3169,6 @@ function salvarEmpresa() {
     toast('Falta o nome da empresa');
     return false;
   }
-  if (emp.dados.fatEstimar == null) {
-    const foco = () => { const o = $('#sec-objetivo'); if (o) { o.scrollIntoView({ block: 'center' }); o.querySelector('input').focus({ preventScroll: true }); } };
-    if (UI.rota.aba === 'resultado') { navegar(`#/analise/${emp.id}`); setTimeout(foco, 0); } else foco();
-    toast('Escolha o que esta análise vai estimar');
-    return false;
-  }
   if (faltaCampo()) return false;
   const agora = new Date().toISOString();
   if (!empresaSalva()) emp.criadoEm = agora;
@@ -3216,7 +3198,7 @@ async function novaAnalise(dados, limpo = false) {
   UI.atual = novaEmpresa(); UI.sujo = !!dados && !limpo; UI.sugestao = null; UI.cnpjMsg = '';
   if (dados) UI.atual.dados = Object.assign(dadosVazios(), dados);
   navegar('#/analise/' + UI.atual.id);
-  setTimeout(() => { const o = $('#sec-objetivo input'); if (o && !dados) o.focus(); }, 0);
+  setTimeout(() => { const o = $('#f-nome'); if (o && !dados) o.focus(); }, 0);
 }
 /* ---------- empresa modelo: um caso real, com dados públicos e fontes oficiais, para ver a ferramenta funcionando ---------- */
 // Banco do Brasil, com os números dos documentos do próprio banco. O gasto real de TI publicado deixa a confiança alta.
@@ -3230,7 +3212,7 @@ const EMPRESA_MODELO = {
     gastosReais: [{ ano: 2024, v: 6.2e9, o: 'oficial' }, { ano: 2025, v: 6.8e9, o: 'oficial' }],
     // não aparecem nos dois documentos usados
     semDado: { usuarios: 'nao-encontrado', profTI: 'nao-encontrado', contratos: 'nao-encontrado', gastoDeclarado: 'nao-encontrado' },
-    fatEstimar: false, modo: 'base', modelo: 'bb-2025'
+    fatEstimar: true, modo: 'base', modelo: 'bb-2025'
   },
   fontes: [
     { doc: 'Relatório da Administração 2025', url: 'https://api.mziq.com/mzfilemanager/v2/d/5760dff3-15e1-4962-9e81-322a0b3d0bbd/637e45ff-9331-d07c-5fde-606c69e1bfe1?origin=2',
@@ -3476,11 +3458,11 @@ const PERIODOS_VALOR = [['12', '12 meses (ano fechado)'], ['9', '9 meses'], ['6'
 function campoReceita(d, R) {
   const f = d.faturamento || { v: '', o: '' }, L = P().setores[linhaDe(d)], tipo = d.fatTipo === 'bruta' ? 'bruta' : 'liquida';
   const seg = R.tipo && (L.ded || 0) > 0 ? `<span class="seg" role="radiogroup" aria-label="O valor informado é">${[['liquida', 'Receita líquida'], ['bruta', 'Faturamento bruto']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="fatTipo" value="${v}" data-simples="fatTipo" ${tipo === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>` : '';
-  return `<div class="campo largo"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}${d.fatEstimar ? ' <span class="mudo">(se tiver)</span>' : ''}</label>${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
+  return `<div class="campo largo"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}</label>${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
     <div class="entrada com-pre"><span class="pre">R$</span><input type="text" inputmode="decimal" id="f-faturamento" data-campo="faturamento" data-parte="v" value="${esc(fmtIn(f.v))}" autocomplete="off"></div>
     <div class="linha-dupla">${seg}<label class="ano">Ano do valor <input type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" value="${esc(d.fatAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></label>${R.orgao ? '' : `<label class="ano">Período <select id="f-fatMeses" data-simples="fatMeses">${PERIODOS_VALOR.map(([v, t]) => `<option value="${v}"${String(d.fatMeses || '12') === v ? ' selected' : ''}>${t}</option>`).join('')}</select></label>`}${botaoOrigem('campo:faturamento', f.o, temValor(f))}${botaoSemDado('faturamento', d)}</div>
     <div class="campo-pe"><span class="dica" id="dica-rec">${dicaReceita(d, R)}</span></div><div class="campo-pe" id="rec-usada"></div><p class="valid" id="v-faturamento"></p>
-    ${R.estimavel ? `<div id="rec-est" class="calc-caixa" ${d.fatEstimar ? '' : 'hidden'}></div>${d.fatEstimar && d.natureza === 'subsidiaria' ? blocoGlobal(d) : ''}` : ''}</div>`;
+    ${R.estimavel ? `<div id="rec-est" class="calc-caixa" hidden></div>${d.natureza === 'subsidiaria' ? blocoGlobal(d) : ''}` : ''}</div>`;
 }
 function dicaReceita(d, R) {
   const Pm = contexto(modoDe(d))[0], L = Pm.setores[linhaDe(d)], g = Pm.receita.g, a = +d.fatAno, m = Math.round(+d.fatMeses) >= 1 && Math.round(+d.fatMeses) <= 12 ? Math.round(+d.fatMeses) : 12, out = [];
@@ -3537,6 +3519,13 @@ async function buscarPTAX() {
   } finally { clearTimeout(t); }
 }
 function origemReceita(rec) { return rec.modo === 'informada' ? rec.informada.o : rec.modo === 'enquadramento' ? 'enquadramento' : rec.modo === 'combinada' ? 'combinada' : 'estimado'; }
+// de onde saiu a receita que está no cartão, em poucas palavras
+function rotuloReceita(rc) {
+  const u = rc.usada;
+  if (rc.modo === 'informada') return 'Valor informado' + (rc.informada && rc.informada.meses < 12 ? ', de ' + rc.informada.meses + ' meses levado a 12' : '');
+  if (rc.modo === 'enquadramento') return 'Meio da faixa legal do enquadramento';
+  return `Faixa provável <b>${fmtRS(u.p10)} a ${fmtRS(u.p90)}</b>`; // a origem (estimada, ou informada e estimada) vai no selo ao lado
+}
 function atualizarReceitaUI(d, r) {
   const di = $('#dica-rec'); if (di) di.textContent = dicaReceita(d, rotulos(d));
   const dt = $('#dica-taxa'); if (dt && !/Buscando/.test(dt.textContent)) dt.innerHTML = dicaTaxa(d);
@@ -3544,8 +3533,7 @@ function atualizarReceitaUI(d, r) {
   const ru = $('#rec-usada'), u = !r.vazio && r.receita && r.receita.usada;
   if (ru) ru.innerHTML = u ? `<span class="dica">Receita líquida usada em ${ANO}: <b>${fmtRS(u.v)}</b></span>${origemChip(origemReceita(r.receita))}` : '';
   const box = $('#rec-est'); if (!box) return;
-  box.hidden = !d.fatEstimar;
-  box.innerHTML = d.fatEstimar ? caixaReceitaEst(r.receita) : '';
+  box.innerHTML = caixaReceitaEst(r.receita); box.hidden = !box.innerHTML;
 }
 function caixaReceitaEst(rec) {
   if (!rec) return '';
@@ -3718,10 +3706,7 @@ function formAnalise() {
   const extS = { operadora: () => campoExtra(d, 'beneficiarios', 'Beneficiários', 'num'), saude: () => campoExtra(d, 'leitos', 'Leitos', 'num'), educacao: () => campoExtra(d, 'alunos', 'Alunos', 'num'), varejo: () => campoExtra(d, 'visitas', 'Visitas ao site por mês', 'num'), industria: () => campoExtra(d, 'ucs', 'Unidades consumidoras (distribuidora)', 'num'), logistica: () => campoExtra(d, 'frota', 'Frota', 'num'), tecnologia: () => campoExtra(d, 'pctTecnica', '% da equipe técnica', 'num') + campoExtra(d, 'acessos', 'Acessos (telecom)', 'num') };
   const nTec = (d.tecnologias || []).length;
   const mais = (n !== 'publico' && n !== 'terceiro' ? campoGrupo(d) : '') + (extN[n] ? extN[n]() : '') + (extS[d.setor] ? extS[d.setor]() : '') + blocoTecnologias(d);
-  const obj = d.fatEstimar === true ? 'ti-receita' : d.fatEstimar === false ? 'ti' : '';
-  const objetivo = `<section class="secao-form objetivo${obj ? '' : ' pede'}" id="sec-objetivo" aria-labelledby="sec-objetivo-t"><div class="sf-cab"><h2 id="sec-objetivo-t">${ico('lista')}O que esta análise vai estimar</h2>${obj ? '' : '<span class="sf-prog">escolha para começar</span>'}</div>
-    <div class="objetivos" role="radiogroup" aria-labelledby="sec-objetivo-t">${[['ti', 'Investimento em TI', 'Quando você já tem a receita ou não precisa dela. Se tiver a receita, informe: ela entra na conta.'], ['ti-receita', 'Receita líquida e investimento em TI', 'A ferramenta estima também a receita, pelos funcionários e pelo setor. Se você tiver um valor, ele entra junto.']].map(([v, t, sub]) => `<label class="obj-op"><input type="radio" name="objetivo" value="${v}" data-objetivo ${obj === v ? 'checked' : ''}><span><b>${t}</b><small>${sub}</small></span></label>`).join('')}</div></section>`;
-  return notaModelo(d) + objetivo + secao('sec-ident', 'id', 'Identificação', '', ident, preenchido(d, ['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio']) + ' de 6')
+  return notaModelo(d) + secao('sec-ident', 'id', 'Identificação', '', ident, preenchido(d, ['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio']) + ' de 6')
     + secao('sec-porte', 'porte', 'Porte', '', porte)
     + secao('sec-ti', 'sinal', 'Equipe e sinais de TI', '', ti)
     + secao('sec-gasto', 'historico', 'Gasto de TI conhecido', 'Dados reais da empresa pesam mais que as médias de mercado e estreitam a faixa.', gasto)
@@ -3755,14 +3740,14 @@ function descModo(m) {
   return 'Pesquisas públicas, até 7 caminhos';
 }
 function seletorModo(m, suf = '', d = null) {
-  return `<div class="modos" role="radiogroup" aria-label="Tipo de estimativa">${MODOS.map(v => {
+  return `<div class="modos" role="radiogroup" aria-label="Método">${MODOS.map(v => {
     const ok = modoDisponivel(v), r = ok && d ? calcModo(d, v) : null;
     return `<label class="modo-op${ok ? '' : ' off'}"><input type="radio" name="modo${suf}" value="${v}" data-modo${m === v ? ' checked' : ''}${ok ? '' : ' disabled'}><span><b>${nomeModo(v)}</b><small>${descModo(v)}</small></span><span class="mo-val">${r && !r.vazio ? fmtRS(r.F) : ok ? '' : '—'}</span></label>`;
   }).join('')}</div>`;
 }
 // nas listas, um menu simples
 function seletorModoLista(m, id) {
-  return `<select id="${id}" data-lote-modo aria-label="Tipo de estimativa">${MODOS.map(v => `<option value="${v}" ${m === v ? 'selected' : ''} ${modoDisponivel(v) ? '' : 'disabled'}>${nomeModo(v)}${modoDisponivel(v) ? '' : ' (indisponível)'}</option>`).join('')}</select>`;
+  return `<select id="${id}" data-lote-modo aria-label="Método">${MODOS.map(v => `<option value="${v}" ${m === v ? 'selected' : ''} ${modoDisponivel(v) ? '' : 'disabled'}>${nomeModo(v)}${modoDisponivel(v) ? '' : ' (indisponível)'}</option>`).join('')}</select>`;
 }
 function mudarModo(v) {
   if (!UI.atual) return;
@@ -3836,18 +3821,18 @@ function atualizarPainel() {
   const pmd = proximosDados(d, r), m = modoDe(d);
   // recomendações num acordeão fechado: úteis, mas discretas
   const blocoPmd = pmd.length ? `<details class="cr-bloco cr-dicas" data-dicas${UI.dicasAbertas ? ' open' : ''}><summary>${ico('lampada')}<span>Como aumentar a confiança</span><span class="ganho">até +${Math.max(...pmd.map(p => p.ganho))}</span>${ico('chev', 'chev')}</summary>${listaPmd(pmd)}</details>` : '';
-  // o que a pessoa escolheu no começo decide o que o cartão mostra: só o investimento em TI ou também a receita líquida
+  // os dois resultados sempre à vista: a receita líquida (informada ou estimada, com a origem) e o investimento em TI
   const rec = !r.vazio && r.receita && r.receita.usada;
-  const saidaReceita = d.fatEstimar !== true ? '' : rec
-    ? `<div class="cr-saida"><p class="cr-rot">Receita líquida, ${ANO}</p><div class="cr-num"><div class="cr-valor cr-valor-rec" id="cr-receita">${fmtRS(rec.v)}</div></div><p class="cr-faixa">${r.receita.modo === 'informada' ? 'Valor informado' : `Faixa provável <b>${fmtRS(rec.p10)} a ${fmtRS(rec.p90)}</b>`} ${origemChip(origemReceita(r.receita))}</p></div>`
-    : `<div class="cr-saida"><p class="cr-rot">Receita líquida</p><p class="vazio-res">Para estimar, preencha os funcionários e o setor.</p></div>`;
+  const saidaReceita = rec
+    ? `<div class="cr-saida"><p class="cr-rot">Receita líquida, ${ANO}</p><div class="cr-num"><div class="cr-valor cr-valor-rec" id="cr-receita">${fmtRS(rec.v)}</div></div><p class="cr-faixa">${rotuloReceita(r.receita)} ${origemChip(origemReceita(r.receita))}</p></div>`
+    : `<div class="cr-saida"><p class="cr-rot">Receita líquida</p><p class="vazio-res">Informe a receita, ou os funcionários e o setor para estimar.</p></div>`;
   const aberto = !!UI.cartaoAberto; el.classList.toggle('aberto', aberto);
   const abrir = botaoCartao(aberto);
-  anunciar(r.vazio ? '' : `Investimento em TI: ${fmtRS(r.F)}${rec && d.fatEstimar ? '. Receita líquida: ' + fmtRS(rec.v) : ''}`);
+  anunciar(r.vazio ? '' : `Investimento em TI: ${fmtRS(r.F)}${rec ? '. Receita líquida: ' + fmtRS(rec.v) : ''}`);
   if (r.vazio) {
     ANIM.mostrado = null;
     el.innerHTML = `<div class="cr-topo">${saidaReceita}<div class="cr-saida"><p class="cr-rot">Investimento em TI</p><div class="vazio-res"><b>${esc(r.msgVazio)}</b>Preencha a receita, os funcionários, a equipe de TI ou um gasto real.</div></div>${abrir}</div>
-      <div class="cr-resto"><div class="cr-in"><div class="cr-bloco"><h3>Tipo de estimativa</h3>${seletorModo(m)}</div>${blocoPmd}</div></div>`;
+      <div class="cr-resto"><div class="cr-in"><div class="cr-bloco"><h3>Método</h3>${seletorModo(m)}</div>${blocoPmd}</div></div>`;
     return;
   }
   const z = r.resumo, com = z.comSalarios, g = com ? z.geral : z.geralSem, c = com ? z.conservadora : z.conservadoraSem;
@@ -3860,7 +3845,7 @@ function atualizarPainel() {
     ${r.E4ativo ? `<div class="nota">${ico('info')}<p>O gasto declarado do ano substitui a estimativa. Os outros caminhos aparecem só para comparação.</p></div>` : ''}
     ${r.avisos.map(a => `<div class="alerta">${ico('alerta')}<p>${esc(a)}</p></div>`).join('')}
     <div class="cr-bloco"><h3>Para o resumo, ${com ? 'com' : 'sem'} salários da equipe de TI</h3><div class="cr-dois"><div><small>Geral</small><b>${fmtRS(g)}</b>${rec ? `<small>${fmtPct(g / rec.v)} da receita</small>` : ''}</div><div><small>Conservadora</small><b>${fmtRS(c)}</b>${rec ? `<small>${fmtPct(c / rec.v)} da receita</small>` : ''}</div></div></div>
-    <div class="cr-bloco"><h3>Tipo de estimativa</h3>${seletorModo(m, '', d)}</div>
+    <div class="cr-bloco"><h3>Método</h3>${seletorModo(m, '', d)}</div>
     ${blocoPmd}
     <div class="cr-acoes"><a class="btn" href="#/analise/${encodeURIComponent(emp.id)}/resultado">${ico('detalhe')}Ver resultado</a><button type="button" class="btn" data-acao="resumo">${ico('copiar')}Copiar resumo</button></div></div></div>`;
   animarValor($('#cr-valor'), r.F, emp.id);
@@ -3938,7 +3923,6 @@ function aoMudarAnalise(e) {
   if (t.hasAttribute('data-salarios')) return mudarSalarios(t.value);
   if (t.hasAttribute('data-modo')) return mudarModo(t.value);
   if (UI.rota.aba === 'resultado') { if (t.id === 'g-horiz') { UI.horizonte = +t.value; atualizarProjecao(); } return; }
-  if (t.hasAttribute('data-objetivo')) { UI.atual.dados.fatEstimar = t.value === 'ti-receita'; marcarAlterado(); return rerenderAnalise(); }
   if (t.tagName === 'SELECT' || t.type === 'checkbox' || t.type === 'radio') {
     setCampo(t); marcarAlterado();
     if (t.dataset.tec) atualizarTecUI(t);
@@ -4231,7 +4215,7 @@ function listaDados(d, r) {
 function dadosUsados(r, d) {
   return `<div class="dados-grade">${listaDados(d, r).map(x => x.val != null
     ? `<div class="dado"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.val}</b>${origemChip(x.o)}${x.extra ? `<small>${esc(x.extra)}</small>` : ''}</div>`
-    : `<div class="dado falta${estadoSemDado(d, x.c) === 'pendente' ? ' pendente' : ''}"><small>${ico(x.i)}${esc(x.rot)}</small>${x.extra ? `<b>${esc(x.extra)}</b>` : chipSemDado(d, x.c) || `<b>${estadoSemDado(d, x.c) === 'pendente' ? 'falta informar' : 'não informado'}</b>`}</div>`).join('')}</div>`;
+    : `<div class="dado falta${estadoSemDado(d, x.c) === 'pendente' ? ' pendente' : ''}"><small>${ico(x.i)}${esc(x.rot)}</small>${chipSemDado(d, x.c) ? chipSemDado(d, x.c) + (x.extra ? `<small>${esc(x.extra)}</small>` : '') : x.extra ? `<b>${esc(x.extra)}</b>` : `<b>${estadoSemDado(d, x.c) === 'pendente' ? 'falta informar' : 'não informado'}</b>`}</div>`).join('')}</div>`;
 }
 function subReceita(r) {
   const rc = r.receita;
@@ -4285,7 +4269,7 @@ function heroResultado(r, d) {
     <div class="hero-conf">${chipConf(r)}<div class="medida"><span class="trilha"><i class="c-${clsNivel(r.icNivel)}" style="width:${r.ic}%"></i></span><b>${r.ic} de 100</b></div><p>${esc(rotuloConfianca(r))}</p>
       <div style="margin-top:12px">${seletorModo(modoDe(d), '-res', d)}</div></div></div>
     <dl class="numeros">
-      ${d.fatEstimar === true ? `<div><dt>Receita líquida, ${ANO}</dt><dd id="res-receita-num">${rec ? fmtRS(rec.v) : '—'}<small>${!rec ? 'faltam funcionários e setor' : r.receita.modo === 'informada' ? 'valor informado' : `faixa ${fmtRS(rec.p10)} a ${fmtRS(rec.p90)}`}</small></dd></div>` : ''}
+      <div><dt>Receita líquida, ${ANO}</dt><dd id="res-receita-num">${rec ? fmtRS(rec.v) : '—'}<small>${!rec ? 'faltam funcionários e setor' : r.receita.modo === 'informada' ? 'valor informado' : `faixa ${fmtRS(rec.p10)} a ${fmtRS(rec.p90)}`}</small></dd></div>
       <div><dt>Geral, ${com ? 'com' : 'sem'} salários de TI</dt><dd>${fmtRS(g)}<small>para o resumo</small></dd></div>
       <div><dt>Conservadora</dt><dd>${fmtRS(c)}<small>percentil ${Math.round(z.q * 100)}</small></dd></div>
       <div><dt>Parte da receita</dt><dd>${rec ? fmtPct(g / rec.v) : '—'}<small>${rec ? 'receita de ' + fmtRS(rec.v) : 'sem receita'}</small></dd></div>
@@ -4552,7 +4536,7 @@ function telaComparar() {
   if (emps.length < 2) return cab + `<div class="vazio"><h2>Escolha de 2 a 4 empresas</h2><p>Marque as empresas na lista e clique em Comparar.</p><div class="acoes"><a class="btn prim" href="#/empresas">Ir para as empresas</a></div></div>`;
   const rs = emps.map(e => ({ e, r: calc(e.dados) }));
   const linhas = [['Setor', x => esc(nomeSetor(x.e.dados))], ['Lugar', x => esc(lugarTxt(x.e.dados) || '—')], ['Valor central', x => x.r.vazio ? '—' : '<b>' + fmtRS(x.r.F) + '</b>'],
-    ['Faixa provável', x => x.r.vazio ? '—' : fmtRS(x.r.p10) + ' a ' + fmtRS(x.r.p90)], ['Confiança', x => x.r.vazio ? '—' : chipConf(x.r)], ['Tipo de estimativa', x => nomeModo(x.r.modoCalc)],
+    ['Faixa provável', x => x.r.vazio ? '—' : fmtRS(x.r.p10) + ' a ' + fmtRS(x.r.p90)], ['Confiança', x => x.r.vazio ? '—' : chipConf(x.r)], ['Método', x => nomeModo(x.r.modoCalc)],
     ['Receita líquida', x => x.r.receita && x.r.receita.usada ? fmtRS(x.r.receita.usada.v) + (x.r.receita.modo === 'informada' ? '' : ' (estimada)') : '—'], ['Conservadora', x => x.r.vazio ? '—' : fmtRS(x.r.resumo.conservadora)], ['Geral sem salários de TI', x => x.r.vazio ? '—' : fmtRS(x.r.resumo.geralSem)], ['Funcionários', x => valorPos(x.e.dados.funcionarios) ? nf(+x.e.dados.funcionarios.v, 0) : '—'],
     ['Caminhos', x => x.r.vazio ? '—' : x.r.ests.map(e => esc(e.nome)).join('<br>')], ['Gasto real', x => { const u = ultimoReal(x.e.dados); return u ? fmtRS(+u.v) + ' (' + u.ano + ')' : '—'; }]];
   return cab + `<section class="painel">${graficoComparacao(rs)}</section>
@@ -4573,7 +4557,7 @@ function tabelaEmpresas(ids) {
     { t: 'Valor central (R$)', tipo: 'rs', l: 20 }, { t: 'P10 (R$)', tipo: 'rs', l: 18 }, { t: 'P90 (R$)', tipo: 'rs', l: 18 }, { t: 'Índice de confiança', tipo: 'int', l: 12 },
     { t: 'Gasto real (R$)', tipo: 'rs', l: 18 }, { t: 'Ano do gasto real', tipo: 'ano', l: 10 }, { t: 'Data da análise', l: 16 }, { t: 'Usada na calibração', l: 12 },
     { t: 'Receita líquida usada (R$)', tipo: 'rs', l: 22 }, { t: 'Natureza da receita', l: 26 }, { t: 'Estimativa conservadora (R$)', tipo: 'rs', l: 22 }, { t: 'Geral sem salários de TI (R$)', tipo: 'rs', l: 22 },
-    { t: 'Conservadora sem salários de TI (R$)', tipo: 'rs', l: 24 }, { t: 'Salários de TI no resumo', l: 12 }, { t: 'Tipo de estimativa', l: 20 }];
+    { t: 'Conservadora sem salários de TI (R$)', tipo: 'rs', l: 24 }, { t: 'Salários de TI no resumo', l: 12 }, { t: 'Método', l: 20 }];
   const linhas = S.empresas.filter(x => !ids || ids.has(x.id)).map(e => {
     const d = e.dados, r = calc(d), u = ultimoReal(d), nat = PAIS.naturezas.find(x => x.id === d.natureza), rec = !r.vazio && r.receita.usada;
     return [d.nome, d.cnpj, nat ? nat.nome : 'Sem informação', nomeSetor(d), d.uf, d.municipio, r.vazio ? '' : r.F, r.vazio ? '' : r.p10, r.vazio ? '' : r.p90, r.vazio ? '' : r.ic, u ? +u.v : '', u ? +u.ano : '', dataBR(e.alteradoEm), e.foraCalibracao ? 'não' : 'sim',
@@ -4696,7 +4680,7 @@ function dadosDaLinha(x, L) {
   if (x.s === '@publico') d.natureza = 'publico'; else if (x.s && x.s !== 'naosei') d.setor = x.s;
   const aR = ultAno(x.r);
   if (aR) { d.faturamento = { v: x.r[aR], o }; d.fatAno = String(aR); }
-  d.fatEstimar = !aR && !!L.estimarReceita;
+  d.fatEstimar = true;
   if (x.f) d.funcionarios = { v: x.f, o };
   if (x.ft) d.profTI = { v: x.ft, o };
   for (const [a, v] of Object.entries(x.g || {})) { if (+a === ANO) d.gastoDeclarado = { v, o }; else if (+a > 1900 && +a < ANO) d.gastosReais.push({ ano: String(a), v, o }); }
@@ -4722,7 +4706,7 @@ async function lerArquivoLista(f) {
   try {
     const tab = await lerTabela(new Uint8Array(await f.arrayBuffer()), f.name);
     if (!tab.linhas.length) throw new Error('A tabela não tem linhas de dados.');
-    UI.lote = Object.assign({ nome: f.name, nomeLista: f.name.replace(/\.[^.]+$/, ''), tab, mapa: mapaAutomatico(tab), segAberto: false, modo: modoDisponivel('padrao') ? 'padrao' : 'base', origem: 'terceiros', estimarReceita: true }, estatisticasColunas(tab));
+    UI.lote = Object.assign({ nome: f.name, nomeLista: f.name.replace(/\.[^.]+$/, ''), tab, mapa: mapaAutomatico(tab), segAberto: false, modo: modoDisponivel('padrao') ? 'padrao' : 'base', origem: 'terceiros' }, estatisticasColunas(tab));
     recalcularLote();
     renderAqui();
   } catch (e) {
@@ -4734,7 +4718,7 @@ function recalcularLote() {
   try {
     const regs = registrosBase(B.tab, B.mapa), temNat = !!B.mapa.papeis.natureza;
     B.linhas = regs.map(x => linhaCompacta(x, temNat));
-    const L = { linhas: B.linhas, modo: B.modo, origem: B.origem, estimarReceita: B.estimarReceita };
+    const L = { linhas: B.linhas, modo: B.modo, origem: B.origem };
     B.comEstimativa = calcularLista(L).filter(x => !x.r.vazio).length; B.erro = '';
   } catch (e) { B.linhas = []; B.comEstimativa = 0; B.erro = e.message || String(e); }
 }
@@ -4749,16 +4733,16 @@ function telaLoteColunas() {
   <section class="painel"><div class="painel-cab"><div><h2>${ico('param')}Como estimar</h2><p>Dá para mudar depois, na própria lista.</p></div></div>
     <div class="opcoes-lote">
       <div class="campo"><div class="campo-rot"><label for="lt-nome">Nome da lista</label></div><input type="text" id="lt-nome" data-lote="nomeLista" value="${esc(B.nomeLista)}"></div>
-      <div class="campo"><div class="campo-rot"><label for="lt-modo">Tipo de estimativa</label></div>${seletorModoLista(B.modo, 'lt-modo')}</div>
+      <div class="campo"><div class="campo-rot"><label for="lt-modo">Método</label></div>${seletorModoLista(B.modo, 'lt-modo')}</div>
       <div class="campo"><div class="campo-rot"><label for="lt-origem">Origem dos números do arquivo</label>${botaoAjuda('origens', 'Origem do dado')}</div><select id="lt-origem" data-lote="origem">${opsOrigem}</select></div>
-      <div class="campo"><label class="chk-linha" style="margin-top:26px"><input type="checkbox" data-lote="estimarReceita" ${B.estimarReceita ? 'checked' : ''}><span>Estimar a receita quando faltar<span class="dica">Pelos funcionários e pelo setor. Fica marcada como estimada.</span></span></label></div>
+      
     </div></section>`;
 }
 function criarLista() {
   const B = UI.lote; if (!B || !B.linhas.length) return;
   const total = S.listas.reduce((a, l) => a + l.linhas.length, 0) + B.linhas.length;
   if (total > MAX_LINHAS_LISTAS) return avisar('Listas grandes demais', `As listas guardam até ${nf(MAX_LINHAS_LISTAS, 0)} empresas neste navegador; com esta seriam ${nf(total, 0)}. Exclua uma lista antiga ou use um arquivo menor.`);
-  const L = { id: uid(), nome: (B.nomeLista || B.nome).trim() || B.nome, arquivo: B.nome, criadoEm: new Date().toISOString(), modo: B.modo, origem: B.origem, estimarReceita: B.estimarReceita, linhas: B.linhas };
+  const L = { id: uid(), nome: (B.nomeLista || B.nome).trim() || B.nome, arquivo: B.nome, criadoEm: new Date().toISOString(), modo: B.modo, origem: B.origem, linhas: B.linhas };
   S.listas.unshift(L); UI.lote = null; UI.loteVer = { q: '', setor: '', conf: '', ordem: 'F', pag: 0 }; UI.loteSel = new Set();
   salvar(); if (!persistente) toast('A lista ficou só nesta sessão: o navegador não permite gravar mais dados.');
   navegar('#/listas/' + L.id);
@@ -4823,9 +4807,9 @@ function telaLista(L) {
     <div class="kpi"><small>Confiança</small><b>${nf(conf.alta, 0)} / ${nf(conf.media, 0)} / ${nf(conf.baixa, 0)}</b><span>alta, média e baixa</span></div>
   </div>
   <section class="painel" style="margin-bottom:16px"><div class="opcoes-lote">
-    <div class="campo"><div class="campo-rot"><label for="lr-modo">Tipo de estimativa</label></div>${seletorModoLista(L.modo, 'lr-modo')}</div>
+    <div class="campo"><div class="campo-rot"><label for="lr-modo">Método</label></div>${seletorModoLista(L.modo, 'lr-modo')}</div>
     <div class="campo"><div class="campo-rot"><label for="lr-origem">Origem dos números do arquivo</label>${botaoAjuda('origens', 'Origem do dado')}</div><select id="lr-origem" data-lista="origem">${opsOrigem}</select></div>
-    <div class="campo"><label class="chk-linha" style="margin-top:26px"><input type="checkbox" data-lista="estimarReceita" ${L.estimarReceita ? 'checked' : ''}><span>Estimar a receita quando faltar</span></label></div>
+    
   </div></section>
   <div class="barra-ferr" role="search">
     <label class="busca"><span class="sr">Buscar</span>${ico('busca')}<input type="search" data-lote-f="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
@@ -4839,7 +4823,7 @@ function atualizarTabelaLote() { const L = listaPorId(UI.rota.id), el = $('#lote
 function tabelaLista(L) {
   const colunas = [{ t: 'Empresa', l: 34 }, { t: 'CNPJ', l: 20 }, { t: 'Setor', l: 32 }, { t: 'UF', l: 6 }, { t: 'Município', l: 22 }, { t: 'Receita líquida usada (R$)', tipo: 'rs', l: 22 }, { t: 'Origem da receita', l: 26 }, { t: 'Funcionários', tipo: 'int', l: 14 },
     { t: 'Investimento em TI, valor central (R$)', tipo: 'rs', l: 24 }, { t: 'P10 (R$)', tipo: 'rs', l: 18 }, { t: 'P90 (R$)', tipo: 'rs', l: 18 }, { t: 'Estimativa conservadora (R$)', tipo: 'rs', l: 22 }, { t: 'Geral sem salários de TI (R$)', tipo: 'rs', l: 22 },
-    { t: 'Índice de confiança', tipo: 'int', l: 12 }, { t: 'Nível de confiança', l: 14 }, { t: 'Tipo de estimativa', l: 20 }, { t: 'Observação', l: 26 }];
+    { t: 'Índice de confiança', tipo: 'int', l: 12 }, { t: 'Nível de confiança', l: 14 }, { t: 'Método', l: 20 }, { t: 'Observação', l: 26 }];
   const linhas = calcularLista(L).map(({ x, r }) => {
     const rec = r.receita && r.receita.usada;
     return [x.n, x.c ? cnpjMascara(x.c) : '', x.s === '@publico' ? 'Setor público' : nomeFiltro(x.s || 'naosei'), x.u, x.m, rec ? rec.v : '', rec ? ROT_ORIGEM[origemReceita(r.receita)] : '', x.f ? +x.f : '',
@@ -4909,14 +4893,12 @@ TELAS.listas = {
       if (t.dataset.mapa || t.dataset.mapaAno || t.dataset.mapaUnid || t.dataset.mapaSetor != null) { mudarMapaDe(B, t); recalcularLote(); return manterFoco(t); }
       if (t.hasAttribute('data-lote-modo')) { B.modo = t.value; recalcularLote(); return manterFoco(t); }
       if (t.dataset.lote === 'origem') { B.origem = t.value; return; }
-      if (t.dataset.lote === 'estimarReceita') { B.estimarReceita = t.checked; recalcularLote(); return manterFoco(t); }
       return;
     }
     if (!L) return;
     if (t.dataset.loteF && t.dataset.loteF !== 'q') { UI.loteVer[t.dataset.loteF] = t.value; UI.loteVer.pag = 0; return atualizarTabelaLote(); }
     if (t.hasAttribute('data-lote-modo')) { L.modo = t.value; salvar(); return manterFoco(t); }
     if (t.dataset.lista === 'origem') { L.origem = t.value; salvar(); return manterFoco(t); }
-    if (t.dataset.lista === 'estimarReceita') { L.estimarReceita = t.checked; salvar(); return manterFoco(t); }
     if (t.dataset.selLote != null) { UI.loteSel = UI.loteSel || new Set(); t.checked ? UI.loteSel.add(+t.dataset.selLote) : UI.loteSel.delete(+t.dataset.selLote); return atualizarTabelaLote(); }
     if (t.hasAttribute('data-sel-lote-todas')) {
       UI.loteSel = UI.loteSel || new Set(); const F = filtrarLote(calcularLista(L)), p = UI.loteVer.pag;
@@ -5182,7 +5164,7 @@ function metReceita(Pm) {
   ${fx(`${vv('Receita', 'líquida')} = ${vv('Faturamento', 'bruto')} × (1 − ${vv('d', 'setor')})`)}${fx(`${vv('Receita', '12 meses')} = ${vv('Receita', 'período')} × 12 ÷ ${vv('meses')}`)}${fx(`${vv('Receita', ANO)} = ${vv('Receita', 'ano do dado')} × (1 + ${nf(R.g, 2)})<sup>${vv('anos')}</sup>`)}
   ${fx(`${vv('σ', 'receita')} = √(${vv('σ', 'origem')}² + ${nf(R.sDed, 2)}² + ((12 − ${vv('meses')}) × ${nf(R.sMeses, 2)})² + ${vv('anos')} × ${nf(I.sigmaG, 2)}²)`)}
   <p>${vv('d', 'setor')} são as deduções médias da receita bruta (impostos sobre vendas e devoluções; aproximado) e só entram quando o valor é faturamento bruto, assim como o termo ${nf(R.sDed, 2)}. O crescimento de ${fmtPct(R.g, 0)} ao ano fica perto do crescimento nominal do PIB. ${vv('meses')} é o período que o valor cobre: 12 para um ano fechado, ou 9, 6 ou 3 quando o dado vem de um balanço trimestral ou semestral. Um período menor é multiplicado por 12 ÷ ${vv('meses')}, sem ajuste de sazonalidade, e cada mês que falta soma ${nf(R.sMeses, 2)} à incerteza (o termo do período, zero em 12 meses).</p>
-  <h3>Estimativa da ferramenta (opcional)</h3><p>Só quando você marca “Estimar a receita”. Até três caminhos, juntados como as médias de mercado: média em logaritmo pesada pela precisão, com ${vv('ρ')} = ${nf(I.rho, 2)}.</p>
+  <h3>Estimativa da ferramenta</h3><p>Sempre que a receita não for informada, e também junto com um valor informado que não seja oficial. Nos métodos por percentual, só quando falta. Até três caminhos, juntados como as médias de mercado: média em logaritmo pesada pela precisão, com ${vv('ρ')} = ${nf(I.rho, 2)}.</p>
   ${fx(`${vv('R', 'F')} = ${vv('Funcionários')} × ${vv('rpf', 'setor')} × ${vv('f', 'R')}`)}
   ${fx(`${vv('R', 'G')} = ${vv('Receita global')} × ${vv('câmbio')} × ${vv('participação')} × (1 + ${nf(R.g, 2)})<sup>${vv('anos')}</sup>`)}
   ${fx(`${vv('participação')} = informada, ou ${vv('Funcionários', 'Brasil')} ÷ ${vv('Funcionários', 'mundo')} × ${nf(R.prodBR, 2)}`)}

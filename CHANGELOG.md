@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [2.1.0] - 2026-11-15
+
+### Alterado
+- **Os dois resultados sempre à vista.** O passo “O que esta análise vai estimar” saiu: toda análise mostra a receita líquida e o investimento em TI, no cartão, no resultado e no resumo, cada um com a origem (valor informado com a origem do dado, estimada pela ferramenta, informada e estimada, ou meio da faixa do enquadramento). A receita é estimada sempre que falta; no Método Vezen, um valor não oficial é juntado à estimativa, como a Metodologia já descrevia. Análises que estavam “só investimento em TI” podem mudar de valor por isso.
+- Nas listas, a opção “Estimar a receita quando faltar” saiu: ela é sempre estimada.
+- O rótulo “Tipo de estimativa” virou “Método” no cartão, no resultado, nas listas e nas planilhas baixadas.
+
 ## [2.0.0] - 2026-11-15
 
 Reorganização das três telas de documentação e parâmetros em uma só, e os três tipos de estimativa redefinidos como métodos. Análises salvas com “Calibração padrão” ou “Minha calibração” mudam de valor, porque esses métodos passaram a calcular por percentual da receita.
