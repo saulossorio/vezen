@@ -25,7 +25,7 @@ const PERMITIDAS = new Set([
   // 1. os dados do glossário
   const dados = await motor(() => ({
     n: GLOSSARIO.length, ids: new Set(GLOSSARIO.map(g => g.id)).size, cats: GL_CATS.map(c => c[0]),
-    ruins: GLOSSARIO.filter(g => !g.id || !g.t || !g.d || !GL_CATS.some(c => c[0] === g.c) || (g.s && !/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}(\/|$)/i.test(g.s)) || (g.m && !SEC_MET.some(s => s[0] === g.m)) || /\s—\s|–/.test(g.d + (g.u || ''))).map(g => g.id),
+    ruins: GLOSSARIO.filter(g => !g.id || !g.t || !g.d || !GL_CATS.some(c => c[0] === g.c) || (g.s && !/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}(\/|$)/i.test(g.s)) || (g.m && !SECOES_METODOS.some(gr => gr[1].some(s => s[0] === g.m))) || /\s—\s|–/.test(g.d + (g.u || ''))).map(g => g.id),
     semDefinicaoCurta: GLOSSARIO.filter(g => g.d.length > 260).map(g => g.id)
   }));
   check('Glossário: ids únicos, categoria válida, definição, site com https e seção da Metodologia existente', dados.n >= 100 && dados.n === dados.ids && dados.ruins.length === 0, dados.ruins.join());
@@ -87,7 +87,7 @@ const PERMITIDAS = new Set([
   check('Metodologia: as siglas do texto viram link', await p.locator('#app .gl-link').count() > 40 && await fgv.count() === 1);
   check('Só o primeiro de cada termo em cada seção', await p.evaluate(() => [...document.querySelectorAll('#app section')].every(s => { const ids = [...s.querySelectorAll('.gl-link')].filter(l => l.closest('section') === s).map(l => l.dataset.gl); return new Set(ids).size === ids.length; })));
   check('“TI” tem um link só por tela', await p.locator('#app .gl-link[data-gl="ti"]').count() === 1);
-  check('Sem link em campo, botão, link, rótulo, título de seção, fórmula e leitor de tela', await p.evaluate(() => document.querySelectorAll('#app :is(input, textarea, select, button, a, label, summary, h1, h2, .fx, .sr) .gl-link').length === 0));
+  check('Sem link em campo, botão, link, rótulo, títulos, fórmula e leitor de tela', await p.evaluate(() => document.querySelectorAll('#app :is(input, textarea, select, button, a, label, summary, h1, h2, h3, h4, .fx, .sr) .gl-link').length === 0));
   check('O link é um botão em forma de texto, com foco por teclado e sem mudar o texto', await p.evaluate(() => { const l = document.querySelector('#app .gl-link'); return l.getAttribute('role') === 'button' && l.tabIndex === 0 && l.getAttribute('aria-haspopup') === 'dialog' && l.textContent.length > 1; }));
   await fgv.scrollIntoViewIfNeeded(); await fgv.click(); await p.waitForTimeout(250);
   const defPop = await p.evaluate(() => document.querySelector('#pop .pop-def').textContent);
@@ -137,14 +137,14 @@ const PERMITIDAS = new Set([
   await p.evaluate(() => { location.hash = '#/empresas'; }); await p.waitForTimeout(300);
   await p.click('[data-acao=menu-empresas]'); await p.click('#pop [data-acao=modelo]'); await p.waitForTimeout(500);
   const idModelo = await p.evaluate(() => UI.atual.id);
-  const rotas = ['#/empresas', `#/analise/${idModelo}`, `#/analise/${idModelo}/resultado`, '#/listas', '#/listas/nova', '#/calibracao', '#/parametros', '#/metodologia', '#/testes', '#/glossario'];
+  const rotas = ['#/empresas', `#/analise/${idModelo}`, `#/analise/${idModelo}/resultado`, '#/listas', '#/listas/nova', '#/metodos', '#/testes', '#/glossario'];
   let corpo = '';
   for (const r of rotas) {
     await ir(r); await p.waitForTimeout(250);
     // texto de todos os trechos da tela, separados, para uma sigla não grudar na vizinha; os links já inseridos não mudam o texto
     corpo += '\n' + await p.evaluate(() => { const w = document.createTreeWalker(document.getElementById('app'), NodeFilter.SHOW_TEXT), s = []; for (let n = w.nextNode(); n; n = w.nextNode()) s.push(n.nodeValue); return s.join(' | '); });
   }
-  corpo += '\n' + await motor(() => [...Object.keys(AJUDA).map(k => textoAjuda(k, dadosVazios())), ...ORIGENS.map(o => o[1] + ' ' + o[2]), ...TECNOLOGIAS.flatMap(g => [g.g, ...g.itens.map(i => i[1] + ' ' + (i[2] || ''))]), ...PAIS.parametros.links.map(l => l.nome), ...SEC_MET.map(s => s[2])].join('\n'));
+  corpo += '\n' + await motor(() => [...Object.keys(AJUDA).map(k => textoAjuda(k, dadosVazios())), ...ORIGENS.map(o => o[1] + ' ' + o[2]), ...TECNOLOGIAS.flatMap(g => [g.g, ...g.itens.map(i => i[1] + ' ' + (i[2] || ''))]), ...PAIS.parametros.links.map(l => l.nome), ...SECOES_METODOS.flatMap(g => g[1].map(s => s[2]))].join('\n'));
   const sobra = await p.evaluate(txt => {
     const formas = GLOSSARIO.flatMap(g => [g.t, ...(g.a || [])]).sort((a, c) => c.length - a.length);
     const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');

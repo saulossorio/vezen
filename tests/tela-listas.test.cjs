@@ -128,20 +128,11 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   await p.click('#dlg-acoes button:has-text("Juntar")'); await p.waitForTimeout(300);
   check('importar juntando', (await p.evaluate(() => S.empresas.length)) === 3 && /Importada Nova/.test(await txt(p, '.lista-emp tbody')));
 
-  // 4. parâmetros: alteração pendente, aviso ao sair, descartar
+  // 4. menu: Métodos no lugar das três telas antigas, e as rotas antigas caem lá
+  await ir('#/metodos');
+  check('menu com Métodos e sem Calibração, Parâmetros ou Metodologia', await p.locator('#nav a[href="#/metodos"][aria-current=page]').count() === 1 && !/Calibração|Parâmetros|Metodologia/.test(await txt(p, '#nav')));
   await ir('#/parametros');
-  await p.fill('[data-p="crescimento.gSetor"]', '9'); await p.waitForTimeout(150);
-  check('parâmetro alterado marca a barra lateral', await p.locator('#nav a[href="#/parametros"] .ponto').count() === 1 && /1 alteração não salva/.test(await txt(p, '#barra-par')));
-  await p.fill('[data-par-busca]', 'salário'); await p.waitForTimeout(150);
-  check('busca de parâmetros', await p.locator('.par-sec:not([hidden])').count() < await p.locator('.par-sec').count());
-  await p.fill('[data-par-busca]', '');
-  await p.click('#nav a[href="#/empresas"]'); await p.waitForTimeout(300);
-  check('sair com alteração pede confirmação', await p.locator('#dlg[open]').count() === 1 && /alteração não salva/.test(await txt(p, '#dlg')));
-  await p.click('#dlg-acoes button:has-text("Continuar editando")'); await p.waitForTimeout(200);
-  check('continuar editando mantém a tela', (await p.evaluate(() => location.hash)) === '#/parametros');
-  await p.click('#nav a[href="#/empresas"]'); await p.waitForTimeout(200);
-  await p.click('#dlg-acoes button:has-text("Descartar alterações")'); await p.waitForTimeout(300);
-  check('descartar volta ao valor salvo', (await p.evaluate(() => location.hash)) === '#/empresas' && (await p.evaluate(() => S.parametros.crescimento.gSetor)) !== 0.09);
+  check('rota antiga de parâmetros cai em Métodos', (await p.evaluate(() => UI.rota.tela + '/' + UI.rota.id)) === 'metodos/met-fontes');
 
   // 5. tema escuro, guardado
   await p.click('[data-acao=tema]'); await p.waitForTimeout(150);

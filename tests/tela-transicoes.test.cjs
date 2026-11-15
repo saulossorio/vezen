@@ -27,19 +27,18 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     await new Promise(r => setTimeout(r, 300));
     return { dentro, logo, depois: abertas() };
   });
-  // diálogo: abre ao sair dos parâmetros com alteração não salva; o botão fecha com transição
+  // diálogo: abre pela função da base, o botão fecha com transição e a promessa só resolve depois
   const dialogo = async p => {
-    await p.ir('#/parametros'); await p.fill('[data-p="crescimento.gSetor"]', '9'); await p.waitForTimeout(150);
-    await p.evaluate(() => { window.__saiu = false; const d = document.getElementById('dlg'); new MutationObserver(() => { if (d.classList.contains('saindo')) window.__saiu = true; }).observe(d, { attributes: true, attributeFilter: ['class'] }); });
-    await p.click('#nav a[href="#/empresas"]'); await p.waitForTimeout(350);
+    await p.evaluate(() => { window.__saiu = false; window.__resp = undefined; const d = document.getElementById('dlg'); new MutationObserver(() => { if (d.classList.contains('saindo')) window.__saiu = true; }).observe(d, { attributes: true, attributeFilter: ['class'] }); perguntar('<h2>Teste</h2><p>Diálogo de teste.</p>', [['Fechar', 'ok', 'prim']]).then(v => { window.__resp = v; }); });
+    await p.waitForTimeout(350);
     const abriu = await p.evaluate(() => document.getElementById('dlg').open);
-    await p.click('#dlg-acoes button:has-text("Continuar editando")'); await p.waitForTimeout(350);
-    return { abriu, saiu: await p.evaluate(() => window.__saiu), fechou: await p.evaluate(() => !document.getElementById('dlg').open && !document.getElementById('dlg').classList.contains('saindo')), rota: await p.evaluate(() => location.hash) };
+    await p.click('#dlg-acoes button:has-text("Fechar")'); await p.waitForTimeout(350);
+    return { abriu, saiu: await p.evaluate(() => window.__saiu), fechou: await p.evaluate(() => !document.getElementById('dlg').open && !document.getElementById('dlg').classList.contains('saindo')), resp: await p.evaluate(() => window.__resp) };
   };
 
   // 1. movimento normal
   let p = await abrir('no-preference');
-  await p.ir('#/metodologia');
+  await p.ir('#/metodos');
   const n = await ciclo(p);
   check('Janelinha entra com transição: classe visivel, opacidade 1 e duração maior que zero', n.dentro.visivel && n.dentro.opacidade === '1' && n.dentro.duracao > 0.05, JSON.stringify(n.dentro));
   check('Janelinha sai com transição: sem o id, inerte e ainda no DOM por um instante', n.logo.ids === 0 && n.logo.noDom === 1 && n.logo.inerte && !n.logo.visivel, JSON.stringify(n.logo));
@@ -53,8 +52,7 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
   check('Abrir uma janelinha logo depois de outra nunca deixa dois ids iguais, e fica só a nova', dup.ids === 1 && dup.restantes === 1, JSON.stringify(dup));
   await p.keyboard.press('Escape'); await p.waitForTimeout(300);
   const d = await dialogo(p);
-  check('Diálogo abre, sai com a classe de transição e fecha, mantendo a tela dos parâmetros', d.abriu && d.saiu && d.fechou && d.rota === '#/parametros', JSON.stringify(d));
-  await p.evaluate(() => { UI.par = null; }); // descarta a alteração de parâmetros do teste anterior, para não pedir confirmação ao sair
+  check('Diálogo abre, sai com a classe de transição, fecha e só então responde', d.abriu && d.saiu && d.fechou && d.resp === 'ok', JSON.stringify(d));
   await p.ir('#/glossario');
   check('Trocar de tela entra com uma transição curta', await p.evaluate(() => document.getElementById('app').classList.contains('entra') && getComputedStyle(document.getElementById('app')).animationName === 'surgir'));
   check('Campos mudam de cor aos poucos, não de repente', await p.evaluate(() => parseFloat(getComputedStyle(document.querySelector('#gl-busca')).transitionDuration.split(',')[0]) > 0));
@@ -62,7 +60,7 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
 
   // 2. quem pede menos animação: tudo imediato
   p = await abrir('reduce');
-  await p.ir('#/metodologia');
+  await p.ir('#/metodos');
   const r = await ciclo(p);
   check('Menos animação: a janelinha entra e sai sem transição, e some do DOM na hora', r.dentro.duracao < 0.01 && r.logo.noDom === 0 && r.logo.ids === 0, JSON.stringify(r));
   await p.ir('#/glossario');

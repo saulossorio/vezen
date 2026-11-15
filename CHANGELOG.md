@@ -2,6 +2,26 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [2.0.0] - 2026-11-15
+
+Reorganização das três telas de documentação e parâmetros em uma só, e os três tipos de estimativa redefinidos como métodos. Análises salvas com “Calibração padrão” ou “Minha calibração” mudam de valor, porque esses métodos passaram a calcular por percentual da receita.
+
+### Adicionado
+- **Tela Métodos**, no lugar de Calibração, Parâmetros e Metodologia: a visão geral (os dois resultados e os três métodos lado a lado), a documentação do Método Vezen com os parâmetros em tabelas de só leitura e as fontes, a documentação e os parâmetros do Método CR1 (com a versão, a data e quantas empresas há em cada grupo), e a documentação do Método Personalizado com a única área de entrada de dados, marcada como tal. As rotas antigas continuam abrindo, nas seções certas.
+- **Método CR1** (Carol Rocha): investimento em TI = receita líquida × percentual do setor, ajustado por estado e cidade, medido numa base de empresas reais; a receita, quando falta, é estimada pela receita por funcionário da mesma base. Os percentuais em uso são provisórios, calculados pela ferramenta com as empresas da base que declararam o gasto de TI, e ficam fixos até uma nova versão (CR1.1, CR2) gerada pelo administrador com `tools/gerar-calibracao.cjs`.
+- **Método Personalizado** com um terceiro caminho de entrada: percentuais digitados (geral e por setor), sem informar empresas. Os outros dois (planilha e empresas digitadas) continuam; o mínimo caiu para 5 empresas.
+- Caminho `EP` (receita × percentual) nos métodos por percentual, com a incerteza medida na própria base e o acerto do CR1 e do Vezen nas mesmas empresas.
+- Glossário: Método Vezen, CR1, Método Personalizado e EP.
+
+### Alterado
+- “Fórmulas base” virou **Método Vezen**, com parâmetros fixos: o editor de Parâmetros saiu (importar, exportar, editar e voltar ao padrão), assim como a troca da base padrão pela tela. Uma mudança de parâmetro é uma versão nova da ferramenta.
+- Nos métodos por percentual, a receita informada vale como está e só é estimada quando falta; gasto real da empresa continua tendo prioridade em todos os métodos.
+- O teste de aceitação F passou a conferir o método por percentual.
+- A versão pública da base do CR1 guarda as contagens por grupo (liberadas pelo dono do produto); nome do arquivo, colunas, segmentos e linhas de empresa continuam fora.
+
+### Removido
+- As telas Calibração, Parâmetros e Metodologia como itens do menu, o editor de parâmetros e a importação de parâmetros por arquivo.
+
 ## [1.8.1] - 2026-11-14
 
 ### Alterado

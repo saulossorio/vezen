@@ -22,33 +22,35 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 
 **Empresa modelo:** um exemplo pronto (Banco do Brasil, com dados oficiais), no menu de **Empresas**.
 
-**Calibração** mostra os três tipos de estimativa e os dados de cada um. **Parâmetros** mostra e permite mudar os números usados nas contas. **Metodologia** explica cada fórmula. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
+**Métodos** explica como cada um dos três métodos calcula, com os parâmetros em uso (só leitura no Vezen e no CR1) e, no fim, os dados do Método Personalizado, a única parte que recebe dados seus. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
 
-## Tipos de estimativa
+## Os três métodos
 
-| Tipo | De onde vêm os números |
-|---|---|
-| Fórmulas base | Só das médias de mercado. É o tipo das análises novas |
-| Calibração padrão | Das médias corrigidas com a base de empresas que vem com a ferramenta, ou com outra base enviada na aba **Calibração** |
-| Minha calibração | Das médias corrigidas com as suas empresas: digitadas, importadas de planilha ou análises salvas com o gasto real |
+Toda análise chega a dois números, a receita líquida e o investimento anual em TI, cada um com a origem à vista. O método escolhido na análise decide como a estimativa é feita:
 
-As calibrações também ajustam por estado, cidade e setor dentro da cidade, só onde há pelo menos 5 empresas.
+| Método | De onde vêm os números | Quem muda os parâmetros |
+|---|---|---|
+| Método Vezen | Pesquisas públicas (FGV, Brasscom, FEBRABAN, Techaisle) e documentos oficiais: até sete caminhos de cálculo, juntados pela precisão, com índice de confiança. É o método das análises novas | Ninguém pela tela: só uma nova versão da ferramenta, com evidência |
+| Método CR1 | Receita × percentual de TI observado numa base de empresas reais, por setor, estado e cidade (método de Carol Rocha). A receita, quando falta, é estimada pela receita por funcionário da mesma base | Só o administrador, com uma nova versão (CR1.1, CR2) |
+| Método Personalizado | A mesma conta do CR1, com percentuais tirados das suas empresas (planilha, digitadas ou análises salvas com gasto real) ou digitados por você | Você, na tela Métodos |
+
+Os percentuais do CR1 em uso são provisórios, calculados pela ferramenta com as empresas da base que declararam o gasto de TI, até a tabela definitiva ser carregada. Nos métodos por percentual, só um lugar com pelo menos 5 empresas tem valor próprio.
 
 ## Privacidade
 
 - Os dados ficam só no navegador de quem usa, mesmo na versão publicada: não há servidor guardando nada.
 - A versão publicada e o arquivo baixado guardam os dados cada um no seu canto. Para passar as análises de um para o outro, exporte um backup em **Empresas** e importe no outro.
 - A internet só é usada para consultar o CNPJ e a cotação de moedas na BrasilAPI.
-- A calibração que vem no arquivo tem só os parâmetros que entram na conta: médias por setor, por porte e por cidade, cada uma de um grupo com 5 empresas ou mais. Não tem nome, CNPJ nem contato de nenhuma empresa, nem o tamanho, o nome ou a origem da base.
+- A base do Método CR1 que vem no arquivo tem só os parâmetros que entram na conta e quantas empresas há em cada grupo. Não tem nome, CNPJ, contato nem nenhum valor de empresa, nem o nome do arquivo ou as colunas de origem.
 - Não guarde neste repositório relatórios do CRM, planilhas nem backups com dados reais. O `.gitignore` bloqueia esses arquivos.
 
 ## Onde está cada coisa
 
 | Caminho | O que é |
 |---|---|
-| `index.html` | O Vezen inteiro: estilos, motor de cálculo (`<script id="motor">`) e a interface em blocos, um por tela (`ui-base`, `ui-analise`, `ui-listas`...) |
+| `index.html` | O Vezen inteiro: estilos, motor de cálculo (`<script id="motor">`) e a interface em blocos, um por tela (`ui-base`, `ui-analise`, `ui-listas`, `ui-metodos`...) |
 | `tests/` | Testes do motor e da tela, com dados fictícios. Veja [tests/README.md](tests/README.md) |
-| `tools/gerar-calibracao.cjs` | Refaz a calibração padrão embutida com uma base nova do CRM |
+| `tools/gerar-calibracao.cjs` | Gera uma versão do Método CR1 (os parâmetros embutidos) a partir de uma planilha de empresas |
 | `AGENTS.md` | Instruções para agentes de IA que forem mudar o código. O `CLAUDE.md` aponta para ele |
 | `CHANGELOG.md` | Histórico de versões |
 

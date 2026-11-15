@@ -1,4 +1,4 @@
-// Ajustes por cidade: nomes do IBGE, regra do mínimo, aplicação na receita e no gasto de TI, e a calibração embutida na versão pública.
+// Ajustes por cidade: nomes do IBGE, regra do mínimo, aplicação na receita e no gasto de TI (método por percentual), e a versão do CR1 embutida.
 const fs = require('fs'), path = require('path'), arq = process.argv[2] || path.join(__dirname, '..', 'index.html');
 const html = fs.readFileSync(arq, 'utf8');
 const m = html.match(/<script id="motor">([\s\S]*?)<\/script>/), mod = { exports: {} };
@@ -62,26 +62,27 @@ const r1 = M.calcular(d, Pc, { ano: 2026, calib: fc }), r0 = M.calcular(Object.a
 const rf = x => x.receita.caminhos.find(c => c.cod === 'RF');
 ok('Receita em Campinas = sem cidade × fator local (cidade × setor na cidade)', r1.receita.local && perto(rf(r1).v / rf(r0).v, r1.receita.local.f, 1e-6) && perto(r1.receita.local.f, cal.receita.local.cidades['SP:campinas'].f * ((cal.receita.local.celulas['industria|SP:campinas'] || {}).f || 1), 1e-9), (rf(r1).v / rf(r0).v).toFixed(4));
 ok('Passo "Ajuste local da base" na conta', rf(r1).partes.some(p => /^Ajuste local da base: Campinas × /.test(p.rot)), rf(r1).partes.map(p => p.rot).join(' | '));
-ok('Gasto de TI: k = setor × local', perto(r1.modelo.k, r1.modelo.kSetor * r1.modelo.local.f, 1e-9) && r0.modelo.local === null && perto(r0.modelo.k, r0.modelo.kSetor, 1e-9), `${r1.modelo.kSetor.toFixed(3)} × ${r1.modelo.local && r1.modelo.local.f}`);
+ok('Gasto de TI: só o caminho EP, receita × percentual do setor × lugar', r1.modelo.pct && r1.ests.map(e => e.cod).join() === 'EP' && perto(r1.modelo.v, r1.receita.usada.v * r1.modelo.p * r1.modelo.local.f, 1e-6) && r0.modelo.local === null && perto(r0.modelo.v, r0.receita.usada.v * r0.modelo.p, 1e-6), `${r1.modelo.p} × ${r1.modelo.local && r1.modelo.local.f}`);
+ok('Gasto de TI: incerteza do EP = √(s² + σ da receita²)', perto(r1.ests[0].s, Math.sqrt(cal.ti.s ** 2 + r1.receita.usada.s ** 2), 1e-9), String(r1.ests[0].s));
 
 // 5. regra do mínimo nos setores
 const poucos = regs.slice(0, 12).map((x, j) => Object.assign({}, x, { setor: j < 3 ? 'saude' : 'industria' }));
 const c2 = M.calibrarRegistros(poucos, P, { ano: 2026, extras: [] });
-ok('Gasto de TI: setor com 3 empresas fica com a correção geral', c2.ti.suficiente && c2.ti.nS.saude === 3 && perto(c2.ti.ks.saude, c2.ti.kg, 1e-12), c2.ti.suficiente ? `${c2.ti.ks.saude} / ${c2.ti.kg}` : 'sem TI');
+ok('Gasto de TI: setor com 3 empresas fica com o percentual geral', c2.ti.suficiente && c2.ti.nS.saude === 3 && perto(c2.ti.ps.saude, c2.ti.pg, 1e-12), c2.ti.suficiente ? `${c2.ti.ps.saude} / ${c2.ti.pg}` : 'sem TI');
 ok('Receita: setor com 3 empresas fica com o nível geral', c2.receita.setores.saude.n === 3 && c2.receita.setores.saude.rpe === Math.round(P.setores.saude.rpe * c2.receita.fatorGeral / 1000) * 1000, JSON.stringify(c2.receita.setores.saude));
 
-// 6. calibração embutida: é a versão pública, só com os parâmetros que entram na conta.
-// A regra do mínimo de empresas por grupo é aplicada ao gerar a calibração (seções 2, 4 e 5); a versão pública não guarda contagens.
+// 6. a versão do CR1 embutida é a pública: parâmetros e contagens por grupo, sem nome de arquivo, colunas, segmentos ou linhas de empresa.
 const E = M.PAIS.calibracaoBase;
-const PROIBIDAS = ['n', 'N', 'nS', 'nG', 'empresas', 'linhas', 'mapa', 'segmentos', 'descartes', 'col', 'descricao', 'formato', 'suspeitas', 'acertoAntes', 'acertoDepois', 'nLinhas', 'nExtras', 'nExtrasTodas', 'repetido', 'linhasTI', 'corte'];
+const PROIBIDAS = ['nome', 'linhas', 'mapa', 'segmentos', 'descartes', 'col', 'descricao', 'formato', 'suspeitas', 'nLinhas', 'nExtras', 'nExtrasTodas', 'repetido', 'linhasTI', 'corte', 'emp', 'cnpj'];
 const chavesDe = (o, out = []) => { if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) { out.push(k); chavesDe(v, out); } return out; };
 const sobra = chavesDe(E).filter(k => PROIBIDAS.includes(k));
-ok('Embutida: versão pública', E.publica === true && !('nome' in E), E.id);
-ok('Embutida: sem contagens, nomes de arquivo, colunas ou segmentos da base', !sobra.length, sobra.join(', '));
-ok('Embutida: grupos e setores em ordem alfabética', [E.receita.setores, E.ti.ks, E.receita.local.cidades, E.ti.local.cidades, E.receita.local.celulas].every(o => Object.keys(o).join() === Object.keys(o).sort().join()));
-ok('Embutida: setores do gasto de TI sem valor próprio usam a geral', Object.entries(E.ti.ks).every(([l, k]) => E.ti.proprio[l] || k === E.ti.kg), JSON.stringify(E.ti.proprio));
-ok('Embutida: 18 cidades na receita e 6 no gasto de TI', Object.keys(E.receita.local.cidades).length === 18 && Object.keys(E.ti.local.cidades).length === 6);
-ok('Embutida: acerto em fração, sem o número de empresas', E.ti.pctAcertoDepois > 0 && E.ti.pctAcertoDepois < 1 && E.ti.pctAcertoAntes < E.ti.pctAcertoDepois, `${E.ti.pctAcertoAntes} → ${E.ti.pctAcertoDepois}`);
+ok('Embutida: versão pública, com rótulo e data', E.publica === true && typeof E.rotulo === 'string' && E.rotulo.length > 1 && /^\d{4}-\d\d-\d\d/.test(E.data), E.id);
+ok('Embutida: sem nome de arquivo, colunas, segmentos ou linhas de empresa', !sobra.length, sobra.join(', '));
+ok('Embutida: contagens por grupo, sem nenhum valor de empresa', E.empresas > 0 && E.ti.N > 0 && E.receita.n > 0 && Object.values(E.ti.nS).every(n => Number.isInteger(n) && n > 0) && Object.values(E.receita.setores).every(x => Number.isInteger(x.n)));
+ok('Embutida: grupos e setores em ordem alfabética', [E.receita.setores, E.ti.ps, E.ti.nS, E.receita.local.cidades, E.ti.local.cidades].every(o => Object.keys(o).join() === Object.keys(o).sort().join()));
+ok('Embutida: setores com menos de 5 empresas usam o percentual geral', Object.entries(E.ti.ps).every(([l, p]) => (E.ti.nS[l] || 0) >= C.minGrupo || perto(p, E.ti.pg, 1e-9)), JSON.stringify(E.ti.nS));
+ok('Embutida: percentuais entre 0,1% e 20% e incerteza com piso', Object.values(E.ti.ps).every(p => p > 0.001 && p < 0.2) && E.ti.s >= P.calibracao.sMin, `${E.ti.pg} / ${E.ti.s}`);
+ok('Embutida: acerto medido nas próprias empresas, pelos dois métodos', E.ti.acertoPct > 0 && E.ti.acertoPct <= E.ti.N && E.ti.acertoVezen <= E.ti.nVezen && E.ti.nVezen <= E.ti.N);
 ok('Embutida: sem CNPJ, e-mail ou linhas de empresa', !/\d{14}|[a-z0-9._-]+@[a-z0-9-]+\.[a-z]|linhasTI|"emp"/i.test(JSON.stringify(E)));
 
 // 7. a versão pública dá as mesmas estimativas que a calibração completa
@@ -94,6 +95,6 @@ for (const municipio of ['Campinas', 'São Paulo', 'Bauru', '']) for (const seto
   total++; if (a1.F === a2.F && a1.p10 === a2.p10 && a1.p90 === a2.p90 && a1.receita.usada.v === a2.receita.usada.v) iguais++;
 }
 ok('Versão pública: mesmas estimativas da calibração completa', iguais === total, `${iguais} de ${total}`);
-ok('Versão pública: marca quem tem valor próprio', pub.ti.proprio.industria === true && pub.receita.setores.industria.proprio === true && !JSON.stringify(pub).includes('"n":'));
+ok('Versão pública: guarda as contagens e marca quem tem valor próprio, sem as linhas', pub.ti.nS.industria >= C.minGrupo && pub.receita.setores.industria.proprio === true && pub.receita.setores.industria.n > 0 && !('linhasTI' in pub) && !('segmentos' in pub) && !('mapa' in pub));
 console.log(falhas ? `\n${falhas} falha(s)` : '\nTudo certo');
 process.exitCode = falhas ? 1 : 0;

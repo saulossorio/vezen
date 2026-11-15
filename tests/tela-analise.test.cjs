@@ -184,17 +184,15 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
     ok('Prompt tem: ' + t, pr.includes(t));
   await p.click('#dlg button:has-text("Fechar")');
 
-  // 6. salvar, metodologia, parâmetros, testes, CSV
+  // 6. salvar, métodos, testes, CSV
   await salvarOk(150);
   ok('Salvar: cabeçalho mostra salva', (await txt('#ws-meta')).includes('Salva em') && await p.locator('#ws-acoes [data-acao=salvar]').isDisabled());
   ok('Salvar: empresa na barra lateral', (await txt('#nav')).includes('Subsidiária Teste'));
-  await ir('#/metodologia');
+  await ir('#/metodos');
   ok('Metodologia: seção da receita', (await p.textContent('#met-receita')).includes('Qual receita entra no cálculo'));
   ok('Metodologia: seção das estimativas', (await p.textContent('#met-estimativas')).includes('percentil 25'));
   ok('Metodologia: testes 134 de 134', (await p.textContent('#met-testes')).includes('134 de 134'));
-  await ir('#/parametros');
-  ok('Parâmetros: seção da receita com 12 setores', await p.locator('#par-receita [data-pcampo$=".rpe"]').count() === 12);
-  ok('Parâmetros: percentil da conservadora', await p.locator('[data-pcampo="estimativas.conservadora"]').count() === 1);
+  ok('Métodos: parâmetros por setor em tabela de só leitura, sem campos de edição', await p.locator('#met-setores tbody tr').count() >= 10 && await p.locator('#met-setores input, #met-fontes input').count() === 0);
   await ir('#/empresas');
   await p.click('[data-acao=menu-empresas]');
   const [dl] = await Promise.all([p.waitForEvent('download'), p.click('#pop [data-acao=exp-csv]')]);
@@ -319,13 +317,13 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const ajudas = await motor(() => Object.keys(AJUDA).map(k => [k, textoAjuda(k, dadosVazios())]));
   ok('Ajudas sem fórmula nem multiplicadores, curtas', ajudas.every(([k, t]) => t && !/[×÷]|multiplic/i.test(t) && t.length < 260), ajudas.filter(([k, t]) => /[×÷]|multiplic/i.test(t) || t.length >= 260).map(x => x[0]).join());
   await p.click('button.ajuda[data-chave=digital]'); await p.waitForTimeout(150);
-  ok('Ajuda da intensidade digital começa dizendo o que é, sem os multiplicadores', (await txt('#pop')).includes('Quanto o negócio depende de tecnologia') && !(await txt('#pop')).includes('0,8') && await p.locator('#pop a[href="#/metodologia/met-ajustes"]').count() === 1);
+  ok('Ajuda da intensidade digital começa dizendo o que é, sem os multiplicadores', (await txt('#pop')).includes('Quanto o negócio depende de tecnologia') && !(await txt('#pop')).includes('0,8') && await p.locator('#pop a[href="#/metodos/met-ajustes"]').count() === 1);
   await p.keyboard.press('Escape'); await p.waitForTimeout(100);
-  await ir('#/metodologia/met-ajustes'); await p.waitForTimeout(1600);
+  await ir('#/metodos/met-ajustes'); await p.waitForTimeout(1600);
   ok('A Metodologia abre na seção da ajuda e traz os multiplicadores', Math.abs(await p.locator('#met-ajustes').evaluate(e => e.getBoundingClientRect().top)) < 140 && (await txt('#met-ajustes')).includes('Intensidade digital') && /baixa 0,80/.test(await txt('#met-ajustes')));
   ok('A Metodologia explica o mínimo de usuários e o salário de referência', /50 usuários/.test(await txt('#met-caminhos')) && /média nacional/.test(await txt('#met-caminhos')));
   ok('Metodologia: a Visão geral traz a conta inteira em 5 passos, com o ajuste dos bancos e um link para cada seção', await p.evaluate(() => { const v = document.querySelector('#met-visao .met-conta'); if (!v) return false; const fx = [...v.querySelectorAll('.fx')].map(f => f.innerText.replace(/\s+/g, ' ')); return v.querySelectorAll(':scope > li').length === 5 && fx.length >= 12 && fx.some(t => /^E1 = .*fesc$/.test(t)) && fx.some(t => /^Receita = .*12 ÷ meses/.test(t)) && v.querySelectorAll('a[data-acao=rolar]').length === 5; }));
-  ok('Metodologia: E1 e E2 mostram o ajuste dos bancos grandes, e a receita vem antes dos caminhos', await p.evaluate(() => { const fx = [...document.querySelectorAll('#met-caminhos .fx')].map(f => f.innerText.replace(/\s+/g, ' ')), ids = [...document.querySelectorAll('section.met-sec')].map(s => s.id); return /^E1 = .*fesc$/.test(fx[0]) && /^E2 = .*fesc$/.test(fx[1]) && ids.indexOf('met-receita') < ids.indexOf('met-caminhos') && ids.indexOf('met-pmd') > ids.indexOf('met-categorias') && ids.length === 16; }));
+  ok('Metodologia: E1 e E2 mostram o ajuste dos bancos grandes, e a receita vem antes dos caminhos', await p.evaluate(() => { const fx = [...document.querySelectorAll('#met-caminhos .fx')].map(f => f.innerText.replace(/\s+/g, ' ')), ids = [...document.querySelectorAll('section.met-sec')].map(s => s.id); return /^E1 = .*fesc$/.test(fx[0]) && /^E2 = .*fesc$/.test(fx[1]) && ids.indexOf('met-receita') < ids.indexOf('met-caminhos') && ids.indexOf('met-pmd') > ids.indexOf('met-categorias') && ids.length === 21; }));
   ok('Metodologia: expoentes com o sinal de menos tipográfico', !/e-\d/.test(await p.evaluate(() => [...document.querySelectorAll('#app .fx')].map(f => f.innerText).join(' '))));
   await ir('#/empresas'); await p.click('.lista-emp .emp-nome >> nth=-1'); await p.waitForTimeout(500);
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(200); await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(300);
@@ -372,7 +370,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   // 8. celular
   await p.setViewportSize({ width: 375, height: 800 });
   const id = await p.evaluate(() => UI.atual && UI.atual.id);
-  for (const [rot, h] of [['análise', `#/analise/${id}`], ['resultado', `#/analise/${id}/resultado`], ['empresas', '#/empresas'], ['metodologia', '#/metodologia'], ['parâmetros', '#/parametros']]) {
+  for (const [rot, h] of [['análise', `#/analise/${id}`], ['resultado', `#/analise/${id}/resultado`], ['empresas', '#/empresas'], ['métodos', '#/metodos'], ['glossário', '#/glossario']]) {
     await ir(h); await p.waitForTimeout(150);
     ok('Celular sem rolagem lateral: ' + rot, await p.evaluate(() => document.documentElement.scrollWidth) <= 375, String(await p.evaluate(() => document.documentElement.scrollWidth)));
   }
