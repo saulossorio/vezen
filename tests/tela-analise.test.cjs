@@ -31,6 +31,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Sem a caixa antiga de estimar a receita', await p.locator('[data-chk=fatEstimar]').count() === 0);
   ok('Alturas iguais: campos, listas e seletores com 40px', await p.evaluate(() => [...document.querySelectorAll('#form input[type=text], #form select, #form .seg')].filter(e => e.offsetParent).every(e => Math.round(e.getBoundingClientRect().height) === 40)));
   ok('Ano da receita vem preenchido com o último ano fechado', (await p.inputValue('#f-fatAno')) === String(new Date().getFullYear() - 1));
+  ok('Nova análise fica fora do Método Personalizado até a pessoa marcar', !(await p.isChecked('#f-usarCalib')) && (await motor(() => UI.atual.foraCalibracao)) === true && (await txt('label:has(#f-usarCalib)')).includes('Usar esta empresa no Método Personalizado'));
   await p.fill('#f-nome', 'Varejo Teste'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'varejo'); await p.selectOption('#f-uf', 'RS');
   ok('Origem só aparece quando o campo tem valor', await p.locator('[data-alvo="campo:faturamento"]').isHidden());
   await p.fill('#f-faturamento', '500.000.000');
@@ -42,23 +43,37 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Ano atual no valor da receita avisa que pode ser parcial', (await p.textContent('#dica-rec')).includes('ainda não fechou'));
   await p.click('.seg-op:has(input[value=bruta])'); await p.fill('#f-fatAno', '2024');
   await p.fill('#f-funcionarios', '2.000'); await orig('funcionarios', 'agregador'); await p.waitForTimeout(150);
-  const dica = await p.textContent('#dica-rec');
-  ok('Dica explica a conversão e o ano', dica.includes('tirando 18%') && dica.includes('Valor de 2024 levado a 2026'), dica);
-  ok('Receita usada = 469,41 mi', (await motor(() => calc(UI.atual.dados).receita.usada.v)).toFixed(0) === '469409000');
-  ok('Campo mostra a receita líquida usada e a origem', (await txt('#rec-usada')).includes('R$ 469,41 mi') && (await txt('#rec-usada')).includes('Oficial'));
+  const dica = await p.textContent('#dica-rec'), REF = new Date().getFullYear() - 1, REC = 500e6 * 0.82 * Math.pow(1.07, REF - 2024), recUsada = () => motor(() => calc(UI.atual.dados).receita.usada.v), igual = (a, b) => Math.abs(a / b - 1) < 1e-9;
+  ok('Dica explica a conversão e o ano', dica.includes('menos 18%') && dica.includes(`Receita de 2024 levada a ${REF}`), dica);
+  ok('Receita usada: bruta menos 18%, levada ao ano de referência', igual(await recUsada(), REC), String(await recUsada()));
+  ok('Campo mostra a receita líquida usada e a origem', (await txt('#rec-usada')).includes(await p.evaluate(v => fmtRS(v), REC)) && (await txt('#rec-usada')).includes('Oficial') && (await txt('#rec-usada')).includes(`de ${REF}`));
   // período do valor: balanço trimestral ou semestral entra levado a 12 meses
-  ok('Período do valor: seletor com 12 meses (ano fechado) como padrão', (await p.inputValue('#f-fatMeses')) === '12' && await p.locator('#f-fatMeses option').count() === 4 && (await txt('#f-fatMeses option:checked')).includes('ano fechado'));
+  ok('Período do valor: seletor com 12 meses como padrão', (await p.inputValue('#f-fatMeses')) === '12' && await p.locator('#f-fatMeses option').count() === 4 && (await txt('#f-fatMeses option:checked')) === '12 meses');
   await p.selectOption('#f-fatMeses', '6'); await p.waitForTimeout(250);
   const dicaP = await p.textContent('#dica-rec');
-  ok('6 meses: a dica diz que o valor vai a 12 meses e depois ao ano da estimativa', dicaP.includes('Valor de 6 meses de 2024 levado a 12 meses (× 2,00)') && dicaP.includes('a 2026'), dicaP);
-  ok('6 meses: a receita usada dobra e o período fica salvo', (await motor(() => calc(UI.atual.dados).receita.usada.v)).toFixed(0) === '938818000' && (await txt('#rec-usada')).includes('R$ 938,82 mi') && (await motor(() => UI.atual.dados.fatMeses)) === '6');
+  ok('6 meses: a dica diz que o valor vai a 12 meses e depois ao ano de referência', dicaP.includes('6 meses levados a 12 (× 2,00)') && dicaP.includes(`levada a ${REF}`), dicaP);
+  ok('6 meses: a receita usada dobra e o período fica salvo', igual(await recUsada(), 2 * REC) && (await txt('#rec-usada')).includes(await p.evaluate(v => fmtRS(v), 2 * REC)) && (await motor(() => UI.atual.dados.fatMeses)) === '6');
   ok('6 meses: a Metodologia e o resumo contam a conversão', await motor(() => { const r = calc(UI.atual.dados), h = blocoReceitaDet(r), s = textoResumo(UI.atual.dados, r); return /Levado a 12 meses/.test(h) && /× 2,00/.test(h) && /calculada a partir de/.test(s) && /receita de 6 meses levada a 12 meses/.test(s); }));
   await p.selectOption('#f-fatMeses', '12'); await p.waitForTimeout(250);
-  ok('Voltar a 12 meses volta a receita, sem aviso de conversão', (await motor(() => calc(UI.atual.dados).receita.usada.v)).toFixed(0) === '469409000' && !(await p.textContent('#dica-rec')).includes('12 meses (×'));
+  ok('Voltar a 12 meses volta a receita, sem aviso de conversão', igual(await recUsada(), REC) && !(await p.textContent('#dica-rec')).includes('12 (×'));
+  // receita de outros anos: uma linha por ano, como o gasto real
+  await p.click('[data-acao=add-rec]'); await p.waitForTimeout(200);
+  ok('Adicionar ano cria uma linha da receita, do ano antes do mais antigo', (await p.inputValue('[data-rec="0"][data-parte="ano"]')) === '2023' && await p.locator('.rec-linha').count() === 2 && await p.locator('[data-rec="0"][data-parte="meses"]').count() === 1);
+  await p.fill('[data-rec="0"][data-parte="v"]', '400.000.000'); await p.waitForTimeout(250);
+  ok('A linha nova pede a origem do dado', await p.locator('.origem[data-alvo="rec:0"]').isVisible() && (await txt('.origem[data-alvo="rec:0"]')).includes('Marcar origem'));
+  ok('Com dois anos fechados, a receita vai ao ano de referência pelo crescimento da própria empresa', igual(await recUsada(), 500e6 * 0.82 * Math.pow(1.25, REF - 2024)) && (await p.textContent('#dica-rec')).includes('crescimento da própria receita'), await p.textContent('#dica-rec'));
+  await p.click('[data-acao=del-rec]'); await p.waitForTimeout(250);
+  ok('Remover o ano volta à receita de antes', await p.locator('.rec-linha').count() === 1 && igual(await recUsada(), REC) && (await motor(() => UI.atual.dados.receitasAnos.length)) === 0);
+  // ano de referência: os dois resultados são dele; trocar refaz a conta
+  ok('Cartão: receita e investimento do ano de referência, o último ano fechado', (await txt('#painel .cr-topo')).includes(`Receita líquida, ${REF}`) && (await txt('#painel .cr-topo')).includes(`Investimento em TI, ${REF}`) && (await p.inputValue('#f-anoRef')) === String(REF));
+  ok('Gasto declarado pede o do ano de referência', (await p.textContent('label[for=f-gastoDeclarado]')).includes(`declarado de ${REF}`));
+  await p.selectOption('#f-anoRef', String(REF - 1)); await p.waitForTimeout(300);
+  ok('Trocar o ano de referência refaz a conta e os rótulos', (await motor(() => UI.atual.dados.anoRef)) === String(REF - 1) && igual(await recUsada(), 500e6 * 0.82 * Math.pow(1.07, REF - 1 - 2024)) && (await txt('#painel .cr-topo')).includes(`Investimento em TI, ${REF - 1}`) && (await p.textContent('label[for=f-gastoDeclarado]')).includes(`declarado de ${REF - 1}`));
+  await p.selectOption('#f-anoRef', String(REF)); await p.waitForTimeout(300);
   ok('O cartão mostra a receita informada, com a origem', (await txt('#cr-receita')) === await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v)) && (await txt('#painel .cr-topo')).includes('Valor informado') && (await txt('#painel .cr-topo')).includes('Oficial'));
   ok('Receita e TI: o cartão mostra a receita líquida usada', (await txt('#cr-receita')) === await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v)) && (await txt('#painel .cr-topo')).includes('Valor informado'));
   const caixa = await p.textContent('#rec-est');
-  ok('Estimar com receita oficial: só comparação', caixa.includes('só para comparação') && caixa.includes('Receita líquida estimada'), caixa.slice(0, 120));
+  ok('Estimar com receita oficial: só comparação', /só para comparação/i.test(caixa) && caixa.includes('Receita líquida estimada'), caixa.slice(0, 120));
   ok('Aviso: oficial fora da faixa estimada', caixa.includes('fora da faixa'));
   ok('Valor oficial continua no cálculo', (await motor(() => calc(UI.atual.dados).receita.modo)) === 'informada');
   ok('Cartão: geral e conservadora', await p.locator('#painel .cr-dois > div').count() === 2 && (await txt('#painel .cr-dois')).includes('Conservadora'));
@@ -76,8 +91,8 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   // resumo para copiar
   await explicar();
   await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
-  const res = await p.inputValue('#txt-resumo');
-  for (const t of ['1. Receita líquida no Brasil (2026, BRL): R$ 469,41 mi (calculada a partir de dado oficial)', 'faturamento bruto de 2024', 'tirando 18%', '2. Estimativa Conservadora – investimento em TI:', '3. Estimativa Geral – investimento em TI:', '4. Fontes, cálculos e observações', 'com os salários da equipe de TI', 'estão incluídos', 'Faturamento global: não utilizado', 'Conversão de moeda: nenhuma', 'Metodologia:', 'Benchmarks: FGV-EAESP', 'Limitações:'])
+  const res = await p.inputValue('#txt-resumo'), recTxt = await p.evaluate(v => fmtRS(v), REC);
+  for (const t of [`1. Receita líquida no Brasil (${REF}, BRL): ${recTxt} (calculada a partir de dado oficial)`, 'faturamento bruto de 2024', 'tirando 18%', '2. Estimativa Conservadora – investimento em TI:', '3. Estimativa Geral – investimento em TI:', '4. Fontes, cálculos e observações', 'com os salários da equipe de TI', 'estão incluídos', 'Faturamento global: não utilizado', 'Conversão de moeda: nenhuma', 'Metodologia:', 'Benchmarks: FGV-EAESP', 'Limitações:'])
     ok('Resumo tem: ' + t, res.includes(t));
   fs.writeFileSync(path.join(os.tmpdir(), 'vezen-resumo-E.txt'), res);
   await p.click('#dlg button:has-text("Copiar resumo")'); await p.waitForTimeout(150);
@@ -109,7 +124,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.fill('#f-globalRec', '5.000.000.000'); await orig('globalRec', 'oficial');
   await p.fill('#f-globalAno', '2025'); await p.fill('#f-globalFunc', '40.000'); await orig('globalFunc', 'oficial'); await p.waitForTimeout(150);
   ok('Dica do câmbio mostra a PTAX da tabela', (await p.textContent('#dica-taxa')).includes('31/12/2025') && (await p.textContent('#dica-taxa')).includes('5,5024'), await p.textContent('#dica-taxa'));
-  await p.fill('#f-fatAno', '2026');
+  await p.fill('#f-fatAno', '2026'); await p.selectOption('#f-anoRef', '2026'); await p.waitForTimeout(300); // o caso D da aceitação é de 2026
   const rD = await motor(() => { const r = calc(UI.atual.dados); return { rec: r.receita.usada.v, F: r.F }; });
   ok('Receita estimada = caso D (912,67 mi)', Math.abs(rD.rec / 912.67e6 - 1) < 0.001, rD.rec);
   ok('F = caso D sem equipe de TI (55,55 mi)', Math.abs(rD.F / 55.55e6 - 1) < 0.001, rD.F);
@@ -183,7 +198,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Salvar: cabeçalho mostra salva', (await txt('#ws-meta')).includes('Salva em') && await p.locator('#ws-acoes [data-acao=salvar]').isDisabled());
   ok('Salvar: empresa na barra lateral', (await txt('#nav')).includes('Subsidiária Teste'));
   await ir('#/metodos');
-  ok('Metodologia: seção da receita', (await p.textContent('#met-receita')).includes('Qual receita entra no cálculo'));
+  ok('Metodologia: seção da receita', (await p.textContent('#met-receita')).includes('Estimativa, quando falta o valor') && (await p.textContent('#met-receita')).includes('usado como está'));
   ok('Metodologia: seção das estimativas', (await p.textContent('#met-estimativas')).includes('percentil 25'));
   ok('Metodologia: testes 134 de 134', (await p.textContent('#met-testes')).includes('134 de 134'));
   ok('Métodos: parâmetros por setor em tabela de só leitura, sem campos de edição', await p.locator('#met-setores tbody tr').count() >= 10 && await p.locator('#met-setores input, #met-fontes input').count() === 0);
@@ -255,6 +270,15 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const pend = () => motor(() => pendentes(UI.atual.dados));
   const tok = t => p.evaluate(t => { const e = document.createElement('i'); e.style.color = `var(${t})`; document.body.appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; }, t);
   ok('Empresa modelo completa: nada faltando, motivo só no que os documentos não trazem', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === '|contratos,gastoDeclarado,profTI,usuarios' && await p.locator('.chip-falta').count() === 0);
+  // sem nome e sem nenhum dado, salvar também funciona: o nome fica vermelho e o aviso conta o que falta
+  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.waitForTimeout(200);
+  ok('Nome vazio fica vermelho no próprio campo', await p.locator('#f-nome').evaluate(e => getComputedStyle(e).borderTopColor) === await tok('--crit'));
+  const nAntes = await motor(() => S.empresas.length);
+  await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
+  ok('Salvar sem nome e sem dados salva, e o aviso diz quantos campos faltam', (await motor(() => S.empresas.length)) === nAntes + 1 && /^Empresa salva\. Faltam \d+ campos$/.test(await txt('#toast')), await txt('#toast'));
+  await ir('#/empresas');
+  ok('Na lista, a empresa sem nome aparece como “(sem nome)”', (await txt('.lista-emp')).includes('(sem nome)'));
+  await p.evaluate(() => { S.empresas = S.empresas.filter(e => e.dados.nome); salvar(); });
   await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.waitForTimeout(200);
   await p.fill('#f-nome', 'Teste Sem Dado'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.fill('#f-funcionarios', '500'); await p.waitForTimeout(300);
   const vis = async c => await p.locator(`.sem-dado[data-campo=${c}]`).count() === 1 && await p.locator(`.sem-dado[data-campo=${c}]`).isVisible();
@@ -286,13 +310,14 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Com equipe de TI, o salário passa a pedir o motivo', await vis('salarioTI'));
   await p.fill('#f-profTI', ''); await p.waitForTimeout(200);
   ok('Apagar o valor volta a faltar informar, sem o motivo antigo, e o campo volta a ficar vermelho', (await txt('.sem-dado[data-campo=profTI]')) === 'Sem dado?' && await campoCor('profTI', 'borderTopColor') === await tok('--crit') && !(await vis('salarioTI')));
-  // não é opcional: salvar e copiar o resumo ficam bloqueados enquanto faltar
+  // salvar nunca é bloqueado: o campo que falta continua vermelho e o aviso diz quantos faltam; o resumo para copiar continua pedindo os campos
   const faltam = await pend();
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
-  ok('Salvar com campo faltando é bloqueado, sem opção de salvar assim mesmo', !(await motor(() => !!empresaSalva())) && (await txt('#toast')).includes(`Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0);
+  ok('Salvar com campo faltando salva, e o aviso diz quantos faltam', (await motor(() => !!empresaSalva())) && (await txt('#toast')).includes(`Empresa salva. Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0, await txt('#toast'));
+  ok('Depois de salvar, os campos que faltam continuam em vermelho', await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === faltam.length);
   const focoNoPendente = () => p.evaluate(() => { const a = document.activeElement; return a.tagName === 'INPUT' && !!a.closest('.campo').querySelector('.sem-dado[data-estado="pendente"]'); });
-  ok('O bloqueio leva ao primeiro campo que falta, que já está em vermelho', await focoNoPendente() && await p.evaluate(() => getComputedStyle(document.activeElement).borderTopColor) === await tok('--crit'));
-  ok('Copiar o resumo com campo faltando também é bloqueado', await (async () => { await p.click('#painel [data-acao=resumo]'); await p.waitForTimeout(300); return await p.locator('#dlg[open]').count() === 0 && (await txt('#toast')).includes('Faltam'); })());
+  ok('Copiar o resumo com campo faltando continua bloqueado', await (async () => { await p.click('#painel [data-acao=resumo]'); await p.waitForTimeout(300); return await p.locator('#dlg[open]').count() === 0 && (await txt('#toast')).includes('Faltam'); })());
+  ok('O resumo leva ao primeiro campo que falta, que já está em vermelho', await focoNoPendente() && await p.evaluate(() => getComputedStyle(document.activeElement).borderTopColor) === await tok('--crit'));
   await p.click('.chip-falta'); await p.waitForTimeout(300);
   ok('O aviso no topo também leva ao campo que falta', await focoNoPendente());
   for (const c of faltam) { await p.click(`.sem-dado[data-campo=${c}]`); await p.click('#pop [data-s]:first-of-type'); await p.waitForTimeout(100); }
@@ -314,10 +339,11 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Ajuda da intensidade digital começa dizendo o que é, sem os multiplicadores', (await txt('#pop')).includes('Quanto o negócio depende de tecnologia') && !(await txt('#pop')).includes('0,8') && await p.locator('#pop a[href="#/metodos/met-ajustes"]').count() === 1);
   await p.keyboard.press('Escape'); await p.waitForTimeout(100);
   await ir('#/metodos/met-ajustes'); await p.waitForTimeout(1600);
-  ok('A Metodologia abre na seção da ajuda e traz os multiplicadores', Math.abs(await p.locator('#met-ajustes').evaluate(e => e.getBoundingClientRect().top)) < 140 && (await txt('#met-ajustes')).includes('Intensidade digital') && /baixa 0,80/.test(await txt('#met-ajustes')));
+  ok('A Metodologia abre na seção da ajuda e traz os multiplicadores', Math.abs(await p.locator('#met-ajustes').evaluate(e => e.getBoundingClientRect().top)) < 140 && (await txt('#met-ajustes')).includes('Intensidade digital') && (await p.evaluate(() => { const tr = [...document.querySelectorAll('#met-ajustes tbody tr')].find(t => t.cells[0].textContent.trim() === 'Intensidade digital baixa'); return tr ? tr.querySelector('td.n').textContent : ''; })) === '0,80');
   ok('A Metodologia explica o mínimo de usuários e o salário de referência', /50 usuários/.test(await txt('#met-caminhos')) && /média nacional/.test(await txt('#met-caminhos')));
-  ok('Metodologia: a Visão geral traz a conta inteira em 5 passos, com o ajuste dos bancos e um link para cada seção', await p.evaluate(() => { const v = document.querySelector('#met-visao .met-conta'); if (!v) return false; const fx = [...v.querySelectorAll('.fx')].map(f => f.innerText.replace(/\s+/g, ' ')); return v.querySelectorAll(':scope > li').length === 5 && fx.length >= 12 && fx.some(t => /^E1 = .*fesc$/.test(t)) && fx.some(t => /^Receita = .*12 ÷ meses/.test(t)) && v.querySelectorAll('a[data-acao=rolar]').length === 5; }));
-  ok('Metodologia: E1 e E2 mostram o ajuste dos bancos grandes, e a receita vem antes dos caminhos', await p.evaluate(() => { const fx = [...document.querySelectorAll('#met-caminhos .fx')].map(f => f.innerText.replace(/\s+/g, ' ')), ids = [...document.querySelectorAll('section.met-sec')].map(s => s.id); return /^E1 = .*fesc$/.test(fx[0]) && /^E2 = .*fesc$/.test(fx[1]) && ids.indexOf('met-receita') < ids.indexOf('met-caminhos') && ids.indexOf('met-pmd') > ids.indexOf('met-categorias') && ids.length === 21; }));
+  ok('Metodologia: a Fórmula completa traz a conta em 5 passos, cada um com legenda e link para a seção', await p.evaluate(() => { const v = document.querySelector('#met-visao .passos'); if (!v) return false; const ls = [...v.querySelectorAll('.fx-e')].map(e => e.innerText.replace(/\s+/g, '') + '=' + e.nextElementSibling.nextElementSibling.innerText.replace(/\s+/g, ' ')); return v.querySelectorAll(':scope > li').length === 5 && ls.length >= 15 && ls.some(t => /^E1=.*fb$/.test(t)) && ls.some(t => /^R=.*12 ÷ m/.test(t)) && v.querySelectorAll('[data-acao=rolar]').length === 5 && v.querySelectorAll('dl.letras').length === 5; }));
+  ok('Metodologia: a tabela dos caminhos mostra o ajuste dos bancos em E1 e E2, e a receita vem antes dos caminhos', await p.evaluate(() => { const lin = [...document.querySelectorAll('#met-caminhos .tab-doc tbody tr')].map(tr => tr.innerText.replace(/\s+/g, ' ')), ids = [...document.querySelectorAll('section.met-sec')].map(s => s.id); return /^E1 · Receita .*fb/.test(lin[0]) && /^E2 · Usuários .*fb/.test(lin[1]) && ids.indexOf('met-receita') < ids.indexOf('met-caminhos') && ids.indexOf('met-pmd') > ids.indexOf('met-categorias') && ids.length === 21; }));
+  ok('Metodologia: nenhuma fórmula dentro de frase: os blocos de texto não têm sinal de igual', await p.evaluate(() => [...document.querySelectorAll('#app .met-sec p, #app .met-sec .notas li')].every(e => !/\s=\s/.test(e.innerText))));
   ok('Metodologia: expoentes com o sinal de menos tipográfico', !/e-\d/.test(await p.evaluate(() => [...document.querySelectorAll('#app .fx')].map(f => f.innerText).join(' '))));
   await ir('#/empresas'); await p.click('.lista-emp .emp-nome >> nth=-1'); await p.waitForTimeout(500);
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(200); await p.click('.abas a:nth-child(1)'); await p.waitForTimeout(300);

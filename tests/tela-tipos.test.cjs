@@ -29,7 +29,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   const cr1 = await txt(p, '#cr1-parametros');
   check('CR1: versão, data e contagens, sem nome de arquivo nem colunas', /Versão [^,]+, de \d\d\/\d\d\/\d{4}: [\d.]+ empresas na base/.test(cr1) && !/\w\.(xlsx?|csv)\b|Coluna “|Fora da conta/.test(cr1) && await p.locator('#cr1-parametros th:text-is("Empresas")').count() >= 2, cr1.slice(0, 160));
   check('CR1: percentual geral e acerto medido nas próprias empresas', /Percentual geral: [\d,]+%/.test(cr1) && /Dentro da faixa de 80% nas próprias empresas: \d+ de \d+ por este método e \d+ de \d+ pelo Método Vezen/.test(cr1), (cr1.match(/Dentro da faixa[^.]*/) || [''])[0]);
-  check('CR1: documentação com a fórmula, o autor e as versões', /Carol Rocha/.test(await txt(p, '#cr1-metodo')) && /Investimento em TI = Receita/.test((await txt(p, '#cr1-metodo')).replace(/\s+/g, ' ')) && /gerar-calibracao/.test(await txt(p, '#cr1-versoes')));
+  check('CR1: documentação com a fórmula, o autor e as versões', /Carol Rocha/.test(await txt(p, '#cr1-metodo')) && /F\s*=\s*R · p · fl/.test((await txt(p, '#cr1-metodo')).replace(/\s+/g, ' ')) && /gerar-calibracao/.test(await txt(p, '#cr1-versoes')));
   check('Vezen: fontes em tabela e parâmetros fixos', /parâmetros do Método Vezen são fixos/.test(await txt(p, '#met-fontes')) && await p.locator('#met-fontes tbody tr').count() >= 30 && /Brasscom/.test(await txt(p, '#met-fontes')));
   check('Personalizado: os quatro caminhos de entrada', (await p.$$eval('#pers-dados .acoes button', bs => bs.map(x => x.textContent.trim()).join('|'))) === 'Importar planilha|Baixar modelo|Adicionar empresa|Informar percentuais');
   check('testes 134 de 134', /134 de 134/.test(await txt(p, '#met-testes')), (await txt(p, '#met-testes')).match(/\d+ de \d+/)[0]);
@@ -49,9 +49,11 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   check('CR1 muda o valor e usa só o caminho do percentual', v0 !== v1 && await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value === 'padrao' && calc(UI.atual.dados).ests.map(e => e.cod).join() === 'EP'), `${v0} → ${v1}`);
   check('CR1: receita informada × percentual do setor', await p.evaluate(() => { const r = calc(UI.atual.dados), T = calPadrao().ti; return Math.abs(r.F / (r.receita.usada.v * T.ps.servicos) - 1) < 1e-9 && r.receita.modo === 'informada'; }));
   check('confiança do CR1 com o acerto medido', /Acerto medido: \d+ de \d+ empresas da base dentro da faixa/.test(await txt(p, '#painel .cr-conf')), await txt(p, '#painel .cr-conf'));
-  // gasto real de 2025 para a análise entrar no Personalizado depois
+  // gasto real de 2024 (antes do ano de referência) para a análise entrar no Personalizado depois
   await p.click('[data-acao=add-real]'); await p.waitForTimeout(200);
-  await p.fill('[data-real="0"][data-parte="ano"]', '2025'); await p.fill('[data-real="0"][data-parte="v"]', '4.000.000'); await p.waitForTimeout(300);
+  await p.fill('[data-real="0"][data-parte="ano"]', '2024'); await p.fill('[data-real="0"][data-parte="v"]', '4.000.000'); await p.waitForTimeout(300);
+  check('a análise só entra no Personalizado quando a pessoa marca', !(await p.isChecked('#f-usarCalib')) && await p.evaluate(() => UI.atual.foraCalibracao === true));
+  await p.check('#f-usarCalib'); await p.waitForTimeout(100);
   await salvarAnalise(p, 400);
 
   // 3. Personalizado: empresas digitadas

@@ -29,7 +29,7 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   await p.click('a[href="#/listas/nova"] >> nth=0'); await p.waitForTimeout(200);
   check('etapa 1: escolher o arquivo', await p.locator('#soltar-lista').count() === 1 && /Escolher o arquivo/.test(await txt(p, '.etapas-lote [aria-current=step]')));
   // a planilha de exemplo mais uma empresa sem receita e sem funcionários (colunas: Empresa;CNPJ;Setor;Estado;Ano;Receita;Funcionários;Funcionários de TI;Gasto de TI)
-  fs.writeFileSync(path.join(TMP, 'vezen-lista-teste.csv'), fs.readFileSync(path.join(D, 'minhas.csv'), 'utf8').replace(/^﻿/, '').trim() + '\r\nSem Dados Ltda;;Indústria;SP;2025;;;;\r\n');
+  fs.writeFileSync(path.join(TMP, 'vezen-lista-teste.csv'), fs.readFileSync(path.join(D, 'minhas.csv'), 'utf8').replace(/^﻿/, '').trim().replace(/;2025;/g, ';2024;') + '\r\nSem Dados Ltda;;Indústria;SP;2024;;;;\r\n'); // dados de 2024: o gasto real vira E0 e o método muda o resultado
   await p.setInputFiles('#arq-lista', path.join(TMP, 'vezen-lista-teste.csv')); await p.waitForTimeout(800);
   check('etapa 2: conferir as colunas', /Conferir as colunas/.test(await txt(p, '.etapas-lote [aria-current=step]')) && await p.inputValue('#mp-nome') === 'Empresa' && await p.inputValue('#mp-funcionarios') === 'Funcionários');
   check('contagem antes de estimar', /15 empresas/.test(await txt(p, '[data-acao=criar-lista]')) && /14 têm dados para estimar/.test(await txt(p, '#app')), await txt(p, '[data-acao=criar-lista]'));

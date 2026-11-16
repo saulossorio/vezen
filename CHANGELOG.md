@@ -2,6 +2,23 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [2.2.0] - 2026-11-16
+
+### Adicionado
+- **Receita por ano**, como o gasto real: uma linha por ano, com valor, período e origem. A conta usa a linha do ano de referência; sem ela, a mais recente antes dele. Com dois anos fechados ou mais, a receita vai ao ano de referência pelo crescimento da própria empresa.
+- **Ano de referência** em cada análise, no cartão e no resultado. Por padrão, o último ano fechado; receita líquida e investimento em TI são desse ano.
+- Teste `motor-receitas` e o verbete Ano de referência no glossário.
+
+### Alterado
+- A receita do último ano fechado entra como foi informada: não é mais levada ao ano em curso.
+- O valor de receita informado é usado como está, de qualquer origem. A origem muda só a incerteza, e a estimativa pelos funcionários fica para comparação. Antes, um valor não oficial era juntado com a estimativa.
+- Gasto real do próprio ano de referência vale como o gasto do ano e vira o resultado; o de outros anos segue no caminho E0.
+- Salvar nunca é bloqueado: salva, o aviso diz quantos campos faltam, e eles continuam em vermelho, inclusive o nome. Copiar o resumo continua pedindo os campos.
+- “Usar esta empresa no Método Personalizado” começa desmarcado; análises salvas antes ficam fora até serem marcadas.
+- **Métodos reescrita.** Títulos dizem o que a seção contém. Cada fórmula fica em bloco, alinhada pelo sinal de igual, com a legenda das letras e o valor em uso. Notas curtas no lugar dos parágrafos. Tabelas com as colunas numéricas da mesma largura e a unidade embaixo do título. A Fórmula completa do Vezen vem em cinco passos.
+- Nas listadas, “Receita líquida, ano anterior” e “dois anos antes” viraram linhas da receita.
+- Excel das empresas: coluna Ano de referência; em Dados e motivos, uma linha por ano de receita e de gasto real.
+
 ## [2.1.0] - 2026-11-15
 
 ### Alterado

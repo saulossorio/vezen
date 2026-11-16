@@ -1,6 +1,6 @@
 # Vezen
 
-Estima quanto uma empresa brasileira investe em TI e, se você pedir, a receita líquida dela. É um único arquivo HTML: abre no navegador, não precisa instalar nada e **os dados ficam só no seu computador**.
+Estima quanto uma empresa brasileira investe em TI e a receita líquida dela, no último ano fechado (ou no ano que você escolher). É um único arquivo HTML: abre no navegador, não precisa instalar nada e **os dados ficam só no seu computador**.
 
 O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Wezen quer dizer "o peso", e o Vezen pesa cada empresa em TI. Faz parte da família do Canis:
 
@@ -26,7 +26,7 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 
 ## Os três métodos
 
-Toda análise chega a dois números, a receita líquida e o investimento anual em TI, cada um com a origem à vista. O método escolhido na análise decide como a estimativa é feita:
+Toda análise chega a dois números do ano de referência (por padrão, o último ano fechado): a receita líquida e o investimento anual em TI, cada um com a origem à vista. A receita aceita um valor por ano, como o gasto real; a conta usa o do ano de referência. O método escolhido na análise decide como a estimativa é feita:
 
 | Método | De onde vêm os números | Quem muda os parâmetros |
 |---|---|---|

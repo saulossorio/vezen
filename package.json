@@ -1,10 +1,10 @@
 {
   "name": "vezen",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "private": true,
   "description": "Estimativa do investimento em TI de empresas brasileiras, num único arquivo HTML.",
   "scripts": {
-    "test": "node tests/motor-casos.test.cjs && node tests/motor-cidades.test.cjs && node tests/motor-bancos.test.cjs && node tests/motor-periodo.test.cjs",
+    "test": "node tests/motor-casos.test.cjs && node tests/motor-cidades.test.cjs && node tests/motor-bancos.test.cjs && node tests/motor-periodo.test.cjs && node tests/motor-receitas.test.cjs",
     "test:tela": "node tests/tela-analise.test.cjs && node tests/tela-tipos.test.cjs && node tests/tela-cidades.test.cjs && node tests/tela-listas.test.cjs && node tests/tela-glossario.test.cjs && node tests/tela-transicoes.test.cjs"
   },
   "devDependencies": {
