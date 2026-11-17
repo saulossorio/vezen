@@ -22,7 +22,7 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 
 **Empresa modelo:** um exemplo pronto (Banco do Brasil, com dados oficiais), no menu de **Empresas**.
 
-**Métodos** explica como cada um dos três métodos calcula, com os parâmetros em uso (só leitura no Vezen e no CR1) e, no fim, os dados do Método Personalizado, a única parte que recebe dados seus. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
+**Métodos** explica como cada um dos três métodos calcula, com os parâmetros em uso (só leitura no Vezen e no CR) e, no fim, os dados do Método Personalizado, a única parte que recebe dados seus. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
 
 ## Os três métodos
 
@@ -30,18 +30,18 @@ Toda análise chega a dois números do ano de referência (por padrão, o últim
 
 | Método | De onde vêm os números | Quem muda os parâmetros |
 |---|---|---|
-| Método Vezen | Pesquisas públicas (FGV, Brasscom, FEBRABAN, Techaisle) e documentos oficiais: até sete caminhos de cálculo, juntados pela precisão, com índice de confiança. É o método das análises novas | Ninguém pela tela: só uma nova versão da ferramenta, com evidência |
-| Método CR1 | Receita × percentual de TI observado numa base de empresas reais, por setor, estado e cidade (método de Carol Rocha). A receita, quando falta, é estimada pela receita por funcionário da mesma base | Só o administrador, com uma nova versão (CR1.1, CR2) |
-| Método Personalizado | A mesma conta do CR1, com percentuais tirados das suas empresas (planilha, digitadas ou análises salvas com gasto real) ou digitados por você | Você, na tela Métodos |
+| Método Vezen | Referências públicas (medianas internacionais por setor, gasto declarado por empresas brasileiras, balanços, FGV, Brasscom, FEBRABAN): até sete caminhos de cálculo, juntados pela precisão, com índice de confiança. É o método das análises novas | Ninguém pela tela: só uma nova versão da ferramenta, com evidência |
+| Método CR (CR0 em uso) | Receita × percentual de TI por segmento, estado e cidade (método de Carol Rocha). A receita, quando falta, é estimada pela receita por funcionário da mesma base | Só o administrador, com uma nova versão (CR1.1, CR2) |
+| Método Personalizado | A mesma conta do CR, com percentuais tirados das suas empresas (planilha, digitadas ou análises salvas com gasto real) ou digitados por você | Você, na tela Métodos |
 
-Os percentuais do CR1 em uso são provisórios, calculados pela ferramenta com as empresas da base que declararam o gasto de TI, até a tabela definitiva ser carregada. Nos métodos por percentual, só um lugar com pelo menos 5 empresas tem valor próprio.
+O CR0 em uso tem dados modelo, fictícios, com a segmentação completa; o CR1 será a primeira versão oficial. Nos métodos por percentual, só um lugar com pelo menos 5 empresas tem valor próprio.
 
 ## Privacidade
 
 - Os dados ficam só no navegador de quem usa, mesmo na versão publicada: não há servidor guardando nada.
 - A versão publicada e o arquivo baixado guardam os dados cada um no seu canto. Para passar as análises de um para o outro, exporte um backup em **Empresas** e importe no outro.
 - A internet só é usada para consultar o CNPJ e a cotação de moedas na BrasilAPI.
-- A base do Método CR1 que vem no arquivo tem só os parâmetros que entram na conta e quantas empresas há em cada grupo. Não tem nome, CNPJ, contato nem nenhum valor de empresa, nem o nome do arquivo ou as colunas de origem.
+- A base do Método CR que vem no arquivo tem só os parâmetros que entram na conta e quantas empresas há em cada grupo. Não tem nome, CNPJ, contato nem nenhum valor de empresa, nem o nome do arquivo ou as colunas de origem.
 - Não guarde neste repositório relatórios do CRM, planilhas nem backups com dados reais. O `.gitignore` bloqueia esses arquivos.
 
 ## Onde está cada coisa
@@ -50,7 +50,7 @@ Os percentuais do CR1 em uso são provisórios, calculados pela ferramenta com a
 |---|---|
 | `index.html` | O Vezen inteiro: estilos, motor de cálculo (`<script id="motor">`) e a interface em blocos, um por tela (`ui-base`, `ui-analise`, `ui-listas`, `ui-metodos`...) |
 | `tests/` | Testes do motor e da tela, com dados fictícios. Veja [tests/README.md](tests/README.md) |
-| `tools/gerar-calibracao.cjs` | Gera uma versão do Método CR1 (os parâmetros embutidos) a partir de uma planilha de empresas |
+| `tools/gerar-calibracao.cjs` | Gera uma versão do Método CR (os parâmetros embutidos) a partir de uma planilha de empresas |
 | `AGENTS.md` | Instruções para agentes de IA que forem mudar o código. O `CLAUDE.md` aponta para ele |
 | `CHANGELOG.md` | Histórico de versões |
 

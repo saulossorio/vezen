@@ -120,7 +120,7 @@ const PERMITIDAS = new Set([
 
   // 6. janelinhas de ajuda também ganham os links
   await p.evaluate(() => { location.hash = '#/empresas'; }); await p.waitForTimeout(300);
-  await p.click('#app [data-acao=nova] >> nth=0'); await p.waitForTimeout(300);
+  await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(300);
   await p.click('button.ajuda[data-chave=natureza]'); await p.waitForTimeout(250);
   check('Ajuda do campo: empresa listada, subsidiária e terceiro setor viram link', await p.locator('#pop .gl-link').count() >= 3 && await p.locator('#pop .gl-link[data-gl="subsidiaria"]').count() === 1 && await p.locator('#pop .gl-link[data-gl="terceiro-setor"]').count() === 1);
   await p.keyboard.press('Escape'); await p.waitForTimeout(250);

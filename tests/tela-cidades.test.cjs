@@ -40,7 +40,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   check('setor dentro da cidade', await p.locator('#pers-dados .cal-local table >> nth=1 >> tbody tr').count() === 2 && /em Campinas\/SP/.test(await txt(p, '#pers-dados .cal-local table >> nth=1')));
 
   // 2. análise em São Paulo com o Personalizado
-  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.waitForTimeout(200);
+  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   await p.fill('#f-nome', 'Teste Cidade'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.selectOption('#f-uf', 'SP');
   await p.fill('#f-faturamento', '300.000.000'); await p.click('[data-acao=origem][data-alvo="campo:faturamento"]'); await p.click('#pop [data-o=oficial]');
   await p.fill('#f-funcionarios', '600');
@@ -79,9 +79,9 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
 
   // 4. a versão provisória do CR1 não tem estado nem cidade: sem ajuste por lugar, e a documentação diz a regra
   await ir('#/metodos');
-  check('CR1 provisório sem ajuste por cidade', /nenhuma cidade com 5 empresas ou mais/.test(await txt(p, '#cr1-parametros')) && /provisórios/.test(await txt(p, '#cr1-metodo')));
+  check('CR0: dados modelo com estados e cidades', /Estado e cidade \(\d+ estados, \d+ cidades\)/.test(await txt(p, '#cr1-parametros')) && /modelo/.test(await txt(p, '#cr1-metodo')));
   check('documentação: mínimo de 5 empresas por grupo e por lugar', /valor próprio com pelo menos 5 empresas/.test(await txt(p, '#cr1-metodo')) && /mínimo de 5 por grupo, lugares só com 5 empresas/.test(await txt(p, '#pers-metodo')));
-  check('análise no CR1 fica sem ajuste por lugar', await p.evaluate(id => { const e = S.empresas.find(x => x.id === id), d = JSON.parse(JSON.stringify(e.dados)); d.modo = 'padrao'; const r = calc(d); return r.modoCalc === 'padrao' && r.modelo.local === null && r.ests.map(x => x.cod).join() === 'EP'; }, idAnalise));
+  check('análise no CR0 tem ajuste por lugar quando o estado está na versão', await p.evaluate(id => { const e = S.empresas.find(x => x.id === id), d = JSON.parse(JSON.stringify(e.dados)); d.modo = 'padrao'; const r = calc(d); return r.modoCalc === 'padrao' && !!r.modelo.local === !!calPadrao().ti.local.ufs[d.uf] && r.ests.map(x => x.cod).join() === 'EP'; }, idAnalise));
 
   // 5. formulário de empresa com cidade
   await p.click('[data-acao=minha-nova]'); await p.waitForTimeout(200);
@@ -100,7 +100,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   await p.click('[data-acao=minha-cancelar]'); await p.waitForTimeout(150);
 
   // 6. CNPJ: a busca só pela lupa, e o município vem com o nome oficial
-  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.waitForTimeout(200);
+  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=padrao]'); await p.waitForTimeout(200);
   await p.fill('#f-cnpj', '11.222.333/0001-81'); await p.press('#f-cnpj', 'Tab'); await p.waitForTimeout(400);
   check('CNPJ: sair do campo não busca', await p.inputValue('#f-municipio') === '' && await p.locator('[data-acao=buscar-cnpj] use[href="#i-busca"]').count() === 1);
   await p.click('[data-acao=buscar-cnpj]'); await p.waitForTimeout(1200);

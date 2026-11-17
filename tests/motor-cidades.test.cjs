@@ -71,10 +71,11 @@ const c2 = M.calibrarRegistros(poucos, P, { ano: 2026, extras: [] });
 ok('Gasto de TI: setor com 3 empresas fica com o percentual geral', c2.ti.suficiente && c2.ti.nS.saude === 3 && perto(c2.ti.ps.saude, c2.ti.pg, 1e-12), c2.ti.suficiente ? `${c2.ti.ps.saude} / ${c2.ti.pg}` : 'sem TI');
 ok('Receita: setor com 3 empresas fica com o nível geral', c2.receita.setores.saude.n === 3 && c2.receita.setores.saude.rpe === Math.round(P.setores.saude.rpe * c2.receita.fatorGeral / 1000) * 1000, JSON.stringify(c2.receita.setores.saude));
 
-// 6. a versão do CR1 embutida é a pública: parâmetros e contagens por grupo, sem nome de arquivo, colunas, segmentos ou linhas de empresa.
+// 6. a versão do CR embutida (CR0, dados modelo, até o CR1 oficial) é a pública: parâmetros e contagens por grupo, sem nome de arquivo, colunas, segmentos ou linhas de empresa.
 const E = M.PAIS.calibracaoBase;
 const PROIBIDAS = ['nome', 'linhas', 'mapa', 'segmentos', 'descartes', 'col', 'descricao', 'formato', 'suspeitas', 'nLinhas', 'nExtras', 'nExtrasTodas', 'repetido', 'linhasTI', 'corte', 'emp', 'cnpj'];
-const chavesDe = (o, out = []) => { if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) { out.push(k); chavesDe(v, out); } return out; };
+// o nome da cidade (do IBGE) é o único 'nome' permitido
+const chavesDe = (o, out = [], dentro = '') => { if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) { if (!(dentro === 'cidade' && k === 'nome')) out.push(k); chavesDe(v, out, k === 'cidades' ? 'cidades' : dentro === 'cidades' ? 'cidade' : ''); } return out; };
 const sobra = chavesDe(E).filter(k => PROIBIDAS.includes(k));
 ok('Embutida: versão pública, com rótulo e data', E.publica === true && typeof E.rotulo === 'string' && E.rotulo.length > 1 && /^\d{4}-\d\d-\d\d/.test(E.data), E.id);
 ok('Embutida: sem nome de arquivo, colunas, segmentos ou linhas de empresa', !sobra.length, sobra.join(', '));
@@ -82,7 +83,7 @@ ok('Embutida: contagens por grupo, sem nenhum valor de empresa', E.empresas > 0 
 ok('Embutida: grupos e setores em ordem alfabética', [E.receita.setores, E.ti.ps, E.ti.nS, E.receita.local.cidades, E.ti.local.cidades].every(o => Object.keys(o).join() === Object.keys(o).sort().join()));
 ok('Embutida: setores com menos de 5 empresas usam o percentual geral', Object.entries(E.ti.ps).every(([l, p]) => (E.ti.nS[l] || 0) >= C.minGrupo || perto(p, E.ti.pg, 1e-9)), JSON.stringify(E.ti.nS));
 ok('Embutida: percentuais entre 0,1% e 20% e incerteza com piso', Object.values(E.ti.ps).every(p => p > 0.001 && p < 0.2) && E.ti.s >= P.calibracao.sMin, `${E.ti.pg} / ${E.ti.s}`);
-ok('Embutida: acerto medido nas próprias empresas, pelos dois métodos', E.ti.acertoPct > 0 && E.ti.acertoPct <= E.ti.N && E.ti.acertoVezen <= E.ti.nVezen && E.ti.nVezen <= E.ti.N);
+ok('Embutida: acerto medido nas próprias empresas, pelos dois métodos (dados modelo não têm)', E.modelo ? E.ti.acertoPct == null : E.ti.acertoPct > 0 && E.ti.acertoPct <= E.ti.N && E.ti.acertoVezen <= E.ti.nVezen && E.ti.nVezen <= E.ti.N);
 ok('Embutida: sem CNPJ, e-mail ou linhas de empresa', !/\d{14}|[a-z0-9._-]+@[a-z0-9-]+\.[a-z]|linhasTI|"emp"/i.test(JSON.stringify(E)));
 
 // 7. a versão pública dá as mesmas estimativas que a calibração completa

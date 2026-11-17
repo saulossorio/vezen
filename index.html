@@ -276,6 +276,19 @@ details > summary { cursor: pointer; }
 .vazio h2 { margin-bottom: 8px; }
 .vazio p { color: var(--cinza); max-width: 560px; margin: 0 auto 18px; }
 .vazio .acoes { justify-content: center; }
+.vazio.inicio { border: 0; background: none; padding: 72px 0 24px; }
+.vazio.inicio h2 { margin-bottom: 22px; }
+.comecos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 720px; margin: 0 auto; }
+.comeco { display: grid; justify-items: center; gap: 4px; padding: 22px 16px; border-radius: var(--raio); border: 1px solid var(--linha-forte); background: var(--superficie); color: var(--tinta); font: inherit; text-decoration: none; cursor: pointer; transition: background var(--dur), border-color var(--dur); }
+.comeco:hover { background: var(--suave); border-color: var(--marca); }
+.comeco svg { margin-bottom: 6px; }
+.comeco span { color: var(--cinza); font-size: .88rem; }
+.comeco:disabled { opacity: .5; cursor: not-allowed; }
+.comeco:disabled:hover { background: var(--superficie); border-color: var(--linha-forte); }
+.comeco.prim { background: var(--marca); border-color: var(--marca); color: var(--marca-texto); }
+.comeco.prim span { color: inherit; opacity: .8; }
+.comeco.prim:hover { background: oklch(0.72 0.17 128); border-color: oklch(0.72 0.17 128); }
+@media (max-width: 720px) { .comecos { grid-template-columns: 1fr; } }
 .passos-vazio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 760px; margin: 0 auto 22px; text-align: left; counter-reset: passo; }
 .passos-vazio li { list-style: none; background: var(--superficie); border: 1px solid var(--linha); border-radius: var(--raio); padding: 12px 14px; font-size: .9rem; color: var(--cinza); margin: 0; }
 .passos-vazio li b { display: block; color: var(--tinta); margin-bottom: 2px; }
@@ -1107,7 +1120,7 @@ const CONFIG = {
   paisAtivo: 'BR',
   paises: {
     BR: {
-      nome: 'Brasil', locale: 'pt-BR', moeda: 'BRL', dataParametros: '2026-11-09',
+      nome: 'Brasil', locale: 'pt-BR', moeda: 'BRL', dataParametros: '2026-11-16',
       naturezas: [
         { id: 'listada', nome: 'Listada na bolsa' },
         { id: 'privada', nome: 'Privada média ou grande (Ltda ou S.A. fechada)' },
@@ -1163,13 +1176,11 @@ const CONFIG = {
         funcionarios: ['cvm', 'linkedin', 'apollo', 'econodata'],
         usuarios: [],
         profTI: ['linkedin', 'apollo'],
-        unidades: ['receita', 'casadosdados'],
         enquadramento: ['receita', 'simples'],
         adicoes: ['cvm', 'b3', 'statusinvest', 'fundamentus'],
         contratos: ['transparencia', 'pncp'],
         digital: ['similarweb'],
         tecnologias: ['builtwith', 'wappalyzer', 'mxtoolbox', 'linkedin', 'gupy'],
-        crescFunc: ['linkedin', 'apollo'],
         vagasTI: ['linkedin', 'gupy'],
         gastosReais: ['cvm', 'transparencia'],
         gastoDeclarado: ['cvm', 'transparencia'],
@@ -1177,8 +1188,8 @@ const CONFIG = {
         grupo: ['receita', 'casadosdados', 'econodata', 'valor1000'],
         porSetor: {
           banco: { faturamento: ['ifdata'] }, seguradora: { faturamento: ['susep'] }, operadora: { faturamento: ['ans'] },
-          saude: { funcionarios: ['cnes'] }, educacao: { funcionarios: ['inep', 'emec'] }, varejo: { unidades: ['sbvc'] },
-          industria: { unidades: ['aneel'] }, tecnologia: { funcionarios: ['anatel'] }
+          saude: { funcionarios: ['cnes'] }, educacao: { funcionarios: ['inep', 'emec'] },
+          tecnologia: { funcionarios: ['anatel'] }
         },
         porNatureza: {
           publico: { faturamento: ['transparencia'] }, terceiro: { faturamento: ['mapaosc'], funcionarios: ['mapaosc'] },
@@ -1187,7 +1198,7 @@ const CONFIG = {
       },
       // metadados de cada parâmetro: fonte, data, aproximado
       // calibração pela base de empresas que vem com a ferramenta (só números agregados, sem dados de empresas)
-      calibracaoBase: {"versao":1,"id":"cr1-provisoria-2026-11-15","rotulo":"CR1 provisória","publica":true,"data":"2026-11-15T16:04:39.089Z","origem":"embutida","empresas":2309,"ufs":{},"receita":{"suficiente":true,"modelo":"porte","anoRef":2025,"g":0.0743,"gBase":0.07,"nG":177,"n":744,"setores":{"bancos":{"rpe":1979000,"rpeBase":771000,"n":107,"proprio":true},"comercio":{"rpe":1395000,"rpeBase":700000,"n":93,"proprio":true},"educacao":{"rpe":510000,"rpeBase":230000,"n":26,"proprio":true},"industria":{"rpe":1430000,"rpeBase":703000,"n":283,"proprio":true},"logistica":{"rpe":1229000,"rpeBase":576000,"n":39,"proprio":true},"outros":{"rpe":1674000,"rpeBase":576000,"n":14,"proprio":true},"saude":{"rpe":595000,"rpeBase":500000,"n":72,"proprio":true},"seguros":{"rpe":3118000,"rpeBase":978000,"n":37,"proprio":true},"servicos":{"rpe":860000,"rpeBase":486000,"n":50,"proprio":true},"tecnologia":{"rpe":859000,"rpeBase":486000,"n":23,"proprio":true}},"local":{"ufs":{},"cidades":{},"demais":{},"celulas":{}},"beta":0.592,"n0":1100,"nMin":121,"nMax":17779,"fatorGeral":2.0109,"s":1.184,"sBase":0.75},"ti":{"suficiente":true,"N":193,"pg":0.013,"ps":{"bancos":0.0419,"comercio":0.0129,"educacao":0.0175,"industria":0.0101,"logistica":0.0122,"outros":0.013,"saude":0.0225,"seguros":0.013,"servicos":0.0082,"tecnologia":0.0325},"nS":{"bancos":11,"comercio":25,"educacao":11,"industria":97,"logistica":15,"outros":1,"saude":10,"seguros":4,"servicos":11,"tecnologia":8},"nSetores":10,"psOutros":true,"s":1.073,"sObs":1.0725,"pctMediana":0.012,"acertoPct":151,"acertoVezen":93,"nVezen":193,"local":{"ufs":{},"cidades":{},"demais":{},"celulas":{}}},"avisos":[]},
+      calibracaoBase: {"versao":1,"id":"cr0-modelo-2026-11-16","rotulo":"CR0","modelo":true,"publica":true,"data":"2026-11-16T12:00:00.000Z","origem":"embutida","empresas":520,"ufs":{"AM":8,"BA":20,"CE":15,"DF":25,"ES":10,"GO":15,"MG":50,"PA":8,"PE":18,"PR":40,"RJ":60,"RS":40,"SC":35,"SP":180},"receita":{"suficiente":true,"modelo":"porte","anoRef":2025,"g":0.0743,"gBase":0.07,"nG":177,"n":744,"setores":{"bancos":{"rpe":1979000,"rpeBase":771000,"n":107,"proprio":true},"comercio":{"rpe":1395000,"rpeBase":700000,"n":93,"proprio":true},"educacao":{"rpe":510000,"rpeBase":230000,"n":26,"proprio":true},"industria":{"rpe":1430000,"rpeBase":703000,"n":283,"proprio":true},"logistica":{"rpe":1229000,"rpeBase":576000,"n":39,"proprio":true},"outros":{"rpe":1674000,"rpeBase":576000,"n":14,"proprio":true},"saude":{"rpe":595000,"rpeBase":500000,"n":72,"proprio":true},"seguros":{"rpe":3118000,"rpeBase":978000,"n":37,"proprio":true},"servicos":{"rpe":860000,"rpeBase":486000,"n":50,"proprio":true},"tecnologia":{"rpe":859000,"rpeBase":486000,"n":23,"proprio":true}},"local":{"ufs":{},"cidades":{},"demais":{},"celulas":{}},"beta":0.592,"n0":1100,"nMin":121,"nMax":17779,"fatorGeral":2.0109,"s":1.184,"sBase":0.75},"ti":{"suficiente":true,"N":520,"pg":0.055,"ps":{"bancos":0.09,"comercio":0.045,"educacao":0.05,"industria":0.04,"logistica":0.045,"outros":0.05,"saude":0.05,"seguros":0.07,"servicos":0.06,"tecnologia":0.11},"nS":{"bancos":40,"comercio":80,"educacao":30,"industria":120,"logistica":35,"outros":16,"saude":45,"seguros":24,"servicos":70,"tecnologia":60},"nSetores":10,"psOutros":true,"s":0.45,"sObs":0.45,"pctMediana":0.055,"local":{"ufs":{"AM":{"f":0.85,"n":8},"BA":{"f":0.88,"n":20},"CE":{"f":0.87,"n":15},"DF":{"f":1.12,"n":25},"ES":{"f":0.93,"n":10},"GO":{"f":0.92,"n":15},"MG":{"f":0.95,"n":50},"PA":{"f":0.84,"n":8},"PE":{"f":0.9,"n":18},"PR":{"f":0.97,"n":40},"RJ":{"f":1.05,"n":60},"RS":{"f":0.96,"n":40},"SC":{"f":0.98,"n":35},"SP":{"f":1.1,"n":180}},"cidades":{"AM:manaus":{"f":1.04,"n":8,"nome":"Manaus"},"BA:salvador":{"f":1.03,"n":13,"nome":"Salvador"},"CE:fortaleza":{"f":1.03,"n":11,"nome":"Fortaleza"},"DF:brasilia":{"f":1,"n":25,"nome":"Brasília"},"ES:vitoria":{"f":1.03,"n":6,"nome":"Vitória"},"GO:goiania":{"f":1.03,"n":11,"nome":"Goiânia"},"MG:belo horizonte":{"f":1.04,"n":28,"nome":"Belo Horizonte"},"MG:uberlandia":{"f":0.95,"n":6,"nome":"Uberlândia"},"PA:belem":{"f":1.02,"n":6,"nome":"Belém"},"PE:recife":{"f":1.05,"n":13,"nome":"Recife"},"PR:curitiba":{"f":1.05,"n":24,"nome":"Curitiba"},"PR:londrina":{"f":0.94,"n":6,"nome":"Londrina"},"RJ:niteroi":{"f":0.97,"n":6,"nome":"Niterói"},"RJ:rio de janeiro":{"f":1.06,"n":42,"nome":"Rio de Janeiro"},"RS:caxias do sul":{"f":0.96,"n":6,"nome":"Caxias do Sul"},"RS:porto alegre":{"f":1.04,"n":22,"nome":"Porto Alegre"},"SC:florianopolis":{"f":1.07,"n":14,"nome":"Florianópolis"},"SC:joinville":{"f":0.98,"n":8,"nome":"Joinville"},"SP:campinas":{"f":1.02,"n":22,"nome":"Campinas"},"SP:ribeirao preto":{"f":0.95,"n":9,"nome":"Ribeirão Preto"},"SP:santos":{"f":0.94,"n":8,"nome":"Santos"},"SP:sao jose dos campos":{"f":1.03,"n":10,"nome":"São José dos Campos"},"SP:sao paulo":{"f":1.08,"n":95,"nome":"São Paulo"}},"demais":{"BA":{"f":0.85,"n":7},"CE":{"f":0.86,"n":4},"GO":{"f":0.9,"n":4},"MG":{"f":0.89,"n":16},"PE":{"f":0.86,"n":5},"PR":{"f":0.91,"n":10},"RJ":{"f":0.9,"n":12},"RS":{"f":0.9,"n":12},"SC":{"f":0.93,"n":13},"SP":{"f":0.88,"n":36}},"celulas":{"bancos|SP:sao paulo":{"f":1.06,"n":18},"comercio|RJ:rio de janeiro":{"f":0.95,"n":10},"industria|RS:caxias do sul":{"f":1.04,"n":5},"industria|SP:campinas":{"f":1.05,"n":9},"logistica|SP:santos":{"f":1.07,"n":5},"saude|MG:belo horizonte":{"f":1.04,"n":6},"servicos|SP:sao paulo":{"f":1.03,"n":20},"tecnologia|PE:recife":{"f":1.08,"n":6},"tecnologia|PR:curitiba":{"f":1.06,"n":6},"tecnologia|SC:florianopolis":{"f":1.12,"n":7},"tecnologia|SP:sao paulo":{"f":1.1,"n":22}}}},"avisos":[]},
       fontes: {
         'equipe.fatorCLT': { fonte: 'Regra prática: 1,7 a 2,0 vezes o salário bruto', aprox: true },
         'equipe.sPessoal': { fonte: 'FGV 36ª: pessoal = 36% do gasto de TI' },
@@ -1195,7 +1206,7 @@ const CONFIG = {
         'equipe.sCapex': { fonte: 'FGV 36ª: investimento = 32% do gasto de TI' },
         'equipe.sCapexBancos': { fonte: 'FEBRABAN 2026: R$ 16,8 bi de R$ 46,8 bi (2025)' },
         'regional.mediaNacional': { fonte: 'Brasscom, empregos CLT de TIC, dez/2025' },
-        'incertezas.sE3': { fonte: 'Participação de pessoal entre 20% e 45% nas fontes', aprox: true },
+        'incertezas.sE3': { fonte: 'Participação de pessoal entre 20% e 45% nas fontes; nas empresas com gasto declarado, o caminho ficou 2,3 vezes abaixo', aprox: true },
         'incertezas.sE4p': { fonte: 'Suposição inicial', aprox: true },
         'incertezas.sE5': { fonte: 'Investimento entre 32% (FGV) e 36% (FEBRABAN)', aprox: true },
         'incertezas.rho': { fonte: 'Suposição inicial', aprox: true },
@@ -1211,7 +1222,7 @@ const CONFIG = {
         'crescimento.cenario': { fonte: 'Suposição inicial', aprox: true },
         'limites': { fonte: 'LC 123/2006; PLP 186/2026 (sancionado em 21/10/2026). Piso do MEI aproximado.' },
         'categorias': { fonte: 'Equipe: FGV 36ª. Demais: proporções Techaisle para PMEs (aproximado). Pequena: Techaisle 2026.', aprox: true },
-        'escala': { fonte: 'Banco do Brasil (2025) e Santander Brasil (2024), pelos documentos oficiais dos bancos; só dois bancos grandes', aprox: true },
+        'nivel': { fonte: 'Medianas internacionais por setor (Gartner e Avasant 2025, pelo resumo de L. Ulstrup); gasto declarado por empresas brasileiras; balanços do Banco do Brasil e do Santander Brasil; FEBRABAN; ABES (mercado de TI); IBGE (pesquisas anuais da indústria, do comércio e dos serviços)' },
         'porte': { fonte: 'FGV 36ª: índice de gasto (9,6%, 10,1%, 10,3%) e CAPU (52, 59, 70 mil) por faixa; 0,8 usuário por teclado' },
         'calibracao': { fonte: 'Regras da ferramenta' },
         'receita.g': { fonte: 'IBGE: PIB nominal de R$ 10,9 tri (2023) para R$ 11,7 tri (2024), cerca de 7% ao ano', aprox: true },
@@ -1224,19 +1235,21 @@ const CONFIG = {
       },
       parametros: {
         setores: {
-          bancos: { nome: 'Bancos e financeiras', p: 0.21, capu: 162000, u: 1.00, sE1: 0.65, sE2: 0.75, rpe: 771000, ded: 0, base: 'FGV 36ª: bancos 21% e CAPU 162 mil', aprox: false },
-          seguros: { nome: 'Seguros e serviços financeiros', p: 0.138, capu: 135000, u: 1.00, sE1: 0.75, sE2: 0.85, rpe: 978000, ded: 0, base: '% derivado: 5,5% (mediana internacional) × 2,5; CAPU FGV de serviços financeiros', aprox: true },
-          tecnologia: { nome: 'Tecnologia, telecom e mídia', p: 0.148, capu: 72000, u: 1.00, sE1: 0.65, sE2: 0.75, rpe: 486000, ded: 0.12, base: 'FGV 36ª serviços; intensidade digital "alta" por padrão', aprox: false },
-          servicos: { nome: 'Serviços em geral', p: 0.148, capu: 72000, u: 1.00, sE1: 0.65, sE2: 0.75, rpe: 486000, ded: 0.12, base: 'FGV 36ª serviços', aprox: false },
-          saude: { nome: 'Saúde', p: 0.12, capu: 60000, u: 1.00, sE1: 0.75, sE2: 0.85, rpe: 500000, ded: 0.12, base: '% derivado: 4,8% × 2,5; CAPU médio FGV', aprox: true },
-          educacao: { nome: 'Educação', p: 0.113, capu: 26000, u: 1.00, sE1: 0.75, sE2: 0.85, rpe: 230000, ded: 0.12, base: '% derivado: 4,5% × 2,5; CAPU FGV 33ª (22 mil) × 1,2', aprox: true },
-          industria: { nome: 'Indústria, energia, agro e construção', p: 0.054, capu: 52000, u: 0.73, sE1: 0.65, sE2: 0.75, rpe: 703000, ded: 0.2, base: 'FGV 36ª indústria', aprox: false },
-          comercio: { nome: 'Comércio e varejo', p: 0.048, capu: 40000, u: 0.84, sE1: 0.65, sE2: 0.75, rpe: 700000, ded: 0.18, base: 'FGV 36ª comércio', aprox: false },
-          logistica: { nome: 'Logística e transporte', p: 0.10, capu: 60000, u: 0.96, sE1: 0.90, sE2: 1.00, rpe: 576000, ded: 0.12, base: 'Sem dado setorial: média FGV', aprox: true },
+          bancos: { nome: 'Bancos e financeiras', p: 0.065, capu: 55000, u: 1.00, sE1: 0.80, sE2: 0.90, rpe: 771000, ded: 0, base: 'Internacional 7,2%; balanços do Banco do Brasil 2025 (9,2%) e do Santander Brasil 2024 (5,8%); medido 4,2%. Por usuário: R$ 76 mil e R$ 80 mil nesses dois bancos, já com o ajuste de porte', aprox: false },
+          seguros: { nome: 'Seguros e serviços financeiros', p: 0.038, capu: 37000, u: 1.00, sE1: 0.90, sE2: 1.00, rpe: 978000, ded: 0, base: 'Internacional 5,5% × 0,69 (relação Brasil ÷ internacional dos setores medidos); sem medida própria', aprox: true },
+          tecnologia: { nome: 'Tecnologia, telecom e mídia', p: 0.04, capu: 20000, u: 1.00, sE1: 0.80, sE2: 0.90, rpe: 486000, ded: 0.12, base: 'Internacional de telecom e mídia 4,2%; medido 3,3%; intensidade digital "alta" por padrão (× 1,3)', aprox: false },
+          servicos: { nome: 'Serviços em geral', p: 0.021, capu: 14000, u: 1.00, sE1: 0.90, sE2: 1.00, rpe: 486000, ded: 0.12, base: 'Internacional de serviços profissionais 5,2%; medido 0,8%: referências distantes', aprox: true },
+          saude: { nome: 'Saúde', p: 0.033, capu: 17000, u: 1.00, sE1: 0.80, sE2: 0.90, rpe: 500000, ded: 0.12, base: 'Internacional 4,8%; medido 2,3%', aprox: false },
+          educacao: { nome: 'Educação', p: 0.028, capu: 7000, u: 1.00, sE1: 0.80, sE2: 0.90, rpe: 230000, ded: 0.12, base: 'Internacional 4,5%; medido 1,8%', aprox: false },
+          industria: { nome: 'Indústria, energia, agro e construção', p: 0.015, capu: 14000, u: 0.73, sE1: 0.80, sE2: 0.90, rpe: 703000, ded: 0.2, base: 'Internacional de manufatura 2,1%; medido 1,0%', aprox: false },
+          comercio: { nome: 'Comércio e varejo', p: 0.018, capu: 13000, u: 0.84, sE1: 0.80, sE2: 0.90, rpe: 700000, ded: 0.18, base: 'Internacional 2,5%; medido 1,3%', aprox: false },
+          logistica: { nome: 'Logística e transporte', p: 0.02, capu: 14000, u: 0.96, sE1: 0.95, sE2: 1.05, rpe: 576000, ded: 0.12, base: 'Sem referência internacional do setor: nível geral; medido 1,2%', aprox: true },
           publico: { nome: 'Setor público', p: null, capu: null, u: 0.96, sE1: null, sE2: null, rpe: null, ded: 0, base: 'Sem referência: estima por E4p, E3, E0 ou E4', aprox: true },
-          terceiro: { nome: 'Terceiro setor', p: 0.10, capu: null, u: 0.96, sE1: 0.90, sE2: null, rpe: null, ded: 0, base: 'Sem dado setorial: média FGV só no E1', aprox: true },
-          outros: { nome: 'Outros ou sem informação', p: 0.10, capu: 60000, u: 0.96, sE1: 0.90, sE2: 1.00, rpe: 576000, ded: 0.15, base: 'Média FGV 36ª', aprox: true }
+          terceiro: { nome: 'Terceiro setor', p: 0.02, capu: null, u: 0.96, sE1: 0.95, sE2: null, rpe: null, ded: 0, base: 'Sem referência do setor: nível geral, só no E1', aprox: true },
+          outros: { nome: 'Outros ou sem informação', p: 0.02, capu: 14000, u: 0.96, sE1: 0.95, sE2: 1.05, rpe: 576000, ded: 0.15, base: 'Nível geral: internacional 3,2% e medido 1,3%', aprox: true }
         },
+        // de onde vem o nível de p e CAPU (ver Métodos, Setores)
+        nivel: { nMedido: 193, kBrasil: 0.69, mercadoTI: 321e9, anoMercado: 2024, receitaIndustria: 6.5e12, receitaComercio: 7.1e12, receitaServicos: 3.2e12, anoReceita: 2023 },
         porte: [
           { ate: 144, teclados: 'até 180', f1: 0.96, f2: 0.867, fr: 0.903 },
           { ate: 640, teclados: '180 a 800', f1: 1.01, f2: 0.983, fr: 0.973 },
@@ -1271,15 +1284,11 @@ const CONFIG = {
           { id: 'licencas', nome: 'Licenças de software', mg: 0.064, peq: 0.08 },
           { id: 'telecom', nome: 'Telecom', mg: 0.032, peq: 0.04 }
         ],
-        // bancos muito grandes gastam bem menos por usuário e por receita do que a faixa de porte maior sugere (ver a Metodologia)
-        escala: { bancos: { de: 5000, beta: 0.36 } },
-        incertezas: { sE3: 0.70, sE4p: 0.20, sE5: 0.45, rho: 0.5, sigmaG: 0.10, pisoSemReal: 0.15, pisoComReal: 0.05, escalaZero: 1.20, escalaCem: 0.05, extraPequena: 0.25 },
+        incertezas: { sE3: 0.85, sE4p: 0.20, sE5: 0.45, rho: 0.5, sigmaG: 0.10, pisoSemReal: 0.15, pisoComReal: 0.05, escalaZero: 1.20, escalaCem: 0.05, extraPequena: 0.25 },
         origens: { oficial: 0.05, agregador: 0.10, terceiros: 0.30, palpite: 0.60 },
         modificadores: {
           digital: { baixa: 0.8, media: 1.0, alta: 1.3 },
           tiMatriz: 0.7,
-          unidades: [{ de: 0, v: 1.0 }, { de: 10, v: 1.1 }, { de: 100, v: 1.2 }],
-          crescimentoLimiar: 20, crescimentoFator: 1.1,
           mMin: 0.5, mMax: 2.0
         },
         limites: {
@@ -1290,7 +1299,7 @@ const CONFIG = {
             { ano: 2028, MEI: 140000, ME: 360000, EPP: 4800000 }
           ]
         },
-        crescimento: { gSetor: 0.08, cenario: 0.04, horizonte: 5, histMin: -0.20, histMax: 0.50, funcMin: -0.10, funcMax: 0.40 },
+        crescimento: { gSetor: 0.08, cenario: 0.04, horizonte: 5, histMin: -0.20, histMax: 0.50 },
         calibracao: { minEmpresas: 5, K: 5, minGrupo: 5, meta: 0.80, sMin: 0.25 },
         receita: { g: 0.07, sFunc: 0.75, sGlobal: 0.60, prodBR: 1.0, sDed: 0.08, sMeses: 0.02 },
         estimativas: { conservadora: 0.25 },
@@ -1359,10 +1368,7 @@ function faixaEnquadramento(enq, anoRef, P) {
   return { min: lim.MEI, max: lim.EPP };
 }
 function nivelDigitalAuto(d) {
-  const ex = d.extras || {};
   if (d.natureza === 'startup' || d.setor === 'tecnologia') return 'alta';
-  if (d.setor === 'educacao' && +ex.pctEAD > 50) return 'alta';
-  if (d.setor === 'varejo' && +ex.pctOnline > 30) return 'alta';
   return 'media';
 }
 
@@ -1511,7 +1517,7 @@ function receitaEmpresa(d, P, c) {
 /* ---------- cálculo principal ---------- */
 function calcular(d, P, opts = {}) {
   const ano = opts.ano ?? new Date().getFullYear();
-  const calib = opts.semCalib ? null : (opts.calib || null), usaPct = !!(calib && calib.ps); // CR1 e Personalizado: só receita × percentual
+  const calib = opts.semCalib ? null : (opts.calib || null), usaPct = !!(calib && calib.ps); // CR e Personalizado: só receita × percentual
   const sOrig = o => P.origens[o] ?? P.origens.terceiros;
   const I = P.incertezas;
   const linhaId = linhaDe(d), L = P.setores[linhaId];
@@ -1526,20 +1532,17 @@ function calcular(d, P, opts = {}) {
   // gasto real do próprio ano de referência é o gasto do ano: vale como o declarado, quando não há outro declarado
   const realDoAno = reais.filter(x => x.ano === ano).pop() || null, declInf = valorPos(d.gastoDeclarado);
   const decl = declInf || (realDoAno ? realDoAno.v : null), oDecl = declInf ? d.gastoDeclarado.o : realDoAno ? realDoAno.o : null;
-  const crescF = valorNum(d.crescFunc);
 
   // usuários, porte, região
   const usuarios = usInf ?? (func ? func * L.u : null);
   const usuariosOrig = usInf ? d.usuarios.o : (func ? d.funcionarios.o : null);
-  const pequena = !!enq || (usuarios != null && usuarios < 50);
+  const pequena = !ehOrgaoPublico(d) && (!!enq || (usuarios != null && usuarios < 50));
   const banda = usuarios != null ? P.porte.find(b => b.ate == null || usuarios <= b.ate) : (pequena ? P.porte[0] : null);
   const f1 = banda ? banda.f1 : 1, f2 = banda ? banda.f2 : 1;
-  // empresa muito grande: a curva de porte termina em “acima de N usuários” e passa dos gastos reais dos maiores; hoje só há ajuste para bancos
-  const Esc = P.escala && P.escala[linhaId], fEsc = Esc && usuarios != null && usuarios > Esc.de ? Math.pow(usuarios / Esc.de, -Esc.beta) : 1;
   const sal = salarioUF(d.uf, P);
   const Iuf = sal ? sal / P.regional.mediaNacional : 1;
   const Ief = 1 + 0.5 * (Iuf - 1);
-  Object.assign(r, { usuarios, pequena, f1, f2, fEsc, Iuf, Ief, enq });
+  Object.assign(r, { usuarios, pequena, f1, f2, Iuf, Ief, enq });
 
   // modificadores
   const Mo = P.modificadores, mods = [];
@@ -1547,9 +1550,6 @@ function calcular(d, P, opts = {}) {
   const NIVEL = { baixa: 'baixa', media: 'média', alta: 'alta' };
   mods.push({ tipo: 'digital', auto: !d.digital, nome: 'Intensidade digital ' + NIVEL[digital] + (d.digital ? '' : ' (automática)'), v: Mo.digital[digital] ?? 1 });
   if (d.natureza === 'subsidiaria' && d.tiMatriz === 'matriz') mods.push({ tipo: 'matriz', nome: 'TI gerida na matriz', v: Mo.tiMatriz });
-  const un = valorPos(d.unidades);
-  if (un) { let v = 1; for (const b of Mo.unidades) if (un >= b.de) v = b.v; mods.push({ tipo: 'unidades', nome: 'Nº de unidades: ' + nf(un, 0), v }); }
-  if (crescF != null && crescF > Mo.crescimentoLimiar) mods.push({ tipo: 'crescimento', nome: 'Crescimento de funcionários acima de ' + Mo.crescimentoLimiar + '%', v: Mo.crescimentoFator });
   const Mmod = clamp(mods.reduce((a, m) => a * m.v, 1), Mo.mMin, Mo.mMax);
   Object.assign(r, { mods, Mmod, digital });
 
@@ -1562,7 +1562,7 @@ function calcular(d, P, opts = {}) {
     const ult = {}; for (const x of reais) ult[x.ano] = x;
     const a0 = Math.min(...anosDist), a1 = Math.max(...anosDist);
     g = clamp(Math.pow(ult[a1].v / ult[a0].v, 1 / (a1 - a0)) - 1, C.histMin, C.histMax); gFonte = 'historico';
-  } else if (crescF != null) { g = clamp(C.gSetor + crescF / 100, C.funcMin, C.funcMax); gFonte = 'funcionarios'; }
+  }
   Object.assign(r, { g, gFonte });
 
   const est = (cod, nome, v, sMod, sIn, formula, extra = {}) => {
@@ -1580,15 +1580,14 @@ function calcular(d, P, opts = {}) {
   let E1 = null;
   if (rec.usada && L.p != null && !rec.e1Fora && !usaPct) {
     const u = rec.usada, sMod = L.sE1 + (pequena ? I.extraPequena : 0);
-    const v = u.v * L.p * f1 * Mmod * fEsc;
+    const v = u.v * L.p * f1 * Mmod;
     E1 = est('E1', 'Pela receita', v, sMod, u.s,
-      fmtRS(u.v) + (rec.modo === 'enquadramento' ? ' (meio da faixa ' + enq + ')' : '') + ' × ' + fmtPct(L.p) + ' × ' + nf(f1, 2) + ' × ' + nf(Mmod, 2) + (fEsc !== 1 ? ' × ' + nf(fEsc, 2) : ''), {
+      fmtRS(u.v) + (rec.modo === 'enquadramento' ? ' (meio da faixa ' + enq + ')' : '') + ' × ' + fmtPct(L.p) + ' × ' + nf(f1, 2) + ' × ' + nf(Mmod, 2), {
         modelo: true, origem: rec.modo === 'informada' ? rec.informada.o : rec.modo === 'enquadramento' ? 'enquadramento' : 'estimado',
         partes: [{ rot: rotRec, val: fmtRS(u.v) },
           { op: '×', rot: '% da receita gasto com TI no setor', val: fmtPct(L.p) },
           { op: '×', rot: 'Ajuste de porte', val: nf(f1, 2) },
-          { op: '×', rot: 'Ajustes da empresa', val: nf(Mmod, 2) },
-          ...(fEsc !== 1 ? [{ op: '×', rot: 'Ajuste de empresa muito grande', val: nf(fEsc, 2) }] : [])]
+          { op: '×', rot: 'Ajustes da empresa', val: nf(Mmod, 2) }]
       });
   }
   r.fatUsado = rec.usada ? rec.usada.v : null; r.viaEnq = rec.modo === 'enquadramento'; if (rec.faixaEnq) r.faixaEnq = rec.faixaEnq;
@@ -1596,16 +1595,15 @@ function calcular(d, P, opts = {}) {
   // E2
   let E2 = null;
   if (usuarios != null && usuarios >= 50 && L.capu != null && !pequena && !usaPct) {
-    const v = usuarios * L.capu * f2 * Ief * Mmod * fEsc;
+    const v = usuarios * L.capu * f2 * Ief * Mmod;
     E2 = est('E2', 'Pelo número de usuários', v, L.sE2, sOrig(usuariosOrig),
-      nf(usuarios, 0) + ' usuários × ' + fmtRS(L.capu) + ' × ' + nf(f2, 3) + ' × ' + nf(Ief, 3) + ' × ' + nf(Mmod, 2) + (fEsc !== 1 ? ' × ' + nf(fEsc, 2) : ''), {
+      nf(usuarios, 0) + ' usuários × ' + fmtRS(L.capu) + ' × ' + nf(f2, 3) + ' × ' + nf(Ief, 3) + ' × ' + nf(Mmod, 2), {
         modelo: true, origem: usuariosOrig || 'terceiros',
         partes: [{ rot: usInf ? 'Usuários de computador' : 'Usuários (funcionários × ' + nf(L.u, 2) + ')', val: nf(usuarios, 0) },
           { op: '×', rot: 'Gasto por usuário no setor, por ano', val: fmtRS(L.capu) },
           { op: '×', rot: 'Ajuste de porte', val: nf(f2, 3) },
           { op: '×', rot: 'Ajuste regional' + (d.uf ? ' (' + d.uf + ')' : ''), val: nf(Ief, 3) },
-          { op: '×', rot: 'Ajustes da empresa', val: nf(Mmod, 2) },
-          ...(fEsc !== 1 ? [{ op: '×', rot: 'Ajuste de empresa muito grande', val: nf(fEsc, 2) }] : [])]
+          { op: '×', rot: 'Ajustes da empresa', val: nf(Mmod, 2) }]
       });
   }
 
@@ -1662,8 +1660,8 @@ function calcular(d, P, opts = {}) {
     E4p = est('E4p', 'Pelos contratos de TI', v, I.sE4p, sOrig(d.contratos.o),
       E3 ? fmtRS(contr) + ' + equipe ' + fmtRS(custoEquipe) : fmtRS(contr) + ' ÷ (1 − ' + nf(sp, 2) + ')', {
         origem: d.contratos.o || 'terceiros',
-        partes: E3 ? [{ rot: 'Contratos e despesas de TI', val: fmtRS(contr) }, { op: '+', rot: 'Custo anual da equipe de TI', val: fmtRS(custoEquipe) }]
-          : [{ rot: 'Contratos e despesas de TI', val: fmtRS(contr) }, { op: '÷', rot: 'Parte do gasto fora da equipe interna', val: fmtPct(1 - sp, 0) }]
+        partes: E3 ? [{ rot: 'Despesa ou contratos de TI', val: fmtRS(contr) }, { op: '+', rot: 'Custo anual da equipe de TI', val: fmtRS(custoEquipe) }]
+          : [{ rot: 'Despesa ou contratos de TI', val: fmtRS(contr) }, { op: '÷', rot: 'Parte do gasto fora da equipe interna', val: fmtPct(1 - sp, 0) }]
       });
   }
 
@@ -1822,7 +1820,7 @@ function proximoMelhorDado(d, P, opts, res) {
 }
 
 /* ---------- calibração (8) ---------- */
-// Métodos CR1 e Personalizado: o percentual da receita gasto com TI, medido nas empresas com gasto de TI real e receita do mesmo ano.
+// Métodos CR e Personalizado: o percentual da receita gasto com TI, medido nas empresas com gasto de TI real e receita do mesmo ano.
 // Mediana por setor puxada para a geral (K), ajustes por estado, cidade e setor na cidade sobre o que sobra, e a dispersão do que sobra vira a incerteza do caminho.
 // O Método Vezen é calculado nas mesmas empresas só para comparar o acerto dos dois.
 function calibrar(empresas, P, opts = {}) {
@@ -2364,25 +2362,25 @@ const TESTES = [
   {
     id: 'A', titulo: 'Média empresa com três estimadores',
     dados: { nome: 'Teste A', natureza: 'privada', setor: 'servicos', uf: 'SP', faturamento: { v: 300000000, o: 'terceiros' },
-      funcionarios: { v: 600, o: 'terceiros' }, profTI: { v: 30, o: 'terceiros' }, unidades: { v: 3, o: 'terceiros' }, digital: 'media', crescFunc: { v: 10, o: 'terceiros' } },
+      funcionarios: { v: 600, o: 'terceiros' }, profTI: { v: 30, o: 'terceiros' }, digital: 'media' },
     checks: r => {
       const e = c => r.ests.find(x => x.cod === c) || {};
       const cat = id => r.categorias.find(x => x.id === id).v, pj = a => r.projecao.find(p => p.ano === a);
       return [
         ['Usuários', r.usuarios, 600, 'rs'], ['f1', r.f1, 1.01, 's'], ['f2', r.f2, 0.983, 's'], ['I_ef', r.Ief, 1.122, 's'], ['M (modificadores)', r.Mmod, 1.00, 's'],
-        ['E1', e('E1').v, 44.84e6, 'rs'], ['σ E1', e('E1').s, 0.716, 's'],
-        ['E2', e('E2').v, 47.65e6, 'rs'], ['σ E2', e('E2').s, 0.808, 's'],
-        ['E3', e('E3').v, 13.18e6, 'rs'], ['σ E3', e('E3').s, 0.762, 's'],
-        ['F', r.F, 30.44e6, 'rs'], ['σ_final', r.sigmaFinal, 0.620, 's'], ['s_disp', r.sDisp, 0.589, 's'], ['Sem alerta', r.alerta, false, 'b'],
-        ['P10', r.p10, 13.75e6, 'rs'], ['P90', r.p90, 67.34e6, 'rs'], ['% inferior', r.pctLo, -55, 'i'], ['% superior', r.pctHi, 121, 'i'],
-        ['Índice de confiança', r.ic, 50, 'i'],
-        ['Equipe', cat('equipe'), 10.96e6, 'rs'], ['Nuvem e SaaS', cat('nuvem'), 7.55e6, 'rs'], ['Hardware', cat('hardware'), 5.36e6, 'rs'],
-        ['Serviços', cat('servicos'), 3.65e6, 'rs'], ['Licenças', cat('licencas'), 1.95e6, 'rs'], ['Telecom', cat('telecom'), 0.97e6, 'rs'],
-        ['Taxa g', r.g, 0.18, 's'], ['Origem de g', r.gFonte, 'funcionarios', 'b'],
-        ['Projeção 2027', pj(2027).base, 35.91e6, 'rs'], ['Projeção 2028', pj(2028).base, 42.38e6, 'rs'], ['Projeção 2029', pj(2029).base, 50.01e6, 'rs'],
-        ['Projeção 2030', pj(2030).base, 59.01e6, 'rs'], ['Projeção 2031', pj(2031).base, 69.63e6, 'rs'],
-        ['2031 conservador', pj(2031).cons, 58.60e6, 'rs'], ['2031 acelerado', pj(2031).acel, 82.26e6, 'rs'],
-        ['2031 P10', pj(2031).lo, 29.93e6, 'rs'], ['2031 P90', pj(2031).hi, 161.99e6, 'rs']
+        ['E1', e('E1').v, 6.36e6, 'rs'], ['σ E1', e('E1').s, 0.949, 's'],
+        ['E2', e('E2').v, 9.26e6, 'rs'], ['σ E2', e('E2').s, 1.044, 's'],
+        ['E3', e('E3').v, 13.18e6, 'rs'], ['σ E3', e('E3').s, 0.901, 's'],
+        ['F', r.F, 9.31e6, 'rs'], ['σ_final', r.sigmaFinal, 0.783, 's'], ['s_disp', r.sDisp, 0.308, 's'], ['Sem alerta', r.alerta, false, 'b'],
+        ['P10', r.p10, 3.41e6, 'rs'], ['P90', r.p90, 25.41e6, 'rs'], ['% inferior', r.pctLo, -63, 'i'], ['% superior', r.pctHi, 173, 'i'],
+        ['Índice de confiança', r.ic, 36, 'i'],
+        ['Equipe', cat('equipe'), 3.35e6, 'rs'], ['Nuvem e SaaS', cat('nuvem'), 2.31e6, 'rs'], ['Hardware', cat('hardware'), 1.64e6, 'rs'],
+        ['Serviços', cat('servicos'), 1.12e6, 'rs'], ['Licenças', cat('licencas'), 595841, 'rs'], ['Telecom', cat('telecom'), 297920, 'rs'],
+        ['Taxa g', r.g, 0.08, 's'], ['Origem de g', r.gFonte, 'media', 'b'],
+        ['Projeção 2027', pj(2027).base, 10.05e6, 'rs'], ['Projeção 2028', pj(2028).base, 10.86e6, 'rs'], ['Projeção 2029', pj(2029).base, 11.73e6, 'rs'],
+        ['Projeção 2030', pj(2030).base, 12.67e6, 'rs'], ['Projeção 2031', pj(2031).base, 13.68e6, 'rs'],
+        ['2031 conservador', pj(2031).cons, 11.33e6, 'rs'], ['2031 acelerado', pj(2031).acel, 16.41e6, 'rs'],
+        ['2031 P10', pj(2031).lo, 4.82e6, 'rs'], ['2031 P90', pj(2031).hi, 38.86e6, 'rs']
       ];
     }
   },
@@ -2396,13 +2394,13 @@ const TESTES = [
       return [
         ['Usuários', r.usuarios, 5.04, 's'], ['Pequena', r.pequena, true, 'b'], ['E2 desligado', !r.ests.some(x => x.cod === 'E2'), true, 'b'],
         ['Faturamento usado', r.fatUsado, 170763, 'rs'], ['f1', r.f1, 0.96, 's'],
-        ['E1', e('E1').v, 7869, 'rs'], ['σ E1', e('E1').s, 1.072, 's'],
-        ['F', r.F, 7869, 'rs'], ['P10', r.p10, 1992, 'rs'], ['P90', r.p90, 31077, 'rs'], ['% inferior', r.pctLo, -75, 'i'], ['% superior', r.pctHi, 295, 'i'],
-        ['Índice de confiança', r.ic, 11, 'i'], ['Taxa g', r.g, 0.08, 's'], ['Origem de g', r.gFonte, 'media', 'b'], ['Projeção 2031', pj(2031).base, 11562, 'rs'],
-        ['Equipe', cat('equipe'), 1574, 'rs'], ['Nuvem e SaaS', cat('nuvem'), 2439, 'rs'], ['Hardware', cat('hardware'), 1731, 'rs'],
-        ['Serviços', cat('servicos'), 1180, 'rs'], ['Licenças', cat('licencas'), 630, 'rs'], ['Telecom', cat('telecom'), 315, 'rs'],
-        ['PMD 1º: gasto declarado', pmd[0] && pmd[0].id, 'gastoDeclarado', 'b'], ['PMD gasto declarado', g('gastoDeclarado'), 89, 'i'],
-        ['PMD 2º: gasto real anterior', pmd[1] && pmd[1].id, 'gastoReal', 'b'], ['PMD gasto real anterior', g('gastoReal'), 84, 'i'],
+        ['E1', e('E1').v, 2951, 'rs'], ['σ E1', e('E1').s, 1.200, 's'],
+        ['F', r.F, 2951, 'rs'], ['P10', r.p10, 634, 'rs'], ['P90', r.p90, 13744, 'rs'], ['% inferior', r.pctLo, -79, 'i'], ['% superior', r.pctHi, 366, 'i'],
+        ['Índice de confiança', r.ic, 0, 'i'], ['Taxa g', r.g, 0.08, 's'], ['Origem de g', r.gFonte, 'media', 'b'], ['Projeção 2031', pj(2031).base, 4336, 'rs'],
+        ['Equipe', cat('equipe'), 590, 'rs'], ['Nuvem e SaaS', cat('nuvem'), 915, 'rs'], ['Hardware', cat('hardware'), 649, 'rs'],
+        ['Serviços', cat('servicos'), 443, 'rs'], ['Licenças', cat('licencas'), 236, 'rs'], ['Telecom', cat('telecom'), 118, 'rs'],
+        ['PMD 1º: gasto declarado', pmd[0] && pmd[0].id, 'gastoDeclarado', 'b'], ['PMD gasto declarado', g('gastoDeclarado'), 100, 'i'],
+        ['PMD 2º: gasto real anterior', pmd[1] && pmd[1].id, 'gastoReal', 'b'], ['PMD gasto real anterior', g('gastoReal'), 95, 'i'],
         ['PMD 3º: profissionais de TI', pmd[2] && pmd[2].id, 'profTI', 'b'], ['PMD profissionais de TI', g('profTI'), 31, 'i']
       ];
     }
@@ -2418,14 +2416,14 @@ const TESTES = [
       return [
         ['Usuários', r.usuarios, 3650, 'rs'], ['f1', r.f1, 1.03, 's'], ['f2', r.f2, 1.167, 's'], ['I_ef', r.Ief, 0.921, 's'],
         ['Taxa g', r.g, 0.10, 's'], ['Origem de g', r.gFonte, 'historico', 'b'],
-        ['E1', e('E1').v, 111.24e6, 'rs'], ['σ E1', e('E1').s, 0.652, 's'],
-        ['E2', e('E2').v, 203.89e6, 'rs'], ['σ E2', e('E2').s, 0.752, 's'],
+        ['E1', e('E1').v, 30.90e6, 'rs'], ['σ E1', e('E1').s, 0.802, 's'],
+        ['E2', e('E2').v, 54.91e6, 'rs'], ['σ E2', e('E2').s, 0.901, 's'],
         ['E5', e('E5').v, 78.12e6, 'rs'], ['σ E5', e('E5').s, 0.453, 's'],
         ['E0', e('E0').v, 96.80e6, 'rs'], ['σ E0', e('E0').s, 0.112, 's'],
-        ['Modelo M', r.modelo && r.modelo.v, 103.47e6, 'rs'], ['σ_M', r.modelo && r.modelo.s, 0.471, 's'],
-        ['F', r.F, 97.14e6, 'rs'], ['σ_final', r.sigmaFinal, 0.118, 's'], ['σ_F', r.sigmaF, 0.109, 's'], ['s_disp', r.sDisp, 0.118, 's'], ['Sem alerta', r.alerta, false, 'b'],
-        ['P10', r.p10, 83.46e6, 'rs'], ['P90', r.p90, 113.07e6, 'rs'], ['% inferior', r.pctLo, -14, 'i'], ['% superior', r.pctHi, 16, 'i'],
-        ['Índice de confiança', r.ic, 94, 'i'], ['Projeção 2027', pj(2027).base, 106.86e6, 'rs'], ['Projeção 2031', pj(2031).base, 156.45e6, 'rs']
+        ['Modelo M', r.modelo && r.modelo.v, 61.15e6, 'rs'], ['σ_M', r.modelo && r.modelo.s, 0.511, 's'],
+        ['F', r.F, 94.79e6, 'rs'], ['σ_final', r.sigmaFinal, 0.170, 's'], ['σ_F', r.sigmaF, 0.109, 's'], ['s_disp', r.sDisp, 0.170, 's'], ['Alerta: mercado longe do gasto real', r.alerta, true, 'b'],
+        ['P10', r.p10, 76.21e6, 'rs'], ['P90', r.p90, 117.90e6, 'rs'], ['% inferior', r.pctLo, -20, 'i'], ['% superior', r.pctHi, 24, 'i'],
+        ['Índice de confiança', r.ic, 90, 'i'], ['Projeção 2027', pj(2027).base, 104.27e6, 'rs'], ['Projeção 2031', pj(2031).base, 152.66e6, 'rs']
       ];
     }
   },
@@ -2439,9 +2437,9 @@ const TESTES = [
         ['Receita pelos funcionários', cam('RF').v, 955.80e6, 'rs'], ['σ receita pelos funcionários', cam('RF').s, 0.808, 's'],
         ['Câmbio USD 31/12/2025', rc.global && rc.global.taxa, 5.5024, 's'], ['Receita pela receita global', cam('RG').v, 883.14e6, 'rs'], ['σ receita global', cam('RG').s, 0.682, 's'],
         ['Receita líquida estimada', rc.usada && rc.usada.v, 912.67e6, 'rs'], ['σ receita estimada', rc.usada && rc.usada.s, 0.638, 's'], ['Modo da receita', rc.modo, 'estimada', 'b'],
-        ['E1', e('E1').v, 50.76e6, 'rs'], ['σ E1', e('E1').s, 0.911, 's'], ['E2', e('E2').v, 59.63e6, 'rs'],
-        ['F', r.F, 55.55e6, 'rs'], ['σ_final', r.sigmaFinal, 0.740, 's'], ['Índice de confiança', r.ic, 40, 'i'],
-        ['Conservadora (P25)', r.resumo.conservadora, 33.72e6, 'rs'], ['Geral sem equipe interna', r.resumo.geralSem, 35.55e6, 'rs'], ['Conservadora sem equipe interna', r.resumo.conservadoraSem, 21.58e6, 'rs']
+        ['E1', e('E1').v, 14.10e6, 'rs'], ['σ E1', e('E1').s, 1.023, 's'], ['E2', e('E2').v, 16.05e6, 'rs'],
+        ['F', r.F, 15.12e6, 'rs'], ['σ_final', r.sigmaFinal, 0.852, 's'], ['Índice de confiança', r.ic, 30, 'i'],
+        ['Conservadora (P25)', r.resumo.conservadora, 8.51e6, 'rs'], ['Geral sem equipe interna', r.resumo.geralSem, 9.68e6, 'rs'], ['Conservadora sem equipe interna', r.resumo.conservadoraSem, 5.45e6, 'rs']
       ];
     }
   },
@@ -2454,14 +2452,14 @@ const TESTES = [
       return [
         ['Receita líquida (bruta − 18%)', rc.informada && rc.informada.liq, 410e6, 'rs'], ['Receita levada a 2026', rc.usada && rc.usada.v, 469.41e6, 'rs'], ['σ da receita', rc.usada && rc.usada.s, 0.170, 's'],
         ['Modo da receita', rc.modo, 'informada', 'b'], ['Estimativa só para comparação', rc.comparacao, true, 'b'], ['Aviso: fora da faixa estimada', (rc.avisos || []).length, 1, 'i'],
-        ['E1', e('E1').v, 23.21e6, 'rs'], ['σ E1', e('E1').s, 0.672, 's'], ['E2', e('E2').v, 72.32e6, 'rs'],
-        ['F', r.F, 38.31e6, 'rs'], ['σ_final', r.sigmaFinal, 0.615, 's'], ['Índice de confiança', r.ic, 51, 'i'],
-        ['Conservadora (P25)', r.resumo.conservadora, 25.29e6, 'rs'], ['Geral sem equipe interna', r.resumo.geralSem, 24.52e6, 'rs']
+        ['E1', e('E1').v, 8.70e6, 'rs'], ['σ E1', e('E1').s, 0.818, 's'], ['E2', e('E2').v, 23.50e6, 'rs'],
+        ['F', r.F, 13.60e6, 'rs'], ['σ_final', r.sigmaFinal, 0.743, 's'], ['Índice de confiança', r.ic, 40, 'i'],
+        ['Conservadora (P25)', r.resumo.conservadora, 8.24e6, 'rs'], ['Geral sem equipe interna', r.resumo.geralSem, 8.70e6, 'rs']
       ];
     }
   },
   {
-    id: 'F', titulo: 'Métodos CR1 e Personalizado: receita pela curva da base e gasto de TI pelo percentual do setor',
+    id: 'F', titulo: 'Métodos CR e Personalizado: receita pela curva da base e gasto de TI pelo percentual do setor',
     dados: { nome: 'Teste F', natureza: 'privada', setor: 'industria', uf: 'SP', funcionarios: { v: 3000, o: 'terceiros' }, fatEstimar: true },
     cal: { id: 'teste-f', ufs: { SP: 1 }, receita: { suficiente: true, anoRef: 2025, g: 0.075, s: 1.2, beta: 0.6, n0: 1100, nMin: 120, nMax: 18000, setores: { industria: { rpe: 1400000 } } },
       ti: { suficiente: true, pg: 0.02, ps: { industria: 0.015 }, nS: { industria: 12 }, psOutros: true, s: 0.5, local: null } },
@@ -2579,7 +2577,7 @@ function migrar(o) {
   // a antiga correção pelas empresas salvas deu lugar à minha calibração, que é refeita sozinha
   if (o.calibracao) { const c = o.calibracao; Object.assign(n.calibracao, { base: c.base || null, mapaUlt: c.mapaUlt || null, minhas: Array.isArray(c.minhas) ? c.minhas : [], direta: c.direta && typeof c.direta === 'object' && c.direta.pg > 0 ? c.direta : null }); }
   n.ultimoBackup = o.ultimoBackup || null; n.ultimaAlteracao = o.ultimaAlteracao || null;
-  // análises salvas antes do tipo de estimativa seguem com o Método Vezen; o antigo tipo “Calibrada” é o CR1.
+  // análises salvas antes do tipo de estimativa seguem com o Método Vezen; o antigo tipo “Calibrada” é o CR.
   n.empresas.forEach(e => {
     if (!e.dados) return;
     // o motivo “Não encontrado” já se chamou de outro jeito
@@ -2609,7 +2607,7 @@ function salvar(alterou = true) {
 function dadosVazios() {
   const f = () => ({ v: '', o: '' });
   return { nome: '', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', anoRef: String(ANO - 1), faturamento: f(), fatAno: String(ANO - 1), fatMeses: '12', fatTipo: 'liquida', fatEstimar: true, receitasAnos: [], funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
-    unidades: f(), enquadramento: '', tipoPublico: '', adicoes: f(), contratos: f(), tiMatriz: '', digital: '', tecnologias: [], tecOutras: '', crescFunc: f(), vagasTI: '',
+    enquadramento: '', tipoPublico: '', adicoes: f(), contratos: f(), tiMatriz: '', digital: '', tecnologias: [], tecOutras: '', vagasTI: '',
     gastosReais: [], gastoDeclarado: f(), gManual: '', extras: {}, viaCNPJ: {}, cnpjInfo: {},
     globalRec: f(), globalMoeda: 'USD', globalAno: String(ANO - 1), globalTaxa: '', globalTaxaFonte: '', globalFunc: f(), globalPart: f(), salariosTI: 'com', modo: 'base', semDado: {} };
 }
@@ -2626,18 +2624,20 @@ const UI = {
   baseNova: null, formMinha: null, formDireta: null, minhaTodas: false,
   lote: null, loteVer: { q: '', setor: '', conf: '', ordem: 'F', pag: 0 }
 };
-// parâmetros fixos dos métodos Vezen e CR1: ninguém edita pela tela. S.parametros fica no estado só para backups antigos continuarem abrindo.
+// parâmetros fixos dos métodos Vezen e CR: ninguém edita pela tela. S.parametros fica no estado só para backups antigos continuarem abrindo.
 const P = () => PAIS.parametros;
 
-/* ---------- os três métodos: Vezen (base), CR1 (padrao) e Personalizado (propria) ---------- */
+/* ---------- os três métodos: Vezen (base), CR (padrao) e Personalizado (propria) ---------- */
 // os nomes internos não mudam, para as análises salvas continuarem abrindo
 const METODOS = {
   base: { nome: 'Método Vezen', curto: 'Vezen', cls: 'base', ico: 'metodo', ancora: 'met-visao', resumo: 'Fórmulas e médias de pesquisas públicas, até sete caminhos de cálculo e índice de confiança. Parâmetros fixos.' },
-  padrao: { nome: 'Método CR1', curto: 'CR1', cls: 'cal', ico: 'empresas', ancora: 'cr1-metodo', resumo: 'Receita × percentual de TI observado numa base de empresas reais, por setor, estado e cidade. Parâmetros fixos, versionados.' },
-  propria: { nome: 'Método Personalizado', curto: 'Personalizado', cls: 'minha', ico: 'calib', ancora: 'pers-metodo', resumo: 'A mesma conta do CR1, com percentuais tirados das suas empresas ou informados por você.' }
+  // o nome do CR é o da versão em uso: CR0 (dados modelo), CR1 (a primeira oficial), CR1.1...
+  padrao: { get nome() { return 'Método ' + versaoCR(); }, get curto() { return versaoCR(); }, cls: 'cal', ico: 'empresas', ancora: 'cr1-metodo', resumo: 'Receita × percentual de TI por segmento, estado e cidade. Parâmetros fixos, versionados.' },
+  propria: { nome: 'Método Personalizado', curto: 'Personalizado', cls: 'minha', ico: 'calib', ancora: 'pers-metodo', resumo: 'A mesma conta do CR, com percentuais tirados das suas empresas ou informados por você.' }
 };
-// Método CR1: só a versão que vem com a ferramenta
+// Método CR: só a versão que vem com a ferramenta
 const calPadrao = () => PAIS.calibracaoBase || null;
+const versaoCR = () => { const c = calPadrao(), m = c && /^CR[\d.]+/.exec(c.rotulo || ''); return m ? m[0] : 'CR'; };
 // minha calibração: refeita com as empresas da pessoa (digitadas, importadas e análises salvas com gasto real) sempre que algo é salvo
 let cacheMinha = null;
 const regsMinhas = (lista = S.calibracao.minhas) => lista.map(x => Object.assign({ receita: {}, gastoTI: {}, receitaTI: {}, chaveSetor: nomeFiltro(x.setor) }, x));
@@ -2657,7 +2657,7 @@ const MODOS = ['base', 'padrao', 'propria'];
 const nomeModo = m => (METODOS[m] || METODOS.base).nome, curtoModo = m => (METODOS[m] || METODOS.base).curto, clsModo = m => (METODOS[m] || METODOS.base).cls;
 const calDoModo = m => m === 'padrao' ? calPadrao() : m === 'propria' ? calMinha() : null;
 const modoDisponivel = m => m === 'base' || usavel(calDoModo(m));
-// o antigo tipo “Calibrada” é o CR1; sem o método escolhido disponível, vale o Método Vezen
+// o antigo tipo “Calibrada” é o CR; sem o método escolhido disponível, vale o Método Vezen
 const modoPedido = d => d && d.modo === 'calibrada' ? 'padrao' : d && MODOS.includes(d.modo) ? d.modo : 'base';
 const modoDe = d => { const m = modoPedido(d); return modoDisponivel(m) ? m : 'base'; };
 // ano de referência da análise: por padrão, o último ano fechado
@@ -2675,7 +2675,7 @@ function calcModo(d, modo) {
 }
 function calc(d) {
   const r = calcModo(d, modoDe(d)), m = modoPedido(d);
-  if (m !== r.modoCalc && !r.vazio) r.avisos.push(m === 'propria' ? 'O Método Personalizado ainda não tem dados suficientes: esta estimativa usa o Método Vezen. Informe empresas ou percentuais em Métodos.' : 'O Método CR1 não está disponível: esta estimativa usa o Método Vezen.');
+  if (m !== r.modoCalc && !r.vazio) r.avisos.push(m === 'propria' ? 'O Método Personalizado ainda não tem dados suficientes: esta estimativa usa o Método Vezen. Informe empresas ou percentuais em Métodos.' : 'O ' + nomeModo('padrao') + ' não está disponível: esta estimativa usa o Método Vezen.');
   return r;
 }
 const ufsTexto = cb => { const u = Object.keys(cb.ufs || {}); return cb.publica ? '' : u.length === 1 ? ' de ' + u[0] : u.length ? ' de ' + u.length + ' estados' : ''; };
@@ -3097,7 +3097,7 @@ function graficoAjustes(r, d) {
   if (usaE1) ls.push(['porte', 'Porte, no cálculo pela receita', r.f1]);
   if (usaE2) { ls.push(['porte', 'Porte, no cálculo por usuários', r.f2]); ls.push(['empresas', 'Região' + (d.uf ? ' (' + d.uf + ')' : ', sem UF'), r.Ief]); }
   const mods = (usaE1 || usaE2) ? r.mods : [];
-  for (const m of mods) ls.push([{ digital: 'sinal', matriz: 'grupo', unidades: 'empresas', crescimento: 'sobe' }[m.tipo] || 'ajuste', m.nome, m.v]);
+  for (const m of mods) ls.push([{ digital: 'sinal', matriz: 'grupo' }[m.tipo] || 'ajuste', m.nome, m.v]);
   const tabela = `<details class="dados-tab"><summary>Ver a explicação de cada ajuste</summary><div style="margin-top:10px">${tabelaAjustes(r, d)}</div></details>`;
   if (!ls.length) return '<p class="mudo">Sem ajustes: os caminhos usados não dependem de médias de mercado.</p>' + tabela;
   const pos = v => clamp(Math.log(v) / Math.log(2), -1, 1) * 50;
@@ -3127,7 +3127,7 @@ function graficoCurva(d, res) {
   const pts = [], ctxC = contexto(modoDe(d), d);
   for (let i = 0; i <= 80; i++) {
     const x = Math.pow(10, Math.log10(x0) + i / 80 * (Math.log10(x1) - Math.log10(x0)));
-    const c = { fatTipo: d.fatTipo, fatAno: d.fatAno, fatMeses: d.fatMeses, natureza: d.natureza, setor: d.setor, uf: d.uf, digital: d.digital, tiMatriz: d.tiMatriz, unidades: d.unidades, crescFunc: d.crescFunc, extras: d.extras };
+    const c = { fatTipo: d.fatTipo, fatAno: d.fatAno, fatMeses: d.fatMeses, natureza: d.natureza, setor: d.setor, uf: d.uf, digital: d.digital, tiMatriz: d.tiMatriz, extras: d.extras };
     if (modo === 'func') { c.funcionarios = { v: x, o: d.funcionarios.o }; if (rpf) c.faturamento = { v: rpf * x, o: d.faturamento.o }; }
     else { c.faturamento = { v: x, o: d.faturamento.o }; c.enquadramento = ''; }
     const r = calcular(c, ...ctxC);
@@ -3174,7 +3174,7 @@ function graficoProjecao(res) {
   const rot = pj.slice(1).map((p, i) => W < 560 && i < pj.length - 2 ? '' : `<text x="${X(p.ano)}" y="${Y(Math.max(p.base, p.acel)) - 24}" text-anchor="middle" font-weight="650" style="fill:var(--tinta)" ${halo}>${rsCurto(p.base)}</text><text x="${X(p.ano)}" y="${Y(Math.max(p.base, p.acel)) - 11}" text-anchor="middle" font-size="10" ${halo}>${(p.base >= pj[i].base ? '+' : '−') + nf(Math.abs(p.base / pj[i].base - 1) * 100, 1)}%</text>`).join('');
   const pts = pj.map(p => `<circle cx="${X(p.ano)}" cy="${Y(p.base)}" r="4.5" fill="var(--superficie)" stroke="var(--acento)" stroke-width="2"><title>${p.ano}: ${fmtRS(p.base)} (faixa ${fmtRS(p.lo)} a ${fmtRS(p.hi)}; crescimento menor ${fmtRS(p.cons)}; maior ${fmtRS(p.acel)})</title></circle>`).join('');
   const rr = reais.map(x => `<circle cx="${X(x.ano)}" cy="${Y(x.v)}" r="5.5" fill="var(--real)" stroke="var(--superficie)" stroke-width="2"><title>Gasto real ${x.ano}: ${fmtRS(x.v)}</title></circle>`).join('');
-  const fonte = { historico: 'histórico de gasto real', funcionarios: 'crescimento de funcionários', media: 'média do setor', manual: 'informada por você' }[res.g === undefined ? 'media' : res.gFonte];
+  const fonte = { historico: 'histórico de gasto real', media: 'média do setor', manual: 'informada por você' }[res.g === undefined ? 'media' : res.gFonte];
   const svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Projeção de ${pj.length - 1} anos do gasto de TI, cenário base de ${fmtRS(pj[0].base)} a ${fmtRS(pj[pj.length - 1].base)}">
     ${gy}${gx}<line class="eixo" x1="${m.l}" x2="${W - m.r}" y1="${H - m.b}" y2="${H - m.b}"/>
     <path d="${area}" fill="var(--acento-faixa)"/>
@@ -3272,6 +3272,7 @@ async function novaAnalise(dados, limpo = false) {
   if (!(await confirmarSaida())) return;
   UI.atual = novaEmpresa(); UI.sujo = !!dados && !limpo; UI.sugestao = null; UI.cnpjMsg = '';
   if (dados) UI.atual.dados = Object.assign(dadosVazios(), dados);
+  else UI.atual.dados.modo = ''; // análise nova: o método é escolhido antes dos dados
   navegar('#/analise/' + UI.atual.id);
   setTimeout(() => { const o = $('#f-nome'); if (o && !dados) o.focus(); }, 0);
 }
@@ -3282,7 +3283,7 @@ const EMPRESA_MODELO = {
   id: 'bb-2025',
   dados: {
     nome: 'Banco do Brasil', cnpj: '00.000.000/0001-91', natureza: 'publico', tipoPublico: 'estatal', setor: 'banco', uf: 'DF', municipio: 'Brasília',
-    fatAno: '2025', faturamento: { v: 73.9e9, o: 'oficial' }, funcionarios: { v: 85206, o: 'oficial' }, unidades: { v: 3955, o: 'oficial' }, crescFunc: { v: -1.6, o: 'oficial' },
+    fatAno: '2025', faturamento: { v: 73.9e9, o: 'oficial' }, funcionarios: { v: 85206, o: 'oficial' },
     tecnologias: ['dev-interno', 'app-cliente', 'api', 'nuvem', 'ia'],
     gastosReais: [{ ano: 2024, v: 6.2e9, o: 'oficial' }, { ano: 2025, v: 6.8e9, o: 'oficial' }],
     // não aparecem nos dois documentos usados
@@ -3345,16 +3346,14 @@ const AJUDA = {
   faturamento: 'Quanto a empresa vendeu no Brasil no período informado. Prefira a receita líquida, sem os impostos sobre vendas; se só achar o faturamento bruto, marque “Faturamento bruto”. Informe o ano e o período (12, 9, 6 ou 3 meses): o valor é levado a 12 meses.',
   funcionarios: 'Número de funcionários da empresa no Brasil.',
   usuarios: 'Pessoas que usam computador no trabalho. Quase nunca é público: se não achar, a ferramenta supõe um valor pelo setor, que aparece em cinza no campo.',
-  unidades: 'Lojas, fábricas, filiais ou centros de distribuição da empresa.',
   profTI: 'Pessoas da equipe interna de TI, contando quem desenvolve sistemas.',
   salarioTI: 'Salário médio mensal da equipe de TI. Se não souber, a ferramenta usa a média do estado.',
   digital: 'Quanto o negócio depende de tecnologia: baixa, média ou alta. No automático, a ferramenta marca alta para startups, empresas de tecnologia, varejo com muitas vendas online e educação a distância.',
-  crescFunc: 'Quanto o número de funcionários mudou nos últimos 12 meses, em %. Pode ser negativo.',
   vagasTI: 'Vagas abertas na área de TI. Só registro: não entra na conta.',
   gastosReais: 'Quanto a empresa gastou de fato com TI em cada ano, quando publica ou declara (relatório anual, balanço, portal da transparência). Informe o ano e o valor; dá para adicionar vários anos.',
   gastoDeclarado: 'Quanto a empresa diz que gastou com TI no ano de referência. Quando informado, vira o resultado.',
   adicoes: 'Quanto a empresa adicionou no ano em software (intangível) e em equipamentos de informática (imobilizado), nas notas do balanço.',
-  contratos: 'Valor dos contratos e despesas de TI do ano, publicados no portal da transparência.',
+  contratos: 'Órgão público: despesa de TI empenhada ou liquidada no ano, no portal da transparência. Estatal: contratos de TI do ano.',
   enquadramento: 'Porte legal da empresa: MEI, ME (microempresa), EPP (pequeno porte) ou Simples, sem saber qual.',
   tiMatriz: 'Onde ficam o orçamento e a gestão de TI de uma subsidiária: no Brasil ou na matriz, no exterior.',
   globalRec: 'Receita total do grupo no mundo, na moeda em que o grupo publica.',
@@ -3365,8 +3364,8 @@ const AJUDA = {
   origens: 'De onde veio cada número, para saber o quanto confiar nele. Sem origem marcada, o número conta como Estimativa de terceiros.'
 };
 // seção da Metodologia que explica como cada campo entra na conta
-const AJUDA_MET = { uf: 'met-ajustes', natureza: 'met-setores', setor: 'met-setores', faturamento: 'met-receita', funcionarios: 'met-caminhos', usuarios: 'met-caminhos', unidades: 'met-ajustes', profTI: 'met-caminhos', salarioTI: 'met-caminhos',
-  digital: 'met-ajustes', crescFunc: 'met-ajustes', gastosReais: 'met-caminhos', gastoDeclarado: 'met-caminhos', adicoes: 'met-caminhos', contratos: 'met-caminhos', enquadramento: 'met-pequenas', tiMatriz: 'met-ajustes',
+const AJUDA_MET = { uf: 'met-ajustes', natureza: 'met-setores', setor: 'met-setores', faturamento: 'met-receita', funcionarios: 'met-caminhos', usuarios: 'met-caminhos', profTI: 'met-caminhos', salarioTI: 'met-caminhos',
+  digital: 'met-ajustes', gastosReais: 'met-caminhos', gastoDeclarado: 'met-caminhos', adicoes: 'met-caminhos', contratos: 'met-caminhos', enquadramento: 'met-pequenas', tiMatriz: 'met-ajustes',
   globalRec: 'met-receita', globalPart: 'met-receita', globalFunc: 'met-receita', origens: 'met-incerteza' };
 const textoAjuda = (k, d) => { const a = AJUDA[k]; return typeof a === 'function' ? a(d) : a || ''; };
 const botaoAjuda = (chave, rot) => `<button type="button" class="ajuda" data-acao="ajuda" data-chave="${chave}" data-rot="${esc(rot)}" aria-label="Sobre ${esc(rot)}" aria-haspopup="dialog" aria-expanded="false">${ico('ajuda')}</button>`;
@@ -3406,21 +3405,42 @@ const MOTIVOS = ['nao-encontrado', 'nao-divulga'], MOTIVOS_3 = [...MOTIVOS, 'nao
 const tem1 = c => d => temValor(d[c]);
 // rot: nome na lista de pendências; vale: quando faz sentido pedir; tem: já respondido com valor; ops: motivos aceitos
 const CAMPOS_SEM_DADO = {
-  faturamento: { rot: d => rotulos(d).fat, vale: d => !rotulos(d).orgao, tem: d => temValor(d.faturamento) || (d.receitasAnos || []).some(x => temValor(x)), ops: MOTIVOS },
+  faturamento: { rot: d => rotulos(d).fat, tem: d => temValor(d.faturamento) || (d.receitasAnos || []).some(x => temValor(x)), ops: MOTIVOS },
   funcionarios: { rot: d => rotulos(d).func, tem: tem1('funcionarios'), ops: MOTIVOS },
   usuarios: { rot: d => rotulos(d).us, tem: tem1('usuarios'), ops: MOTIVOS },
-  unidades: { rot: d => rotulos(d).un, tem: tem1('unidades'), ops: MOTIVOS_3 },
   adicoes: { rot: () => 'Adições em software e equipamentos', vale: d => d.natureza === 'listada', tem: tem1('adicoes'), ops: MOTIVOS },
-  contratos: { rot: () => 'Contratos e despesas de TI', vale: d => d.natureza === 'publico', tem: tem1('contratos'), ops: MOTIVOS },
+  contratos: { rot: d => rotContratos(d), vale: d => d.natureza === 'publico', tem: tem1('contratos'), ops: MOTIVOS },
   profTI: { rot: () => 'Profissionais de TI', tem: tem1('profTI'), ops: MOTIVOS_3 },
   salarioTI: { rot: () => 'Salário médio da equipe de TI', vale: d => temValor(d.profTI), tem: tem1('salarioTI'), ops: MOTIVOS_3 },
-  crescFunc: { rot: () => 'Crescimento de funcionários', tem: tem1('crescFunc'), ops: MOTIVOS },
   gastosReais: { rot: () => 'Gasto de TI real, por ano', tem: d => (d.gastosReais || []).some(x => temValor(x)), ops: MOTIVOS },
   gastoDeclarado: { rot: d => 'Gasto de TI declarado de ' + anoDe(d), tem: tem1('gastoDeclarado'), ops: MOTIVOS }
 };
+// campos que só o Método Vezen usa (os métodos por percentual são receita × percentual) e que o gasto de TI do próprio ano torna inúteis
+const SO_VEZEN = ['usuarios', 'profTI', 'salarioTI', 'digital', 'adicoes', 'tiMatriz'];
+const gastoDoAno = d => !!(valorPos(d.gastoDeclarado) || (d.gastosReais || []).some(x => valorPos(x) && +x.ano === anoDe(d)));
+const temGastoReal = d => gastoDoAno(d) || (d.gastosReais || []).some(x => valorPos(x));
+const chaveForm = d => modoDe(d) + '|' + gastoDoAno(d) + '|' + temGastoReal(d);
+// o campo só aparece e só é pedido quando, com o método, a natureza e os dados da análise, pode mudar o resultado
+function entraNaConta(d, c) {
+  const n = d.natureza, orgao = ehOrgaoPublico(d), vezen = modoDe(d) === 'base';
+  if (c === 'municipio') return !vezen && !orgao;
+  if (c === 'uf') return vezen || !orgao;
+  if (c === 'setor') return !orgao && n !== 'terceiro';
+  if (c === 'faturamento' || c === 'funcionarios') return !orgao;
+  if (!SO_VEZEN.includes(c) && c !== 'contratos') return true;
+  if (gastoDoAno(d)) return false;
+  if (c === 'contratos') return true;
+  if (!vezen) return false;
+  if (c === 'usuarios') return !orgao && n !== 'pequena' && n !== 'terceiro';
+  if (c === 'digital') return !orgao;
+  return true;
+}
+// órgão público informa a execução do orçamento; estatal, os contratos
+const rotContratos = d => ehOrgaoPublico(d) ? 'Despesa de TI do ano, empenhada ou liquidada' : 'Contratos de TI do ano';
+const rotProfTI = d => ehOrgaoPublico(d) ? 'Servidores de TI' : 'Profissionais de TI internos';
 // 'valor' (respondido com número), um motivo, 'pendente' (vazio e sem motivo: falta informar) ou null (não se pede neste caso)
 function estadoSemDado(d, c) {
-  const x = CAMPOS_SEM_DADO[c]; if (!x || (x.vale && !x.vale(d))) return null;
+  const x = CAMPOS_SEM_DADO[c]; if (!x || (x.vale && !x.vale(d)) || !entraNaConta(d, c)) return null;
   if (x.tem(d)) return 'valor';
   const s = (d.semDado || {})[c]; return x.ops.includes(s) ? s : 'pendente';
 }
@@ -3518,13 +3538,8 @@ function rotulos(d) {
   else if (n === 'terceiro') func = 'Trabalhadores';
   else if (s === 'saude') func = 'Profissionais';
   else if (s === 'educacao') func = 'Docentes e técnicos';
-  let un = 'Unidades (lojas, fábricas, filiais)';
-  if (n === 'privada') un = 'Filiais';
-  if (s === 'varejo') un = 'Lojas';
-  else if (s === 'industria') un = 'Fábricas ou unidades';
-  else if (s === 'logistica') un = 'Centros de distribuição';
   const us = n === 'pequena' ? 'Computadores' : 'Usuários de computador';
-  return { fat, func, un, us, tipo, bancos, orgao, estimavel: !orgao && n !== 'terceiro' };
+  return { fat, func, us, tipo, bancos, orgao, estimavel: !orgao && n !== 'terceiro' };
 }
 
 /* ---------- receita: uma linha por ano, como o gasto real ---------- */
@@ -3754,37 +3769,34 @@ function formAnalise() {
   const infoCNPJ = d.cnpjInfo && (d.cnpjInfo.inicio || d.cnpjInfo.capital) ? `<span class="dica">${d.cnpjInfo.inicio ? 'Início de atividade: ' + esc(dataBR(d.cnpjInfo.inicio)) : ''}${d.cnpjInfo.inicio && d.cnpjInfo.capital ? '. ' : ''}${d.cnpjInfo.capital ? 'Capital social: ' + fmtRS(+d.cnpjInfo.capital) : ''}</span>` : '';
   const natOps = [['', 'Sem informação'], ...PAIS.naturezas.filter(n => n.id !== 'naosei').map(n => [n.id, n.nome])];
   const setOps = [['', 'Sem informação'], ...PAIS.filtrosSetor.filter(s => s.id !== 'naosei').map(s => [s.id, s.nome])];
-  const n = d.natureza;
+  const n = d.natureza, vz = c => entraNaConta(d, c);
+  UI.chaveForm = chaveForm(d);
   // campos que dependem da natureza e mudam a conta
   const porNatureza = (n === 'pequena' || d.enquadramento ? campoSelect(d, 'enquadramento', 'Enquadramento', [['', n === 'pequena' ? 'Selecione' : 'Nenhum'], ['MEI', 'MEI'], ['ME', 'ME'], ['EPP', 'EPP'], ['Simples', 'Simples, sem saber ME ou EPP']], { rerender: true, ajuda: true }) : '')
-    + (n === 'subsidiaria' ? campoSelect(d, 'tiMatriz', 'Onde a TI é gerida', [['', 'Sem informação'], ['brasil', 'No Brasil'], ['matriz', 'Na matriz']], { rerender: true, ajuda: true }) : '')
-    + (n === 'publico' ? campoSelect(d, 'tipoPublico', 'Tipo de órgão', [['', 'Órgão público (administração direta, autarquia, fundação pública)'], ['estatal', 'Estatal (empresa pública ou sociedade de economia mista)']], { rerender: true, largo: true, dica: d.tipoPublico === 'estatal' ? 'Estatal usa as médias do seu setor de atividade (ex.: Banco do Brasil e Caixa usam as de bancos).' : 'Órgão público estima por contratos, equipe de TI ou gasto real.' }) : '');
+    + (n === 'subsidiaria' && entraNaConta(d, 'tiMatriz') ? campoSelect(d, 'tiMatriz', 'Onde a TI é gerida', [['', 'Sem informação'], ['brasil', 'No Brasil'], ['matriz', 'Na matriz']], { rerender: true, ajuda: true }) : '')
+    + (n === 'publico' ? campoSelect(d, 'tipoPublico', 'Tipo de órgão', [['', 'Órgão público (administração direta, autarquia, fundação pública)'], ['estatal', 'Estatal (empresa pública ou sociedade de economia mista)']], { rerender: true, largo: true }) : '');
   const ident = campoTexto(d, 'nome', 'Nome da empresa', { largo: true, extra: 'required aria-required="true"' })
     + `<div class="campo"><div class="campo-rot"><label for="f-cnpj">CNPJ</label>${botaoAjuda('cnpj', 'CNPJ')}</div><div class="entrada com-acao"><input type="text" inputmode="numeric" id="f-cnpj" data-cnpj value="${esc(d.cnpj)}" placeholder="00.000.000/0000-00" autocomplete="off">${botaoCNPJ(d)}</div><div class="campo-pe">${infoCNPJ}</div><p class="valid" id="v-cnpj">${UI.cnpjMsg}</p></div>`
     + campoSelect(d, 'natureza', 'Natureza', natOps, { rerender: true, ajuda: true })
     + (sug ? `<div class="sugestao largo">${ico('info')}<span>Sugestão pelo CNPJ: ${sug.natureza ? '<b>' + esc(PAIS.naturezas.find(x => x.id === sug.natureza).nome) + (sug.natureza === 'publico' ? (sug.tipoPublico === 'estatal' ? ' (estatal)' : ' (órgão público)') : '') + '</b>' : ''}${sug.natureza && sug.setor ? ' e ' : ''}${sug.setor ? '<b>' + esc(PAIS.filtrosSetor.find(s => s.id === sug.setor).nome) + '</b>' : ''}.</span><button type="button" class="btn peq prim" data-acao="usar-sug">Usar sugestão</button><button type="button" class="btn peq" data-acao="ignorar-sug">Ignorar</button></div>` : '')
-    + campoSelect(d, 'setor', 'Setor', setOps, { rerender: true, ajuda: true, dica: ehOrgaoPublico(d) || n === 'terceiro' ? 'Os parâmetros vêm da natureza.' : '' })
-    + campoSelect(d, 'uf', 'UF', [['', 'Selecione'], ...PAIS.ufs.map(u => [u, u])], { ajuda: true })
-    + campoTexto(d, 'municipio', 'Município', { extra: 'list="dl-municipios"', valid: esc(avisoMunicipio(d)) }) + `<datalist id="dl-municipios">${opcoesMunicipios(d.uf)}</datalist>`
+    + (vz('setor') ? campoSelect(d, 'setor', 'Setor', setOps, { rerender: true, ajuda: true }) : '')
+    + (vz('uf') ? campoSelect(d, 'uf', 'UF', [['', 'Selecione'], ...PAIS.ufs.map(u => [u, u])], { ajuda: true }) : '')
+    + (vz('municipio') ? campoTexto(d, 'municipio', 'Município', { extra: 'list="dl-municipios"', valid: esc(avisoMunicipio(d)) }) + `<datalist id="dl-municipios">${opcoesMunicipios(d.uf)}</datalist>` : '')
     + porNatureza;
-  const porte = campoReceita(d, R)
-    + campoNum(d, 'funcionarios', R.func, { un: 'pessoas' })
-    + campoNum(d, 'usuarios', R.us, { un: 'pessoas', ph: usPh })
-    + campoNum(d, 'unidades', R.un)
-    + (n === 'listada' ? campoNum(d, 'adicoes', 'Adições do ano em software e equipamentos de informática', { pre: 'R$', largo: true }) : '')
-    + (n === 'publico' ? campoNum(d, 'contratos', 'Contratos e despesas de TI do ano', { pre: 'R$', largo: true }) : '');
-  const extDigital = d.setor === 'varejo' ? campoExtra(d, 'pctOnline', '% de vendas online', 'num', 'Acima de 30%, a intensidade digital automática fica alta.') : d.setor === 'educacao' ? campoExtra(d, 'pctEAD', '% de alunos a distância', 'num', 'Acima de 50%, a intensidade digital automática fica alta.') : '';
-  const ti = campoNum(d, 'profTI', 'Profissionais de TI internos', { un: 'pessoas' })
+  const porte = (vz('faturamento') ? campoReceita(d, R) : '')
+    + (vz('funcionarios') ? campoNum(d, 'funcionarios', R.func, { un: 'pessoas' }) : '')
+    + (vz('usuarios') ? campoNum(d, 'usuarios', R.us, { un: 'pessoas', ph: usPh }) : '')
+    + (n === 'listada' && vz('adicoes') ? campoNum(d, 'adicoes', 'Adições do ano em software e equipamentos de informática', { pre: 'R$', largo: true }) : '')
+    + (n === 'publico' && vz('contratos') ? campoNum(d, 'contratos', rotContratos(d), { pre: 'R$', largo: true }) : '');
+  const ti = vz('profTI') ? campoNum(d, 'profTI', rotProfTI(d), { un: 'pessoas' })
     + campoNum(d, 'salarioTI', 'Salário médio da equipe de TI', { pre: 'R$', un: 'por mês', dica: 'Opcional.' })
-    + campoSelect(d, 'digital', 'Intensidade digital', [['', 'Automática (' + nivelDigitalAuto(d) + ')'], ['baixa', 'Baixa'], ['media', 'Média'], ['alta', 'Alta']], { ajuda: true })
-    + campoNum(d, 'crescFunc', 'Crescimento de funcionários em 12 meses', { un: '%' })
-    + extDigital
-    + `<div class="campo"><div class="campo-rot"><label for="f-vagasTI">Vagas de TI abertas</label>${botaoAjuda('vagasTI', 'Vagas de TI')}</div><input type="text" inputmode="numeric" id="f-vagasTI" data-simples="vagasTI" value="${esc(d.vagasTI)}" autocomplete="off"></div>`;
+    + (!vz('digital') ? '' : campoSelect(d, 'digital', 'Intensidade digital', [['', 'Automática (' + nivelDigitalAuto(d) + ')'], ['baixa', 'Baixa'], ['media', 'Média'], ['alta', 'Alta']], { ajuda: true })) : '';
+  const vagas = `<div class="campo"><div class="campo-rot"><label for="f-vagasTI">Vagas de TI abertas</label>${botaoAjuda('vagasTI', 'Vagas de TI')}</div><input type="text" inputmode="numeric" id="f-vagasTI" data-simples="vagasTI" value="${esc(d.vagasTI)}" autocomplete="off"></div>`;
   const gasto = `<div class="campo largo"><div class="campo-rot"><span class="rot">Gasto de TI real, por ano</span>${botaoAjuda('gastosReais', 'Gasto real')}</div>
       <div class="reais">${reais.length ? '<div class="reais-cab"><span>Ano</span><span>Valor</span></div>' : ''}${reais.map((x, i) => `<div class="reais-linha"><input type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano)}"><div class="entrada com-pre"><span class="pre">R$</span><input type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || 'ano')}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}"></div>${botaoOrigem('real:' + i, x.o, temValor(x))}${btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq perigo')}</div>`).join('')}
       <div class="reais-acoes"><button type="button" class="btn peq" data-acao="add-real">${ico('mais')}Adicionar ano</button>${botaoSemDado('gastosReais', d)}</div></div><p class="valid" id="v-reais"></p></div>`
     + campoNum(d, 'gastoDeclarado', 'Gasto de TI declarado de ' + anoDe(d), { pre: 'R$', largo: true })
-    + `<div class="campo largo"><label class="chk-linha"><input type="checkbox" id="f-usarCalib" data-usar-calib ${emp.foraCalibracao ? '' : 'checked'}><span>Usar esta empresa no Método Personalizado<span class="dica">O gasto real entra nos percentuais do método. Vale depois de salvar.</span></span></label></div>`;
+    + (!temGastoReal(d) ? '' : `<div class="campo largo"><label class="chk-linha"><input type="checkbox" id="f-usarCalib" data-usar-calib ${emp.foraCalibracao ? '' : 'checked'}><span>Usar esta empresa no Método Personalizado<span class="dica">O gasto real entra nos percentuais do método. Vale depois de salvar.</span></span></label></div>`);
   // só registro: não muda a conta
   const extN = {
     listada: () => campoExtra(d, 'valorMercado', 'Valor de mercado', 'num'),
@@ -3793,10 +3805,10 @@ function formAnalise() {
   };
   const extS = { operadora: () => campoExtra(d, 'beneficiarios', 'Beneficiários', 'num'), saude: () => campoExtra(d, 'leitos', 'Leitos', 'num'), educacao: () => campoExtra(d, 'alunos', 'Alunos', 'num'), varejo: () => campoExtra(d, 'visitas', 'Visitas ao site por mês', 'num'), industria: () => campoExtra(d, 'ucs', 'Unidades consumidoras (distribuidora)', 'num'), logistica: () => campoExtra(d, 'frota', 'Frota', 'num'), tecnologia: () => campoExtra(d, 'pctTecnica', '% da equipe técnica', 'num') + campoExtra(d, 'acessos', 'Acessos (telecom)', 'num') };
   const nTec = (d.tecnologias || []).length;
-  const mais = (n !== 'publico' && n !== 'terceiro' ? campoGrupo(d) : '') + (extN[n] ? extN[n]() : '') + (extS[d.setor] ? extS[d.setor]() : '') + blocoTecnologias(d);
-  return notaModelo(d) + secao('sec-ident', 'id', 'Identificação', '', ident, preenchido(d, ['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio']) + ' de 6')
-    + secao('sec-porte', 'porte', 'Porte', '', porte)
-    + secao('sec-ti', 'sinal', 'Equipe e sinais de TI', '', ti)
+  const mais = vagas + (n !== 'publico' && n !== 'terceiro' ? campoGrupo(d) : '') + (extN[n] ? extN[n]() : '') + (extS[d.setor] ? extS[d.setor]() : '') + blocoTecnologias(d);
+  return notaModelo(d) + secao('sec-ident', 'id', 'Identificação', '', ident, (cs => preenchido(d, cs) + ' de ' + cs.length)(['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio'].filter(vz)))
+    + (porte ? secao('sec-porte', 'porte', ehOrgaoPublico(d) ? 'Execução orçamentária' : 'Porte', '', porte) : '')
+    + (ti ? secao('sec-ti', 'sinal', 'Equipe de TI', '', ti) : '')
     + secao('sec-gasto', 'historico', 'Gasto de TI conhecido', 'Dados reais da empresa pesam mais que as médias de mercado e estreitam a faixa.', gasto)
     + `<details class="secao-form" id="sec-mais"${nTec || (d.extras && Object.values(d.extras).some(v => v !== '' && v != null)) ? ' open' : ''}><summary><div class="sf-cab"><h2>${ico('chip')}Mais sobre a empresa</h2><span class="sf-prog"><span id="tec-n">${nTec ? plural(nTec, 'tecnologia marcada', 'tecnologias marcadas') : 'só registro'}</span> ${ico('chev', 'chev')}</span></div></summary><p class="sf-desc">Ficam salvos com a análise, mas não mudam o valor.</p><div class="grade-campos">${mais}</div></details>`
     + `<div class="rodape-form">${chipEstado()}<button type="button" class="btn prim" data-acao="salvar">${ico('salvar')}Salvar</button></div>`;
@@ -3807,7 +3819,7 @@ function validar(d) {
   const c = cnpjDigitos(d.cnpj);
   if (c.length && !cnpjValido(c)) v.cnpj = 'CNPJ inválido: confira os dígitos.';
   else if (c.length === 14 && c.slice(8, 12) !== '0001') v.cnpjFilial = 'Este CNPJ é de uma filial (depois da barra não vem 0001). Receita e funcionários devem ser da empresa inteira no Brasil: use o CNPJ da matriz.';
-  for (const k of ['faturamento', 'funcionarios', 'usuarios', 'profTI', 'salarioTI', 'unidades', 'adicoes', 'contratos', 'gastoDeclarado']) {
+  for (const k of ['faturamento', 'funcionarios', 'usuarios', 'profTI', 'salarioTI', 'adicoes', 'contratos', 'gastoDeclarado']) {
     const f = d[k]; if (!f) continue;
     if (Number.isNaN(f.v)) v[k] = 'Número inválido.';
     else if (f.v !== '' && +f.v < 0) v[k] = 'Valor negativo: confira.';
@@ -3841,7 +3853,7 @@ function seletorModoLista(m, id) {
 function mudarModo(v) {
   if (!UI.atual) return;
   UI.atual.dados.modo = MODOS.includes(v) ? v : 'base'; marcarAlterado();
-  if (UI.rota.aba === 'resultado') renderAqui(); else atualizarPainel();
+  if (UI.rota.aba === 'resultado') renderAqui(); else rerenderAnalise();
   const f = document.querySelector('#app input[data-modo]:checked'); if (f) f.focus({ preventScroll: true });
 }
 // ano de referência da análise: por padrão o último ano fechado; o ano em curso também vale
@@ -3867,6 +3879,7 @@ function rotuloConfianca(r) {
   if (r.modoCalc === 'base') return 'Aproximada: pesquisas públicas, sem medida em empresas reais.';
   const cal = calDoModo(r.modoCalc), T = cal && cal.ti && cal.ti.suficiente ? cal.ti : null;
   if (T && T.direta) return 'Aproximada: percentuais informados por você, sem dispersão medida.';
+  if (T && T.N && T.acertoPct == null) return 'Aproximada: dados modelo, sem medida em empresas reais.';
   if (T && T.N) return `Acerto medido: ${nf(T.acertoPct, 0)} de ${nf(T.N, 0)} ${r.modoCalc === 'padrao' ? 'empresas da base' : 'das suas empresas'} dentro da faixa.`;
   return 'Aproximada: este método não mediu o gasto de TI.';
 }
@@ -3922,7 +3935,8 @@ function atualizarPainel() {
   const blocoPmd = pmd.length ? `<details class="cr-bloco cr-dicas" data-dicas${UI.dicasAbertas ? ' open' : ''}><summary>${ico('lampada')}<span>Como aumentar a confiança</span><span class="ganho">até +${Math.max(...pmd.map(p => p.ganho))}</span>${ico('chev', 'chev')}</summary>${listaPmd(pmd)}</details>` : '';
   // os dois resultados sempre à vista: a receita líquida (informada ou estimada, com a origem) e o investimento em TI
   const rec = !r.vazio && r.receita && r.receita.usada;
-  const saidaReceita = rec
+  const orgao = ehOrgaoPublico(d);
+  const saidaReceita = orgao ? '' : rec
     ? `<div class="cr-saida"><p class="cr-rot">Receita líquida, ${r.ano}</p><div class="cr-num"><div class="cr-valor cr-valor-rec" id="cr-receita">${fmtRS(rec.v)}</div></div><p class="cr-faixa">${rotuloReceita(r.receita)} ${origemChip(origemReceita(r.receita))}</p></div>`
     : `<div class="cr-saida"><p class="cr-rot">Receita líquida</p><p class="vazio-res">Informe a receita, ou os funcionários e o setor para estimar.</p></div>`;
   const aberto = !!UI.cartaoAberto; el.classList.toggle('aberto', aberto);
@@ -3930,7 +3944,7 @@ function atualizarPainel() {
   anunciar(r.vazio ? '' : `Investimento em TI: ${fmtRS(r.F)}${rec ? '. Receita líquida: ' + fmtRS(rec.v) : ''}`);
   if (r.vazio) {
     ANIM.mostrado = null;
-    el.innerHTML = `<div class="cr-topo">${saidaReceita}<div class="cr-saida"><p class="cr-rot">Investimento em TI</p><div class="vazio-res"><b>${esc(r.msgVazio)}</b>Preencha a receita, os funcionários, a equipe de TI ou um gasto real.</div></div>${abrir}</div>
+    el.innerHTML = `<div class="cr-topo">${saidaReceita}<div class="cr-saida"><p class="cr-rot">Investimento em TI</p><div class="vazio-res"><b>${orgao ? 'Informe a despesa de TI' : esc(r.msgVazio)}</b>${orgao ? (m === 'base' ? 'Preencha a despesa de TI, os servidores de TI ou um gasto real.' : 'Preencha a despesa de TI ou um gasto real.') : m === 'base' ? 'Preencha a receita, os funcionários, a equipe de TI ou um gasto real.' : 'Preencha a receita, os funcionários ou um gasto real.'}</div></div>${abrir}</div>
       <div class="cr-resto"><div class="cr-in"><div class="cr-bloco cr-ano"><h3><label for="f-anoRef">Ano de referência</label></h3>${seletorAno(d)}</div><div class="cr-bloco"><h3>Método</h3>${seletorModo(m)}</div>${blocoPmd}</div></div>`;
     return;
   }
@@ -4048,6 +4062,8 @@ function aoMudarAnalise(e) {
     if (av) av.textContent = avisoMunicipio(d);
   }
   if (t.dataset.simples === 'nome') { const v = $('#v-nome'); if (v) v.textContent = ''; }
+  // gasto de TI do ano informado ou apagado: os campos que entram na conta mudam
+  if ((t.dataset.campo === 'gastoDeclarado' || t.hasAttribute('data-real')) && chaveForm(UI.atual.dados) !== UI.chaveForm) return rerenderAnalise();
   if (t.dataset.simplesNum) t.value = fmtIn(UI.atual.dados[t.dataset.simplesNum]);
   if (t.dataset.parte === 'v' || t.hasAttribute('data-num')) t.value = fmtIn(t.dataset.real != null ? UI.atual.dados.gastosReais[+t.dataset.real].v : t.dataset.rec != null ? UI.atual.dados.receitasAnos[+t.dataset.rec].v : t.dataset.campo ? UI.atual.dados[t.dataset.campo].v : UI.atual.dados.extras[t.dataset.extra]);
 }
@@ -4121,11 +4137,14 @@ TELAS.analise = {
   },
   render(r) {
     const emp = UI.atual, d = emp.dados, res = r.aba === 'resultado', id = encodeURIComponent(emp.id);
+    if (d.modo === '') return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">Nova análise</h1></div></header>
+    <div class="vazio inicio"><h2>Método</h2><div class="comecos">${MODOS.map(v => `<button type="button" class="comeco" data-acao="escolher-modo" data-v="${v}"${modoDisponivel(v) ? '' : ' disabled'}>${ico(METODOS[v].ico)}<b>${nomeModo(v)}</b><span>${modoDisponivel(v) ? { base: 'Pesquisas públicas', padrao: 'Receita × percentual', propria: 'Seus dados' }[v] : 'Sem dados ainda'}</span></button>`).join('')}</div></div>`;
     return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">${esc(d.nome.trim() || 'Nova análise')}</h1><div class="ws-meta" id="ws-meta">${metaEmpresa(d)}</div></div><div class="acoes" id="ws-acoes">${acoesAnalise()}</div></header>
     <nav class="abas" aria-label="Partes da análise"><a href="#/analise/${id}"${res ? '' : ' aria-current="page"'}>${ico('analise')}Dados</a><a href="#/analise/${id}/resultado"${res ? ' aria-current="page"' : ''}>${ico('detalhe')}Resultado</a></nav>
     ${res ? corpoResultado(emp) : `<div class="ws-corpo"><div class="grade-ws"><form class="form-ws" id="form" autocomplete="off" onsubmit="return false" novalidate>${formAnalise()}</form><aside class="resumo-lado" aria-label="Estimativa"><div class="cartao-res" id="painel"></div><p class="sr" id="anuncio" aria-live="polite"></p></aside></div></div>`}`;
   },
   depois(r) {
+    if (UI.atual.dados.modo === '') return;
     if (r.aba === 'resultado') { depoisResultado(); return; }
     // guarda se as dicas estão abertas também para quando a tela inteira é redesenhada
     $('#painel').addEventListener('toggle', e => { if (e.target.matches('[data-dicas]')) UI.dicasAbertas = e.target.open; }, true);
@@ -4141,6 +4160,7 @@ TELAS.analise = {
 };
 acoes({
   'nova': () => novaAnalise(),
+  'escolher-modo': b => { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#f-nome'); if (o) o.focus(); },
   'modelo': () => abrirEmpresaModelo(),
   'salvar': () => salvarEmpresa(),
   'descartar': () => descartar(),
@@ -4175,7 +4195,7 @@ acoes({
 <script id="ui-resultado">
 "use strict";
 /* ===================== RESULTADO DE UMA EMPRESA: a explicação do número, o resumo e o prompt ===================== */
-const FONTE_G = { historico: 'calculado pelo seu histórico de gasto real', funcionarios: 'média do mercado mais o crescimento de funcionários', media: 'média do mercado', manual: 'informado por você' };
+const FONTE_G = { historico: 'calculado pelo seu histórico de gasto real', media: 'média do mercado', manual: 'informado por você' };
 const ICO_CAMINHO = { E0: 'historico', E1: 'moeda', E2: 'monitor', E3: 'equipe', E4: 'doc', E4p: 'governo', E5: 'caixa', EP: 'empresas' };
 const icoCaminho = e => `<span class="ic-cam ${e.modelo ? 'mod' : 'real'}" data-tip="${e.modelo ? 'Média de mercado' : 'Dado real da empresa'}">${ico(ICO_CAMINHO[e.cod] || 'info')}</span>`;
 function nivelPrecisao(s) {
@@ -4186,14 +4206,14 @@ function quemDoSetor(r) { return r.linhaId === 'outros' ? 'Na média de todos os
 function textoCaminho(e, r) {
   const Pm = P(), sp = r.pequena ? Pm.equipe.sPessoalPequena : Pm.equipe.sPessoal;
   switch (e.cod) {
-    case 'EP': return `A receita líquida é multiplicada pelo percentual que as empresas da base gastam com TI no setor${e.local ? ', ajustado pelo lugar (' + esc(textoLocal(e.local)) + ')' : ''}. É a conta dos métodos CR1 e Personalizado.`;
+    case 'EP': return `A receita líquida é multiplicada pelo percentual que as empresas da base gastam com TI no setor${e.local ? ', ajustado pelo lugar (' + esc(textoLocal(e.local)) + ')' : ''}. É a conta dos métodos CR e Personalizado.`;
     case 'E0': return `O cálculo parte do último gasto de TI real informado e o leva até ${r.ano} com o crescimento de ${fmtPct(r.g)} ao ano (${FONTE_G[r.gFonte]}).`;
     case 'E1': {
       const rc = r.receita || {}, pre = rc.modo === 'enquadramento' ? `Sem receita informada, vale o meio da faixa legal do enquadramento ${r.enq}, que vai de ${fmtRS(r.faixaEnq.min)} a ${fmtRS(r.faixaEnq.max)} por ano. `
         : rc.modo === 'estimada' ? 'A receita foi estimada pela ferramenta: não é dado oficial. ' : '';
-      return pre + `${quemDoSetor(r)} gastam com TI, em média, ${fmtPct(r.linha.p)} da receita líquida (pesquisa FGV).`;
+      return pre + `${quemDoSetor(r)} gastam com TI, no valor central, ${fmtPct(r.linha.p)} da receita líquida.`;
     }
-    case 'E2': return `${quemDoSetor(r)} gastam, em média, ${fmtRS(r.linha.capu)} por ano para cada usuário de computador (pesquisa FGV).`;
+    case 'E2': return `${quemDoSetor(r)} gastam, no valor central, ${fmtRS(r.linha.capu)} por ano para cada usuário de computador.`;
     case 'E3': return `Primeiro se calcula quanto a equipe interna de TI custa em um ano. Como a equipe costuma ser ${fmtPct(sp, 0)} do gasto total de TI, o custo é dividido por essa parte para chegar ao total.`;
     case 'E4': return `O gasto de TI de ${r.ano} foi informado: ele substitui a estimativa.`;
     case 'E4p': return r.custoEquipe != null ? 'Os contratos e despesas de TI do ano são somados ao custo da equipe interna de TI.' : `Os contratos não incluem a equipe interna, que costuma ser ${fmtPct(sp, 0)} do gasto de TI. Por isso os contratos são divididos pela parte restante.`;
@@ -4264,9 +4284,7 @@ function tabelaAjustes(r, d) {
   if (usaE1 || usaE2) {
     const porque = {
       digital: m => `Baixa ${nf(Mo.digital.baixa, 1)}, média ${nf(Mo.digital.media, 1)}, alta ${nf(Mo.digital.alta, 1)}.${m.auto ? ' Escolhida pela natureza e pelo setor; você pode mudar nos dados.' : ''}`,
-      matriz: () => 'Parte da TI é paga e gerida pela matriz no exterior.',
-      unidades: () => { const t = Mo.unidades.map((u, i) => (i === Mo.unidades.length - 1 ? `${nf(u.de, 0)} ou mais` : `${i ? 'de ' + nf(u.de, 0) + ' a ' : 'até '}${nf(Mo.unidades[i + 1].de - 1, 0)}`) + ': ' + nf(u.v, 1)).join('; ') + '.'; return t[0].toUpperCase() + t.slice(1); },
-      crescimento: () => 'Empresas crescendo rápido costumam gastar mais com TI.'
+      matriz: () => 'Parte da TI é paga e gerida pela matriz no exterior.'
     };
     for (const m of r.mods) add(esc(m.nome), nf(m.v, 2), porque[m.tipo] ? porque[m.tipo](m) : '');
     add('Total dos ajustes da empresa', nf(r.Mmod, 2), `Produto dos ajustes acima, limitado entre ${nf(Mo.mMin, 1)} e ${nf(Mo.mMax, 1)}. Vale para os cálculos pela receita e por usuários.`);
@@ -4274,7 +4292,6 @@ function tabelaAjustes(r, d) {
   if (r.pequena) add('Regras de pequena empresa', 'sim', `${r.enq ? 'Enquadramento ' + r.enq : 'Menos de 50 usuários'}: o cálculo por usuários fica desligado, a faixa fica mais larga e a divisão por categoria usa o perfil de pequena empresa.`);
   const gTxt = {
     historico: () => { const a = r.reais.map(x => x.ano); return `Calculado pelo seu gasto real entre ${Math.min(...a)} e ${Math.max(...a)}, limitado entre ${fmtPct(C.histMin, 0)} e +${fmtPct(C.histMax, 0)} ao ano.`; },
-    funcionarios: () => `Média do mercado (${fmtPct(C.gSetor, 0)}) mais o crescimento de funcionários informado, limitado entre ${fmtPct(C.funcMin, 0)} e +${fmtPct(C.funcMax, 0)}.`,
     media: () => `Média do mercado: as pesquisas da FGV e da FEBRABAN apontam alta de ${fmtPct(C.gSetor, 0)} ao ano.`,
     manual: () => 'Informado por você na projeção.'
   };
@@ -4308,7 +4325,7 @@ function numerosTecnicos(r) {
 }
 function listaDados(d, r) {
   const R = rotulos(d), out = [];
-  const add = (c, rot, i, fmt, extra = '') => { const f = d[c], ok = f && f.v !== '' && f.v != null && isFinite(+f.v); out.push({ c, rot, i, val: ok ? fmt(+f.v) : null, o: ok ? (f.o || '') : null, extra }); };
+  const add = (c, rot, i, fmt, extra = '') => { if (!entraNaConta(d, c)) return; const f = d[c], ok = f && f.v !== '' && f.v != null && isFinite(+f.v); out.push({ c, rot, i, val: ok ? fmt(+f.v) : null, o: ok ? (f.o || '') : null, extra }); };
   const rc = r.receita || {}, inf = rc.informada;
   add('faturamento', R.fat, 'moeda', fmtRS, inf ? [inf.bruta ? `bruto; líquida ≈ ${fmtRS(inf.liq)}` : '', inf.ano || inf.meses < 12 ? [inf.ano ? 'de ' + inf.ano : '', inf.meses < 12 ? inf.meses + ' meses, levados a 12' : ''].filter(Boolean).join(', ') + (inf.dt || inf.meses < 12 ? `; em ${r.ano} ≈ ${fmtRS(inf.v)}` : '') : ''].filter(Boolean).join('; ')
     : rc.usada ? `≈ ${fmtRS(rc.usada.v)} ${rc.modo === 'enquadramento' ? 'pelo enquadramento ' + r.enq : 'estimada pela ferramenta'}` : rc.estimativa ? `≈ ${fmtRS(rc.estimativa.v)} estimada (referência)` : '');
@@ -4316,10 +4333,8 @@ function listaDados(d, r) {
   add('usuarios', R.us, 'monitor', v => nf(v, 0), !valorPos(d.usuarios) && r.usuarios != null ? `≈ ${nf(r.usuarios, 0)} pelos funcionários` : '');
   add('profTI', 'Profissionais de TI', 'codigo', v => nf(v, 0));
   add('salarioTI', 'Salário médio de TI', 'moeda', v => fmtRS(v) + ' por mês');
-  add('unidades', R.un, 'empresas', v => nf(v, 0));
-  add('crescFunc', 'Crescimento de funcionários', 'sobe', v => nf(v, 1) + '% em 12 meses');
   if (d.natureza === 'listada') add('adicoes', 'Adições em software e equipamentos', 'caixa', fmtRS);
-  if (d.natureza === 'publico') add('contratos', 'Contratos e despesas de TI', 'governo', fmtRS);
+  if (d.natureza === 'publico') add('contratos', rotContratos(d), 'governo', fmtRS);
   add('gastoDeclarado', 'Gasto de TI declarado do ano', 'doc', fmtRS);
   const rs = r.reais || [], u = rs[rs.length - 1];
   out.push({ c: 'gastosReais', rot: 'Gasto de TI real', i: 'historico', val: u ? fmtRS(u.v) + ' em ' + u.ano : null, o: u ? (u.o || '') : null, extra: rs.length > 1 ? rs.length + ' anos informados' : '' });
@@ -4449,15 +4464,13 @@ Grupo econômico (controladora ou grupo do qual a empresa faz parte):
 Receita líquida anual no Brasil (R$), uma linha por ano, dos três últimos anos fechados:
 Faturamento bruto anual no Brasil (R$), só se não houver a receita líquida, uma linha por ano:
 Número de funcionários no Brasil:
-Número de unidades (lojas, fábricas, filiais ou centros de distribuição):
 Enquadramento, se for pequena (MEI, ME, EPP ou Simples):
 Profissionais de TI internos:
 Tecnologias que a empresa usa, uma por linha (ex.: ERP como SAP ou TOTVS, CRM, nuvem, Microsoft 365 ou Google Workspace, sistemas ou apps próprios, loja virtual):
-Crescimento de funcionários nos últimos 12 meses (%):
 Gasto de TI real em anos anteriores (uma linha por ano):
 Gasto de TI declarado de ${anoDe(d)} (R$):
 Adições do ano em software e equipamentos de informática, se listada na bolsa (R$):
-Contratos e despesas de TI do ano, se for setor público (R$):
+Despesa de TI do ano, empenhada ou liquidada, se for órgão público; contratos de TI, se for estatal (R$):
 Se for subsidiária de grupo estrangeiro, só com fonte confiável:
 Receita global do grupo (valor, moeda e ano):
 Participação do Brasil na receita global (%), se a empresa divulgar:
@@ -4531,12 +4544,12 @@ function textoResumo(d, r) {
   if (r.modoCalc !== 'base') {
     const deN = n => n ? ` de ${nf(n, 0)} empresas` : '';
     const ps = [calR.receita && calR.receita.suficiente ? `receita por funcionário medida${deN(calR.receita.n)}${rec.local ? `, com ajuste local × ${nf(rec.local.f, 2)} (${textoLocal(rec.local)})` : ''}` : '', calR.ti && calR.ti.suficiente ? (calR.ti.direta ? `percentual informado por você: ${fmtPct(r.modelo && r.modelo.p, 2)}` : `percentual de TI sobre a receita medido${deN(calR.ti.N)}: ${fmtPct(r.modelo && r.modelo.p, 2)} neste setor${r.modelo && r.modelo.local ? `, com ajuste local × ${nf(r.modelo.local.f, 2)} (${textoLocal(r.modelo.local)})` : ''}`) : ''].filter(Boolean);
-    const fonte = r.modoCalc !== 'padrao' ? (calR.direta ? 'percentuais informados por você' : `as empresas informadas por você (${descMinha()})`) : `a base ${calR.rotulo || 'CR1'} de ${dataBR(calR.data)} (${nf(calR.empresas || 0, 0)} empresas)`;
+    const fonte = r.modoCalc !== 'padrao' ? (calR.direta ? 'percentuais informados por você' : `as empresas informadas por você (${descMinha()})`) : calR.modelo ? `os dados modelo do ${esc(calR.rotulo)}, fictícios` : `a base ${calR.rotulo || 'CR'} de ${dataBR(calR.data)} (${nf(calR.empresas || 0, 0)} empresas)`;
     b(`Método: ${nomeModo(r.modoCalc)}, com ${fonte}${ps.length ? ': ' + ps.join('; ') : ''}.${altR}`);
-  } else b(`Método: Método Vezen, com médias de pesquisas públicas (FGV, Brasscom, FEBRABAN, Techaisle).${altR}`);
+  } else b(`Método: Método Vezen, com referências públicas (medianas internacionais por setor, gasto declarado por empresas brasileiras, balanços, FGV, Brasscom, FEBRABAN).${altR}`);
   const bench = [];
-  if (usados.some(e => e.cod === 'E1')) bench.push(`FGV-EAESP, 36ª Pesquisa Anual do Uso de TI: o setor “${r.linha.nome}” gasta ${fmtPct(r.linha.p)} da receita líquida com TI (ajuste de porte ${nf(r.f1, 2)})`);
-  if (usados.some(e => e.cod === 'E2')) bench.push(`FGV-EAESP: ${fmtRS(r.linha.capu)} por usuário de computador por ano (ajuste de porte ${nf(r.f2, 3)}; regional ${nf(r.Ief, 3)})`);
+  if (usados.some(e => e.cod === 'E1')) bench.push(`o setor “${r.linha.nome}” gasta ${fmtPct(r.linha.p)} da receita líquida com TI, valor central entre a mediana internacional e o gasto declarado por empresas brasileiras (ajuste de porte ${nf(r.f1, 2)})`);
+  if (usados.some(e => e.cod === 'E2')) bench.push(`${fmtRS(r.linha.capu)} por usuário de computador por ano (ajuste de porte ${nf(r.f2, 3)}; regional ${nf(r.Ief, 3)})`);
   if (usados.some(e => e.cod === 'E3' || e.cod === 'E4p')) bench.push(`salário de TI por UF (Brasscom) e equipe interna = ${fmtPct(r.pequena ? Pm.equipe.sPessoalPequena : Pm.equipe.sPessoal, 0)} do gasto de TI`);
   if (usados.some(e => e.cod === 'EP')) bench.push(`percentual da receita gasto com TI medido em ${nf(calR.ti && calR.ti.N || 0, 0)} empresas${calR.ti && calR.ti.nS && calR.ti.nS[r.linhaId] ? ` (${nf(calR.ti.nS[r.linhaId], 0)} do setor)` : ''}: ${fmtPct(r.modelo && r.modelo.p, 2)}`);
   if (usados.some(e => e.cod === 'E5')) bench.push(`investimento = ${fmtPct(r.linhaId === 'bancos' ? Pm.equipe.sCapexBancos : Pm.equipe.sCapex, 0)} do gasto de TI (FGV, FEBRABAN)`);
@@ -4552,7 +4565,7 @@ function textoResumo(d, r) {
   if (u && rec.modo !== 'informada') lim.push('receita estimada, não oficial');
   if (inf && rec.modo === 'informada' && inf.meses < 12) lim.push(`receita de ${inf.meses} meses levada a 12 meses, sem ajuste de sazonalidade`);
   if (usados.some(e => ['terceiros', 'palpite'].includes(e.origem))) lim.push('há dados de terceiros ou palpites');
-  lim.push(r.modoCalc === 'padrao' ? `Método CR1 (${calR.rotulo || 'CR1'}) feito com uma amostra de empresas, que pode não representar todos os setores e lugares` : r.modoCalc === 'propria' ? (calR.direta ? 'Método Personalizado com percentuais informados por você, sem medida' : `Método Personalizado feito com ${nf(contagemMinha().total, 0)} empresas informadas por você`) : 'Método Vezen: médias de pesquisas públicas, sem medida em empresas reais');
+  lim.push(r.modoCalc === 'padrao' ? calR.modelo ? `${nomeModo('padrao')} com dados modelo, fictícios: o valor só mostra a conta` : `${nomeModo('padrao')} feito com uma amostra de empresas, que pode não representar todos os setores e lugares` : r.modoCalc === 'propria' ? (calR.direta ? 'Método Personalizado com percentuais informados por você, sem medida' : `Método Personalizado feito com ${nf(contagemMinha().total, 0)} empresas informadas por você`) : 'Método Vezen: médias de pesquisas públicas, sem medida em empresas reais');
   b('Limitações: ' + lim.join('; ') + '.');
   return L.join('\n');
 }
@@ -4627,10 +4640,9 @@ function lembreteBackup() {
 function telaEmpresas() {
   const n = S.empresas.length;
   const cab = `<div class="cab"><div class="cab-txt"><h1>Empresas</h1><p class="sub">${n ? plural(n, 'empresa analisada', 'empresas analisadas') + '. ' : ''}Os dados ficam só neste navegador.</p></div>
-    <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button>${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
-  if (!n) return cab + `<div class="vazio"><h2>Nenhuma empresa ainda</h2><p>Comece pela análise de uma empresa ou estime uma lista inteira de uma vez. A estimativa aparece enquanto você preenche os dados.</p>
-    <ol class="passos-vazio"><li><b>Uma empresa</b>Nome e um dado de porte, como receita ou funcionários. Com o CNPJ, a ferramenta busca o resto.</li><li><b>Uma lista</b>Uma planilha do CRM ou do Excel com várias empresas, estimadas de uma vez.</li><li><b>Backup</b>Já usou o Vezen em outro computador? Importe o backup exportado lá.</li></ol>
-    <div class="acoes"><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button><a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn" data-acao="importar">${ico('subir')}Importar backup</button></div>
+    <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
+  if (!n) return cab + `<div class="vazio inicio"><h2>Nenhuma empresa ainda</h2>
+    <div class="comecos"><button type="button" class="comeco prim" data-acao="nova">${ico('mais')}<b>Nova análise</b><span>Uma empresa</span></button><a class="comeco" href="#/listas/nova">${ico('tabela')}<b>Analisar uma lista</b><span>Planilha com várias empresas</span></a><button type="button" class="comeco" data-acao="importar">${ico('subir')}<b>Importar backup</b><span>De outro computador</span></button></div>
     <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button></p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
@@ -5270,7 +5282,7 @@ function mudarMapaDe(B, t) {
 
 /* ---------- a tela ---------- */
 // Documentação dos três métodos (parâmetros em tabelas de só leitura) e, no fim, a única área de entrada: os dados do Método Personalizado.
-// O que a pessoa informa sobre uma empresa fica na análise, nunca aqui. Seções com id "met-" são do Método Vezen; "cr1-", do CR1; "pers-", do Personalizado.
+// O que a pessoa informa sobre uma empresa fica na análise, nunca aqui. Seções com id "met-" são do Método Vezen; "cr1-", do CR; "pers-", do Personalizado.
 // Regras do texto: título é o nome do que a seção contém; fórmula só em bloco (eqs), nunca dentro de frase; cada letra tem uma linha na legenda (LETRAS), com o valor em uso.
 const SECOES_METODOS = [
   ['Visão geral', [['met-inicio', 'detalhe', 'Os três métodos']]],
@@ -5278,7 +5290,7 @@ const SECOES_METODOS = [
     ['met-incerteza', 'terceiros', 'Incerteza'], ['met-juncao', 'peso', 'Média ponderada'], ['met-faixa', 'faixa', 'Faixa provável e confiança'], ['met-estimativas', 'desce', 'Estimativas do resumo'],
     ['met-projecao', 'projecao', 'Projeção'], ['met-categorias', 'pizza', 'Divisão por categoria'], ['met-pmd', 'lampada', 'Como aumentar a confiança'], ['met-pequenas', 'porte', 'Pequenas empresas'],
     ['met-setores', 'setor', 'Parâmetros por setor'], ['met-fontes', 'doc', 'Fontes'], ['met-testes', 'testes', 'Testes de aceitação']]],
-  ['Método CR1', [['cr1-metodo', 'empresas', 'Fórmula'], ['cr1-parametros', 'tabela', 'Parâmetros em uso'], ['cr1-versoes', 'historico', 'Versões']]],
+  [nomeModo('padrao'), [['cr1-metodo', 'empresas', 'Fórmula'], ['cr1-parametros', 'tabela', 'Parâmetros em uso'], ['cr1-versoes', 'historico', 'Versões']]],
   ['Método Personalizado', [['pers-metodo', 'calib', 'Fórmula'], ['pers-dados', 'subir', 'Seus dados']]]
 ];
 const CORPO_METODOS = { 'met-inicio': metInicio, 'met-visao': metVisao, 'met-receita': metReceita, 'met-caminhos': metCaminhos, 'met-ajustes': metAjustes, 'met-incerteza': metIncerteza, 'met-juncao': metJuncao, 'met-faixa': metFaixa,
@@ -5288,7 +5300,7 @@ const ENTRADA = new Set(['pers-dados']); // a única seção em que a pessoa inf
 function telaMetodos() {
   if (UI.baseNova) return secaoBaseNova();
   const Pm = P();
-  return `<div class="cab"><div class="cab-txt"><h1>Métodos</h1><p class="sub">Fórmulas e parâmetros de cada método. Vezen e CR1 são fixos; o Personalizado usa os seus dados.</p></div>
+  return `<div class="cab"><div class="cab-txt"><h1>Métodos</h1><p class="sub">Fórmulas e parâmetros de cada método. Vezen e CR são fixos; o Personalizado usa os seus dados.</p></div>
     <div class="acoes"><a class="btn" href="#/testes">${ico('testes')}Testes de aceitação</a></div></div>
   <div class="doc-grade met-corpo"><nav class="doc-ind" aria-label="Seções">${SECOES_METODOS.map(([g, ss]) => `<p class="ind-grupo">${g}</p>${ss.map(([id, , t]) => `<button type="button" data-acao="rolar" data-alvo="${id}"${ENTRADA.has(id) ? ' class="ind-entrada"' : ''}>${t}</button>`).join('')}`).join('')}</nav>
   <div class="doc-corpo">${SECOES_METODOS.map(([g, ss]) => `<h2 class="met-grupo" data-sem-termos>${g}</h2>` + ss.map(([id, i, t]) => `<section class="painel doc-sec met-sec${ENTRADA.has(id) ? ' met-entrada' : ''}" id="${id}" aria-labelledby="${id}-t"><h2 id="${id}-t">${ico(i)}${t}${ENTRADA.has(id) ? '<span class="selo entrada">entrada de dados</span>' : ''}</h2>${CORPO_METODOS[id](Pm)}</section>`).join('')).join('')}</div></div>`;
@@ -5321,7 +5333,7 @@ function tabM(cab, linhas, o = {}) {
 }
 // as letras das fórmulas do Método Vezen: uma definição só, usada em todas as seções
 function LETRAS(Pm) {
-  const R = Pm.receita, E = Pm.equipe, Mo = Pm.modificadores, I = Pm.incertezas, B = Pm.escala && Pm.escala.bancos;
+  const R = Pm.receita, E = Pm.equipe, Mo = Pm.modificadores, I = Pm.incertezas;
   return {
     R: [vv('R'), 'receita líquida do ano de referência', ''],
     V: [vv('V'), 'receita informada, da linha do ano de referência ou da mais próxima', ''],
@@ -5332,7 +5344,6 @@ function LETRAS(Pm) {
     p: [vv('p'), '% da receita gasto com TI no setor', 'por setor'],
     f12: [`${vv('f', '1')}, ${vv('f', '2')}`, 'ajuste de porte', 'por faixa'],
     M: [vv('M'), 'ajustes da empresa', `${nf(Mo.mMin, 1)} a ${nf(Mo.mMax, 1)}`],
-    fb: [vv('f', 'b'), 'ajuste de bancos muito grandes', B ? `1 até ${nf(B.de, 0)} usuários` : '1'],
     U: [vv('U'), 'usuários de computador', ''],
     N: [vv('N'), 'funcionários', ''],
     u: [vv('u'), 'usuários por funcionário no setor', 'por setor'],
@@ -5361,8 +5372,8 @@ const legDe = (Pm, ks) => { const L = LETRAS(Pm); return leg(ks.map(k => L[k]));
 // as fórmulas que aparecem na conta inteira e nas seções de detalhe
 const FX = {
   receita: () => [vv('R'), `${vv('V')} · (1 − ${vv('d')}) · 12 ÷ ${vv('m')} · ${pot(`(1 + ${vv('g', 'R')})`, vv('a'))}`],
-  e1: () => [vv('E', '1'), `${vv('R')} · ${vv('p')} · ${vv('f', '1')} · ${vv('M')} · ${vv('f', 'b')}`],
-  e2: () => [vv('E', '2'), `${vv('U')} · ${vv('CAPU')} · ${vv('f', '2')} · ${vv('I')} · ${vv('M')} · ${vv('f', 'b')}`],
+  e1: () => [vv('E', '1'), `${vv('R')} · ${vv('p')} · ${vv('f', '1')} · ${vv('M')}`],
+  e2: () => [vv('E', '2'), `${vv('U')} · ${vv('CAPU')} · ${vv('f', '2')} · ${vv('I')} · ${vv('M')}`],
   e3: () => [vv('E', '3'), `${vv('T')} · ${vv('S')} · 12 · ${vv('c')} ÷ ${vv('s')}`],
   e5: () => [vv('E', '5'), `${vv('A')} ÷ ${vv('q')}`],
   e0: () => [vv('E', '0'), `${vv('G')} · ${pot(`(1 + ${vv('g')})`, vv('a'))}`],
@@ -5384,8 +5395,9 @@ function metInicio() {
   return `<dl class="ficha"><div><dt>Receita líquida</dt><dd>Do ano de referência da análise (padrão: o último ano fechado). Informada, ou estimada quando falta.</dd></div>
     <div><dt>Investimento em TI</dt><dd>Do mesmo ano, com faixa provável e índice de confiança.</dd></div></dl>
   <div class="tipos">${['base', 'padrao', 'propria'].map(cartao).join('')}</div>
-  ${tabM(['', 'Método Vezen', 'Método CR1', 'Método Personalizado'], [
-    ['Parâmetros', 'Pesquisas públicas e documentos oficiais', 'Base de empresas reais', 'Suas empresas ou seus percentuais'],
+  ${tabM(['', 'Método Vezen', nomeModo('padrao'), 'Método Personalizado'], [
+    ['Parâmetros', 'Pesquisas públicas e documentos oficiais', (calPadrao() || {}).modelo ? 'Dados modelo, fictícios' : 'Base de empresas reais', 'Suas empresas ou seus percentuais'],
+    ['Dados da empresa', 'Receita, funcionários, usuários, equipe de TI, adições, gasto real; órgão público: despesa de TI e equipe', 'Receita, funcionários, segmento, estado, cidade, gasto real', 'Receita, funcionários, segmento, estado, cidade, gasto real'],
     ['Investimento em TI', 'Até 7 caminhos, média ponderada', fxIn(`${vv('R')} · ${vv('p')} · ${vv('f', 'l')}`), fxIn(`${vv('R')} · ${vv('p')} · ${vv('f', 'l')}`)],
     ['Receita que falta', 'Pelas pesquisas', 'Pela base', 'Pelas suas empresas'],
     ['Quem altera', 'Nova versão da ferramenta', 'Administrador, nova versão', 'Você, em Seus dados']], { larg: ['10rem', '', '', ''] })}`;
@@ -5397,7 +5409,7 @@ function metVisao(Pm) {
   return `<p class="d-lead">Ano de referência: o da análise; por padrão, o último ano fechado. Valores em reais nominais.</p>
   <ol class="passos">
     ${passo('Receita líquida', 'met-receita', eqs(FX.receita()) + legDe(Pm, ['V', 'd', 'm', 'gR', 'a']))}
-    ${passo('Caminhos com médias de mercado', 'met-caminhos', eqs(FX.e1(), FX.e2(), FX.e3(), FX.e5()) + legDe(Pm, ['p', 'f12', 'M', 'fb', 'U', 'CAPU', 'I', 'T', 'S', 'c', 's', 'A', 'q']))}
+    ${passo('Caminhos com médias de mercado', 'met-caminhos', eqs(FX.e1(), FX.e2(), FX.e3(), FX.e5()) + legDe(Pm, ['p', 'f12', 'M', 'U', 'CAPU', 'I', 'T', 'S', 'c', 's', 'A', 'q']))}
     ${passo('Caminhos com dados reais', 'met-caminhos', eqs(FX.e0(), FX.e4p(), FX.e4()) + legDe(Pm, ['G', 'g', 'K', 'D']))}
     ${passo('Média ponderada', 'met-juncao', eqs(FX.peso(), FX.media(), FX.final()) + legDe(Pm, ['sig', 'Ei', 'Xj', 'F']))}
     ${passo('Resultado', 'met-faixa', eqs([vv('Geral'), vv('F')], FX.cons(Pm), FX.p10(), FX.p90(), FX.conf(Pm)) + legDe(Pm, ['sf']))}
@@ -5430,30 +5442,25 @@ function metCaminhos(Pm) {
     ['E4p · Contratos', f(`${FX.e4p()[1]}<br>${vv('K')} ÷ (1 − ${vv('s')})`), 'Setor público; a segunda forma sem equipe de TI', nf(I.sE4p, 2)],
     ['E0 · Gasto real', f(FX.e0()[1]), 'Há gasto real de outro ano', 'ver Incerteza'],
     ['E4 · Gasto do ano', f(vv('D')), 'Há gasto do ano de referência, declarado ou real: substitui os demais', '—']], { num: [false, false, false, true], larg: ['10rem', '', '', '6.5rem'] })}
-  <details class="d-det" data-sem-termos><summary>Letras das fórmulas</summary>${legDe(Pm, ['R', 'p', 'f12', 'M', 'fb', 'U', 'CAPU', 'I', 'T', 'S', 'c', 's', 'A', 'q', 'K', 'G', 'g', 'a', 'D'])}</details>
+  <details class="d-det" data-sem-termos><summary>Letras das fórmulas</summary>${legDe(Pm, ['R', 'p', 'f12', 'M', 'U', 'CAPU', 'I', 'T', 'S', 'c', 's', 'A', 'q', 'K', 'G', 'g', 'a', 'D'])}</details>
   ${bloco('Quando falta um dado', eqs([vv('U'), `${vv('N')} · ${vv('u')}`, 'sem usuários informados']) + legDe(Pm, ['N', 'u'])
     + notas([`Salário sem valor informado: o médio de TI da UF; sem UF, a média nacional (${fmtRS(Pm.regional.mediaNacional)}).`, 'Sem gasto declarado, o resultado nunca fica abaixo das adições do balanço.']))}`;
 }
 function metAjustes(Pm) {
-  const Mo = Pm.modificadores, pt = Pm.porte, B = Pm.escala && Pm.escala.bancos;
+  const Mo = Pm.modificadores, pt = Pm.porte;
   const faixa = i => i === 0 ? `até ${nf(pt[0].ate, 0)}` : pt[i].ate == null ? `acima de ${nf(pt[i - 1].ate, 0)}` : `${nf(pt[i - 1].ate + 1, 0)} a ${nf(pt[i].ate, 0)}`;
-  const un = Mo.unidades.map((u, i) => [i === Mo.unidades.length - 1 ? `${nf(u.de, 0)} ou mais` : `${i ? nf(u.de, 0) + ' a ' : 'até '}${nf(Mo.unidades[i + 1].de - 1, 0)}`, nf(u.v, 2)]);
   return bloco('Porte', tabM(['Usuários', ['Receita', vv('f', '1')], ['Gasto por usuário', vv('f', '2')], ['Receita por funcionário', vv('f', 'R')]], pt.map((b, i) => [faixa(i), nf(b.f1, 2), nf(b.f2, 3), nf(b.fr ?? 1, 3)]), { iguais: true })
       + notas(['Faixas da FGV em teclados, com 0,8 usuário por teclado.', 'Sem usuários: pequenas na primeira faixa; as demais sem ajuste.']))
     + bloco('Região', eqs([vv('I'), `1 + 0,5 · (${vv('S', 'UF')} ÷ ${vv('S', 'BR')} − 1)`])
       + leg([[vv('S', 'UF'), 'salário médio de TI da UF', 'ver Fontes'], [vv('S', 'BR'), 'média nacional', fmtRS(Pm.regional.mediaNacional)], ['0,5', 'parte do gasto de TI que é mão de obra', '']])
       + notas(['Só em E2. Sem UF, sem ajuste.']))
-    + bloco('Ajustes da empresa', eqs([vv('M'), `${vv('m', 'digital')} · ${vv('m', 'matriz')} · ${vv('m', 'unidades')} · ${vv('m', 'crescimento')}`, `entre ${nf(Mo.mMin, 1)} e ${nf(Mo.mMax, 1)}`])
+    + bloco('Ajustes da empresa', eqs([vv('M'), `${vv('m', 'digital')} · ${vv('m', 'matriz')}`, `entre ${nf(Mo.mMin, 1)} e ${nf(Mo.mMax, 1)}`])
       + tabM(['Ajuste', 'Quando', ['Fator', '×']], [
         ['Intensidade digital baixa', 'Escolhida na análise', nf(Mo.digital.baixa, 2)],
         ['Intensidade digital média', 'Padrão', nf(Mo.digital.media, 2)],
-        ['Intensidade digital alta', 'Startups, tecnologia, educação com mais de 50% a distância, varejo com mais de 30% online', nf(Mo.digital.alta, 2)],
-        ['TI gerida na matriz', 'Subsidiárias', nf(Mo.tiMatriz, 2)],
-        ...un.map(([t, v]) => ['Unidades', t, v]),
-        ['Crescimento de funcionários', `Acima de ${nf(Mo.crescimentoLimiar, 0)}% em 12 meses`, nf(Mo.crescimentoFator, 2)]])
-      + notas(['Entra em E1 e E2.']))
-    + (B ? bloco('Bancos muito grandes', eqs([vv('f', 'b'), pot(`(${vv('U')} ÷ ${nf(B.de, 0)})`, `−${nf(B.beta, 2)}`), `bancos acima de ${nf(B.de, 0)} usuários`])
-      + notas(['Multiplica E1 e E2; nos demais casos, vale 1.', 'Ajustado aos gastos de TI publicados pelo Banco do Brasil (2025) e pelo Santander Brasil (2024). Aproximado: só dois bancos.'])) : '');
+        ['Intensidade digital alta', 'Startups e tecnologia', nf(Mo.digital.alta, 2)],
+        ['TI gerida na matriz', 'Subsidiárias', nf(Mo.tiMatriz, 2)]])
+      + notas(['Entra em E1 e E2.']));
 }
 function metIncerteza(Pm) {
   return bloco('', eqs([vv('σ', 'i'), `√(${vv('σ', 'modelo')}² + ${vv('σ', 'dado')}²)`], [vv('σ', 'E0'), `√(${vv('σ', 'dado')}² + ${vv('a')} · ${vv('σ', 'g')}²)`])
@@ -5516,7 +5523,6 @@ function metProjecao(Pm) {
     + bloco('Crescimento do gasto de TI, em ordem de preferência', tabM(['Fonte', 'Valor de g'], [
       ['Informado no gráfico de projeção', 'O informado'],
       ['Gasto real de dois anos ou mais', `${fxIn(`${pot(`(${vv('G', 'último')} ÷ ${vv('G', 'primeiro')})`, `1 ÷ ${vv('n')}`)} − 1`)}, de ${menos(fmtPct(C.histMin, 0))} a +${fmtPct(C.histMax, 0)}`],
-      ['Crescimento de funcionários', `${fmtPct(C.gSetor, 0)} + o crescimento, de ${menos(fmtPct(C.funcMin, 0))} a +${fmtPct(C.funcMax, 0)}`],
       ['Nenhum dos anteriores', `${fmtPct(C.gSetor, 0)} ao ano, média de mercado`]]));
 }
 function metCategorias(Pm) {
@@ -5540,7 +5546,24 @@ function metSetores(Pm) {
   return tabM(['Setor', ['% da receita', vv('p')], ['Por usuário', vv('CAPU') + ', R$/ano'], ['Usuários', 'por funcionário, ' + vv('u')], ['Incerteza', 'de E1, ' + vv('σ')], ['Incerteza', 'de E2, ' + vv('σ')]],
       ss.map(s => [esc(s.nome), cel(s.p, v => fmtPct(v)), cel(s.capu, milRS), nf(s.u, 2), cel(s.sE1, v => nf(v, 2)), cel(s.sE2, v => nf(v, 2))]), { num: [false, true, true, true, true, true] })
     + notas(['Órgão público usa a linha Setor público; terceiro setor, a linha Terceiro setor; estatal, a do seu setor de atividade.'])
+    + nivelSetores(Pm)
     + `<details class="d-det" data-sem-termos><summary>Origem de cada linha</summary>${tabM(['Setor', 'Base'], ss.map(s => [esc(s.nome), esc(s.base) + (s.aprox ? ' <span class="selo aprox">aproximado</span>' : '')]))}</details>`;
+}
+// de onde vem o nível do % da receita e do gasto por usuário, e a conferência com o tamanho do mercado
+function nivelSetores(Pm) {
+  const N = Pm.nivel, S0 = Pm.setores; if (!N) return '';
+  const bi = v => 'R$ ' + nf(v / 1e9, 0) + ' bi', soma = S0.industria.p * N.receitaIndustria + S0.comercio.p * N.receitaComercio + S0.servicos.p * N.receitaServicos;
+  return bloco('Nível', eqs([vv('p'), `√(${vv('p', 'int')} · ${vv('p', 'BR')})`], [vv('CAPU'), `${vv('p')} · ${vv('r')} ÷ ${vv('u')}`])
+    + leg([[vv('p', 'int'), 'mediana internacional do setor', 'Gartner e Avasant 2025'], [vv('p', 'BR'), 'mediana do gasto declarado por empresas brasileiras', `${nf(N.nMedido, 0)} empresas`],
+      [vv('r'), 'receita líquida por funcionário no setor', ''], [vv('u'), 'usuários por funcionário', '']])
+    + notas([`Setor sem medida: mediana internacional × ${nf(N.kBrasil, 2)}, a relação dos setores medidos.`, 'Bancos: entram também os balanços do Banco do Brasil e do Santander Brasil.',
+      'Valor central é mediana, não média: metade das empresas fica acima e metade abaixo.']))
+    + bloco('Conferência com o mercado', tabM(['Setor', ['Receita líquida', `IBGE, ${N.anoReceita}`], ['Gasto de TI', vv('p') + ' × receita']], [
+      ['Indústria', bi(N.receitaIndustria), bi(S0.industria.p * N.receitaIndustria)], ['Comércio', bi(N.receitaComercio), bi(S0.comercio.p * N.receitaComercio)],
+      ['Serviços', bi(N.receitaServicos), bi(S0.servicos.p * N.receitaServicos)], ['Soma', '', bi(soma)]], { num: [false, true, true] })
+      + notas([`Mercado brasileiro de TI em ${N.anoMercado}: ${bi(N.mercadoTI)} (ABES), sem contar a equipe interna das empresas.`,
+        'Com os percentuais da pesquisa da FGV (5,4%, 4,8% e 14,8%), a soma daria R$ 1,2 tri, mais de 3 vezes o mercado. Por isso ela não define mais o nível.',
+        'Da FGV ficam as faixas de porte, a parte da equipe e a parte do investimento.']));
 }
 // nome legível de cada grupo de parâmetros, na ordem da tabela de fontes
 const NOMES_FONTE = {
@@ -5549,7 +5572,7 @@ const NOMES_FONTE = {
   'incertezas.sE5': 'Incerteza do modelo de E5', 'incertezas.rho': 'Correlação entre caminhos de mercado (ρ)', 'incertezas.sigmaG': 'Incerteza do crescimento, por ano', 'incertezas.extraPequena': 'Incerteza extra de E1 nas pequenas',
   'incertezas.pisoSemReal': 'Piso da incerteza sem dado real', 'incertezas.pisoComReal': 'Piso da incerteza com dado real', 'incertezas.escalaZero': 'Incerteza com confiança 0', 'incertezas.escalaCem': 'Incerteza com confiança 100',
   origens: 'Incerteza por origem do dado', modificadores: 'Ajustes da empresa (M)', 'crescimento.gSetor': 'Crescimento do gasto de TI, média de mercado', 'crescimento.cenario': 'Cenários da projeção',
-  limites: 'Limites do enquadramento', categorias: 'Divisão por categoria', escala: 'Ajuste de bancos muito grandes', porte: 'Faixas de porte', calibracao: 'Regras dos métodos por percentual',
+  limites: 'Limites do enquadramento', categorias: 'Divisão por categoria', nivel: 'Nível do % da receita e do gasto por usuário', porte: 'Faixas de porte', calibracao: 'Regras dos métodos por percentual',
   'receita.g': 'Crescimento da receita, sem histórico', 'receita.sFunc': 'Incerteza da receita pelos funcionários', 'receita.sGlobal': 'Incerteza da participação pelos funcionários', 'receita.prodBR': 'Produtividade do Brasil na participação',
   'receita.sDed': 'Incerteza das deduções', 'receita.sMeses': 'Incerteza por mês que falta', 'estimativas.conservadora': 'Percentil da Conservadora'
 };
@@ -5567,28 +5590,27 @@ function metTestes() {
   <a class="btn" href="#/testes">${ico('testes')}Ver os testes</a>`;
 }
 
-/* ---------- Método CR1 ---------- */
+/* ---------- Método CR ---------- */
 function cr1Metodo(Pm) {
   const C = Pm.calibracao, cb = calPadrao(), K = nf(C.K, 0);
-  return `<dl class="ficha"><div><dt>Autora</dt><dd>Carol Rocha</dd></div><div><dt>Base</dt><dd>Empresas reais com gasto de TI declarado</dd></div><div><dt>Versão em uso</dt><dd>${cb ? esc(cb.rotulo || 'CR1') : '—'}</dd></div></dl>
-  ${eqs([vv('F'), `${vv('R')} · ${vv('p')} · ${vv('f', 'l')}`], [vv('p'), pot('e', `(${vv('n')} · ln ${vv('p', 'med')} + ${K} · ln ${vv('p', 'g')}) ÷ (${vv('n')} + ${K})`)],
-    [vv('f', 'l'), `${vv('f', 'UF')} · ${vv('f', 'cidade')} · ${vv('f', 'setor na cidade')}`], [vv('σ'), `√(${vv('s')}² + ${vv('σ', 'R')}²)`])}
-  ${leg([[vv('F'), 'investimento em TI, valor central', ''], [vv('R'), 'receita líquida do ano de referência', 'informada ou estimada'], [vv('p', 'med'), 'mediana do % da receita nas empresas do setor', 'Parâmetros em uso'],
-    [vv('n'), 'empresas do setor com gasto declarado', ''], [vv('p', 'g'), '% da receita de toda a base', ''], [vv('f', 'l'), 'fator do lugar; cada nível medido sobre o que sobra do anterior', 'Parâmetros em uso'],
-    [vv('s'), 'dispersão dos % depois do setor e do lugar', `piso ${nf(C.sMin ?? 0.25, 2)}`], [vv('σ', 'R'), 'incerteza da receita', 'como no Vezen']])}
+  return `<dl class="ficha"><div><dt>Autora</dt><dd>Carol Rocha</dd></div><div><dt>Base</dt><dd>${cb && cb.modelo ? 'Dados modelo, fictícios' : 'Empresas reais com gasto de TI declarado'}</dd></div><div><dt>Versão em uso</dt><dd>${cb ? esc(cb.rotulo || 'CR') : '—'}</dd></div></dl>
+  ${eqs([vv('F'), `${vv('R')} · ${vv('p', 'seg')} · ${vv('f', 'UF')} · ${vv('f', 'cid')} · ${vv('f', 'seg·cid')}`], [vv('σ'), `√(${vv('s')}² + ${vv('σ', 'R')}²)`])}
+  ${leg([[vv('F'), 'investimento em TI, valor central', ''], [vv('R'), 'receita líquida do ano de referência', 'informada ou estimada'], [vv('p', 'seg'), '% da receita gasto com TI no segmento', 'Parâmetros em uso'],
+    [vv('f', 'UF'), 'fator do estado', '1 sem valor'], [vv('f', 'cid'), 'fator da cidade; sem valor, o das demais cidades do estado', '1 sem valor'], [vv('f', 'seg·cid'), 'fator do segmento naquela cidade', '1 sem valor'],
+    [vv('s'), 'dispersão dos % depois do segmento e do lugar', `piso ${nf(C.sMin ?? 0.25, 2)}`], [vv('σ', 'R'), 'incerteza da receita', 'como no Vezen']])}
   ${notas([`Grupo só tem valor próprio com pelo menos ${nf(C.minGrupo ?? 5, 0)} empresas; com menos, vale o nível acima.`, 'Receita que falta: estimada pelos funcionários, com a receita por funcionário medida na base.',
     'Gasto real informado (E0, E4) entra como no Método Vezen. Faixa provável, confiança e Conservadora também.', 'Setor público e terceiro setor não têm percentual: use o Método Vezen.'])}
-  ${cb && /provis/i.test(cb.rotulo || '') ? `<div class="alerta">${ico('alerta')}<p>Percentuais <b>provisórios</b>, medidos nas empresas da base que declararam o gasto de TI, até a tabela definitiva do CR1.</p></div>` : ''}`;
+  ${cb && cb.modelo ? `<div class="alerta">${ico('alerta')}<p>Valores <b>modelo</b>, fictícios: mostram a segmentação por segmento, estado e cidade. A primeira versão oficial será o CR1.</p></div>` : ''}`;
 }
 function cr1Parametros() {
   const cb = calPadrao();
   if (!cb) return '<p class="mudo">Nenhuma base em uso.</p>';
   const ufs = Object.entries(cb.ufs || {}).sort((a, b) => b[1] - a[1]);
-  return `<p class="cal-uso">${ico('check')}<span>Versão <b>${esc(cb.rotulo || 'CR1')}</b>, de ${dataBR(cb.data)}: ${plural(cb.empresas || 0, 'empresa na base', 'empresas na base')}${ufs.length ? ', de ' + ufs.map(([u, n]) => `${u} (${nf(n, 0)})`).join(', ') : ''}.</span></p>
+  return `<p class="cal-uso">${ico('check')}<span>Versão <b>${esc(cb.rotulo || 'CR')}</b>, de ${dataBR(cb.data)}: ${cb.modelo ? 'dados modelo, ' : ''}${plural(cb.empresas || 0, cb.modelo ? 'empresa fictícia' : 'empresa na base', cb.modelo ? 'empresas fictícias' : 'empresas na base')}${ufs.length ? ', de ' + ufs.map(([u, n]) => `${u} (${nf(n, 0)})`).join(', ') : ''}.</span></p>
   ${tabelasCalibracao(cb, false)}`;
 }
 function cr1Versoes() {
-  return `<ol class="lista-num"><li>Os percentuais não se editam na tela: cada mudança é uma versão nova, CR1.1 para um ajuste e CR2 para uma base nova.</li>
+  return `<ol class="lista-num"><li>Os percentuais não se editam na tela: cada mudança é uma versão nova. CR0: dados modelo. CR1: a primeira oficial, com a tabela de Carol Rocha. CR1.1 para um ajuste e CR2 para uma base nova.</li>
   <li>O administrador gera a versão com <code>node tools/gerar-calibracao.cjs &lt;planilha&gt; &lt;rótulo&gt;</code>. A planilha fica fora do repositório; no arquivo publicado entram só os parâmetros e as contagens por grupo.</li>
   <li>Os testes conferem a versão embutida, e esta tela mostra o rótulo e a data.</li></ol>
   ${notas(['Quem precisa de percentuais diferentes usa o Método Personalizado.'])}`;
@@ -5597,14 +5619,14 @@ function cr1Versoes() {
 /* ---------- Método Personalizado ---------- */
 function persMetodo(Pm) {
   const C = Pm.calibracao, minG = nf(C.minGrupo ?? 5, 0);
-  return `<p class="d-lead">A fórmula do CR1, com percentuais que vêm dos seus dados.</p>
+  return `<p class="d-lead">A fórmula do CR, com percentuais que vêm dos seus dados.</p>
   ${eqs([vv('F'), `${vv('R')} · ${vv('p')} · ${vv('f', 'l')}`])}
   ${tabM(['Fonte dos dados', 'O que informar', ['Mínimo', 'empresas']], [
     ['Planilha', 'Excel, CSV ou Parquet com empresa, setor, UF, cidade, receita líquida, funcionários e gasto de TI real', nf(C.minEmpresas, 0)],
     ['Empresas digitadas', 'Os mesmos dados, uma empresa por vez', nf(C.minEmpresas, 0)],
     ['Análises salvas', 'Marcadas em “Usar esta empresa no Método Personalizado”', 'somam'],
     ['Percentuais diretos', '% geral e, se quiser, por setor', '—']], { num: [false, false, true], larg: ['11rem', '', '6.5rem'] })}
-  ${notas([`Com empresas, valem as regras do CR1: mínimo de ${minG} por grupo, lugares só com ${minG} empresas.`, 'Percentual abaixo de 1/5 ou acima de 5 vezes a mediana fica de fora até você confirmar o valor.',
+  ${notas([`Com empresas, valem as regras do CR: mínimo de ${minG} por grupo, lugares só com ${minG} empresas.`, 'Percentual abaixo de 1/5 ou acima de 5 vezes a mediana fica de fora até você confirmar o valor.',
     `Percentuais diretos: incerteza fixa de ${nf(0.5, 2)}, sem dispersão medida.`, 'Receita que falta: pela receita por funcionário das suas empresas; sem empresas suficientes, pela do Método Vezen.'])}`;
 }
 function persDados() {
@@ -5656,18 +5678,18 @@ function liLocal(A, minG) {
   if (!nc && !nd.length && !nu) return `<li>Ajuste por cidade: nenhuma cidade com ${minG} empresas ou mais.</li>`;
   return `<li>Ajuste por ${nu ? 'estado e ' : ''}cidade: ${nu ? `${nu} ${nu === 1 ? 'estado' : 'estados'}, ` : ''}<b>${nc} ${nc === 1 ? 'cidade' : 'cidades'}</b> com valor próprio${nd.length ? `, as demais cidades ${nd.length === 1 ? 'do estado' : 'de cada estado'} juntas` : ''}${ns ? ` e ${ns} ${ns === 1 ? 'setor dentro de cidade' : 'setores dentro de cidades'}` : ''} (tabela abaixo).</li>`;
 }
-function secaoLocal(cal, minG) {
+function secaoLocal(cal, minG, aberta) {
   const A = cal.receita && cal.receita.suficiente ? cal.receita.local : null, B = cal.ti && cal.ti.suficiente ? cal.ti.local : null, X = [A, B];
   const chaves = g => [...new Set(X.flatMap(x => x ? Object.keys(x[g]) : []))];
   const n = (g, k) => Math.max(...X.map(x => x && x[g][k] ? x[g][k].n || 0 : 0));
   const cels = (g, k) => X.map(x => x && x[g][k] ? `<td class="n">× ${nf(x[g][k].f, 2)}</td><td class="n">${nf(x[g][k].n, 0)}</td>` : '<td class="n">—</td><td></td>').join('');
   const nome = k => { const x = X.find(y => y && y.cidades[k]); return (x ? x.cidades[k].nome : k.slice(3)) + '/' + k.slice(0, 2); };
   const linhas = [...chaves('ufs').map(u => ['Estado ' + u, 'ufs', u]), ...chaves('cidades').sort((a, b) => n('cidades', b) - n('cidades', a)).map(k => [nome(k), 'cidades', k]), ...chaves('demais').map(u => ['Demais cidades de ' + u, 'demais', u])];
-  if (!linhas.length) return '';
+  if (!linhas.length) return '<p class="mudo">Sem valores por estado e cidade nesta versão: fator 1.</p>';
   const cab = p => `<thead><tr><th>${p}</th><th class="n">Receita por funcionário</th><th class="n">Empresas</th><th class="n">% de TI</th><th class="n">Empresas</th></tr></thead>`;
   const rotCel = k => { const [l, c] = k.split('|'); return nomeLinha(l) + ' em ' + nome(c); };
   const sc = chaves('celulas').sort((a, b) => n('celulas', b) - n('celulas', a)), nc = chaves('cidades').length;
-  return `<details class="cal-seg cal-local"><summary>Ajustes por cidade (${nc} ${nc === 1 ? 'cidade' : 'cidades'} com valor próprio)</summary>
+  return `<details class="cal-seg cal-local"${aberta ? ' open' : ''}><summary>Estado e cidade (${chaves('ufs').length} estados, ${nc} ${nc === 1 ? 'cidade' : 'cidades'})</summary>
     <p class="mudo">Fator sobre o valor do setor. Cada lugar só tem valor próprio com pelo menos ${minG} empresas; as cidades com menos entram juntas em “demais cidades”. A análise usa o fator do município da empresa; sem município, fica sem ajuste por cidade.</p>
     <div class="tab-wrap"><table>${cab('Lugar')}<tbody>${linhas.map(([t, g, k]) => `<tr><td>${esc(t)}</td>${cels(g, k)}</tr>`).join('')}</tbody></table></div>
     ${sc.length ? `<p class="mudo">Setor dentro da cidade, sobre o fator da cidade:</p><div class="tab-wrap"><table>${cab('Setor e cidade')}<tbody>${sc.map(k => `<tr><td>${esc(rotCel(k))}</td>${cels('celulas', k)}</tr>`).join('')}</tbody></table></div>` : ''}</details>`;
@@ -5678,11 +5700,11 @@ function tabelasCalibracao(cal, minha) {
   let h = (cal.avisos || []).map(a => `<div class="alerta">${esc(a)}</div>`).join('') + '<div class="cal-duas"><div class="cal-bloco"><h3>Gasto de TI: percentual da receita</h3>';
   if (T && T.suficiente) {
     const susp = T.suspeitas ? `; ${T.suspeitas} muito fora do padrão ${T.suspeitas === 1 ? 'ficou' : 'ficaram'} de fora${T.corte ? '' : ' até você confirmar o valor'}` : '';
-    h += `<p class="mudo">${T.direta ? 'Percentuais informados por você.' : `${plural(T.N, 'empresa', 'empresas')} com gasto de TI real e receita do mesmo ano${susp}.`} Percentual geral: <b>${fmtPct(T.pg, 2)}</b>${T.direta ? '' : `; setores com menos de ${minG} empresas usam o geral`}.</p>
+    h += `<p class="mudo">${T.direta ? 'Percentuais informados por você.' : cal.modelo ? 'Dados modelo, fictícios.' : `${plural(T.N, 'empresa', 'empresas')} com gasto de TI real e receita do mesmo ano${susp}.`} Percentual geral: <b>${fmtPct(T.pg, 2)}</b>${T.direta ? '' : `; setores com menos de ${minG} empresas usam o geral`}.</p>
     <div class="tab-wrap"><table><thead><tr><th>Setor</th>${T.direta ? '' : '<th class="n">Empresas</th>'}<th class="n">% da receita</th></tr></thead><tbody>${setoresTI.map(l => { const n = (T.nS && T.nS[l]) || 0, p = (T.ps && T.ps[l]) ?? (T.psOutros === false ? null : T.pg), proprio = T.direta ? T.ps && T.ps[l] != null : n >= minG;
       return `<tr><td>${esc(nomeLinha(l))}</td>${T.direta ? '' : `<td class="n">${n || '—'}</td>`}<td class="n">${p == null ? '<span class="mudo">sem percentual</span>' : proprio ? `<b>${fmtPct(p, 2)}</b>` : `${fmtPct(p, 2)} <small class="mudo">geral</small>`}</td></tr>`; }).join('')}</tbody></table></div>
     <ul class="cal-nums"><li>Incerteza do caminho: <b>${nf(T.s, 2)}</b>${T.direta ? ' (fixa, sem dispersão medida)' : ` (dispersão dos percentuais depois do setor e do lugar${(T.sObs || 0) < (C.sMin ?? 0.25) ? ', no piso' : ''})`}.</li>
-    ${!T.direta && T.N ? `<li>Dentro da faixa de 80% nas próprias empresas: <b>${nf(T.acertoPct, 0)} de ${nf(T.N, 0)}</b> por este método${T.nVezen ? ` e ${nf(T.acertoVezen, 0)} de ${nf(T.nVezen, 0)} pelo Método Vezen` : ''}.</li>` : ''}${T.direta ? '' : liLocal(T.local, minG)}</ul>`;
+    ${!T.direta && T.N && T.acertoPct != null ? `<li>Dentro da faixa de 80% nas próprias empresas: <b>${nf(T.acertoPct, 0)} de ${nf(T.N, 0)}</b> por este método${T.nVezen ? ` e ${nf(T.acertoVezen, 0)} de ${nf(T.nVezen, 0)} pelo Método Vezen` : ''}.</li>` : ''}${T.direta ? '' : liLocal(T.local, minG)}</ul>`;
   } else h += `<p class="mudo">${T && T.N ? `Só ${plural(T.N, 'empresa tem', 'empresas têm')} gasto de TI real e receita utilizáveis` : 'Nenhuma empresa com gasto de TI real e receita utilizáveis'}; são precisas ${nf(C.minEmpresas, 0)}.${minha ? ' Sem elas, o gasto de TI segue o Método Vezen.' : ''}</p>`;
   h += '</div><div class="cal-bloco"><h3>Receita pelos funcionários</h3>';
   if (R && R.suficiente) {
@@ -5697,7 +5719,7 @@ function tabelasCalibracao(cal, minha) {
     <li>Crescimento da receita: <b>${fmtPct(R.g, 1)} ao ano</b>${(R.nG || 0) >= 20 ? `, mediana de ${nf(R.nG, 0)} empresas com dois anos seguidos` : ', do Método Vezen (poucas empresas com dois anos seguidos)'}.</li>
     ${fora.length ? `<li class="mudo">Fora da conta: ${fora.map(x => nf(x[0], 0) + ' ' + x[1]).join(', ')}.</li>` : ''}</ul>`;
   } else h += `<p class="mudo">${R && R.n ? `Só ${plural(R.n, 'empresa tem', 'empresas têm')} receita e funcionários utilizáveis` : 'Nenhuma empresa com receita e funcionários utilizáveis'}; são precisas ${Math.ceil(C.minEmpresas / 2)}. A receita, quando falta, segue o Método Vezen.</p>`;
-  return h + '</div></div>' + secaoLocal(cal, minG);
+  return h + '</div></div>' + secaoLocal(cal, minG, !minha);
 }
 /* ---------- importar planilha para o Método Personalizado ---------- */
 function secaoBaseNova() {
@@ -5799,6 +5821,9 @@ const GLOSSARIO = [
   { id: 'febraban', t: 'FEBRABAN', n: 'Federação Brasileira de Bancos', c: 'inst', m: 'met-caminhos', s: 'https://portal.febraban.org.br',
     d: 'Entidade que reúne os bancos do país e publica uma pesquisa anual sobre tecnologia bancária.',
     u: 'Fonte do investimento em tecnologia e do crescimento do orçamento de TI dos bancos.' },
+  { id: 'abes', t: 'ABES', n: 'Associação Brasileira das Empresas de Software', c: 'inst', m: 'met-setores', s: 'https://abes.org.br',
+    d: 'Entidade do setor de software que publica todo ano o tamanho do mercado brasileiro de TI.',
+    u: 'Confere se o nível dos percentuais cabe no mercado.' },
   { id: 'techaisle', t: 'Techaisle', c: 'inst', m: 'met-pequenas', s: 'https://techaisle.com',
     d: 'Empresa de pesquisa de mercado de tecnologia, com foco em pequenas e médias empresas.',
     u: 'Fonte do perfil de gasto de TI das pequenas empresas e da divisão do gasto por categoria.' },
@@ -5916,7 +5941,7 @@ const GLOSSARIO = [
   /* finanças */
   { id: 'receita-liquida', t: 'Receita líquida', c: 'fin', a: ['receitas líquidas'], ci: true, m: 'met-receita',
     d: 'Valor vendido no ano depois de tirar os impostos sobre vendas e as devoluções. É a linha de receita do balanço.',
-    u: 'Base do caminho “Pela receita”: a pesquisa da FGV mede o gasto de TI sobre ela.' },
+    u: 'Base do caminho “Pela receita”: o gasto de TI é medido sobre ela.' },
   { id: 'faturamento-bruto', t: 'Faturamento bruto', c: 'fin', a: ['receita bruta'], ci: true, m: 'met-receita',
     d: 'Total vendido no ano, antes de tirar os impostos sobre vendas e as devoluções.',
     u: 'É o valor usado para enquadrar MEI, ME e EPP. A ferramenta o converte em receita líquida quando preciso.' },
@@ -5988,8 +6013,8 @@ const GLOSSARIO = [
   { id: 're', t: 'RE', n: 'Receita pelo enquadramento', c: 'calc', m: 'met-receita',
     d: 'Caminho que estima a receita de uma pequena empresa por um valor no meio da faixa do enquadramento.' },
   { id: 'capu', t: 'CAPU', c: 'calc', m: 'met-caminhos',
-    d: 'Gasto anual de TI por usuário: quanto as empresas do setor gastam, em média, com tecnologia para cada pessoa que usa computador no trabalho.',
-    u: 'Entra no caminho E2, a partir da pesquisa da FGV.' },
+    d: 'Gasto anual de TI por usuário: quanto as empresas do setor gastam, no valor central, com tecnologia para cada pessoa que usa computador no trabalho.',
+    u: 'Entra no caminho E2.' },
   { id: 'usuarios', t: 'Usuários de TI', c: 'calc', a: ['usuários', 'usuário'], ci: true, auto: false, m: 'met-caminhos',
     d: 'Pessoas que usam computador no trabalho. Quase nunca é um dado público.',
     u: 'Entra no caminho E2. Sem o número, a ferramenta supõe um valor pelo setor.' },
@@ -6016,18 +6041,18 @@ const GLOSSARIO = [
     u: 'Quanto maior o σ, mais larga é a faixa provável e menor a confiança.' },
   { id: 'calibracao', t: 'Calibração', c: 'calc', a: ['calibrações', 'calibrada', 'calibradas', 'calibrado', 'calibrados', 'calibrar'], ci: true, m: 'cr1-metodo',
     d: 'Medir, em empresas reais, o número que uma fórmula usa (aqui, o percentual da receita gasto com TI), em vez de tomá-lo de uma pesquisa.',
-    u: 'Os métodos CR1 e Personalizado são calibrados com empresas; o Método Vezen não.' },
+    u: 'Os métodos CR e Personalizado são calibrados com empresas; o Método Vezen não.' },
   { id: 'metodo-vezen', t: 'Método Vezen', c: 'calc', m: 'met-visao',
     d: 'O método da própria ferramenta: fórmulas e médias de pesquisas públicas, até sete caminhos de cálculo juntados pela precisão, com índice de confiança. Os parâmetros são fixos.',
     u: 'Serve para qualquer empresa, inclusive sem receita.' },
-  { id: 'cr1', t: 'CR1', n: 'Método CR1, de Carol Rocha', c: 'calc', a: ['Método CR1', 'CR1.1', 'CR2'], m: 'cr1-metodo',
-    d: 'Método que estima o investimento em TI multiplicando a receita líquida pelo percentual que empresas parecidas gastam com TI, medido numa base de empresas por setor, estado e cidade. Os percentuais são fixos e versionados (CR1, CR1.1, CR2).',
+  { id: 'cr1', t: 'CR', n: 'Método CR, de Carol Rocha', c: 'calc', a: ['Método CR', 'Método CR0', 'Método CR1', 'CR0', 'CR1', 'CR1.1', 'CR2'], m: 'cr1-metodo',
+    d: 'Método que multiplica a receita líquida pelo percentual de TI do segmento, ajustado por estado e cidade. Versões: CR0 (dados modelo), CR1 (primeira oficial), CR1.1, CR2.',
     u: 'Serve para empresas parecidas com as da base e com receita conhecida.' },
   { id: 'personalizado', t: 'Método Personalizado', c: 'calc', m: 'pers-metodo',
-    d: 'A mesma conta do CR1, mas com percentuais tirados das empresas que você informa, ou digitados por você.',
+    d: 'A mesma conta do CR, mas com percentuais tirados das empresas que você informa, ou digitados por você.',
     u: 'É o único método em que a pessoa muda os parâmetros.' },
   { id: 'ep', t: 'EP', n: 'Pela receita e o percentual da base', c: 'calc', m: 'cr1-metodo',
-    d: 'Caminho dos métodos CR1 e Personalizado: receita líquida vezes o percentual de TI do setor, ajustado pelo estado e pela cidade.' },
+    d: 'Caminho dos métodos CR e Personalizado: receita líquida vezes o percentual de TI do setor, ajustado pelo estado e pela cidade.' },
   { id: 'pmd', t: 'PMD', n: 'Próximo melhor dado', c: 'calc', a: ['próximo melhor dado'], ci: true, m: 'met-pmd',
     d: 'Os dados que mais aumentariam a confiança da estimativa se fossem preenchidos.',
     u: 'A análise sugere os três principais.' },

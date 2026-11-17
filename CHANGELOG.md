@@ -2,6 +2,25 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.0.0] - 2026-11-16
+
+### Alterado
+- **Nível do Método Vezen.** O % da receita gasto com TI e o gasto por usuário de cada setor deixaram de vir da pesquisa da FGV, que ficava de 2 a 5 vezes acima do gasto real. O valor central agora é a média geométrica entre a mediana internacional do setor e a mediana do gasto declarado por empresas brasileiras; nos bancos entram também os balanços do Banco do Brasil e do Santander Brasil. As estimativas pelo Método Vezen ficam, em geral, de 60% a 85% menores.
+- O gasto por usuário (CAPU) de cada setor passou a ser coerente com o % da receita: % × receita por funcionário ÷ usuários por funcionário. Os dois caminhos de mercado dão valores próximos numa empresa típica.
+- Incerteza dos caminhos de mercado maior (0,80 a 0,95 pela receita; 0,90 a 1,05 por usuários; 0,85 pela equipe), porque as referências divergem entre si. A confiança das análises sem gasto real cai cerca de 10 pontos.
+- Métodos, Setores: nova parte “Nível”, com a fórmula, as fontes e a conferência com o tamanho do mercado brasileiro de TI (ABES e IDC) e a receita dos setores (IBGE).
+- **CR0 no lugar do CR1 provisório.** O método por percentual vem com dados modelo, fictícios, com a segmentação completa: segmento, estado, cidade e segmento na cidade. O nome do método segue a versão; o CR1 será a primeira versão oficial.
+- **Só os campos que entram na conta.** A análise mostra e pede só os campos que mudam o resultado no método escolhido. Com gasto de TI do ano de referência informado, equipe, usuários e unidades saem do formulário em qualquer método. O que já foi digitado fica guardado.
+- **Método antes dos dados.** A análise nova começa pela escolha do método; o formulário abre depois, só com os campos daquele método. O método continua podendo ser trocado no painel.
+- **Formulário por natureza.** Órgão público: seção “Execução orçamentária”, com a despesa de TI do ano (empenhada ou liquidada), servidores de TI e gasto real; sem receita, funcionários, setor nem usuários. Estatal: contratos de TI do ano. Pequena e terceiro setor sem usuários; terceiro setor sem setor. Município só nos métodos por percentual. A caixa do Método Personalizado só aparece com gasto real informado.
+- Empresas, sem nenhuma análise: três cartões clicáveis (Nova análise, Analisar uma lista, Importar backup) no lugar do texto e das caixas; o cabeçalho não repete os botões.
+- Métodos, Os três métodos: nova linha “Dados da empresa”, com o que cada método usa.
+- Casos de aceitação A a E com os valores do novo nível. No caso C, o gasto real fica longe das referências do setor e o alerta de divergência aparece.
+
+### Removido
+- Ajustes por número de unidades e por crescimento de funcionários (até 10%, sem fonte) e os campos deles; % de vendas online e % de alunos a distância. A projeção sem histórico usa a média de mercado. Caso de aceitação A com a nova projeção.
+- O ajuste especial de bancos muito grandes: com o novo nível, os dois bancos conferidos ficam a menos de 1,2 vez do gasto real sem ele.
+
 ## [2.2.0] - 2026-11-16
 
 ### Adicionado

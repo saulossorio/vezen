@@ -1,5 +1,5 @@
-// Gera uma versão do Método CR1 (a linha "calibracaoBase: {...}," dentro do index.html) a partir de uma planilha de empresas, usando o próprio motor.
-// Uso: node tools/gerar-calibracao.cjs <planilha> [rótulo]      ex.: node tools/gerar-calibracao.cjs base.xls CR1.1
+// Gera uma versão do Método CR (a linha "calibracaoBase: {...}," dentro do index.html) a partir de uma planilha de empresas, usando o próprio motor.
+// Uso: node tools/gerar-calibracao.cjs <planilha> [rótulo]      ex.: node tools/gerar-calibracao.cjs base.xls CR1
 // A planilha fica fora do repositório. No index.html entra só a versão pública (calibracaoPublica, no motor): os parâmetros que entram na conta
 // e quantas empresas há em cada grupo, sem o nome do arquivo, as colunas, os segmentos ou qualquer linha de empresa.
 // Depois rode os testes: eles conferem que a versão embutida é a pública.
@@ -25,6 +25,6 @@ const M = mod.exports;
   const R = cal.receita || {}, T = cal.ti || {}, n = o => o ? Object.keys(o).length : 0, r4 = x => x == null ? x : Math.round(x * 1e4) / 1e4;
   console.log('colunas usadas (só no terminal):', JSON.stringify(cal.mapa));
   console.log('gravado:', json.length, 'caracteres | rótulo', rotulo, '| receita n', R.n, 'β', r4(R.beta), 'cidades', n(R.local && R.local.cidades), 'células', n(R.local && R.local.celulas),
-    '| TI N', T.N, 'p geral', r4(T.pg), 's', r4(T.s), 'cidades', n(T.local && T.local.cidades), 'células', n(T.local && T.local.celulas), '| acerto CR1', T.acertoPct, 'Vezen', T.acertoVezen, '| avisos', (cal.avisos || []).length);
+    '| TI N', T.N, 'p geral', r4(T.pg), 's', r4(T.s), 'cidades', n(T.local && T.local.cidades), 'células', n(T.local && T.local.celulas), '| acerto CR', T.acertoPct, 'Vezen', T.acertoVezen, '| avisos', (cal.avisos || []).length);
   if ((cal.avisos || []).length) console.log('avisos (só no terminal):', cal.avisos.join(' | '));
 })().catch(e => { console.error(e); process.exit(1); });
