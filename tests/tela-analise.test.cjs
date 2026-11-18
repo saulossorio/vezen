@@ -20,7 +20,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const orig = async (c, o) => { await p.click(`[data-acao=origem][data-alvo="campo:${c}"]`); await p.click(`#pop [data-o=${o}]`); };
   const motor = expr => p.evaluate(expr);
   const txt = async s => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
-  // campo vazio sem motivo bloqueia salvar e copiar o resumo: nos testes que não são do marcador, todos os pendentes recebem um motivo
+  // campo vazio sem motivo fica em vermelho: nos testes que não são do marcador, todos os pendentes recebem um motivo
   const explicar = () => p.evaluate(() => { const d = UI.atual.dados; d.semDado = d.semDado || {}; for (const c of pendentes(d)) d.semDado[c] = CAMPOS_SEM_DADO[c].ops[0]; atualizarSemDado(); atualizarCabecalho(); });
   const salvarOk = async (espera = 200) => { await explicar(); await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(espera); };
 
@@ -37,23 +37,23 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.fill('#f-faturamento', '500.000.000');
   ok('Campo com valor e sem origem pede a marcação', (await txt('[data-alvo="campo:faturamento"]')).includes('Marcar origem'));
   await orig('faturamento', 'oficial');
-  ok('Origem marcada aparece no botão', (await txt('[data-alvo="campo:faturamento"]')).includes('Oficial') && (await motor(() => UI.atual.dados.faturamento.o)) === 'oficial');
+  ok('Origem marcada aparece no botão', (await txt('[data-alvo="campo:faturamento"]')).includes('DRE') && (await motor(() => UI.atual.dados.faturamento.o)) === 'oficial');
   ok('Seletor líquida/bruta aparece', await p.locator('.seg input[name=fatTipo]').count() === 2);
   await p.fill('#f-fatAno', String(new Date().getFullYear())); await p.waitForTimeout(100);
   ok('Ano atual no valor da receita avisa que pode ser parcial', (await p.textContent('#dica-rec')).includes('ainda não fechou'));
   await p.click('.seg-op:has(input[value=bruta])'); await p.fill('#f-fatAno', '2024');
-  await p.fill('#f-funcionarios', '2.000'); await orig('funcionarios', 'agregador'); await p.waitForTimeout(150);
+  await p.fill('#f-funcionarios', '2.000'); await orig('funcionarios', 'oficial'); await p.waitForTimeout(150);
   const dica = await p.textContent('#dica-rec'), REF = new Date().getFullYear() - 1, REC = 500e6 * 0.82 * Math.pow(1.07, REF - 2024), recUsada = () => motor(() => calc(UI.atual.dados).receita.usada.v), igual = (a, b) => Math.abs(a / b - 1) < 1e-9;
   ok('Dica explica a conversão e o ano', dica.includes('menos 18%') && dica.includes(`Receita de 2024 levada a ${REF}`), dica);
   ok('Receita usada: bruta menos 18%, levada ao ano de referência', igual(await recUsada(), REC), String(await recUsada()));
-  ok('Campo mostra a receita líquida usada e a origem', (await txt('#rec-usada')).includes(await p.evaluate(v => fmtRS(v), REC)) && (await txt('#rec-usada')).includes('Oficial') && (await txt('#rec-usada')).includes(`de ${REF}`));
+  ok('Campo mostra a receita líquida usada e a origem', (await txt('#rec-usada')).includes(await p.evaluate(v => fmtRS(v), REC)) && (await txt('#rec-usada')).includes('DRE') && (await txt('#rec-usada')).includes(`de ${REF}`));
   // período do valor: balanço trimestral ou semestral entra levado a 12 meses
   ok('Período do valor: seletor com 12 meses como padrão', (await p.inputValue('#f-fatMeses')) === '12' && await p.locator('#f-fatMeses option').count() === 4 && (await txt('#f-fatMeses option:checked')) === '12 meses');
   await p.selectOption('#f-fatMeses', '6'); await p.waitForTimeout(250);
   const dicaP = await p.textContent('#dica-rec');
   ok('6 meses: a dica diz que o valor vai a 12 meses e depois ao ano de referência', dicaP.includes('6 meses levados a 12 (× 2,00)') && dicaP.includes(`levada a ${REF}`), dicaP);
   ok('6 meses: a receita usada dobra e o período fica salvo', igual(await recUsada(), 2 * REC) && (await txt('#rec-usada')).includes(await p.evaluate(v => fmtRS(v), 2 * REC)) && (await motor(() => UI.atual.dados.fatMeses)) === '6');
-  ok('6 meses: a Metodologia e o resumo contam a conversão', await motor(() => { const r = calc(UI.atual.dados), h = blocoReceitaDet(r), s = textoResumo(UI.atual.dados, r); return /Levado a 12 meses/.test(h) && /× 2,00/.test(h) && /calculada a partir de/.test(s) && /receita de 6 meses levada a 12 meses/.test(s); }));
+  ok('6 meses: a Metodologia e o resumo contam a conversão', await motor(() => { const r = calc(UI.atual.dados), h = blocoReceitaDet(r), s = textoResumo(UI.atual.dados, r); return /Levado a 12 meses/.test(h) && /× 2,00/.test(h) && /ajustada pela ferramenta/.test(s) && /receita de 6 meses levada a 12 meses/.test(s); }));
   await p.selectOption('#f-fatMeses', '12'); await p.waitForTimeout(250);
   ok('Voltar a 12 meses volta a receita, sem aviso de conversão', igual(await recUsada(), REC) && !(await p.textContent('#dica-rec')).includes('12 (×'));
   // receita de outros anos: uma linha por ano, como o gasto real
@@ -70,7 +70,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.selectOption('#f-anoRef', String(REF - 1)); await p.waitForTimeout(300);
   ok('Trocar o ano de referência refaz a conta e os rótulos', (await motor(() => UI.atual.dados.anoRef)) === String(REF - 1) && igual(await recUsada(), 500e6 * 0.82 * Math.pow(1.07, REF - 1 - 2024)) && (await txt('#painel .cr-topo')).includes(`Investimento em TI, ${REF - 1}`) && (await p.textContent('label[for=f-gastoDeclarado]')).includes(`declarado de ${REF - 1}`));
   await p.selectOption('#f-anoRef', String(REF)); await p.waitForTimeout(300);
-  ok('O cartão mostra a receita informada, com a origem', (await txt('#cr-receita')) === await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v)) && (await txt('#painel .cr-topo')).includes('Valor informado') && (await txt('#painel .cr-topo')).includes('Oficial'));
+  ok('O cartão mostra a receita informada, com a origem', (await txt('#cr-receita')) === await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v)) && (await txt('#painel .cr-topo')).includes('Valor informado') && (await txt('#painel .cr-topo')).includes('DRE'));
   ok('Receita e TI: o cartão mostra a receita líquida usada', (await txt('#cr-receita')) === await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v)) && (await txt('#painel .cr-topo')).includes('Valor informado'));
   const caixa = await p.textContent('#rec-est');
   ok('Estimar com receita oficial: só comparação', /só para comparação/i.test(caixa) && caixa.includes('Receita líquida estimada'), caixa.slice(0, 120));
@@ -92,7 +92,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await explicar();
   await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
   const res = await p.inputValue('#txt-resumo'), recTxt = await p.evaluate(v => fmtRS(v), REC);
-  for (const t of [`1. Receita líquida no Brasil (${REF}, BRL): ${recTxt} (calculada a partir de dado oficial)`, 'faturamento bruto de 2024', 'tirando 18%', '2. Estimativa Conservadora – investimento em TI:', '3. Estimativa Geral – investimento em TI:', '4. Fontes, cálculos e observações', 'com os salários da equipe de TI', 'estão incluídos', 'Faturamento global: não utilizado', 'Conversão de moeda: nenhuma', 'Metodologia:', 'Benchmarks: o setor', 'Limitações:'])
+  for (const t of [`1. Receita líquida no Brasil (${REF}, BRL): ${recTxt} (DRE, ajustada pela ferramenta)`, 'faturamento bruto de 2024', 'tirando 18%', '2. Estimativa Conservadora – investimento em TI:', '3. Estimativa Geral – investimento em TI:', '4. Fontes, cálculos e observações', 'com os salários da equipe de TI', 'estão incluídos', 'Faturamento global: não utilizado', 'Conversão de moeda: nenhuma', 'Metodologia:', 'Benchmarks: o setor', 'Limitações:'])
     ok('Resumo tem: ' + t, res.includes(t));
   fs.writeFileSync(path.join(os.tmpdir(), 'vezen-resumo-E.txt'), res);
   await p.click('#dlg button:has-text("Copiar resumo")'); await p.waitForTimeout(150);
@@ -191,8 +191,9 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   // 5. prompt da IA com as regras do time
   await p.click('[data-acao=prompt-ia]'); await p.locator('#dlg[open]').waitFor();
   const pr = await p.inputValue('#txt-prompt');
-  for (const t of ['Pesquise primeiro as fontes oficiais', 'Nunca invente valores, fontes ou documentos', 'Não confunda com outras empresas do mesmo grupo', 'receita líquida ou faturamento bruto', 'sem converter', 'Receita global do grupo (valor, moeda e ano)', 'Valor 1000'])
+  for (const t of ['a fonte é a DRE', 'Nunca invente valores, fontes ou links', 'Não use outras empresas do grupo', '"líquida" ou "bruta"', 'sem converter', 'Receita global do grupo', 'Valor 1000', 'Dado | Valor | Ano | Fonte | Tipo', 'R$ 1.250.000.000', 'Não encontrado:'])
     ok('Prompt tem: ' + t, pr.includes(t));
+  ok('Prompt de subsidiária não pede dados de órgão público nem de pequena', !pr.includes('empenhada') && !pr.includes('Enquadramento'));
   await p.click('#dlg button:has-text("Fechar")');
 
   // 6. salvar, métodos, testes, CSV
@@ -268,7 +269,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/empresas'); await p.click('[data-acao=menu-empresas]'); await p.click('#pop [data-acao=modelo]'); await p.waitForTimeout(400);
   ok('Empresa modelo salva: abrir de novo leva à mesma análise, sem duplicar', (await p.evaluate(() => location.hash)) === '#/analise/' + idModelo && (await p.evaluate(() => S.empresas.filter(e => e.dados.modelo).length)) === 1);
 
-  // campo sem valor: ou tem valor, ou tem um motivo explícito; senão falta informar, e isso bloqueia salvar e copiar o resumo
+  // campo sem valor: ou tem valor, ou tem um motivo explícito; senão falta informar, e o campo fica em vermelho
   const pend = () => motor(() => pendentes(UI.atual.dados));
   const tok = t => p.evaluate(t => { const e = document.createElement('i'); e.style.color = `var(${t})`; document.body.appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; }, t);
   ok('Empresa modelo completa: nada faltando, motivo só no que os documentos não trazem', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === '|contratos,gastoDeclarado,profTI,usuarios' && await p.locator('.chip-falta').count() === 0);
@@ -312,16 +313,17 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Com equipe de TI, o salário passa a pedir o motivo', await vis('salarioTI'));
   await p.fill('#f-profTI', ''); await p.waitForTimeout(200);
   ok('Apagar o valor volta a faltar informar, sem o motivo antigo, e o campo volta a ficar vermelho', (await txt('.sem-dado[data-campo=profTI]')) === 'Sem dado?' && await campoCor('profTI', 'borderTopColor') === await tok('--crit') && !(await vis('salarioTI')));
-  // salvar nunca é bloqueado: o campo que falta continua vermelho e o aviso diz quantos faltam; o resumo para copiar continua pedindo os campos
+  // salvar e copiar o resumo nunca são bloqueados: o campo que falta continua vermelho, o aviso diz quantos faltam e o resumo os lista
   const faltam = await pend();
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
   ok('Salvar com campo faltando salva, e o aviso diz quantos faltam', (await motor(() => !!empresaSalva())) && (await txt('#toast')).includes(`Empresa salva. Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0, await txt('#toast'));
   ok('Depois de salvar, os campos que faltam continuam em vermelho', await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === faltam.length);
   const focoNoPendente = () => p.evaluate(() => { const a = document.activeElement; return a.tagName === 'INPUT' && !!a.closest('.campo').querySelector('.sem-dado[data-estado="pendente"]'); });
-  ok('Copiar o resumo com campo faltando continua bloqueado', await (async () => { await p.click('#painel [data-acao=resumo]'); await p.waitForTimeout(300); return await p.locator('#dlg[open]').count() === 0 && (await txt('#toast')).includes('Faltam'); })());
-  ok('O resumo leva ao primeiro campo que falta, que já está em vermelho', await focoNoPendente() && await p.evaluate(() => getComputedStyle(document.activeElement).borderTopColor) === await tok('--crit'));
+  await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
+  ok('Copiar o resumo com campo faltando abre e lista o que falta', /Dados ainda não informados: /.test(await p.inputValue('#txt-resumo')));
+  await p.click('#dlg button:has-text("Fechar")');
   await p.click('.chip-falta'); await p.waitForTimeout(300);
-  ok('O aviso no topo também leva ao campo que falta', await focoNoPendente());
+  ok('O aviso no topo leva ao primeiro campo que falta, que já está em vermelho', await focoNoPendente() && await p.evaluate(() => getComputedStyle(document.activeElement).borderTopColor) === await tok('--crit'));
   for (const c of faltam) { await p.click(`.sem-dado[data-campo=${c}]`); await p.click(c === 'profTI' ? '#pop [data-s=nao-se-aplica]' : '#pop [data-s]:first-of-type'); await p.waitForTimeout(100); }
   ok('Tudo explicado: nada falta, nenhum campo em vermelho e o aviso do topo some', (await pend()).length === 0 && await p.locator('.chip-falta').count() === 0 && await p.locator('.sem-dado[data-estado="pendente"]').count() === 0 && await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === 0);
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);

@@ -8,7 +8,7 @@ const URL = 'file://' + path.join(__dirname, '..', 'index.html');
 const ok = [], falhas = [];
 const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (info ? ' — ' + info : '')); };
 const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
-// campo vazio sem motivo bloqueia salvar e copiar o resumo: nos testes que não são do marcador, todos os pendentes recebem um motivo
+// campo vazio sem motivo fica em vermelho: nos testes que não são do marcador, todos os pendentes recebem um motivo
 const explicar = p => p.evaluate(() => { const d = UI.atual.dados; d.semDado = d.semDado || {}; for (const c of pendentes(d)) d.semDado[c] = CAMPOS_SEM_DADO[c].ops[0]; atualizarSemDado(); atualizarCabecalho(); });
 const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(espera); };
 (async () => {
@@ -205,8 +205,13 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   check('estatal segue o formulário de empresa', await entra({ natureza: 'publico', tipoPublico: 'estatal' }, todos) === 'setor,uf,faturamento,funcionarios,usuarios,profTI,salarioTI,digital,contratos');
   check('pequena e terceiro setor sem usuários; terceiro setor sem setor', await entra({ natureza: 'pequena' }, ['usuarios', 'setor']) === 'setor' && await entra({ natureza: 'terceiro' }, ['usuarios', 'setor']) === '');
   check('município só nos métodos por percentual', await entra({ natureza: 'privada' }, ['municipio']) === '');
-  check('rótulos do órgão público', await p2.evaluate(() => rotContratos({ natureza: 'publico' }) === 'Despesa de TI do ano, empenhada ou liquidada' && rotProfTI({ natureza: 'publico' }) === 'Servidores de TI' && rotContratos({ natureza: 'publico', tipoPublico: 'estatal' }) === 'Contratos de TI do ano'));
+  check('rótulos do órgão público', await p2.evaluate(() => rotContratos({ natureza: 'publico' }) === 'Despesa de TI do ano' && rotProfTI({ natureza: 'publico' }) === 'Servidores de TI' && rotContratos({ natureza: 'publico', tipoPublico: 'estatal' }) === 'Contratos de TI do ano'));
 
+  check('etapa da despesa: liquidada por padrão; dotação e empenho baixam a confiança, sem mudar o valor', await p2.evaluate(() => {
+    const d = Object.assign(dadosVazios(), { modo: 'base', natureza: 'publico', uf: 'SP', contratos: { v: 5e7, o: 'oficial' } }), r = e => { d.contratosEtapa = e; return calc(d); };
+    const L = r('liquidado'), E = r('empenhado'), D = r('dotacao');
+    return etapaDespesa(dadosVazios()) === 'liquidado' && Math.abs(L.F - D.F) / L.F < 0.01 && L.ic > E.ic && E.ic > D.ic;
+  }));
   console.log('OK (' + ok.length + '):\n  ' + ok.join('\n  '));
   console.log('FALHAS (' + falhas.length + '):\n  ' + falhas.join('\n  '));
   console.log('Erros JS:', erros.length ? erros : 'nenhum');

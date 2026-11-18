@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.0.1] - 2026-11-17
+
+### Alterado
+- **Prompt para IA.** Pede só os dados que entram na conta do método e da natureza da análise, e a resposta vem numa tabela (Dado, Valor, Ano, Fonte, Tipo), com valores com ponto de milhar, mais uma linha com o que não foi encontrado e no máximo três observações.
+- **Etapa da despesa pública.** No órgão público, a despesa de TI do ano vem com a etapa: liquidada (padrão), paga, empenhada ou dotação. O valor entra como está; paga, empenhada e dotação somam incerteza ao caminho (0,05, 0,10 e 0,25, suposições iniciais) e baixam a confiança. O resumo e os dados usados dizem a etapa, e o prompt para IA pede as quatro.
+- **Origem do dado: três opções.** “Oficial via outro site” saiu: o documento vale igual, venha de onde vier, e conta como Oficial. Na receita, Oficial aparece como **DRE**. Análises e listas salvas com a origem antiga passam a Oficial (incerteza 0,05 em vez de 0,10).
+- Copiar o resumo não é mais bloqueado por campo vazio: o resumo lista os campos que faltam em “Dados ainda não informados”.
+
 ## [3.0.0] - 2026-11-16
 
 ### Alterado
