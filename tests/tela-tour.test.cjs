@@ -30,7 +30,8 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
       'Natureza': async () => p.selectOption('#f-natureza', 'publico'),
       'Tipo de órgão': async () => p.selectOption('#f-tipoPublico', 'estatal'),
       'Setor': async () => p.selectOption('#f-setor', 'banco'),
-      'Receita': async () => { await p.fill('#f-faturamento', '73.900.000.000'); await p.press('#f-faturamento', 'Tab'); },
+      'Receita': async () => { await p.fill('#f-faturamento', '73,9 bi'); await p.press('#f-faturamento', 'Tab');
+        check(`${nomeTela}: valor abreviado vira o número inteiro`, (await p.inputValue('#f-faturamento')) === '73.900.000.000'); },
       'Origem do dado': async () => { await p.click('#app .origem[data-alvo="campo:faturamento"]'); await p.click('#pop [data-o="oficial"]'); },
       'Funcionários': async () => { await p.fill('#f-funcionarios', '85206'); await p.press('#f-funcionarios', 'Tab'); },
       'Quando falta um dado': async () => { await p.click('#app .sem-dado[data-campo="profTI"]'); await p.click('#pop [data-s="nao-encontrado"]'); },

@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.2.1] - 2026-11-18
+
+### Alterado
+- **Valores abreviados.** Receita, gasto real e os demais campos de valor aceitam “73,9 bi”, “250 mi” e “300 mil”; ao sair do campo, aparece o número inteiro. O tour usa a forma abreviada.
+
 ## [3.2.0] - 2026-11-18
 
 ### Alterado

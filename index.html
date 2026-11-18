@@ -4033,7 +4033,7 @@ function setCampo(el) {
   const emp = UI.atual, d = emp.dados;
   if (el.dataset.campo) {
     const c = el.dataset.campo; d[c] = d[c] || { v: '', o: '' };
-    d[c].v = parseBR(el.value);
+    d[c].v = valorDigitado(el.value);
     if (d.viaCNPJ) delete d.viaCNPJ[c];
   } else if (el.dataset.simples) {
     const c = el.dataset.simples; d[c] = el.value;
@@ -4047,10 +4047,10 @@ function setCampo(el) {
     d.extras = d.extras || {}; d.extras[el.dataset.extra] = el.hasAttribute('data-num') ? parseBR(el.value) : el.value;
   } else if (el.dataset.real != null) {
     const x = d.gastosReais[+el.dataset.real], p = el.dataset.parte;
-    x[p] = p === 'v' ? parseBR(el.value) : el.value.replace(/\D/g, '').slice(0, 4);
+    x[p] = p === 'v' ? valorDigitado(el.value) : el.value.replace(/\D/g, '').slice(0, 4);
   } else if (el.dataset.rec != null) {
     const x = d.receitasAnos[+el.dataset.rec], p = el.dataset.parte;
-    x[p] = p === 'v' ? parseBR(el.value) : p === 'meses' ? el.value : el.value.replace(/\D/g, '').slice(0, 4);
+    x[p] = p === 'v' ? valorDigitado(el.value) : p === 'meses' ? el.value : el.value.replace(/\D/g, '').slice(0, 4);
   } else if (el.dataset.tec) {
     const s = new Set(d.tecnologias || []); el.checked ? s.add(el.dataset.tec) : s.delete(el.dataset.tec); d.tecnologias = [...s];
   } else if (el.hasAttribute('data-usar-calib')) {
@@ -4111,6 +4111,8 @@ function aoMudarAnalise(e) {
   if (t.hasAttribute('data-modo')) return mudarModo(t.value);
   if (t.hasAttribute('data-anoref')) return mudarAnoRef(t.value);
   if (UI.rota.aba === 'resultado') { if (t.id === 'g-horiz') { UI.horizonte = +t.value; atualizarProjecao(); } return; }
+  // valor abreviado ("73,9 bi", "250 mi"): ao sair do campo, mostra o número inteiro
+  if (t.dataset.parte === 'v' && /[a-z]/i.test(t.value.replace(/r\$/i, ''))) { const x = valorDigitado(t.value); if (typeof x === 'number' && isFinite(x)) t.value = fmtIn(x); }
   if (t.tagName === 'SELECT' || t.type === 'checkbox' || t.type === 'radio') {
     setCampo(t); marcarAlterado();
     if (t.dataset.tec) atualizarTecUI(t);
@@ -6395,8 +6397,8 @@ const TOUR = [
     acao: 'Escolha Estatal', alvo: [() => campoDoTour('#f-tipoPublico')], tarefa: () => { const d = dadosTour(); return !!d && d.tipoPublico === 'estatal'; } },
   { titulo: 'Setor', texto: 'O quanto se investe em TI varia muito de um setor para outro: bancos estão entre os que mais investem, e a construção civil, entre os que menos. Por isso o setor define a base de comparação.',
     acao: 'Escolha Banco, financeira, cooperativa de crédito', alvo: [() => campoDoTour('#f-setor')], tarefa: () => { const d = dadosTour(); return !!d && d.setor === 'banco'; } },
-  { titulo: 'Receita', texto: 'A receita é o ponto de partida da maioria dos caminhos de cálculo. O ano e o período importam porque nem sempre o dado encontrado é do ano analisado ou cobre 12 meses; a ferramenta faz esse ajuste sozinha.',
-    acao: 'Digite 73.900.000.000 no valor; o ano já vem como 2025', alvo: ['#app .campo-rec'], tarefa: () => { const d = dadosTour(); return !!d && pertoDe((d.faturamento || {}).v, 73.9e9) && ['', '2025'].includes(String(d.fatAno || '')); } },
+  { titulo: 'Receita', texto: 'A receita é o ponto de partida da maioria dos caminhos de cálculo. O ano e o período importam porque nem sempre o dado encontrado é do ano analisado ou cobre 12 meses; a ferramenta faz esse ajuste sozinha. Valores grandes podem ser abreviados: 73,9 bi vale o mesmo que 73.900.000.000.',
+    acao: 'Digite 73,9 bi no valor; o ano já vem como 2025', alvo: ['#app .campo-rec'], tarefa: () => { const d = dadosTour(); return !!d && pertoDe((d.faturamento || {}).v, 73.9e9) && ['', '2025'].includes(String(d.fatAno || '')); } },
   { titulo: 'Origem do dado', texto: 'Todo número tem uma origem: DRE, estimativa de terceiros ou palpite. Ela importa porque um dado da DRE é muito mais seguro que um palpite: quanto mais confiável a origem, mais peso o número tem no resultado e mais estreita fica a faixa provável. A receita do Banco do Brasil vem da DRE.',
     acao: 'Clique em Marcar origem do dado e escolha DRE', alvo: [() => $('#app .origem[data-alvo="campo:faturamento"]')], tarefa: () => { const d = dadosTour(); return !!d && (d.faturamento || {}).o === 'oficial'; } },
   { titulo: 'Funcionários', texto: 'O número de funcionários permite estimar o investimento por pessoa, um caminho que não depende da receita. Com dois caminhos independentes, um confere o outro.',
@@ -6404,7 +6406,7 @@ const TOUR = [
   { titulo: 'Quando falta um dado', texto: 'Nem todo número é público, e tudo bem. Os documentos do banco não informam quantos profissionais de TI ele tem. Nesse caso, indique o motivo: a conta não muda, mas fica registrado que a busca foi feita, a ferramenta para de pedir esse dado e o resumo mostra o que foi procurado. Campo vazio sem motivo fica em vermelho porque ainda não se sabe se alguém procurou.',
     acao: 'Clique em Sem dado? e escolha Não encontrado', alvo: [() => campoDoTour('#f-profTI')], tarefa: () => { const d = dadosTour(); return !!d && !!(d.semDado || {}).profTI; } },
   { titulo: 'Gasto de TI real', texto: 'Quando a própria empresa publica quanto gastou com TI, esse é o melhor dado possível: ele pesa mais que qualquer média de mercado e estreita a faixa. O Banco do Brasil publica o seu. Com o gasto do ano, as médias deixam de ser necessárias, e por isso alguns campos somem do formulário.',
-    acao: 'Clique em Adicionar ano, escreva 2025 no ano e 6.800.000.000 no valor', alvo: [() => { const r = $('#app .reais'); return r && r.closest('.campo'); }], tarefa: () => { const d = dadosTour(); return !!d && (d.gastosReais || []).some(x => +x.ano === 2025 && pertoDe(x.v, 6.8e9)); } },
+    acao: 'Clique em Adicionar ano, escreva 2025 no ano e 6,8 bi no valor', alvo: [() => { const r = $('#app .reais'); return r && r.closest('.campo'); }], tarefa: () => { const d = dadosTour(); return !!d && (d.gastosReais || []).some(x => +x.ano === 2025 && pertoDe(x.v, 6.8e9)); } },
   { titulo: 'Resultado ao vivo', texto: 'Este painel acompanhou cada número que você digitou. Ele mostra o investimento em TI estimado, a faixa provável, porque toda estimativa tem margem de erro, e a confiança, que sobe quanto melhores forem os dados.', alvo: ['#painel'] },
   { titulo: 'Pesquisar com IA', texto: 'Perguntar direto a uma IA costuma trazer números soltos, de anos diferentes e sem fonte. Este botão gera um pedido pronto, feito para esta empresa: pede só os dados que o método usa, com ano, fonte e se o dado é oficial ou de terceiros, proíbe inventar valores e devolve tudo numa tabela fácil de passar para cá. Ainda assim, confira as fontes antes de usar.', alvo: ['#ws-acoes [data-acao="prompt-ia"]'] },
   { titulo: 'Salvar', texto: 'A análise só fica guardada quando você salva, e apenas neste navegador, sem ir para nenhum servidor. Por isso, se o navegador for limpo, ela se perde; exportar um backup de vez em quando evita esse risco. Este exercício não precisa ser salvo.', alvo: ['#ws-acoes [data-acao="salvar"]'] },
