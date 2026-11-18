@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.2.0] - 2026-11-18
+
+### Alterado
+- **Tour guiado como exercício.** A pessoa cria a análise do Banco do Brasil e preenche, ela mesma, os dados oficiais da empresa modelo: método, nome, natureza, tipo de órgão, setor, receita, origem (DRE), funcionários, um dado marcado como não encontrado e o gasto de TI real. O tour nunca troca de tela nem de aba sozinho: cada mudança é um clique da pessoa, e o Próximo espera a tarefa ser feita, com aviso de acerto. Saiu o passo que só mostrava o aviso da empresa modelo.
+- **Textos do tour.** Tom mais acolhedor, e cada passo explica o porquê: por que o método vem antes, por que a origem pesa, por que marcar um dado que falta, qual a vantagem do pedido pronto para a IA em vez de perguntar direto.
+- **No celular**, a página rola para o campo do passo não ficar embaixo do quadro do tour.
+- **Fonte.** Texto corrido em 16px (antes 15px), no novo token `--texto`; tamanhos entre 15 e 16px passaram a 16px.
+
 ## [3.1.0] - 2026-11-17
 
 ### Adicionado

@@ -89,7 +89,7 @@ Para achar algo, busque pelo nome: `calcular`, `receitaEmpresa`, `calibrarBase`,
 
 ## Desenho da interface
 
-- **Identidade.** É a do Canis e do Laika (4Network): fonte Public Sans, verde `#8dc63f` nos botões principais, neutros levemente esverdeados, barra lateral clara.
+- **Identidade.** É a do Canis e do Laika (4Network): fonte Public Sans com texto corrido de 16px (token `--texto`; tamanho menor só para texto secundário, como rótulos, notas e legendas), verde `#8dc63f` nos botões principais, neutros levemente esverdeados, barra lateral clara.
 - **Cores.** Use só os tokens do `:root` (`--tinta`, `--cinza`, `--linha`, `--marca`, `--acento`...), nunca uma cor fixa no HTML gerado. Os dois temas, claro e escuro, precisam funcionar.
 - **Gráficos.** As cores dos gráficos foram validadas para daltonismo: verde para médias de mercado, azul para dados reais da empresa, sempre com legenda ou rótulo. Todo gráfico traz “Ver dados em tabela”.
 - **Celular.** Toda tela precisa funcionar sem rolagem lateral em 375 px de largura. Tabelas largas ficam dentro de `.tab-wrap`; a lista de empresas vira cartões.
@@ -116,7 +116,7 @@ npm run test:tela   # tela: abre o Chrome sem janela (precisa de npm install)
 4. Rode os testes. `motor-cidades` confere que a versão embutida é a pública, com contagens e sem nome de arquivo, colunas, segmentos, CNPJ ou e-mail, e que ela dá as mesmas estimativas da calibração completa.
 5. Registre no `CHANGELOG.md` com o rótulo da versão. Versão com dados modelo leva `modelo: true`, e a tela avisa.
 
-- **Tour guiado.** `TOUR` (bloco `ui-tour`) lista os passos: título, texto, alvo (seletores ou funções, em ordem de preferência), `antes` (prepara a tela), `clique` (o clique no alvo avança) e `lateral` (no celular, abre a barra lateral). Ao mudar, renomear ou tirar algo que o tour mostra, atualize o passo no mesmo commit; o teste `tela-tour` percorre todos os passos no computador e no celular e falha se um alvo sumir. Abre sozinho uma vez por navegador (`vezen.tour` no `localStorage`); navegadores automatizados só o abrem quando o teste pede. Nada é salvo durante o tour: ele usa a empresa modelo sem salvar.
+- **Tour guiado.** `TOUR` (bloco `ui-tour`) lista os passos: título, texto (o porquê de cada coisa, não só o que fazer), `acao` (o que a pessoa faz), alvo (seletores ou funções, em ordem de preferência), `clique` (o clique no alvo avança), `tarefa` (função que diz se a pessoa já fez; o Próximo espera) e `lateral` (no celular, abre a barra lateral). É um exercício: a pessoa cria a análise do Banco do Brasil e preenche os campos com os números de `EMPRESA_MODELO`. O tour nunca troca de tela, de aba nem preenche nada sozinho; quem navega e digita é a pessoa, e o Voltar só aparece quando o passo anterior está na tela de agora. Ao mudar, renomear ou tirar algo que o tour mostra ou pede, atualize o passo no mesmo commit; o teste `tela-tour` faz o exercício inteiro com cliques de verdade, no computador e no celular, e falha se um alvo sumir ou ficar tapado. Abre sozinho uma vez por navegador (`vezen.tour` no `localStorage`); navegadores automatizados só o abrem quando o teste pede. Nada é salvo durante o tour.
 
 ## Ao terminar uma mudança
 

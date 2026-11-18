@@ -1,4 +1,4 @@
-// Tour guiado: abre sozinho na primeira visita, percorre todos os passos sem perder nenhum alvo (computador e celular),
+// Tour guiado: abre sozinho na primeira visita, faz o exercício inteiro como a pessoa faria, sem perder nem tapar nenhum alvo (computador e celular),
 // segura cliques fora do recorte, avança pelo clique no alvo, pode ser pulado e reaberto pela barra lateral.
 const { chromium } = require('playwright-core');
 const path = require('path');
@@ -23,9 +23,28 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     check(`${nomeTela}: o primeiro passo oferece Começar e Agora não`, (await p.textContent('[data-t="proximo"]')) === 'Começar' && (await p.textContent('[data-t="pular"]')) === 'Agora não');
     await p.mouse.click(5, viewport.height - 5); await p.waitForTimeout(250);
     check(`${nomeTela}: clique fora do cartão é segurado e explicado`, await p.locator('.tour-msg.visivel').count() === 1 && await p.evaluate(() => location.hash) === '#/empresas');
+    // o que a pessoa faz em cada passo de clique ou de tarefa, sempre com clique de verdade (o véu não pode tapar)
+    const FAZER = {
+      'Primeiro, escolha o método': async () => p.click('#app .comeco[data-v="base"]'),
+      'O nome da empresa': async () => p.fill('#f-nome', 'Banco do Brasil'),
+      'Natureza': async () => p.selectOption('#f-natureza', 'publico'),
+      'Tipo de órgão': async () => p.selectOption('#f-tipoPublico', 'estatal'),
+      'Setor': async () => p.selectOption('#f-setor', 'banco'),
+      'Receita': async () => { await p.fill('#f-faturamento', '73.900.000.000'); await p.press('#f-faturamento', 'Tab'); },
+      'Origem do dado': async () => { await p.click('#app .origem[data-alvo="campo:faturamento"]'); await p.click('#pop [data-o="oficial"]'); },
+      'Funcionários': async () => { await p.fill('#f-funcionarios', '85206'); await p.press('#f-funcionarios', 'Tab'); },
+      'Quando falta um dado': async () => { await p.click('#app .sem-dado[data-campo="profTI"]'); await p.click('#pop [data-s="nao-encontrado"]'); },
+      'Gasto de TI real': async () => { await p.click('#app [data-acao="add-real"]'); await p.fill('#app [data-real][data-parte="ano"]', '2025'); await p.fill('#app [data-real][data-parte="v"]', '6.800.000.000'); await p.press('#app [data-real][data-parte="v"]', 'Tab'); }
+    };
+    const tarefa = await p.evaluate(() => TOUR.map(x => !!x.tarefa));
     for (let i = 1; i < titulos.length; i++) {
-      // nos passos de clique, no computador o clique é no próprio alvo; no celular, pelo botão Próximo
-      if (clique[i - 1] && nomeTela === 'computador') await p.evaluate(() => { const el = TOUR[T.i] && T.el; el.click(); });
+      const atual = titulos[i - 1];
+      if (tarefa[i - 1] && atual === 'Primeiro, escolha o método') {
+        await p.click('[data-t="proximo"]'); await p.waitForTimeout(300);
+        check(`${nomeTela}: Próximo espera a tarefa ser feita`, (await tit()) === atual && await p.locator('.tour-msg.visivel').count() === 1);
+      }
+      if (FAZER[atual]) await FAZER[atual]();
+      else if (clique[i - 1]) { const r = await p.evaluate(() => { const b = T.el.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }); await p.mouse.click(r[0], r[1]); }
       else await p.click('[data-t="proximo"]');
       const chegou = await esperaTit(titulos[i]);
       await p.waitForTimeout(450);
@@ -36,7 +55,7 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     check(`${nomeTela}: último passo conclui`, (await p.textContent('[data-t="proximo"]')) === 'Concluir');
     await p.click('[data-t="proximo"]'); await p.waitForTimeout(400);
     check(`${nomeTela}: concluir fecha o tour e lembra que foi visto`, await p.locator('#tour').count() === 0 && await p.evaluate(() => localStorage.getItem('vezen.tour')) === 'visto');
-    check(`${nomeTela}: o tour não salva a empresa modelo`, await p.evaluate(() => S.empresas.length) === 0);
+    check(`${nomeTela}: o tour não salva o exercício`, await p.evaluate(() => S.empresas.length) === 0);
     await p.reload(); await p.waitForTimeout(1000);
     check(`${nomeTela}: depois de visto, não abre sozinho`, await p.locator('#tour').count() === 0);
     if (nomeTela === 'celular') { await p.click('[data-acao="menu"]'); await p.waitForTimeout(300); }
