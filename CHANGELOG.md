@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.1.0] - 2026-11-17
+
+### Adicionado
+- **Tour guiado.** Passo a passo pelo caminho básico: Empresas, nova análise e método, empresa modelo, natureza, receita, origem do dado, campo sem valor, resultado ao vivo, pesquisa com IA, salvar, aba Resultado, Listas, Métodos e glossário. Abre sozinho na primeira visita, pode ser pulado (Agora não, Pular tour, Esc) e reaberto pela barra lateral (Tour guiado) ou pela tela vazia de Empresas. Destaca cada parte com um recorte que desliza de um passo para o outro; nos passos de clique, o clique no destaque avança. Clique fora do destaque balança o cartão e diz o que fazer; parte que não aparece mostra o aviso com Tentar de novo. Teclado: setas, Tab dentro do cartão e Esc. Nada é salvo durante o tour.
+
 ## [3.0.1] - 2026-11-17
 
 ### Alterado

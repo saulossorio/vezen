@@ -966,6 +966,46 @@ input[type="text"], input[type="search"], input:not([type]), select, textarea { 
 details { interpolate-size: allow-keywords; }
 details::details-content { block-size: 0; overflow: hidden; transition: block-size 200ms var(--ease), content-visibility 200ms allow-discrete; }
 details[open]::details-content { block-size: auto; }
+
+/* ===================== TOUR GUIADO ===================== */
+/* véu escuro com um recorte no ponto mostrado; o recorte e o cartão deslizam de um passo para o outro */
+.tour { --veu-tour: oklch(0.14 0.01 210 / 0.56); }
+:root[data-tema="escuro"] .tour { --veu-tour: oklch(0.03 0 0 / 0.74); }
+.tour { position: fixed; inset: 0; z-index: 120; opacity: 0; transition: opacity 220ms var(--ease); }
+.tour.visivel { opacity: 1; }
+.tour-bloq { position: fixed; background: transparent; }
+.tour-luz { position: fixed; border-radius: var(--raio); pointer-events: none; box-shadow: 0 0 0 3px var(--marca), 0 0 0 200vmax var(--veu-tour);
+  transition: top 340ms var(--ease), left 340ms var(--ease), width 340ms var(--ease), height 340ms var(--ease), box-shadow 340ms var(--ease); }
+.tour-luz.sem-alvo { box-shadow: 0 0 0 0 transparent, 0 0 0 200vmax var(--veu-tour); }
+.tour-luz.clique { animation: tour-pulso 1.6s var(--ease) infinite; }
+@keyframes tour-pulso { 0%, 100% { box-shadow: 0 0 0 3px var(--marca), 0 0 0 200vmax var(--veu-tour); } 50% { box-shadow: 0 0 0 7px oklch(0.8 0.15 128 / 0.55), 0 0 0 200vmax var(--veu-tour); } }
+.tour-cartao { position: fixed; width: min(380px, calc(100vw - 32px)); background: var(--superficie); color: var(--tinta); border: 1px solid var(--linha); border-radius: var(--raio-g);
+  box-shadow: var(--sombra-g); padding: 16px 18px 14px; transition: top 340ms var(--ease), left 340ms var(--ease), opacity 160ms var(--ease), transform 160ms var(--ease); }
+.tour-cartao.troca { opacity: 0; transform: translateY(6px); }
+.tour-cartao.chama { animation: tour-chama 380ms var(--ease); }
+@keyframes tour-chama { 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } 100% { transform: none; } }
+.tour-cartao.folha { width: auto; }
+.tour-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px -6px 8px 0; }
+.tour-passo { font-size: .8rem; font-weight: 650; letter-spacing: .02em; color: var(--link); text-transform: uppercase; }
+.tour-barra { height: 4px; border-radius: 4px; background: var(--suave); overflow: hidden; margin-bottom: 14px; }
+.tour-barra i { display: block; height: 100%; width: 0; background: var(--marca); border-radius: 4px; transition: width 340ms var(--ease); }
+.tour-cartao h2 { font-size: 1.12rem; line-height: 1.3; margin: 0 0 6px; outline: none; }
+.tour-cartao p { margin: 0; line-height: 1.5; color: var(--cinza); font-size: .95rem; }
+.tour-acao { display: flex; align-items: center; gap: 8px; margin-top: 12px !important; padding: 8px 10px; border-radius: var(--raio-p); background: var(--marca-f); border: 1px solid var(--marca-b); color: var(--tinta) !important; font-weight: 600; font-size: .9rem !important; }
+.tour-acao .ico { width: 16px; height: 16px; color: var(--link); flex: none; }
+.tour-msg { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 220ms var(--ease), opacity 220ms var(--ease), margin 220ms var(--ease); margin-top: 0; }
+.tour-msg > div { overflow: hidden; }
+.tour-msg.visivel { grid-template-rows: 1fr; opacity: 1; margin-top: 12px; }
+.tour-msg p { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: var(--raio-p); font-size: .88rem !important; }
+.tour-msg .ico { width: 16px; height: 16px; flex: none; margin-top: 2px; }
+.tour-msg.dica p { background: var(--info-f); border: 1px solid var(--info-b); color: var(--tinta); }
+.tour-msg.erro p { background: var(--crit-f); border: 1px solid var(--crit-b); color: var(--tinta); }
+.tour-msg.erro .ico { color: var(--crit); } .tour-msg.dica .ico { color: var(--info); }
+.tour-pe { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.tour-pe > span { display: flex; gap: 8px; }
+.tour-pe .link-btn { color: var(--cinza); font-size: .88rem; }
+.tour-pe .btn[hidden] { display: none; }
+@media (max-width: 600px) { .tour-pe .btn { padding: 6px 12px; } }
 </style>
 </head>
 <body>
@@ -2838,6 +2878,7 @@ function renderNav() {
   const pend = !b || (S.ultimaAlteracao && S.ultimaAlteracao > b), atencao = S.empresas.length && (!b || d > 7 || pend);
   $('#lat-pe').innerHTML = `${S.empresas.length || S.listas.length ? `<div class="lat-dados${atencao ? ' atencao' : ''}">${b ? 'Último backup ' + haDias(d) + (pend ? ', com alterações depois' : '') : 'Nenhum backup exportado ainda'}</div>
     <button type="button" class="lat-item" data-acao="exp-menu" aria-haspopup="menu" aria-expanded="false"${tip('Exportar as empresas')}>${ico('baixar')}<span class="rot">Exportar</span>${atencao ? '<i class="ponto" aria-hidden="true"></i>' : ''}</button>` : ''}
+    <button type="button" class="lat-item" data-acao="tour"${tip('Tour guiado')}>${ico('ajuda')}<span class="rot">Tour guiado</span></button>
     <button type="button" class="lat-item" data-acao="tema"${tip(escuro ? 'Tema claro' : 'Tema escuro')}>${ico(escuro ? 'sol' : 'lua')}<span class="rot">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>`;
 }
 function abrirMenuLateral() { $('#casca').classList.add('menu-aberto'); const p = $('#nav a'); if (p) p.focus(); }
@@ -4650,7 +4691,7 @@ function telaEmpresas() {
     <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
   if (!n) return cab + `<div class="vazio inicio"><h2>Nenhuma empresa ainda</h2>
     <div class="comecos"><button type="button" class="comeco prim" data-acao="nova">${ico('mais')}<b>Nova análise</b><span>Uma empresa</span></button><a class="comeco" href="#/listas/nova">${ico('tabela')}<b>Analisar uma lista</b><span>Planilha com várias empresas</span></a><button type="button" class="comeco" data-acao="importar">${ico('subir')}<b>Importar backup</b><span>De outro computador</span></button></div>
-    <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button></p></div>`;
+    <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button> · <button type="button" class="link-btn" data-acao="tour">Fazer o tour guiado</button></p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
     <label class="busca"><span class="sr">Buscar</span>${ico('busca')}<input type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
@@ -6318,6 +6359,203 @@ const glObs = new MutationObserver(recs => {
 });
 glObs.observe(document.body, { childList: true, subtree: true });
 </script>
+<script id="ui-tour">
+"use strict";
+/* ===================== TOUR GUIADO: o caminho básico, passo a passo; dá para pular e refazer ===================== */
+// Cada passo: titulo, texto, alvo (seletores em ordem de preferência; sem alvo, o cartão fica no meio da tela),
+// antes (prepara a tela), clique (o passo espera um clique no alvo, com a frase de "acao"), lateral (alvo na barra lateral).
+// Ao mudar a interface, confira os alvos: o teste tela-tour percorre o tour inteiro, no computador e no celular.
+const TOUR_CHAVE = 'vezen.tour';
+const naAnalise = () => UI.rota.tela === 'analise' && !!UI.atual;
+const irAnalise = (aba = '') => { const h = '#/analise/' + encodeURIComponent(UI.atual.id) + aba; if (location.hash !== h) navegar(h); };
+const TOUR = [
+  { titulo: 'Bem-vindo ao Vezen', texto: 'O Vezen estima quanto uma empresa brasileira investe em TI por ano e mostra de onde vem cada número. Em {n} passos curtos, o caminho básico.' },
+  { titulo: 'Empresas', texto: 'As análises salvas ficam aqui, com o valor estimado e a confiança de cada uma.', alvo: ['#nav a[href="#/empresas"]'], lateral: true,
+    antes: () => { if (UI.rota.tela !== 'empresas') navegar('#/empresas'); } },
+  { titulo: 'Nova análise', texto: 'Cada estimativa começa por aqui.', acao: 'Clique em Nova análise', alvo: ['#nav .lat-nova'], lateral: true, clique: true },
+  { titulo: 'Primeiro, o método', texto: 'Vezen usa pesquisas públicas. CR multiplica a receita pelo percentual de TI do segmento. Personalizado usa as suas empresas. Depois, o formulário mostra só os campos do método escolhido.',
+    alvo: ['#app .comecos'], antes: async () => { if (!(naAnalise() && UI.atual.dados.modo === '')) await novaAnalise(); } },
+  { titulo: 'Empresa modelo', texto: 'Nos próximos passos, o Banco do Brasil, com dados oficiais. Nada é salvo sem você pedir.', alvo: ['#app .nota-modelo'],
+    antes: async () => { if (!(naAnalise() && UI.atual.dados.modelo)) await abrirEmpresaModelo(); else irAnalise(); } },
+  { titulo: 'Natureza e setor', texto: 'Mudam o formulário. Um órgão público, por exemplo, pede a despesa de TI no lugar da receita.', alvo: [() => campoDoTour('#f-natureza'), () => campoDoTour('#f-setor')], antes: () => irAnalise() },
+  { titulo: 'Receita', texto: 'Valor, ano e período. A conta leva o valor para o ano de referência e para 12 meses.', alvo: ['#app .campo-rec'], antes: () => irAnalise() },
+  { titulo: 'Origem do dado', texto: 'Todo número tem origem: DRE, estimativa de terceiros ou palpite. Quanto mais oficial, mais peso na conta.', alvo: ['#app .origem[data-alvo="campo:faturamento"]'], antes: () => irAnalise() },
+  { titulo: 'Campo sem valor', texto: 'Sem o número, diga por quê: não encontrado, não divulga ou não se aplica. Campo vazio e sem motivo fica em vermelho.', alvo: [() => $$('#app .sem-dado').find(visivelTour)], antes: () => irAnalise() },
+  { titulo: 'Resultado ao vivo', texto: 'Muda enquanto você digita: receita líquida e investimento em TI, com a faixa provável e a confiança.', alvo: ['#painel'], antes: () => irAnalise() },
+  { titulo: 'Pesquisar com IA', texto: 'Gera um texto para colar numa IA. Ela devolve os dados com a fonte de cada um; confira antes de usar.', alvo: ['#ws-acoes [data-acao="prompt-ia"]'], antes: () => irAnalise() },
+  { titulo: 'Salvar', texto: 'Guarda a análise neste navegador. De vez em quando, exporte um backup.', alvo: ['#ws-acoes [data-acao="salvar"]'], antes: () => irAnalise() },
+  { titulo: 'Como o valor foi calculado', texto: 'A aba Resultado mostra os caminhos de cálculo, a projeção, os dados usados e o resumo para copiar.', acao: 'Clique em Resultado', alvo: ['#app .abas a[href$="/resultado"]'], clique: true, antes: () => irAnalise() },
+  { titulo: 'Resultado', texto: 'Cada seção explica uma parte da conta. O índice ao lado leva direto a ela.', alvo: ['#app .indice-lado', '#app .res-corpo > section'], antes: () => irAnalise('/resultado') },
+  { titulo: 'Listas', texto: 'Muitas empresas de uma vez: envie uma planilha e a ferramenta estima todas.', alvo: ['#nav a[href="#/listas"]'], lateral: true },
+  { titulo: 'Métodos e glossário', texto: 'Fórmulas, fontes e testes de cada método; e as siglas, como DRE e CAPU, em uma frase.', alvo: ['#nav a[href="#/metodos"]'], lateral: true },
+  { titulo: 'Pronto', texto: 'O tour fica aqui, para rever quando quiser.', alvo: ['#lat-pe [data-acao="tour"]'], lateral: true }
+];
+const visivelTour = el => !!el && el.isConnected && el.getClientRects().length > 0 && el.getBoundingClientRect().width > 0;
+const campoDoTour = sel => { const i = $(sel); return i ? i.closest('.campo') || i : null; };
+const menuMovel = () => matchMedia('(max-width: 960px)').matches;
+const esperar = ms => new Promise(r => setTimeout(r, ms));
+let T = null;
+
+function acharAlvo(p) {
+  for (const a of p.alvo || []) { const el = typeof a === 'function' ? a() : $(a); if (visivelTour(el)) return el; }
+  return null;
+}
+async function esperarAlvo(p, seq, ms = 3000) {
+  for (let t = 0; t < ms; t += 80) { if (!T || T.seq !== seq) return null; const el = acharAlvo(p); if (el) return el; await esperar(80); }
+  return null;
+}
+// espera a rolagem e as transições pararem antes de recortar o alvo
+async function esperarParado(el, seq) {
+  let ult = '', iguais = 0;
+  for (let t = 0; t < 900 && iguais < 3; t += 16) {
+    if (!T || T.seq !== seq) return;
+    await new Promise(r => requestAnimationFrame(r));
+    const r = el.getBoundingClientRect(), k = [r.top, r.left, r.width, r.height].map(Math.round).join();
+    iguais = k === ult ? iguais + 1 : 0; ult = k;
+  }
+}
+
+function montarTour() {
+  const raiz = document.createElement('div'); raiz.className = 'tour'; raiz.id = 'tour';
+  raiz.innerHTML = `${['c', 'd', 'b', 'e', 'furo'].map(l => `<div class="tour-bloq" data-l="${l}"></div>`).join('')}<div class="tour-luz sem-alvo"></div>
+    <section class="tour-cartao" role="dialog" aria-labelledby="tour-tit" aria-describedby="tour-txt">
+      <div class="tour-topo"><span class="tour-passo" id="tour-passo"></span><button type="button" class="btn fant ico-so peq" data-t="fechar" aria-label="Fechar o tour" data-tip="Fechar o tour">${ico('x')}</button></div>
+      <div class="tour-barra" aria-hidden="true"><i></i></div>
+      <h2 id="tour-tit" tabindex="-1"></h2><p id="tour-txt"></p>
+      <p class="tour-acao" hidden></p>
+      <div class="tour-msg" aria-live="polite"><div><p></p></div></div>
+      <div class="tour-pe"><button type="button" class="link-btn" data-t="pular">Pular tour</button>
+        <span><button type="button" class="btn" data-t="voltar">Voltar</button><button type="button" class="btn" data-t="repetir" hidden>Tentar de novo</button><button type="button" class="btn prim" data-t="proximo">Próximo</button></span></div>
+    </section>`;
+  document.body.appendChild(raiz);
+  raiz.addEventListener('click', e => {
+    const b = e.target.closest('[data-t]');
+    if (b) { e.stopPropagation(); return ({ fechar: fecharTour, pular: fecharTour, voltar: () => passoTour(T.i - 1), proximo: avancarTour, repetir: () => passoTour(T.i) })[b.dataset.t](); }
+    if (e.target.classList.contains('tour-bloq')) { e.stopPropagation(); chamarAtencao(); }
+  });
+  return raiz;
+}
+function abrirTour(i = 0) {
+  if (T) return passoTour(i);
+  fecharPop(); esconderTip();
+  T = { i: 0, seq: 0, el: null, raiz: montarTour(), foco: document.activeElement, menu: false };
+  document.addEventListener('click', cliqueNoAlvo, true);
+  document.addEventListener('keydown', teclaTour, true);
+  window.addEventListener('resize', reposicionarTour); window.addEventListener('scroll', reposicionarTour, { passive: true });
+  requestAnimationFrame(() => T && T.raiz.classList.add('visivel'));
+  passoTour(i);
+}
+function fecharTour() {
+  if (!T) return;
+  const t = T; T = null; t.seq++;
+  try { localStorage.setItem(TOUR_CHAVE, 'visto'); } catch (e) { /* sem armazenamento: o tour só não lembra que já foi visto */ }
+  document.removeEventListener('click', cliqueNoAlvo, true); document.removeEventListener('keydown', teclaTour, true);
+  window.removeEventListener('resize', reposicionarTour); window.removeEventListener('scroll', reposicionarTour);
+  if (t.menu) fecharMenuLateral();
+  t.raiz.classList.remove('visivel');
+  setTimeout(() => t.raiz.remove(), reduzMov() ? 0 : 230);
+  const f = t.foco && t.foco.isConnected ? t.foco : $('#app'); if (f) f.focus({ preventScroll: true });
+}
+function avancarTour() { if (T.i >= TOUR.length - 1) return fecharTour(); passoTour(T.i + 1); }
+
+async function passoTour(i) {
+  if (!T || i < 0 || i >= TOUR.length) return;
+  const p = TOUR[i], seq = ++T.seq, c = $('.tour-cartao', T.raiz);
+  T.i = i; T.el = null;
+  c.classList.add('troca'); mensagemTour('');
+  // a barra lateral do celular abre só nos passos que mostram algo nela
+  if (menuMovel()) { if (p.lateral) { abrirMenuLateral(); T.menu = true; } else if (T.menu) { fecharMenuLateral(); T.menu = false; } }
+  try { if (p.antes) await p.antes(); } catch (e) { /* a tela não ficou pronta: o passo mostra o aviso */ }
+  if (!T || T.seq !== seq) return;
+  const el = p.alvo ? await esperarAlvo(p, seq) : null;
+  if (!T || T.seq !== seq) return;
+  if (el) { el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: reduzMov() ? 'auto' : 'smooth' }); await esperarParado(el, seq); if (!T || T.seq !== seq) return; }
+  T.el = el;
+  const ultimo = i === TOUR.length - 1, falhou = !!p.alvo && !el;
+  $('#tour-passo').textContent = i ? `Passo ${i} de ${TOUR.length - 1}` : 'Tour guiado';
+  $('.tour-barra i', T.raiz).style.width = (i / (TOUR.length - 1) * 100) + '%';
+  $('#tour-tit').textContent = p.titulo; $('#tour-txt').textContent = p.texto.replace('{n}', TOUR.length - 1);
+  const ac = $('.tour-acao', T.raiz); ac.hidden = !(p.acao && el); ac.innerHTML = p.acao ? `${ico('seta')}${esc(p.acao)} ou em Próximo` : '';
+  $('[data-t="voltar"]', T.raiz).hidden = i === 0;
+  $('[data-t="repetir"]', T.raiz).hidden = !falhou;
+  $('[data-t="proximo"]', T.raiz).textContent = i === 0 ? 'Começar' : ultimo ? 'Concluir' : 'Próximo';
+  $('[data-t="pular"]', T.raiz).textContent = i === 0 ? 'Agora não' : 'Pular tour';
+  if (falhou) mensagemTour('Esta parte não apareceu na tela. Tente de novo ou siga para o próximo passo.', 'erro');
+  $('.tour-luz', T.raiz).classList.toggle('clique', !!(p.clique && el));
+  posicionarTour();
+  requestAnimationFrame(() => { if (!T || T.seq !== seq) return; c.classList.remove('troca'); $('#tour-tit').focus({ preventScroll: true }); });
+}
+function mensagemTour(txt, tipo = 'dica') {
+  if (!T) return;
+  const m = $('.tour-msg', T.raiz); clearTimeout(T.tmMsg);
+  if (!txt) return m.classList.remove('visivel');
+  m.className = 'tour-msg visivel ' + tipo; $('p', m).innerHTML = ico(tipo === 'erro' ? 'alerta' : 'info') + `<span>${esc(txt)}</span>`;
+  if (tipo === 'dica') T.tmMsg = setTimeout(() => m.classList.remove('visivel'), 3200);
+}
+// clique fora do recorte: o cartão balança e diz o que fazer
+function chamarAtencao() {
+  const c = $('.tour-cartao', T.raiz), p = TOUR[T.i];
+  c.classList.remove('chama'); void c.offsetWidth; c.classList.add('chama');
+  mensagemTour(p.clique && T.el ? `${p.acao}, na área destacada, ou use Próximo.` : 'Durante o tour, use Próximo e Voltar. Para mexer na tela, pule o tour.');
+}
+// nos passos de clique, o clique no alvo segue para a ação da própria tela e avança o tour
+function cliqueNoAlvo(e) {
+  if (!T || !T.el || !TOUR[T.i].clique || !T.el.contains(e.target)) return;
+  const seq = T.seq; setTimeout(() => { if (T && T.seq === seq) passoTour(T.i + 1); }, 0);
+}
+function teclaTour(e) {
+  if (!T || $('#dlg').open) return;
+  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return fecharTour(); }
+  const c = $('.tour-cartao', T.raiz), dentro = c.contains(e.target);
+  if (e.key === 'ArrowRight' && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) { e.preventDefault(); return avancarTour(); }
+  if (e.key === 'ArrowLeft' && T.i > 0 && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) { e.preventDefault(); return passoTour(T.i - 1); }
+  // o foco fica no cartão: Tab circula entre os botões dele
+  if (e.key === 'Tab') {
+    const fs = $$('button:not([hidden]), [tabindex="-1"]#tour-tit', c).filter(x => x.offsetParent !== null || x.id === 'tour-tit');
+    if (!fs.length) return;
+    const i = fs.indexOf(document.activeElement);
+    if (!dentro || (e.shiftKey && i <= 0) || (!e.shiftKey && i === fs.length - 1)) { e.preventDefault(); fs[e.shiftKey ? fs.length - 1 : 0].focus(); }
+  }
+}
+let tmTour = 0;
+function reposicionarTour() { if (!T) return; cancelAnimationFrame(tmTour); tmTour = requestAnimationFrame(posicionarTour); }
+function posicionarTour() {
+  if (!T) return;
+  const p = TOUR[T.i], vw = document.documentElement.clientWidth, vh = window.innerHeight, m = 16, folga = 8;
+  // a tela pode ter sido redesenhada: o alvo é procurado de novo
+  if (T.el && !T.el.isConnected) T.el = acharAlvo(p);
+  const r = T.el ? T.el.getBoundingClientRect() : null;
+  let f = r ? { x: r.left - folga, y: r.top - folga, w: r.width + 2 * folga, h: r.height + 2 * folga } : { x: vw / 2, y: vh / 2, w: 0, h: 0 };
+  if (r) { const x2 = Math.min(vw - 4, f.x + f.w), y2 = Math.min(vh - 4, f.y + f.h); f.x = Math.max(4, f.x); f.y = Math.max(4, f.y); f.w = Math.max(0, x2 - f.x); f.h = Math.max(0, y2 - f.y); }
+  const luz = $('.tour-luz', T.raiz); luz.classList.toggle('sem-alvo', !r);
+  Object.assign(luz.style, { left: f.x + 'px', top: f.y + 'px', width: f.w + 'px', height: f.h + 'px' });
+  // quatro faixas em volta do recorte seguram os cliques; o recorte só deixa clicar nos passos de clique
+  const bl = l => $(`.tour-bloq[data-l="${l}"]`, T.raiz), px = (el, x, y, w, h) => Object.assign(el.style, { left: x + 'px', top: y + 'px', width: Math.max(0, w) + 'px', height: Math.max(0, h) + 'px' });
+  px(bl('c'), 0, 0, vw, f.y); px(bl('b'), 0, f.y + f.h, vw, vh - f.y - f.h); px(bl('e'), 0, f.y, f.x, f.h); px(bl('d'), f.x + f.w, f.y, vw - f.x - f.w, f.h);
+  if (p.clique && r) px(bl('furo'), 0, 0, 0, 0); else px(bl('furo'), f.x, f.y, f.w, f.h);
+  // cartão: embaixo, em cima, à direita ou à esquerda do alvo, onde couber; no celular, uma folha presa embaixo ou em cima
+  const c = $('.tour-cartao', T.raiz), estreito = vw < 600; c.classList.toggle('folha', estreito);
+  if (estreito) { c.style.left = m + 'px'; c.style.right = m + 'px'; }
+  else c.style.right = 'auto';
+  const cw = c.offsetWidth, ch = c.offsetHeight, lim = (v, a, b) => Math.min(Math.max(v, a), Math.max(a, b));
+  let x, y;
+  if (estreito) { x = m; y = r && f.y + f.h / 2 > vh / 2 ? m : vh - ch - m; }
+  else if (!r) { x = (vw - cw) / 2; y = (vh - ch) / 2; }
+  else if (vh - (f.y + f.h) >= ch + 2 * m) { x = lim(f.x + f.w / 2 - cw / 2, m, vw - cw - m); y = f.y + f.h + 14; }
+  else if (f.y >= ch + 2 * m) { x = lim(f.x + f.w / 2 - cw / 2, m, vw - cw - m); y = f.y - ch - 14; }
+  else if (vw - (f.x + f.w) >= cw + 2 * m) { x = f.x + f.w + 14; y = lim(f.y + f.h / 2 - ch / 2, m, vh - ch - m); }
+  else if (f.x >= cw + 2 * m) { x = f.x - cw - 14; y = lim(f.y + f.h / 2 - ch / 2, m, vh - ch - m); }
+  else { x = vw - cw - m; y = vh - ch - m; }
+  c.style.left = x + 'px'; c.style.top = y + 'px';
+}
+// primeira visita: o tour abre sozinho uma vez (os testes automatizados o abrem só quando pedem)
+function tourInicial() {
+  if (navigator.webdriver) return;
+  try { if (localStorage.getItem(TOUR_CHAVE)) return; } catch (e) { return; }
+  abrirTour(0);
+}
+acoes({ 'tour': () => abrirTour(0) });
+</script>
 <script id="ui-inicio">
 "use strict";
 /* ===================== EVENTOS GERAIS E INÍCIO ===================== */
@@ -6378,6 +6616,7 @@ acoes({ 'menu': () => abrirMenuLateral(), 'menu-fechar': () => fecharMenuLateral
 $('#aviso-armaz').hidden = persistente;
 if (!location.hash || !TELAS[lerRota().tela] || lerRota().tela !== location.hash.replace(/^#\/?/, '').split('/')[0]) history.replaceState(null, '', '#/empresas');
 aoMudarRota();
+setTimeout(tourInicial, 500);
 </script>
 </body>
 </html>

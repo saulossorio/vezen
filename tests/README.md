@@ -14,6 +14,7 @@ Os testes usam só dados fictícios. Os do motor precisam só do Node.js. Os de 
 | `tela-cidades.test.cjs` | Campo Município com a lista do IBGE, Personalizado com cidades (planilha e formulário, tabela por lugar com contagens), valores e resumo com o ajuste por lugar, o CR0 (dados modelo) com estados e cidades e a consulta de CNPJ pela lupa |
 | `tela-listas.test.cjs` | Listas (importar, conferir colunas, filtrar, baixar em Excel e CSV, salvar e abrir empresas), busca e seleção em Empresas, comparação, Excel das empresas (duas abas, números de verdade), backup, parâmetros pendentes, tema escuro, voltar do navegador e menu do celular |
 | `tela-glossario.test.cjs` | Glossário: dados dos verbetes, lista em ordem alfabética, busca, categoria e filtro por letra, chegada por um termo, siglas do texto que viram link (um por seção, nunca em campo, botão, título ou no que a pessoa digitou), janelinha com a mesma definição da lista em todos os termos, e a conferência de que as siglas das telas estão no glossário |
+| `tela-tour.test.cjs` | Tour guiado: abre na primeira visita, percorre todos os passos sem perder alvo (computador e celular), segura cliques fora do destaque, avança pelo clique, pula, reabre, Voltar e Esc |
 | `tela-transicoes.test.cjs` | Janelinhas e diálogos com entrada e saída curtas, sem ids repetidos, e tudo imediato para quem pede menos animação |
 | `zip.cjs` | Leitor mínimo de .zip (e portanto de .xlsx), só com o Node.js, usado pelos testes de Excel |
 | `dados/` | Planilhas fictícias usadas pelos testes de tela |

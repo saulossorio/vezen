@@ -40,6 +40,7 @@ Está publicado no GitHub Pages: https://saulossorio.github.io/vezen/. O site é
 | `<script id="ui-listas">` | Listas: uma planilha inteira estimada de uma vez |
 | `<script id="ui-metodos">` | A tela Métodos: documentação dos três métodos (as seções `met*` do Vezen, `cr1*` do CR e `pers*` do Personalizado), as tabelas de parâmetros de só leitura, a área de dados do Personalizado (planilha, empresas digitadas, percentuais diretos), a leitura de planilhas (o mapa de colunas é usado também pelas listas) e os testes de aceitação |
 | `<script id="ui-glossario">` | Glossário (`GLOSSARIO`, a fonte única das definições), tela do glossário e as siglas do texto que viram link (`linkarTermos`) |
+| `<script id="ui-tour">` | Tour guiado: os passos (`TOUR`), o recorte que destaca cada parte, o cartão e o início automático na primeira visita |
 | `<script id="ui-inicio">` | Eventos gerais e início |
 
 São scripts clássicos: uma constante declarada num bloco vale nos outros. Por isso dois blocos não podem declarar o mesmo nome.
@@ -114,6 +115,8 @@ npm run test:tela   # tela: abre o Chrome sem janela (precisa de npm install)
 3. Confira os números que ele mostra: empresas com receita e funcionários, empresas com gasto de TI, percentual geral, acerto do CR e do Vezen nas mesmas empresas.
 4. Rode os testes. `motor-cidades` confere que a versão embutida é a pública, com contagens e sem nome de arquivo, colunas, segmentos, CNPJ ou e-mail, e que ela dá as mesmas estimativas da calibração completa.
 5. Registre no `CHANGELOG.md` com o rótulo da versão. Versão com dados modelo leva `modelo: true`, e a tela avisa.
+
+- **Tour guiado.** `TOUR` (bloco `ui-tour`) lista os passos: título, texto, alvo (seletores ou funções, em ordem de preferência), `antes` (prepara a tela), `clique` (o clique no alvo avança) e `lateral` (no celular, abre a barra lateral). Ao mudar, renomear ou tirar algo que o tour mostra, atualize o passo no mesmo commit; o teste `tela-tour` percorre todos os passos no computador e no celular e falha se um alvo sumir. Abre sozinho uma vez por navegador (`vezen.tour` no `localStorage`); navegadores automatizados só o abrem quando o teste pede. Nada é salvo durante o tour: ele usa a empresa modelo sem salvar.
 
 ## Ao terminar uma mudança
 
