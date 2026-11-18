@@ -20,6 +20,8 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 5. **Uma lista:** em **Listas**, escolha uma planilha (relatório do CRM, Excel, CSV ou Parquet), confira o que cada coluna é e veja todas as empresas estimadas. Filtre, baixe os resultados em Excel (ou CSV), abra qualquer empresa como análise ou salve as escolhidas em Empresas.
 6. Em **Exportar**, na barra lateral, baixe as empresas em Excel para ler e compartilhar. Faça também o backup (.json) de vez em quando: se os dados do navegador forem apagados, as análises e as listas se perdem, e é o backup que as traz de volta.
 
+**Receita pelo CNPJ:** o botão de buscar o CNPJ também traz a receita da DRE das companhias abertas, publicada na CVM, com o link para o documento. O arquivo com essas receitas é atualizado toda semana por uma tarefa do GitHub (`tools/receitas-cvm.cjs`).
+
 **Tour guiado:** na primeira visita, um passo a passo ensina o caminho básico fazendo: você cria a análise do Banco do Brasil e preenche os dados oficiais, campo a campo. Pule quando quiser e reabra em **Tour guiado**, na barra lateral.
 
 **Empresa modelo:** um exemplo pronto (Banco do Brasil, com dados oficiais), no menu de **Empresas**.

@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.3.0] - 2026-11-18
+
+### Adicionado
+- **Receita da DRE pelo CNPJ.** O botão de buscar ou atualizar o CNPJ também procura a DRE da empresa na CVM. Nas companhias abertas, preenche a receita do ano de referência (ou do último publicado), com origem DRE, período de 12 meses e os anos anteriores como histórico, e mostra o selo “via CVM” com o link para o documento. Editar a receita tira o selo. Empresa fora da CVM fica como estava.
+- **Arquivo semanal da CVM.** `tools/receitas-cvm.cjs` lê os dados abertos da CVM (DFP dos três últimos anos, DRE consolidada ou, sem ela, a individual) e grava `dados/receitas-cvm.json`, com cerca de 700 companhias. A tarefa “Receitas da CVM” do GitHub roda toda segunda e publica o arquivo se os números mudarem. Nos bancos, a receita é o resultado da intermediação financeira depois da perda esperada com crédito, mais as receitas de serviços e tarifas.
+
 ## [3.2.1] - 2026-11-18
 
 ### Alterado

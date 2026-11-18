@@ -19,6 +19,9 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   // consulta de CNPJ respondida com o município em caixa alta e sem acento, como vem da Receita
   await p.route('**/brasilapi.com.br/api/cnpj/**', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
     body: JSON.stringify({ cnpj: '11222333000181', razao_social: 'EMPRESA TESTE LTDA', uf: 'SP', municipio: 'SAO JOSE DOS CAMPOS', porte: 'DEMAIS', cnae_fiscal_descricao: 'Desenvolvimento de programas de computador sob encomenda', qsa: [] }) }));
+  // DRE na CVM: o arquivo semanal, aqui com uma companhia fictícia
+  await p.route('**/dados/receitas-cvm.json', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+    body: JSON.stringify({ fonte: 'teste', atualizado: '2026-01-01', empresas: { '11222333000181': { n: 'EMPRESA TESTE S.A.', r: { 2025: [1234567000, 'https://exemplo.invalid/dfp-2025'], 2024: [1100000000, 'https://exemplo.invalid/dfp-2024'] } } } }) }));
   await p.goto(URL);
   const ir = async h => { await p.evaluate(x => { location.hash = x; }, h); await p.waitForTimeout(300); };
 
@@ -106,6 +109,10 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   await p.click('[data-acao=buscar-cnpj]'); await p.waitForTimeout(1200);
   check('CNPJ: depois da busca, a lupa vira atualizar', await p.locator('[data-acao=buscar-cnpj] use[href="#i-atualizar"]').count() === 1 && /Atualizar/.test(await p.getAttribute('[data-acao=buscar-cnpj]', 'aria-label')));
   check('CNPJ: município oficial', await p.inputValue('#f-municipio') === 'São José dos Campos' && await p.inputValue('#f-uf') === 'SP', await p.inputValue('#f-municipio'));
+  check('CNPJ: receita da DRE na CVM, com ano, origem DRE e link', await p.evaluate(() => { const d = UI.atual.dados; return d.faturamento.v === 1234567000 && d.faturamento.o === 'oficial' && d.fatAno === '2025' && d.receitasAnos.length === 1 && +d.receitasAnos[0].ano === 2024; })
+    && await p.inputValue('#f-faturamento') === '1.234.567.000' && await p.locator('.campo-rec a[href="https://exemplo.invalid/dfp-2025"]').count() === 1 && await p.locator('.campo-rec .selo', { hasText: 'via CVM' }).count() === 1);
+  await p.fill('#f-faturamento', '1.300.000.000'); await p.waitForTimeout(300); await p.click('#f-cnpj'); await p.waitForTimeout(300);
+  check('CNPJ: editar a receita tira o selo da CVM', await p.evaluate(() => !UI.atual.dados.viaCVM));
 
   // 7. celular
   await p.setViewportSize({ width: 375, height: 800 }); await p.waitForTimeout(200);
