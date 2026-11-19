@@ -35,10 +35,10 @@ Toda análise chega a dois números do ano de referência (por padrão, o últim
 | Método | De onde vêm os números | Quem muda os parâmetros |
 |---|---|---|
 | Método Vezen | Referências públicas (medianas internacionais por setor, gasto declarado por empresas brasileiras, balanços, FGV, Brasscom, FEBRABAN): até sete caminhos de cálculo, juntados pela precisão, com índice de confiança. É o método das análises novas | Ninguém pela tela: só uma nova versão da ferramenta, com evidência |
-| Método CR (CR0 em uso) | Receita × percentual de TI por segmento, estado e cidade (método de Carol Rocha). A receita, quando falta, é estimada pela receita por funcionário da mesma base | Só o administrador, com uma nova versão (CR1.1, CR2) |
+| Método CR (CR1 em uso) | Receita líquida (ou despesa empenhada, no órgão público) × percentual de investimento em TI, só CAPEX, por segmento e estado, do estudo de Carol Rocha (2026). Sem valor no estado, a média nacional do segmento. A receita, quando falta, é estimada pelos funcionários, como no Vezen | Só o administrador, com uma nova versão (CR1.1, CR2) |
 | Método Personalizado | A mesma conta do CR, com percentuais tirados das suas empresas (planilha, digitadas ou análises salvas com gasto real) ou digitados por você | Você, na tela Métodos |
 
-O CR0 em uso tem dados modelo, fictícios, com a segmentação completa; o CR1 será a primeira versão oficial. Nos métodos por percentual, só um lugar com pelo menos 5 empresas tem valor próprio.
+O CR1 mede só investimento (CAPEX); o Método Vezen mede o gasto total de TI ou, se escolhido no painel, só o CAPEX. No Método Personalizado, só um lugar com pelo menos 5 empresas tem valor próprio.
 
 ## Privacidade
 

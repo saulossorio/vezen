@@ -2,6 +2,17 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.4.0] - 2026-11-19
+
+### Adicionado
+- **Método CR1, a primeira versão oficial do CR.** Tabela do estudo de Carol Rocha (2026): percentual de investimento em TI, só CAPEX, sobre a receita líquida, ou sobre a despesa empenhada no órgão público, por segmento e estado. Sem valor no estado, vale a média nacional do segmento. Os 12 segmentos do estudo, mais PRODs (5,14%, a mediana das empresas de processamento de dados do governo no estudo) e Serviços e outros (3%, prestação de serviços na pesquisa de tendências). Administração direta no Amapá (0%) conta como sem valor.
+- **Campo Segmento no CR1**, com a lista do estudo, no lugar do setor; sem escolha, vale o segmento mais próximo do setor. O órgão público informa a despesa empenhada total e o estado.
+- **Método Vezen só com CAPEX.** No painel, “O que estimar”: gasto total de TI (como antes) ou só investimento (CAPEX), que é o total, e cada caminho, vezes a parte de investimento do gasto de TI (32%, FGV; 36% nos bancos, FEBRABAN).
+
+### Alterado
+- **O CR1 substitui o CR0** (dados modelo). O CR1 não tem cidade nem ajuste por lugar, e gasto real, gasto declarado e despesa de TI não entram nele, porque são gasto total. O resultado se chama “Investimento em TI (CAPEX)”.
+- **Teste da lupa do CNPJ** espera a resposta em vez de um tempo fixo: a consulta da CVM às vezes demora mais.
+
 ## [3.3.0] - 2026-11-18
 
 ### Adicionado

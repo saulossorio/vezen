@@ -71,20 +71,27 @@ const c2 = M.calibrarRegistros(poucos, P, { ano: 2026, extras: [] });
 ok('Gasto de TI: setor com 3 empresas fica com o percentual geral', c2.ti.suficiente && c2.ti.nS.saude === 3 && perto(c2.ti.ps.saude, c2.ti.pg, 1e-12), c2.ti.suficiente ? `${c2.ti.ps.saude} / ${c2.ti.pg}` : 'sem TI');
 ok('Receita: setor com 3 empresas fica com o nível geral', c2.receita.setores.saude.n === 3 && c2.receita.setores.saude.rpe === Math.round(P.setores.saude.rpe * c2.receita.fatorGeral / 1000) * 1000, JSON.stringify(c2.receita.setores.saude));
 
-// 6. a versão do CR embutida (CR0, dados modelo, até o CR1 oficial) é a pública: parâmetros e contagens por grupo, sem nome de arquivo, colunas, segmentos ou linhas de empresa.
-const E = M.PAIS.calibracaoBase;
-const PROIBIDAS = ['nome', 'linhas', 'mapa', 'segmentos', 'descartes', 'col', 'descricao', 'formato', 'suspeitas', 'nLinhas', 'nExtras', 'nExtrasTodas', 'repetido', 'linhasTI', 'corte', 'emp', 'cnpj'];
-// o nome da cidade (do IBGE) é o único 'nome' permitido
-const chavesDe = (o, out = [], dentro = '') => { if (o && typeof o === 'object') for (const [k, v] of Object.entries(o)) { if (!(dentro === 'cidade' && k === 'nome')) out.push(k); chavesDe(v, out, k === 'cidades' ? 'cidades' : dentro === 'cidades' ? 'cidade' : ''); } return out; };
-const sobra = chavesDe(E).filter(k => PROIBIDAS.includes(k));
-ok('Embutida: versão pública, com rótulo e data', E.publica === true && typeof E.rotulo === 'string' && E.rotulo.length > 1 && /^\d{4}-\d\d-\d\d/.test(E.data), E.id);
-ok('Embutida: sem nome de arquivo, colunas, segmentos ou linhas de empresa', !sobra.length, sobra.join(', '));
-ok('Embutida: contagens por grupo, sem nenhum valor de empresa', E.empresas > 0 && E.ti.N > 0 && E.receita.n > 0 && Object.values(E.ti.nS).every(n => Number.isInteger(n) && n > 0) && Object.values(E.receita.setores).every(x => Number.isInteger(x.n)));
-ok('Embutida: grupos e setores em ordem alfabética', [E.receita.setores, E.ti.ps, E.ti.nS, E.receita.local.cidades, E.ti.local.cidades].every(o => Object.keys(o).join() === Object.keys(o).sort().join()));
-ok('Embutida: setores com menos de 5 empresas usam o percentual geral', Object.entries(E.ti.ps).every(([l, p]) => (E.ti.nS[l] || 0) >= C.minGrupo || perto(p, E.ti.pg, 1e-9)), JSON.stringify(E.ti.nS));
-ok('Embutida: percentuais entre 0,1% e 20% e incerteza com piso', Object.values(E.ti.ps).every(p => p > 0.001 && p < 0.2) && E.ti.s >= P.calibracao.sMin, `${E.ti.pg} / ${E.ti.s}`);
-ok('Embutida: acerto medido nas próprias empresas, pelos dois métodos (dados modelo não têm)', E.modelo ? E.ti.acertoPct == null : E.ti.acertoPct > 0 && E.ti.acertoPct <= E.ti.N && E.ti.acertoVezen <= E.ti.nVezen && E.ti.nVezen <= E.ti.N);
+// 6. a versão do CR embutida (CR1): a tabela de Carol Rocha, % de investimento em TI (CAPEX) por segmento e estado, sem dados de empresa
+const E = M.PAIS.calibracaoBase, T = E.ti.tabela, SEGS = Object.keys(T);
+ok('Embutida: CR1 público, com rótulo, data e CAPEX', E.publica === true && E.rotulo === 'CR1' && !E.modelo && E.capex === true && /^\d{4}-\d\d-\d\d/.test(E.data), E.id);
+ok('Embutida: 12 segmentos do estudo, PRODs e Serviços e outros', SEGS.length === 14 && ['prods', 'servicos', 'adm', 'justica', 'utilities'].every(k => T[k]), SEGS.join());
+ok('Embutida: percentuais entre 0,1% e 10%, estados válidos, sem zero', SEGS.every(k => T[k].nac > 0.001 && T[k].nac < 0.1 && Object.entries(T[k].uf).every(([u, p]) => M.PAIS.ufs.includes(u) && p > 0.001 && p < 0.1)));
+ok('Embutida: valores do estudo (Finanças CE 9%, Administração direta PI 0,4%, PRODs 5,14%, Educação 1,4%)', perto(T.financas.uf.CE, 0.09, 1e-9) && perto(T.adm.uf.PI, 0.004, 1e-9) && perto(T.prods.nac, 0.0514, 1e-9) && perto(T.educacao.nac, 0.014, 1e-9) && T.adm.uf.AP == null);
 ok('Embutida: sem CNPJ, e-mail ou linhas de empresa', !/\d{14}|[a-z0-9._-]+@[a-z0-9-]+\.[a-z]|linhasTI|"emp"/i.test(JSON.stringify(E)));
+{
+  const Pt = M.parametrosCalibrados(P, E), ft = M.fatoresCalibrados(E, P), run = dd => M.calcular(dd, Pt, { ano: 2025, calib: ft });
+  const base = { nome: 'X', natureza: 'privada', setor: 'banco', uf: 'CE', faturamento: { v: 1e9, o: 'oficial' }, fatAno: '2025', fatMeses: '12', gastosReais: [{ ano: 2025, v: 5e7, o: 'oficial' }], gastoDeclarado: { v: 6e7, o: 'oficial' } };
+  const r1 = run(JSON.parse(JSON.stringify(base)));
+  ok('CR1: receita × % do segmento no estado, só o caminho EP, CAPEX', perto(r1.F, 9e7, 1) && r1.ests.map(e => e.cod).join() === 'EP' && r1.capex === true && r1.segCR === 'financas', r1.F);
+  ok('CR1: gasto real e declarado não entram (são gasto total)', !r1.temReal && !r1.E4ativo);
+  ok('CR1: estado sem valor usa a média nacional', perto(run(Object.assign(JSON.parse(JSON.stringify(base)), { uf: 'AC' })).F, 4e7, 1));
+  ok('CR1: segmento escolhido vale sobre o setor', perto(run(Object.assign(JSON.parse(JSON.stringify(base)), { segCR: 'prods' })).F, 5.14e7, 1));
+  const org = run({ nome: 'Y', natureza: 'publico', uf: 'RR', faturamento: { v: 1e9, o: 'oficial' }, fatAno: '2025', fatMeses: '12' });
+  ok('CR1: órgão público usa a despesa empenhada e a administração direta', perto(org.F, 5e7, 1) && org.segCR === 'adm', org.F);
+  ok('CR1: órgão público sem a despesa não estima', run({ nome: 'Y', natureza: 'publico', uf: 'RR', funcionarios: { v: 500, o: 'oficial' } }).vazio);
+  const est = run({ nome: 'Z', natureza: 'privada', setor: 'industria', uf: 'RN', funcionarios: { v: 1000, o: 'oficial' } });
+  ok('CR1: receita que falta é estimada pelos funcionários', !est.vazio && perto(est.F, est.receita.usada.v * 0.05, 1));
+}
 
 // 7. a versão pública dá as mesmas estimativas que a calibração completa
 const pub = M.calibracaoPublica(cal, C.minGrupo);

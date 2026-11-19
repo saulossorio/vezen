@@ -183,7 +183,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Matriz sem aviso', !(await p.textContent('#v-cnpj')).includes('filial'));
   ok('CNPJ completo não busca sozinho', pedidosCnpj === 0, String(pedidosCnpj));
   ok('Lupa dentro do campo do CNPJ', await p.locator('.entrada.com-acao #f-cnpj + [data-acao=buscar-cnpj]').count() === 1);
-  await p.click('[data-acao=buscar-cnpj]'); await p.waitForTimeout(400);
+  await p.click('[data-acao=buscar-cnpj]'); await p.waitForFunction(() => /Não foi possível/.test(document.querySelector('#v-cnpj').textContent), null, { timeout: 8000 }).catch(() => {});
   ok('A lupa busca na Receita', pedidosCnpj === 1 && (await txt('#v-cnpj')).includes('Não foi possível consultar agora'), await txt('#v-cnpj'));
   await p.focus('#f-cnpj'); await p.keyboard.press('Enter'); await p.waitForTimeout(400);
   ok('Enter no campo também busca', pedidosCnpj === 2, String(pedidosCnpj));

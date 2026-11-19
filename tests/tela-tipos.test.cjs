@@ -1,4 +1,4 @@
-// Testes de tela dos três métodos: a tela Métodos (documentação, parâmetros do CR0 e os dados do Personalizado), a escolha do método na análise,
+// Testes de tela dos três métodos: a tela Métodos (documentação, parâmetros do CR1 e os dados do Personalizado), a escolha do método na análise,
 // empresas digitadas, importadas e percentuais diretos no Personalizado, rotas antigas e a migração de dados antigos.
 const { chromium } = require('playwright-core');
 const fs = require('fs');
@@ -24,12 +24,11 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   // 1. a tela Métodos: um item só no menu, documentação por método e a área de entrada do Personalizado
   check('menu: Métodos no lugar de Calibração, Parâmetros e Metodologia', /Métodos/.test(await txt(p, '#nav')) && !/Calibração|Parâmetros|Metodologia/.test(await txt(p, '#nav')) && await p.locator('#nav a[href="#/metodos"]').count() === 1);
   await ir(p, '#/metodos');
-  check('21 seções em 4 grupos, com uma só de entrada de dados', await p.locator('section.met-sec').count() === 21 && (await p.$$eval('.doc-ind .ind-grupo', g => g.map(x => x.textContent).join('|'))) === 'Visão geral|Método Vezen|Método CR0|Método Personalizado' && await p.locator('section.met-entrada').count() === 1 && (await txt(p, '#pers-dados-t')).includes('entrada de dados'));
-  check('cartões dos três métodos', /Disponível|análise/.test(await cartao(p, 'Método Vezen')) && /Disponível/.test(await cartao(p, 'Método CR0')) && /Sem dados ainda/.test(await cartao(p, 'Método Personalizado')), await cartao(p, 'Método Personalizado'));
+  check('21 seções em 4 grupos, com uma só de entrada de dados', await p.locator('section.met-sec').count() === 21 && (await p.$$eval('.doc-ind .ind-grupo', g => g.map(x => x.textContent).join('|'))) === 'Visão geral|Método Vezen|Método CR1|Método Personalizado' && await p.locator('section.met-entrada').count() === 1 && (await txt(p, '#pers-dados-t')).includes('entrada de dados'));
+  check('cartões dos três métodos', /Disponível|análise/.test(await cartao(p, 'Método Vezen')) && /Disponível/.test(await cartao(p, 'Método CR1')) && /Sem dados ainda/.test(await cartao(p, 'Método Personalizado')), await cartao(p, 'Método Personalizado'));
   const cr1 = await txt(p, '#cr1-parametros');
-  check('CR0: versão, data e contagens, sem nome de arquivo nem colunas', /Versão [^,]+, de \d\d\/\d\d\/\d{4}: (dados modelo, )?[\d.]+ empresas (na base|fictícias)/.test(cr1) && !/\w\.(xlsx?|csv)\b|Coluna “|Fora da conta/.test(cr1) && await p.locator('#cr1-parametros th:text-is("Empresas")').count() >= 2, cr1.slice(0, 160));
-  check('CR0: percentual geral, dados modelo sem acerto medido, estados e cidades abertos', /Percentual geral: [\d,]+%/.test(cr1) && /Dados modelo, fictícios/.test(cr1) && !/Dentro da faixa de 80%/.test(cr1) && /Estado e cidade \(\d+ estados, \d+ cidades\)/.test(cr1) && await p.locator('#cr1-parametros details.cal-local').evaluate(e => e.open), cr1.slice(0, 200));
-  check('CR0: documentação com a fórmula, o autor e as versões', /Carol Rocha/.test(await txt(p, '#cr1-metodo')) && /F\s*=\s*R · p\s*seg · f\s*UF · f\s*cid · f\s*seg·cid/.test((await txt(p, '#cr1-metodo')).replace(/\s+/g, ' ')) && /gerar-calibracao/.test(await txt(p, '#cr1-versoes')));
+  check('CR1: versão, data, segmentos e a tabela por estado', /Versão CR1, de \d\d\/\d\d\/\d{4}: 14 segmentos, % de investimento em TI \(CAPEX\)/.test(cr1) && await p.locator('#cr1-parametros table.tab-cr1 tbody tr').count() === 14 && await p.locator('#cr1-parametros th:text-is("CE")').count() === 1, cr1.slice(0, 160));
+  check('CR1: documentação com a fórmula, a autora, o CAPEX e as versões', /Carol Rocha/.test(await txt(p, '#cr1-metodo')) && /F\s*=\s*R · p\s*seg,UF/.test((await txt(p, '#cr1-metodo')).replace(/\s+/g, ' ')) && /CAPEX/.test(await txt(p, '#cr1-metodo')) && /gerar-calibracao/.test(await txt(p, '#cr1-versoes')));
   check('Vezen: fontes em tabela e parâmetros fixos', /parâmetros do Método Vezen são fixos/.test(await txt(p, '#met-fontes')) && await p.locator('#met-fontes tbody tr').count() >= 30 && /Brasscom/.test(await txt(p, '#met-fontes')));
   check('Personalizado: os quatro caminhos de entrada', (await p.$$eval('#pers-dados .acoes button', bs => bs.map(x => x.textContent.trim()).join('|'))) === 'Importar planilha|Baixar modelo|Adicionar empresa|Informar percentuais');
   check('testes 134 de 134', /134 de 134/.test(await txt(p, '#met-testes')), (await txt(p, '#met-testes')).match(/\d+ de \d+/)[0]);
@@ -42,17 +41,29 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await p.fill('#f-nome', 'Teste Serviços'); await p.selectOption('#f-setor', 'servicos'); await p.selectOption('#f-uf', 'SP');
   await p.fill('#f-faturamento', '300.000.000'); await p.fill('#f-funcionarios', '600'); await p.waitForTimeout(700);
   const v0 = await txt(p, '#cr-valor');
-  check('cartão no Vezen mostra quanto daria o CR0', /R\$/.test(await txt(p, '#painel .modo-op:has(input[value=padrao]) .mo-val')), await txt(p, '#painel .modo-op:has(input[value=padrao])'));
-  check('nomes e descrições dos métodos no cartão', (await txt(p, '#painel .modo-op:has(input[value=base]) b')) === 'Método Vezen' && /^Receita × percentual da base/.test(await txt(p, '#painel .modo-op:has(input[value=padrao]) small')) && /Métodos$/.test(await txt(p, '#painel .modo-op:has(input[value=propria]) small')));
+  check('cartão no Vezen mostra quanto daria o CR1', /R\$/.test(await txt(p, '#painel .modo-op:has(input[value=padrao]) .mo-val')), await txt(p, '#painel .modo-op:has(input[value=padrao])'));
+  check('nomes e descrições dos métodos no cartão', (await txt(p, '#painel .modo-op:has(input[value=base]) b')) === 'Método Vezen' && /^Só investimento \(CAPEX\), por segmento e estado/.test(await txt(p, '#painel .modo-op:has(input[value=padrao]) small')) && /Métodos$/.test(await txt(p, '#painel .modo-op:has(input[value=propria]) small')));
   await p.click('#painel label.modo-op:has(input[data-modo][value=padrao])'); await p.waitForTimeout(900);
   const v1 = await txt(p, '#cr-valor');
   // só os campos que entram na conta: nos métodos por percentual somem usuários, unidades e a seção da equipe; com gasto de TI do ano, também no Vezen
   const campos = () => p.evaluate(() => ['f-funcionarios', 'f-usuarios', 'sec-ti', 'f-gastoDeclarado'].filter(id => document.getElementById(id)).join());
-  check('CR0: formulário só com os campos que entram na conta', await campos() === 'f-funcionarios,f-gastoDeclarado' && await p.evaluate(() => !pendentes(UI.atual.dados).some(c => SO_VEZEN.includes(c))), await campos());
+  check('CR1: formulário com segmento, estado, receita e funcionários', await campos() === 'f-funcionarios' && await p.locator('#f-segCR').count() === 1 && await p.locator('#f-setor, #f-municipio').count() === 0 && await p.inputValue('#f-segCR') === 'servicos' && await p.evaluate(() => !pendentes(UI.atual.dados).some(c => SO_VEZEN.includes(c))), await campos());
   check('Vezen: todos os campos, e eles somem com gasto de TI do ano', await p.evaluate(() => { const d = JSON.parse(JSON.stringify(UI.atual.dados)); d.modo = 'base'; const antes = SO_VEZEN.filter(c => entraNaConta(d, c)).length; d.gastoDeclarado = { v: 1e6, o: 'oficial' }; return antes === SO_VEZEN.length && !SO_VEZEN.some(c => entraNaConta(d, c)) && entraNaConta(d, 'funcionarios'); }));
-  check('CR0 muda o valor e usa só o caminho do percentual', v0 !== v1 && await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value === 'padrao' && calc(UI.atual.dados).ests.map(e => e.cod).join() === 'EP'), `${v0} → ${v1}`);
-  check('CR0: receita informada × percentual do setor', await p.evaluate(() => { const r = calc(UI.atual.dados), T = calPadrao().ti; const loc = r.modelo.local; return Math.abs(r.F / (r.receita.usada.v * T.ps.servicos * (loc ? loc.f : 1)) - 1) < 1e-9 && r.receita.modo === 'informada'; }));
-  check('confiança do CR0: dados modelo, sem acerto medido', /Aproximada: dados modelo/.test(await txt(p, '#painel .cr-conf')), await txt(p, '#painel .cr-conf'));
+  check('CR1 muda o valor e usa só o caminho do percentual', v0 !== v1 && await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value === 'padrao' && calc(UI.atual.dados).ests.map(e => e.cod).join() === 'EP'), `${v0} → ${v1}`);
+  check('CR1: receita informada × percentual do segmento no estado, rótulo CAPEX', await p.evaluate(() => { const r = calc(UI.atual.dados); return Math.abs(r.F / (r.receita.usada.v * 0.03) - 1) < 1e-9 && r.receita.modo === 'informada'; }) && /Investimento em TI \(CAPEX\)/.test(await txt(p, '#painel .cr-rot >> nth=1')));
+  check('confiança do CR1: percentuais do estudo', /Aproximada: percentuais do estudo/.test(await txt(p, '#painel .cr-conf')), await txt(p, '#painel .cr-conf'));
+  await p.selectOption('#f-segCR', 'ti'); await p.waitForTimeout(500);
+  check('CR1: o segmento escolhido muda o percentual (Tecnologia da informação, SP 3%)', await p.evaluate(() => UI.atual.dados.segCR === 'ti' && calc(UI.atual.dados).segCR === 'ti'));
+  await p.selectOption('#f-segCR', 'servicos'); await p.waitForTimeout(300);
+  check('CR1: órgão público informa a despesa empenhada total', await p.evaluate(() => rotulos({ natureza: 'publico', modo: 'padrao' }).fat === 'Despesa empenhada total' && rotulos({ natureza: 'publico', modo: 'base' }).fat === 'Orçamento total'));
+  // Método Vezen: gasto total ou só investimento (CAPEX)
+  check('o seletor de CAPEX só aparece no Método Vezen', await p.locator('#f-escopo').count() === 0);
+  await p.click('#painel label.modo-op:has(input[data-modo][value=base])'); await p.waitForTimeout(700);
+  await p.selectOption('#f-escopo', 'capex'); await p.waitForTimeout(700);
+  check('Vezen só CAPEX: gasto total × 32% e rótulo CAPEX', await p.evaluate(() => { const d = UI.atual.dados, r = calc(d), t = calc(Object.assign({}, d, { escopo: '' })); return d.escopo === 'capex' && r.capex && Math.abs(r.F / t.F - 0.32) < 1e-9 && Math.abs(r.p90 / t.p90 - 0.32) < 1e-9 && r.ests.every(e => /CAPEX/.test(e.partes[e.partes.length - 1].rot)); }) && /Investimento em TI \(CAPEX\)/.test(await txt(p, '#painel .cr-rot >> nth=1')));
+  await p.selectOption('#f-escopo', ''); await p.waitForTimeout(500);
+  check('Vezen volta ao gasto total', await p.evaluate(() => !calc(UI.atual.dados).capex) && !/CAPEX/.test(await txt(p, '#painel .cr-rot >> nth=1')));
+  await p.click('#painel label.modo-op:has(input[data-modo][value=padrao])'); await p.waitForTimeout(700);
   // gasto real de 2024 (antes do ano de referência) para a análise entrar no Personalizado depois
   await p.click('[data-acao=add-real]'); await p.waitForTimeout(200);
   await p.fill('[data-real="0"][data-parte="ano"]', '2024'); await p.fill('[data-real="0"][data-parte="v"]', '4.000.000'); await p.press('[data-real="0"][data-parte="v"]', 'Tab'); await p.waitForTimeout(300);
@@ -116,7 +127,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await explicar(p); await p.click('#painel [data-acao=resumo]'); await p.waitForTimeout(300);
   const res = await p.inputValue('#txt-resumo');
   check('resumo: título com o método', /\(Método Personalizado\)/.test(res));
-  check('resumo: método, percentual e outros métodos', /Método: Método Personalizado, com as empresas informadas por você \(.*\): .*percentual de TI sobre a receita medido de \d+ empresas: [\d,]+% neste setor.*Pelos outros métodos: Método Vezen, Geral R\$ .*Método CR0, Geral R\$/.test(res), (res.match(/- Método.*/) || [''])[0].slice(0, 300));
+  check('resumo: método, percentual e outros métodos', /Método: Método Personalizado, com as empresas informadas por você \(.*\): .*percentual de TI sobre a receita medido de \d+ empresas: [\d,]+% neste setor.*Pelos outros métodos: Método Vezen, Geral R\$ .*Método CR1, Geral R\$/.test(res), (res.match(/- Método.*/) || [''])[0].slice(0, 300));
   check('resumo: limitações', /Método Personalizado feito com 20 empresas informadas por você/.test(res));
   await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   await salvarAnalise(p);
@@ -194,7 +205,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
       calibracao: { aplicada: { data: '2026-11-10', N: 12, kg: 0.5, ks: {}, lambda: 1.2, acerto: 9, base: 'base-2026-11-10' }, historico: [null], base: null, semBase: false, mapaUlt: null } }));
   });
   await p2.reload(); await p2.waitForTimeout(400);
-  check('migração: calibrada → CR1', /Método CR0/.test(await txt(p2, '#app table tbody')), await txt(p2, '#app table tbody'));
+  check('migração: calibrada → CR1', /Método CR1/.test(await txt(p2, '#app table tbody')), await txt(p2, '#app table tbody'));
   await ir(p2, '#/metodos');
   check('migração: Personalizado vazio', /Nenhum dado ainda/.test(await txt(p2, '#pers-dados')));
 
