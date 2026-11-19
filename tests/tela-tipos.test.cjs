@@ -29,6 +29,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   const cr1 = await txt(p, '#cr1-parametros');
   check('CR1: versão, data, segmentos e a tabela por estado', /Versão CR1, de \d\d\/\d\d\/\d{4}: 14 segmentos, % de investimento em TI \(CAPEX\)/.test(cr1) && await p.locator('#cr1-parametros table.tab-cr1 tbody tr').count() === 14 && await p.locator('#cr1-parametros th:text-is("CE")').count() === 1, cr1.slice(0, 160));
   check('CR1: documentação com a fórmula, a autora, o CAPEX e as versões', /Carol Rocha/.test(await txt(p, '#cr1-metodo')) && /F\s*=\s*R · p\s*seg,UF/.test((await txt(p, '#cr1-metodo')).replace(/\s+/g, ' ')) && /CAPEX/.test(await txt(p, '#cr1-metodo')) && /gerar-calibracao/.test(await txt(p, '#cr1-versoes')));
+  check('Vezen: origem das fórmulas, Índice G e CAPU da FGV', /Índice G/.test(await txt(p, '#met-caminhos')) && /FGVcia/.test(await txt(p, '#met-caminhos')) && /CAPEX \+ OPEX/.test(await txt(p, '#met-caminhos')));
   check('Vezen: fontes em tabela e parâmetros fixos', /parâmetros do Método Vezen são fixos/.test(await txt(p, '#met-fontes')) && await p.locator('#met-fontes tbody tr').count() >= 30 && /Brasscom/.test(await txt(p, '#met-fontes')));
   check('Personalizado: os quatro caminhos de entrada', (await p.$$eval('#pers-dados .acoes button', bs => bs.map(x => x.textContent.trim()).join('|'))) === 'Importar planilha|Baixar modelo|Adicionar empresa|Informar percentuais');
   check('testes 134 de 134', /134 de 134/.test(await txt(p, '#met-testes')), (await txt(p, '#met-testes')).match(/\d+ de \d+/)[0]);

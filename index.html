@@ -4071,7 +4071,7 @@ function atualizarPainel() {
     ${avisoDivergencia(r)}
     ${r.E4ativo ? `<div class="nota">${ico('info')}<p>O gasto declarado do ano substitui a estimativa. Os outros caminhos aparecem só para comparação.</p></div>` : ''}
     ${r.avisos.map(a => `<div class="alerta">${ico('alerta')}<p>${esc(a)}</p></div>`).join('')}
-    <div class="cr-bloco"><h3>${r.capex ? 'Para o resumo' : `Para o resumo, ${com ? 'com' : 'sem'} salários da equipe de TI`}</h3><div class="cr-dois"><div><small>Geral</small><b>${fmtRS(g)}</b>${rec ? `<small>${fmtPct(g / rec.v)} da receita</small>` : ''}</div><div><small>Conservadora</small><b>${fmtRS(c)}</b>${rec ? `<small>${fmtPct(c / rec.v)} da receita</small>` : ''}</div></div></div>
+    <div class="cr-bloco"><h3>${r.capex ? 'Para o resumo' : `Para o resumo, ${com ? 'com' : 'sem'} salários da equipe de TI`}</h3><div class="cr-dois"><div><small>Geral</small><b>${fmtRS(g)}</b>${rec ? `<small>${fmtPct(g / rec.v)} da receita${r.capex || !com ? '' : ' (Índice G)'}</small>` : ''}</div><div><small>Conservadora</small><b>${fmtRS(c)}</b>${rec ? `<small>${fmtPct(c / rec.v)} da receita</small>` : ''}</div></div></div>
     <div class="cr-bloco cr-ano"><h3><label for="f-anoRef">Ano de referência</label></h3>${seletorAno(d)}</div>
     <div class="cr-bloco"><h3>Método</h3>${seletorModo(m, '', d)}${seletorEscopo(d, m)}</div>
     ${blocoPmd}
@@ -5581,6 +5581,13 @@ function metCaminhos(Pm) {
     ['E0 · Gasto real', f(FX.e0()[1]), 'Há gasto real de outro ano', 'ver Incerteza'],
     ['E4 · Gasto do ano', f(vv('D')), 'Há gasto do ano de referência, declarado ou real: substitui os demais', '—']], { num: [false, false, false, true], larg: ['10rem', '', '', '6.5rem'] })}
   <details class="d-det" data-sem-termos><summary>Letras das fórmulas</summary>${legDe(Pm, ['R', 'p', 'f12', 'M', 'U', 'CAPU', 'I', 'T', 'S', 'c', 's', 'A', 'q', 'K', 'G', 'g', 'a', 'D'])}</details>
+  ${bloco('De onde vêm as fórmulas: Índice G e CAPU', `<p>Os dois primeiros caminhos isolam o gasto de TI nos dois indicadores da Pesquisa Anual do Uso de TI da FGV (FGVcia, da FGV EAESP), a referência no Brasil para comparar o gasto de TI entre empresas.</p>`
+    + eqs([`Índice G`, `gasto total de TI (CAPEX + OPEX) ÷ receita líquida × 100`, 'gasto e investimento em TI sobre a receita'], [vv('CAPU'), 'gasto total de TI ÷ usuários', 'custo anual de TI por usuário'])
+    + notas(['O Índice G de uma empresa só se calcula quando o gasto de TI já é conhecido. Para estimar, a conta vai ao contrário: o E1 multiplica a receita pelo percentual típico do setor (o Índice G do setor), e o E2 multiplica os usuários pelo CAPU do setor.',
+      'Os dois somam gasto e investimento (OPEX e CAPEX): hoje a TI é muito comprada como serviço, como nuvem e assinaturas, que são OPEX. Contar só o CAPEX deixaria de fora a maior parte do gasto.',
+      'O nível dos percentuais por setor não vem da FGV: com os percentuais da pesquisa, a soma das empresas passaria 3 vezes o mercado de TI do Brasil (veja Setores). Da FGV vêm o ajuste de porte, a parte da equipe e a parte do investimento.',
+      'O CAPU sobe com o tamanho da empresa, ao contrário do que se esperaria: por isso o ajuste de porte.',
+      'No resultado, o percentual da receita do valor geral é o Índice G estimado da empresa.']))}
   ${bloco('Quando falta um dado', eqs([vv('U'), `${vv('N')} · ${vv('u')}`, 'sem usuários informados']) + legDe(Pm, ['N', 'u'])
     + notas([`Salário sem valor informado: o médio de TI da UF; sem UF, a média nacional (${fmtRS(Pm.regional.mediaNacional)}).`, 'Sem gasto declarado, o resultado nunca fica abaixo das adições do balanço.']))}`;
 }
@@ -6171,8 +6178,11 @@ const GLOSSARIO = [
   { id: 're', t: 'RE', n: 'Receita pelo enquadramento', c: 'calc', m: 'met-receita',
     d: 'Caminho que estima a receita de uma pequena empresa por um valor no meio da faixa do enquadramento.' },
   { id: 'capu', t: 'CAPU', c: 'calc', m: 'met-caminhos',
-    d: 'Gasto anual de TI por usuário: quanto as empresas do setor gastam, no valor central, com tecnologia para cada pessoa que usa computador no trabalho.',
-    u: 'Entra no caminho E2.' },
+    d: 'Custo anual de TI por usuário: quanto as empresas do setor gastam, no valor central, com tecnologia para cada pessoa que usa computador no trabalho. Indicador da Pesquisa Anual do Uso de TI da FGV.',
+    u: 'Entra no caminho E2. Sobe com o tamanho da empresa.' },
+  { id: 'indiceg', t: 'Índice G', c: 'calc', a: ['Índice G'], m: 'met-caminhos',
+    d: 'Gasto total de TI (CAPEX e OPEX) dividido pela receita líquida, vezes 100. Indicador de governança de TI da Pesquisa Anual do Uso de TI da FGV: mostra quanto de cada real de receita vai para tecnologia.',
+    u: 'O caminho E1 usa o Índice G típico do setor; no resultado, o percentual da receita do valor geral é o Índice G estimado da empresa.' },
   { id: 'usuarios', t: 'Usuários de TI', c: 'calc', a: ['usuários', 'usuário'], ci: true, auto: false, m: 'met-caminhos',
     d: 'Pessoas que usam computador no trabalho. Quase nunca é um dado público.',
     u: 'Entra no caminho E2. Sem o número, a ferramenta supõe um valor pelo setor.' },

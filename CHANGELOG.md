@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.4.1] - 2026-11-19
+
+### Adicionado
+- **Índice G e CAPU na documentação.** Em Métodos, Caminhos: de onde vêm as fórmulas dos dois primeiros caminhos (os indicadores da Pesquisa Anual do Uso de TI da FGV), por que somam CAPEX e OPEX e por que o nível dos percentuais não vem da FGV. Índice G no glossário; o CAPU ganha a origem.
+- **Índice G no resultado.** O percentual da receita do valor geral, no gasto total com salários, aparece como o Índice G estimado da empresa.
+
 ## [3.4.0] - 2026-11-19
 
 ### Adicionado
