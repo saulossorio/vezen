@@ -1,4 +1,4 @@
-// Testes de tela dos três métodos: a tela Métodos (documentação, parâmetros do CR1 e os dados do Personalizado), a escolha do método na análise,
+// Testes de tela dos quatro métodos: a tela Métodos (documentação, parâmetros do CR1 e os dados do Personalizado), a escolha do método na análise,
 // empresas digitadas, importadas e percentuais diretos no Personalizado, rotas antigas e a migração de dados antigos.
 const { chromium } = require('playwright-core');
 const fs = require('fs');
@@ -24,12 +24,13 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   // 1. a tela Métodos: um item só no menu, documentação por método e a área de entrada do Personalizado
   check('menu: Métodos no lugar de Calibração, Parâmetros e Metodologia', /Métodos/.test(await txt(p, '#nav')) && !/Calibração|Parâmetros|Metodologia/.test(await txt(p, '#nav')) && await p.locator('#nav a[href="#/metodos"]').count() === 1);
   await ir(p, '#/metodos');
-  check('21 seções em 4 grupos, com uma só de entrada de dados', await p.locator('section.met-sec').count() === 21 && (await p.$$eval('.doc-ind .ind-grupo', g => g.map(x => x.textContent).join('|'))) === 'Visão geral|Método Vezen|Método CR1|Método Personalizado' && await p.locator('section.met-entrada').count() === 1 && (await txt(p, '#pers-dados-t')).includes('entrada de dados'));
-  check('cartões dos três métodos', /Disponível|análise/.test(await cartao(p, 'Método Vezen')) && /Disponível/.test(await cartao(p, 'Método CR1')) && /Sem dados ainda/.test(await cartao(p, 'Método Personalizado')), await cartao(p, 'Método Personalizado'));
+  check('23 seções em 5 grupos, com uma só de entrada de dados', await p.locator('section.met-sec').count() === 23 && (await p.$$eval('.doc-ind .ind-grupo', g => g.map(x => x.textContent).join('|'))) === 'Visão geral|Método Vezen|Método CR1|Método FGV|Método Personalizado' && await p.locator('section.met-entrada').count() === 1 && (await txt(p, '#pers-dados-t')).includes('entrada de dados'));
+  check('cartões dos quatro métodos', /Disponível|análise/.test(await cartao(p, 'Método Vezen')) && /Disponível/.test(await cartao(p, 'Método CR1')) && /Disponível/.test(await cartao(p, 'Método FGV')) && /Sem dados ainda/.test(await cartao(p, 'Método Personalizado')), await cartao(p, 'Método Personalizado'));
   const cr1 = await txt(p, '#cr1-parametros');
   check('CR1: versão, data, segmentos e a tabela por estado', /Versão CR1, de \d\d\/\d\d\/\d{4}: 14 segmentos, % de investimento em TI \(CAPEX\)/.test(cr1) && await p.locator('#cr1-parametros table.tab-cr1 tbody tr').count() === 14 && await p.locator('#cr1-parametros th:text-is("CE")').count() === 1, cr1.slice(0, 160));
   check('CR1: documentação com a fórmula, a autora, o CAPEX e as versões', /Carol Rocha/.test(await txt(p, '#cr1-metodo')) && /F\s*=\s*R · p\s*seg,UF/.test((await txt(p, '#cr1-metodo')).replace(/\s+/g, ' ')) && /CAPEX/.test(await txt(p, '#cr1-metodo')) && /gerar-calibracao/.test(await txt(p, '#cr1-versoes')));
   check('Vezen: origem das fórmulas, Índice G e CAPU da FGV', /Índice G/.test(await txt(p, '#met-caminhos')) && /FGVcia/.test(await txt(p, '#met-caminhos')) && /CAPEX \+ OPEX/.test(await txt(p, '#met-caminhos')));
+  check('FGV: fórmula, links da calculadora e da pesquisa, seis setores', /PDCA TI/.test(await txt(p, '#fgv-metodo')) && await p.locator('#fgv-metodo a[href="https://www.pdcati.com.br/benchmarking-ti/"]').count() === 1 && await p.locator('#fgv-metodo a[href*="pesti_fgvcia_2025.pdf"]').count() === 1 && await p.locator('#fgv-parametros tbody tr').count() === 6 && /21,0%/.test(await txt(p, '#fgv-parametros')));
   check('Vezen: fontes em tabela e parâmetros fixos', /parâmetros do Método Vezen são fixos/.test(await txt(p, '#met-fontes')) && await p.locator('#met-fontes tbody tr').count() >= 30 && /Brasscom/.test(await txt(p, '#met-fontes')));
   check('Personalizado: os quatro caminhos de entrada', (await p.$$eval('#pers-dados .acoes button', bs => bs.map(x => x.textContent.trim()).join('|'))) === 'Importar planilha|Baixar modelo|Adicionar empresa|Informar percentuais');
   check('testes 134 de 134', /134 de 134/.test(await txt(p, '#met-testes')), (await txt(p, '#met-testes')).match(/\d+ de \d+/)[0]);
@@ -38,7 +39,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await ir(p, '#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   check('nova análise no Método Vezen', await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value) === 'base');
   const dis = await p.evaluate(() => [...document.querySelectorAll('#painel input[data-modo]')].map(i => i.value + ':' + i.disabled).join(','));
-  check('Personalizado desabilitado sem dados', dis === 'base:false,padrao:false,propria:true', dis);
+  check('Personalizado desabilitado sem dados', dis === 'base:false,padrao:false,fgv:false,propria:true', dis);
   await p.fill('#f-nome', 'Teste Serviços'); await p.selectOption('#f-setor', 'servicos'); await p.selectOption('#f-uf', 'SP');
   await p.fill('#f-faturamento', '300.000.000'); await p.fill('#f-funcionarios', '600'); await p.waitForTimeout(700);
   const v0 = await txt(p, '#cr-valor');
@@ -64,6 +65,9 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   check('Vezen só CAPEX: gasto total × 32% e rótulo CAPEX', await p.evaluate(() => { const d = UI.atual.dados, r = calc(d), t = calc(Object.assign({}, d, { escopo: '' })); return d.escopo === 'capex' && r.capex && Math.abs(r.F / t.F - 0.32) < 1e-9 && Math.abs(r.p90 / t.p90 - 0.32) < 1e-9 && r.ests.every(e => /CAPEX/.test(e.partes[e.partes.length - 1].rot)); }) && /Investimento em TI \(CAPEX\)/.test(await txt(p, '#painel .cr-rot >> nth=1')));
   await p.selectOption('#f-escopo', ''); await p.waitForTimeout(500);
   check('Vezen volta ao gasto total', await p.evaluate(() => !calc(UI.atual.dados).capex) && !/CAPEX/.test(await txt(p, '#painel .cr-rot >> nth=1')));
+  await p.click('#painel label.modo-op:has(input[data-modo][value=fgv])'); await p.waitForTimeout(700);
+  check('FGV: campo Setor (FGV), sem estado; receita × Índice G de Serviços (14,5%), gasto total', await p.locator('#f-segFGV').count() === 1 && await p.inputValue('#f-segFGV') === 'servicos' && await p.locator('#f-uf, #f-segCR, #f-setor').count() === 0
+    && await p.evaluate(() => { const r = calc(UI.atual.dados); return r.modoCalc === 'fgv' && !r.capex && Math.abs(r.F / (r.receita.usada.v * 0.145) - 1) < 1e-9; }) && !/CAPEX/.test(await txt(p, '#painel .cr-rot >> nth=1')));
   await p.click('#painel label.modo-op:has(input[data-modo][value=padrao])'); await p.waitForTimeout(700);
   // gasto real de 2024 (antes do ano de referência) para a análise entrar no Personalizado depois
   await p.click('[data-acao=add-real]'); await p.waitForTimeout(200);
@@ -120,10 +124,10 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await ir(p, '#/empresas');
   await p.click('.lista-emp .emp-nome >> nth=0'); await p.waitForTimeout(500);
   const dis2 = await p.evaluate(() => [...document.querySelectorAll('#painel input[data-modo]')].map(i => i.value + ':' + i.disabled).join(','));
-  check('Personalizado habilitado', dis2 === 'base:false,padrao:false,propria:false', dis2);
+  check('Personalizado habilitado', dis2 === 'base:false,padrao:false,fgv:false,propria:false', dis2);
   await p.click('#painel label.modo-op:has(input[data-modo][value=propria])'); await p.waitForTimeout(500);
   const vals = await p.evaluate(() => [...document.querySelectorAll('#painel .modo-op .mo-val')].map(e => e.textContent));
-  check('cartão com o valor dos três métodos', vals.length === 3 && vals.every(v => /R\$/.test(v)), vals.join(' | '));
+  check('cartão com o valor dos quatro métodos', vals.length === 4 && vals.every(v => /R\$/.test(v)), vals.join(' | '));
   check('opção do Personalizado diz as empresas', /20 empresas suas/.test(await txt(p, '#painel .modo-op:has(input[value=propria]) small')));
   await explicar(p); await p.click('#painel [data-acao=resumo]'); await p.waitForTimeout(300);
   const res = await p.inputValue('#txt-resumo');
@@ -133,7 +137,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await p.keyboard.press('Escape'); await p.waitForTimeout(200);
   await salvarAnalise(p);
   await p.click('.abas a:nth-child(2)'); await p.waitForTimeout(500);
-  check('resultado: chip e seletor', await p.locator('#res-estimativa .chip-modo.minha').count() === 1 && await p.locator('#res-estimativa input[data-modo]').count() === 3);
+  check('resultado: chip e seletor', await p.locator('#res-estimativa .chip-modo.minha').count() === 1 && await p.locator('#res-estimativa input[data-modo]').count() === 4);
   const etapas = (await p.evaluate(() => [...document.querySelectorAll('.etapas')].map(e => e.textContent).join(' '))).replace(/\s+/g, ' ');
   check('resultado: etapa do percentual, sem correção k', /Estimativa pela receita e o percentual da base/.test(etapas) && !/Correção da calibração/.test(etapas), etapas.slice(0, 200));
   check('resultado: o caminho EP com as partes', /Pela receita e o percentual da base/.test(await txt(p, '#res-caminhos')) && /% da receita gasto com TI nas empresas da base/.test(await txt(p, '#res-caminhos')));

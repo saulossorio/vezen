@@ -82,7 +82,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.waitForTimeout(700); // o valor do cartão anima até o novo
   ok('Cartão: valor central = motor', (await txt('#cr-valor')).startsWith(await p.evaluate(() => fmtRS(calc(UI.atual.dados).F))));
   ok('Sem salários = 64% do geral', Math.abs(z.geralSem / z.geral - 0.64) < 1e-9);
-  ok('Cartão: tipo de estimativa com o valor de cada opção', await p.locator('#painel .modo-op').count() === 3 && /R\$/.test(await txt('#painel .modo-op:has(input[value=padrao]) .mo-val')));
+  ok('Cartão: tipo de estimativa com o valor de cada opção', await p.locator('#painel .modo-op').count() === 4 && /R\$/.test(await txt('#painel .modo-op:has(input[value=padrao]) .mo-val')));
   ok('Cartão: o que falta para a confiança, num acordeão fechado', await p.locator('#painel details.cr-dicas:not([open]) .pmd button').count() >= 1);
   await p.click('#painel details.cr-dicas > summary'); await p.fill('#f-funcionarios', '2.001'); await p.waitForTimeout(150);
   ok('Acordeão continua aberto quando o cartão se redesenha', await p.locator('#painel details.cr-dicas[open]').count() === 1);
@@ -116,7 +116,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.click('[data-acao=menu-analise]'); await p.click('#pop [data-acao=nova]'); await p.waitForTimeout(150);
   if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Descartar")');
   await p.waitForTimeout(150);
-  ok('Nova análise começa pela escolha do método', await p.locator('[data-acao=escolher-modo]').count() === 3 && await p.locator('#form').count() === 0);
+  ok('Nova análise começa pela escolha do método', await p.locator('[data-acao=escolher-modo]').count() === 4 && await p.locator('#form').count() === 0);
   await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(150);
   await p.fill('#f-nome', 'Subsidiária Teste'); await p.selectOption('#f-natureza', 'subsidiaria'); await p.selectOption('#f-setor', 'industria'); await p.selectOption('#f-uf', 'SP');
   ok('Rótulo da receita para subsidiária', (await p.textContent('label[for=f-faturamento]')).includes('Receita no Brasil'));
@@ -346,7 +346,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('A Metodologia abre na seção da ajuda e traz os multiplicadores', Math.abs(await p.locator('#met-ajustes').evaluate(e => e.getBoundingClientRect().top)) < 140 && (await txt('#met-ajustes')).includes('Intensidade digital') && (await p.evaluate(() => { const tr = [...document.querySelectorAll('#met-ajustes tbody tr')].find(t => t.cells[0].textContent.trim() === 'Intensidade digital baixa'); return tr ? tr.querySelector('td.n').textContent : ''; })) === '0,80');
   ok('A Metodologia explica o mínimo de usuários e o salário de referência', /50 usuários/.test(await txt('#met-caminhos')) && /média nacional/.test(await txt('#met-caminhos')));
   ok('Metodologia: a Fórmula completa traz a conta em 5 passos, cada um com legenda e link para a seção', await p.evaluate(() => { const v = document.querySelector('#met-visao .passos'); if (!v) return false; const ls = [...v.querySelectorAll('.fx-e')].map(e => e.innerText.replace(/\s+/g, '') + '=' + e.nextElementSibling.nextElementSibling.innerText.replace(/\s+/g, ' ')); return v.querySelectorAll(':scope > li').length === 5 && ls.length >= 15 && ls.some(t => /^E1=.*M$/.test(t)) && ls.some(t => /^R=.*12 ÷ m/.test(t)) && v.querySelectorAll('[data-acao=rolar]').length === 5 && v.querySelectorAll('dl.letras').length === 5; }));
-  ok('Metodologia: a tabela dos caminhos traz E1 e E2 sem ajuste especial de bancos, e a receita vem antes dos caminhos', await p.evaluate(() => { const lin = [...document.querySelectorAll('#met-caminhos .tab-doc tbody tr')].map(tr => tr.innerText.replace(/\s+/g, ' ')), ids = [...document.querySelectorAll('section.met-sec')].map(s => s.id); return /^E1 · Receita /.test(lin[0]) && !/fb/.test(lin[0]) && /^E2 · Usuários /.test(lin[1]) && !/fb/.test(lin[1]) && ids.indexOf('met-receita') < ids.indexOf('met-caminhos') && ids.indexOf('met-pmd') > ids.indexOf('met-categorias') && ids.length === 21; }));
+  ok('Metodologia: a tabela dos caminhos traz E1 e E2 sem ajuste especial de bancos, e a receita vem antes dos caminhos', await p.evaluate(() => { const lin = [...document.querySelectorAll('#met-caminhos .tab-doc tbody tr')].map(tr => tr.innerText.replace(/\s+/g, ' ')), ids = [...document.querySelectorAll('section.met-sec')].map(s => s.id); return /^E1 · Receita /.test(lin[0]) && !/fb/.test(lin[0]) && /^E2 · Usuários /.test(lin[1]) && !/fb/.test(lin[1]) && ids.indexOf('met-receita') < ids.indexOf('met-caminhos') && ids.indexOf('met-pmd') > ids.indexOf('met-categorias') && ids.length === 23; }));
   ok('Metodologia: nenhuma fórmula dentro de frase: os blocos de texto não têm sinal de igual', await p.evaluate(() => [...document.querySelectorAll('#app .met-sec p, #app .met-sec .notas li')].every(e => !/\s=\s/.test(e.innerText))));
   ok('Metodologia: expoentes com o sinal de menos tipográfico', !/e-\d/.test(await p.evaluate(() => [...document.querySelectorAll('#app .fx')].map(f => f.innerText).join(' '))));
   await ir('#/empresas'); await p.click('.lista-emp .emp-nome >> nth=-1'); await p.waitForTimeout(500);

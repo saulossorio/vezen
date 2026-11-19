@@ -93,6 +93,17 @@ ok('Embutida: sem CNPJ, e-mail ou linhas de empresa', !/\d{14}|[a-z0-9._-]+@[a-z
   ok('CR1: receita que falta é estimada pelos funcionários', !est.vazio && perto(est.F, est.receita.usada.v * 0.05, 1));
 }
 
+// 6b. Método FGV: a conta da calculadora da PDCA TI, receita × Índice G do setor (gasto total)
+{
+  const F = M.PAIS.metodoFGV, Pf = M.parametrosCalibrados(P, F), ff = M.fatoresCalibrados(F, P), run = dd => M.calcular(dd, Pf, { ano: 2025, calib: ff });
+  const G = F.ti.tabela, base = { nome: 'X', natureza: 'privada', setor: 'banco', faturamento: { v: 1e9, o: 'oficial' }, fatAno: '2025', fatMeses: '12', gastoDeclarado: { v: 6e7, o: 'oficial' } };
+  ok('FGV: os seis setores da calculadora, com Índice G e CAPU', Object.keys(G).join() === 'agro,industria,servicos,comercio,geral,financeiro' && perto(G.financeiro.nac, 0.21, 1e-9) && perto(G.servicos.nac, 0.145, 1e-9) && perto(G.comercio.nac, 0.048, 1e-9) && G.financeiro.capu === 135000);
+  const r1 = run(JSON.parse(JSON.stringify(base)));
+  ok('FGV: R$ 1 bi no Financeiro dá R$ 210 mi, como na calculadora; gasto total, só o caminho EP', perto(r1.F, 2.1e8, 1) && !r1.capex && r1.ests.map(e => e.cod).join() === 'EP' && !r1.E4ativo, r1.F);
+  ok('FGV: sem setor, Geral (10%); setor escolhido vale sobre o da ferramenta', perto(run(Object.assign(JSON.parse(JSON.stringify(base)), { setor: '' })).F, 1e8, 1) && perto(run(Object.assign(JSON.parse(JSON.stringify(base)), { segFGV: 'agro' })).F, 5e7, 1));
+  ok('FGV: não vale para órgão público', run({ nome: 'Y', natureza: 'publico', faturamento: { v: 1e9, o: 'oficial' }, fatAno: '2025', fatMeses: '12' }).vazio);
+}
+
 // 7. a versão pública dá as mesmas estimativas que a calibração completa
 const pub = M.calibracaoPublica(cal, C.minGrupo);
 const Pp = M.parametrosCalibrados(P, pub), fp = M.fatoresCalibrados(pub, P);

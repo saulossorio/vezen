@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.0] - 2026-11-19
+
+### Adicionado
+- **Método FGV**, o quarto método: a conta exata da [calculadora de benchmarking de TI da PDCA TI](https://www.pdcati.com.br/benchmarking-ti/) (Gustavo de Castro Rafael), receita líquida × Índice G do setor na 36ª Pesquisa Anual do Uso de TI da FGVcia (2025). Gasto total de TI. Seis setores, como na calculadora: Agro 5%, Indústria 5,5%, Serviços 14,5%, Comércio 4,8%, Financeiro 21% e Geral 10%; o CAPU de cada setor aparece só para comparar. Campo “Setor (FGV)”; sem escolha, vale o mais próximo do setor da ferramenta, e sem setor, Geral. Não vale para órgão público. Em Métodos, “Fórmula e fonte”, com os links da calculadora e da pesquisa, e “Parâmetros em uso”; no glossário, Método FGV e PDCA TI.
+
+### Alterado
+- **Métodos por tabela** (CR1 e FGV) usam o mesmo motor: cada tabela diz o campo do segmento, o segmento de cada setor, a linha do setor para estimar a receita e se mede só CAPEX.
+- **Escolha do método** com quatro opções.
+
 ## [3.4.1] - 2026-11-19
 
 ### Adicionado

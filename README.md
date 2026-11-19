@@ -26,9 +26,9 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 
 **Empresa modelo:** um exemplo pronto (Banco do Brasil, com dados oficiais), no menu de **Empresas**.
 
-**Métodos** explica como cada um dos três métodos calcula, com os parâmetros em uso (só leitura no Vezen e no CR) e, no fim, os dados do Método Personalizado, a única parte que recebe dados seus. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
+**Métodos** explica como cada um dos quatro métodos calcula, com os parâmetros em uso (só leitura no Vezen, no CR e no FGV) e, no fim, os dados do Método Personalizado, a única parte que recebe dados seus. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
 
-## Os três métodos
+## Os quatro métodos
 
 Toda análise chega a dois números do ano de referência (por padrão, o último ano fechado): a receita líquida e o investimento anual em TI, cada um com a origem à vista. A receita aceita um valor por ano, como o gasto real; a conta usa o do ano de referência. O método escolhido na análise decide como a estimativa é feita:
 
@@ -36,6 +36,7 @@ Toda análise chega a dois números do ano de referência (por padrão, o últim
 |---|---|---|
 | Método Vezen | Referências públicas (medianas internacionais por setor, gasto declarado por empresas brasileiras, balanços, FGV, Brasscom, FEBRABAN): até sete caminhos de cálculo, juntados pela precisão, com índice de confiança. É o método das análises novas | Ninguém pela tela: só uma nova versão da ferramenta, com evidência |
 | Método CR (CR1 em uso) | Receita líquida (ou despesa empenhada, no órgão público) × percentual de investimento em TI, só CAPEX, por segmento e estado, do estudo de Carol Rocha (2026). Sem valor no estado, a média nacional do segmento. A receita, quando falta, é estimada pelos funcionários, como no Vezen | Só o administrador, com uma nova versão (CR1.1, CR2) |
+| Método FGV | Receita líquida × Índice G do setor na 36ª Pesquisa Anual do Uso de TI da FGV: a conta da [calculadora de benchmarking da PDCA TI](https://www.pdcati.com.br/benchmarking-ti/). Gasto total de TI, seis setores; os percentuais são bem maiores que os do Vezen, uma referência alta de mercado | Ninguém pela tela: só uma nova versão da ferramenta |
 | Método Personalizado | A mesma conta do CR, com percentuais tirados das suas empresas (planilha, digitadas ou análises salvas com gasto real) ou digitados por você | Você, na tela Métodos |
 
 O CR1 mede só investimento (CAPEX); o Método Vezen mede o gasto total de TI ou, se escolhido no painel, só o CAPEX. No Método Personalizado, só um lugar com pelo menos 5 empresas tem valor próprio.
