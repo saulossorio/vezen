@@ -5,7 +5,7 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 ## [3.6.1] - 2026-11-20
 
 ### Alterado
-- **Tour:** o primeiro passo diz o que o Vezen é (ferramenta para estimar dados financeiros de empresas no Brasil), sem saudação nem adjetivos.
+- **Tour reescrito em tom impessoal:** o primeiro passo diz o que o Vezen é (ferramenta para estimar dados financeiros de empresas no Brasil); sem saudação, exclamação, adjetivos nem a quantidade de passos no texto.
 
 ## [3.6.0] - 2026-11-20
 

@@ -25,8 +25,8 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     check(`${nomeTela}: clique fora do cartão é segurado e explicado`, await p.locator('.tour-msg.visivel').count() === 1 && await p.evaluate(() => location.hash) === '#/empresas');
     // o que a pessoa faz em cada passo de clique ou de tarefa, sempre com clique de verdade (o véu não pode tapar)
     const FAZER = {
-      'Primeiro, escolha o método': async () => p.click('#app .comeco[data-v="base"]'),
-      'O nome da empresa': async () => p.fill('#f-nome', 'Banco do Brasil'),
+      'Método': async () => p.click('#app .comeco[data-v="base"]'),
+      'Nome da empresa': async () => p.fill('#f-nome', 'Banco do Brasil'),
       'Natureza': async () => p.selectOption('#f-natureza', 'publico'),
       'Tipo de órgão': async () => p.selectOption('#f-tipoPublico', 'estatal'),
       'Setor': async () => p.selectOption('#f-setor', 'banco'),
@@ -34,13 +34,13 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
         check(`${nomeTela}: valor abreviado vira o número inteiro`, (await p.inputValue('#f-faturamento')) === '73.900.000.000'); },
       'Origem do dado': async () => { await p.click('#app .origem[data-alvo="campo:faturamento"]'); await p.click('#pop [data-o="oficial"]'); },
       'Funcionários': async () => { await p.fill('#f-funcionarios', '85206'); await p.press('#f-funcionarios', 'Tab'); },
-      'Quando falta um dado': async () => { await p.click('#app .sem-dado[data-campo="profTI"]'); await p.click('#pop [data-s="nao-encontrado"]'); },
+      'Dado não encontrado': async () => { await p.click('#app .sem-dado[data-campo="profTI"]'); await p.click('#pop [data-s="nao-encontrado"]'); },
       'Gasto de TI real': async () => { await p.click('#app [data-acao="add-real"]'); await p.fill('#app [data-real][data-parte="ano"]', '2025'); await p.fill('#app [data-real][data-parte="v"]', '6.800.000.000'); await p.press('#app [data-real][data-parte="v"]', 'Tab'); }
     };
     const tarefa = await p.evaluate(() => TOUR.map(x => !!x.tarefa));
     for (let i = 1; i < titulos.length; i++) {
       const atual = titulos[i - 1];
-      if (tarefa[i - 1] && atual === 'Primeiro, escolha o método') {
+      if (tarefa[i - 1] && atual === 'Método') {
         await p.click('[data-t="proximo"]'); await p.waitForTimeout(300);
         check(`${nomeTela}: Próximo espera a tarefa ser feita`, (await tit()) === atual && await p.locator('.tour-msg.visivel').count() === 1);
       }
