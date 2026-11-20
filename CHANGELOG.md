@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.2] - 2026-11-20
+
+### Corrigido
+- Alinhamento da seta em “só registro” e do ícone dos avisos dentro da caixa da receita.
+
 ## [3.8.1] - 2026-11-20
 
 ### Alterado
