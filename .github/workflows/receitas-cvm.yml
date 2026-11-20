@@ -1,6 +1,7 @@
-# Atualiza dados/receitas-cvm.json (receita da DRE das companhias abertas, dados abertos da CVM) toda segunda de manhã.
-# Também roda à mão, em Actions > Receitas da CVM > Run workflow.
-name: Receitas da CVM
+# Atualiza dados/receitas-cvm.json (receita da DRE das companhias abertas, dados abertos da CVM) e dados/receitas-ifdata.json
+# (receita dos bancos e financeiras no IF.data do Banco Central) toda segunda de manhã.
+# Também roda à mão, em Actions > Receitas da CVM e do IF.data > Run workflow.
+name: Receitas da CVM e do IF.data
 on:
   schedule:
     - cron: '0 9 * * 1'
@@ -16,9 +17,10 @@ jobs:
         with:
           node-version: 20
       - run: node tools/receitas-cvm.cjs
+      - run: node tools/receitas-ifdata.cjs
       - name: Publicar se mudou
         run: |
-          git add dados/receitas-cvm.json
+          git add dados/receitas-cvm.json dados/receitas-ifdata.json
           if git diff --cached --quiet; then echo "Sem mudança"; exit 0; fi
-          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Receitas da CVM atualizadas"
+          git -c user.name="github-actions[bot]" -c user.email="41898282+github-actions[bot]@users.noreply.github.com" commit -m "Receitas da CVM e do IF.data atualizadas"
           git push

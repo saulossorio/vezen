@@ -22,6 +22,9 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   // DRE na CVM: o arquivo semanal, aqui com uma companhia fictícia
   await p.route('**/dados/receitas-cvm.json', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
     body: JSON.stringify({ fonte: 'teste', atualizado: '2026-01-01', empresas: { '11222333000181': { n: 'EMPRESA TESTE S.A.', r: { 2025: [1234567000, 'https://exemplo.invalid/dfp-2025'], 2024: [1100000000, 'https://exemplo.invalid/dfp-2024'] } } } }) }));
+  // IF.data: o mesmo CNPJ fictício também está lá, mas a CVM vem na frente; outro, só no IF.data, pela raiz do CNPJ
+  await p.route('**/dados/receitas-ifdata.json', r => r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+    body: JSON.stringify({ fonte: 'teste', atualizado: '2026-01-01', inst: { '11222333': { n: 'X', r: { 2025: 9 } }, '33444555': { n: 'BANCO TESTE S.A.', r: { 2025: 777000000, 2024: 700000000, 2023: 650000000 }, c: 1 } } }) }));
   await p.goto(URL);
   const ir = async h => { await p.evaluate(x => { location.hash = x; }, h); await p.waitForTimeout(300); };
 
@@ -113,6 +116,10 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
     && await p.inputValue('#f-faturamento') === '1.234.567.000' && await p.locator('.campo-rec a[href="https://exemplo.invalid/dfp-2025"]').count() === 1 && await p.locator('.campo-rec .selo', { hasText: 'via CVM' }).count() === 1);
   await p.fill('#f-faturamento', '1.300.000.000'); await p.waitForTimeout(300); await p.click('#f-cnpj'); await p.waitForTimeout(300);
   check('CNPJ: editar a receita tira o selo da CVM', await p.evaluate(() => !UI.atual.dados.viaCVM));
+  await p.fill('#f-cnpj', '33.444.555/0001-81'); await p.click('[data-acao=buscar-cnpj]');
+  await p.waitForFunction(() => UI.atual.dados.viaCVM, null, { timeout: 8000 }).catch(() => {}); await p.waitForTimeout(300);
+  check('CNPJ fora da CVM: receita do IF.data, com os três anos e o selo', await p.evaluate(() => { const d = UI.atual.dados; return d.faturamento.v === 777000000 && d.fatAno === '2025' && d.receitasAnos.length === 2 && d.viaCVM.f === 'ifdata' && d.viaCVM.c === 1; })
+    && await p.locator('.campo-rec .selo', { hasText: 'via IF.data' }).count() === 1 && /do conglomerado/.test(await txt(p, '.campo-rec .dica-cvm')), await txt(p, '.campo-rec .dica-cvm'));
 
   // 7. celular
   await p.setViewportSize({ width: 375, height: 800 }); await p.waitForTimeout(200);

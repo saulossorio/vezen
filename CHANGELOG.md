@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.6.0] - 2026-11-20
+
+### Adicionado
+- **Receita pelo IF.data.** A busca do CNPJ traz a receita dos bancos, cooperativas e financeiras que não publicam DFP na CVM, do balanço no IF.data do Banco Central (três últimos anos fechados): resultado da intermediação financeira, já depois da perda esperada com crédito, mais tarifas e serviços, junho mais dezembro. A líder de um conglomerado prudencial leva a receita do conglomerado; as outras instituições, a individual. Selo “via IF.data” e link para o IF.data. A CVM continua na frente quando tem a empresa.
+- **Tarefa semanal** gera também `dados/receitas-ifdata.json` (`tools/receitas-ifdata.cjs`).
+
 ## [3.5.0] - 2026-11-19
 
 ### Adicionado

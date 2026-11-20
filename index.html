@@ -1228,6 +1228,9 @@ const CONFIG = {
       linkConsultaCnpj: 'https://solucoes.receita.fazenda.gov.br/servicos/cnpjreva/cnpjreva_solicitacao.asp',
       // receita da DRE das companhias abertas (CVM), gerada toda semana por tools/receitas-cvm.cjs e publicada junto do Vezen
       arqReceitasCvm: 'dados/receitas-cvm.json', urlReceitasCvm: 'https://saulossorio.github.io/vezen/dados/receitas-cvm.json',
+      // receita das instituições do Banco Central que não estão na CVM (IF.data), gerada por tools/receitas-ifdata.cjs na mesma tarefa
+      arqReceitasIf: 'dados/receitas-ifdata.json', urlReceitasIf: 'https://saulossorio.github.io/vezen/dados/receitas-ifdata.json',
+      linkIfdata: 'https://www3.bcb.gov.br/ifdata/',
       ondeEncontrar: {
         cnpj: ['receita', 'brasilapi', 'casadosdados'],
         uf: ['receita', 'ibge'],
@@ -3671,8 +3674,11 @@ function campoReceita(d, R) {
   const ls = outras.map((x, i) => linha(`<input type="text" inputmode="numeric" data-rec="${i}" data-parte="ano" aria-label="Ano" value="${esc(x.ano)}" maxlength="4" autocomplete="off">`,
     `<input type="text" inputmode="decimal" data-rec="${i}" data-parte="v" aria-label="Receita de ${esc(x.ano || 'outro ano')}" value="${esc(fmtIn(x.v))}" autocomplete="off">`,
     seletorPeriodo(`data-rec="${i}" data-parte="meses" aria-label="Período"`, x.meses), botaoOrigem('rec:' + i, x.o, temValor(x)), btnIco('lixo', 'Remover este ano', `data-acao="del-rec" data-i="${i}"`, 'peq perigo')));
-  const cvm = d.viaCVM ? `<span class="dica dica-cvm">${ico('doc')}DRE de ${esc(d.viaCVM.ano)} publicada na CVM. <a href="${esc(d.viaCVM.link)}" target="_blank" rel="noopener">Abrir o documento</a></span>` : '';
-  return `<div class="campo largo campo-rec"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}</label>${d.viaCVM ? '<span class="selo cnpj">via CVM</span>' : ''}${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
+  // viaCVM guarda a fonte oficial da receita: a DRE na CVM ou, com f: 'ifdata', o balanço no IF.data
+  const via = d.viaCVM, viaIf = via && via.f === 'ifdata';
+  const cvm = !via ? '' : viaIf ? `<span class="dica dica-cvm">${ico('doc')}Balanço de ${esc(via.ano)} no IF.data do Banco Central${via.c ? ', do conglomerado' : ''}: intermediação financeira mais tarifas e serviços. <a href="${esc(PAIS.linkIfdata)}" target="_blank" rel="noopener">Abrir o IF.data</a></span>`
+    : `<span class="dica dica-cvm">${ico('doc')}DRE de ${esc(via.ano)} publicada na CVM. <a href="${esc(via.link)}" target="_blank" rel="noopener">Abrir o documento</a></span>`;
+  return `<div class="campo largo campo-rec"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}</label>${via ? `<span class="selo cnpj">via ${viaIf ? 'IF.data' : 'CVM'}</span>` : ''}${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
     ${seg ? `<div class="linha-dupla">${seg}</div>` : ''}
     <div class="rec-anos${per ? '' : ' sem-periodo'}"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span>${per ? '<span>Período</span>' : ''}</div>${l0}${ls.join('')}</div>
     <div class="reais-acoes"><button type="button" class="btn peq" data-acao="add-rec">${ico('mais')}Adicionar ano</button>${botaoSemDado('faturamento', d)}</div>
@@ -4202,8 +4208,8 @@ async function consultarCNPJ() {
   if (c.length !== 14 || !cnpjValido(c)) { atualizarPainel(); if (c.length !== 14) aviso('O CNPJ tem 14 dígitos.'); return; }
   const b = $('[data-acao=buscar-cnpj]'); if (b) { b.disabled = true; b.setAttribute('aria-busy', 'true'); }
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 8000);
-  UI.cnpjMsg = 'Consultando a Receita Federal e a CVM…'; atualizarPainel();
-  const cvm = receitaCVM(c);
+  UI.cnpjMsg = 'Consultando a Receita Federal, a CVM e o Banco Central…'; atualizarPainel();
+  const cvm = receitaCVM(c), ifd = receitaIF(c);
   try {
     const resp = await fetch(PAIS.apiCnpj.replace('{cnpj}', c), { signal: ctl.signal });
     if (!resp.ok) throw new Error('http');
@@ -4213,9 +4219,10 @@ async function consultarCNPJ() {
   } catch (err) {
     UI.cnpjMsg = `Não foi possível consultar agora; preencha à mão. <a href="${esc(PAIS.linkConsultaCnpj)}" target="_blank" rel="noopener">Consulta CNPJ da Receita</a>`;
   } finally { clearTimeout(t); }
-  const e = await cvm;
+  const e = await cvm, f = await ifd;
   if (UI.atual !== alvo) return;
   if (e && e.r) { const a = aplicarReceitaCVM(e); toast(`Receita de ${a} preenchida com a DRE publicada na CVM.`); }
+  else if (f && f.r) { const a = aplicarReceitaIF(f); toast(`Receita de ${a} preenchida com o balanço no IF.data do Banco Central.`); }
   else if (e === null) toast('A DRE na CVM não pôde ser consultada agora.');
   marcarAlterado(); if (UI.rota.tela === 'analise') rerenderAnalise();
 }
@@ -4229,17 +4236,30 @@ async function receitaCVM(c) {
   const j = await receitasCvm;
   return j && j.empresas ? j.empresas[c] || {} : null;
 }
+// IF.data: bancos, cooperativas e financeiras, pela raiz do CNPJ. Mesmo retorno de receitaCVM; só entra quando a CVM não tem.
+let receitasIf = null;
+async function receitaIF(c) {
+  if (!receitasIf) {
+    const url = location.protocol === 'file:' ? PAIS.urlReceitasIf : PAIS.arqReceitasIf;
+    receitasIf = fetch(url).then(r => { if (!r.ok) throw new Error('http'); return r.json(); }).catch(() => { receitasIf = null; return null; });
+  }
+  const j = await receitasIf;
+  return j && j.inst ? j.inst[c.slice(0, 8)] || {} : null;
+}
 // o ano de referência, se a DRE dele já saiu; senão o último anterior. Os outros anos entram como histórico da receita.
-function aplicarReceitaCVM(e) {
-  const d = UI.atual.dados, anos = Object.keys(e.r).map(Number).sort((a, b) => b - a), ref = anoDe(d);
+// r: ano -> receita; banco: a receita não é a líquida de vendas, então o tipo não muda
+function aplicarReceitaOficial(r, banco, via) {
+  const d = UI.atual.dados, anos = Object.keys(r).map(Number).sort((a, b) => b - a), ref = anoDe(d);
   const a0 = anos.includes(ref) ? ref : anos.find(a => a < ref) ?? anos[0];
-  d.faturamento = { v: e.r[a0][0], o: 'oficial' }; d.fatAno = String(a0); d.fatMeses = '12';
-  if (!e.b) d.fatTipo = 'liquida';
-  d.receitasAnos = anos.filter(a => a !== a0).map(a => ({ ano: String(a), v: e.r[a][0], meses: '12', o: 'oficial' }));
+  d.faturamento = { v: r[a0], o: 'oficial' }; d.fatAno = String(a0); d.fatMeses = '12';
+  if (!banco) d.fatTipo = 'liquida';
+  d.receitasAnos = anos.filter(a => a !== a0).map(a => ({ ano: String(a), v: r[a], meses: '12', o: 'oficial' }));
   if (d.semDado) delete d.semDado.faturamento;
-  d.viaCVM = { ano: a0, link: e.r[a0][1] };
+  d.viaCVM = { ano: a0, ...via(a0) };
   return a0;
 }
+const aplicarReceitaCVM = e => aplicarReceitaOficial(Object.fromEntries(Object.entries(e.r).map(([a, x]) => [a, x[0]])), e.b, a => ({ link: e.r[a][1] }));
+const aplicarReceitaIF = e => aplicarReceitaOficial(e.r, true, () => ({ f: 'ifdata', ...(e.c ? { c: 1 } : {}) }));
 function aplicarCNPJ(j) {
   const d = UI.atual.dados, via = d.viaCNPJ = d.viaCNPJ || {};
   const nome = j.nome_fantasia || j.razao_social;
@@ -6028,7 +6048,7 @@ const GLOSSARIO = [
     u: 'Fonte da cotação PTAX e do IF.data.' },
   { id: 'ifdata', t: 'IF.data', c: 'inst', s: 'https://www3.bcb.gov.br/ifdata',
     d: 'Painel público do Banco Central com balanços e indicadores de bancos e outras instituições financeiras.',
-    u: 'Fonte de receita e balanço de bancos e financeiras.' },
+    u: 'Fonte de receita e balanço de bancos e financeiras. A busca do CNPJ traz a receita de quem não está na CVM.' },
   { id: 'cvm', t: 'CVM', n: 'Comissão de Valores Mobiliários', c: 'inst', s: 'https://www.gov.br/cvm',
     d: 'Órgão que fiscaliza o mercado de ações e recebe os balanços das empresas de capital aberto.',
     u: 'Fonte oficial de receita e balanço das empresas listadas, nos dados abertos.' },
