@@ -288,6 +288,10 @@ details > summary { cursor: pointer; }
 .comeco:hover { background: var(--suave); border-color: var(--marca); }
 .comeco svg { margin-bottom: 6px; }
 .comeco span { color: var(--cinza); font-size: .88rem; }
+.comeco-mede { font-style: normal; font-size: .75rem; font-weight: 600; color: var(--info); border: 1px solid var(--linha-forte); border-radius: 999px; padding: 1px 9px; margin: 2px 0 4px; }
+.comecos-met .comeco { align-content: start; }
+.comecos-met .comeco span { font-size: .84rem; line-height: 1.4; }
+.comecos-met .comeco .comeco-falta { color: var(--info); font-weight: 600; margin-top: 4px; }
 .comeco:disabled { opacity: .5; cursor: not-allowed; }
 .comeco:disabled:hover { background: var(--superficie); border-color: var(--linha-forte); }
 .comeco.prim { background: var(--marca); border-color: var(--marca); color: var(--marca-texto); }
@@ -2729,12 +2733,13 @@ const P = () => PAIS.parametros;
 
 /* ---------- os quatro métodos: Vezen (base), CR (padrao), FGV (fgv) e Personalizado (propria) ---------- */
 // os nomes internos não mudam, para as análises salvas continuarem abrindo
+// mede e breve: o que cada método estima e uma frase sobre a conta, nos cartões da escolha do método
 const METODOS = {
-  base: { nome: 'Método Vezen', curto: 'Vezen', cls: 'base', ico: 'metodo', ancora: 'met-visao', resumo: 'Fórmulas e médias de pesquisas públicas, até sete caminhos de cálculo e índice de confiança. Parâmetros fixos.' },
+  base: { nome: 'Método Vezen', curto: 'Vezen', cls: 'base', ico: 'metodo', ancora: 'met-visao', mede: 'Gasto total ou CAPEX', breve: 'Médias de pesquisas públicas por até sete caminhos (receita, funcionários, gasto publicado), com faixa provável e confiança.', resumo: 'Fórmulas e médias de pesquisas públicas, até sete caminhos de cálculo e índice de confiança. Parâmetros fixos.' },
   // o nome do CR é o da versão em uso: CR0 (dados modelo), CR1 (a primeira oficial), CR1.1...
-  padrao: { get nome() { return 'Método ' + versaoCR(); }, get curto() { return versaoCR(); }, cls: 'cal', ico: 'empresas', ancora: 'cr1-metodo', resumo: 'Receita × percentual de investimento em TI (CAPEX) por segmento e estado. Parâmetros fixos, versionados.' },
-  fgv: { nome: 'Método FGV', curto: 'FGV', cls: 'fgv', ico: 'curva', ancora: 'fgv-metodo', resumo: 'Receita × Índice G do setor na pesquisa da FGV, o cálculo da calculadora de benchmarking da PDCA TI. Gasto total de TI.' },
-  propria: { nome: 'Método Personalizado', curto: 'Personalizado', cls: 'minha', ico: 'calib', ancora: 'pers-metodo', resumo: 'A mesma conta do CR, com percentuais tirados das suas empresas ou informados por você.' }
+  padrao: { get nome() { return 'Método ' + versaoCR(); }, get curto() { return versaoCR(); }, cls: 'cal', ico: 'empresas', ancora: 'cr1-metodo', mede: 'Só CAPEX', breve: 'Receita líquida, ou despesa empenhada no órgão público, × percentual de investimento em TI do segmento no estado (estudo de Carol Rocha).', resumo: 'Receita × percentual de investimento em TI (CAPEX) por segmento e estado. Parâmetros fixos, versionados.' },
+  fgv: { nome: 'Método FGV', curto: 'FGV', cls: 'fgv', ico: 'curva', ancora: 'fgv-metodo', mede: 'Gasto total', breve: 'Receita × Índice G do setor na pesquisa anual da FGV, a mesma conta da calculadora da PDCA TI.', resumo: 'Receita × Índice G do setor na pesquisa da FGV, o cálculo da calculadora de benchmarking da PDCA TI. Gasto total de TI.' },
+  propria: { nome: 'Método Personalizado', curto: 'Personalizado', cls: 'minha', ico: 'calib', ancora: 'pers-metodo', mede: 'Gasto total', breve: 'Receita × percentual de TI tirado das empresas cadastradas pelo usuário ou informado por ele.', resumo: 'A mesma conta do CR, com percentuais tirados das suas empresas ou informados por você.' }
 };
 // Método CR: só a versão que vem com a ferramenta
 const calPadrao = () => PAIS.calibracaoBase || null;
@@ -4310,7 +4315,10 @@ TELAS.analise = {
   render(r) {
     const emp = UI.atual, d = emp.dados, res = r.aba === 'resultado', id = encodeURIComponent(emp.id);
     if (d.modo === '') return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">Nova análise</h1></div></header>
-    <div class="vazio inicio"><h2>Método</h2><div class="comecos">${MODOS.map(v => `<button type="button" class="comeco" data-acao="escolher-modo" data-v="${v}"${modoDisponivel(v) ? '' : ' disabled'}>${ico(METODOS[v].ico)}<b>${nomeModo(v)}</b><span>${modoDisponivel(v) ? { base: 'Pesquisas públicas', padrao: 'Receita × percentual', fgv: 'Receita × Índice G', propria: 'Seus dados' }[v] : 'Sem dados ainda'}</span></button>`).join('')}</div></div>`;
+    <div class="vazio inicio"><h2>Método</h2><div class="comecos comecos-met">${MODOS.map(v => { const M = METODOS[v], dentro = `${ico(M.ico)}<b>${nomeModo(v)}</b><em class="comeco-mede">${M.mede}</em><span>${M.breve}</span>`;
+      // Personalizado sem dados: o cartão leva para onde se cadastram as empresas ou os percentuais
+      return modoDisponivel(v) ? `<button type="button" class="comeco" data-acao="escolher-modo" data-v="${v}">${dentro}</button>`
+        : `<a class="comeco" href="#/metodos/pers-dados" data-v="${v}">${dentro}<span class="comeco-falta">Sem dados ainda: cadastrar empresas ou percentuais</span></a>`; }).join('')}</div></div>`;
     return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">${esc(d.nome.trim() || 'Nova análise')}</h1><div class="ws-meta" id="ws-meta">${metaEmpresa(d)}</div></div><div class="acoes" id="ws-acoes">${acoesAnalise()}</div></header>
     <nav class="abas" aria-label="Partes da análise"><a href="#/analise/${id}"${res ? '' : ' aria-current="page"'}>${ico('analise')}Dados</a><a href="#/analise/${id}/resultado"${res ? ' aria-current="page"' : ''}>${ico('detalhe')}Resultado</a></nav>
     ${res ? corpoResultado(emp) : `<div class="ws-corpo"><div class="grade-ws"><form class="form-ws" id="form" autocomplete="off" onsubmit="return false" novalidate>${formAnalise()}</form><aside class="resumo-lado" aria-label="Estimativa"><div class="cartao-res" id="painel"></div><p class="sr" id="anuncio" aria-live="polite"></p></aside></div></div>`}`;
@@ -4809,7 +4817,7 @@ function telaEmpresas() {
     <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
   if (!n) return cab + `<div class="vazio inicio"><h2>Nenhuma empresa ainda</h2>
     <div class="comecos"><button type="button" class="comeco prim" data-acao="nova">${ico('mais')}<b>Nova análise</b><span>Uma empresa</span></button><a class="comeco" href="#/listas/nova">${ico('tabela')}<b>Analisar uma lista</b><span>Planilha com várias empresas</span></a><button type="button" class="comeco" data-acao="importar">${ico('subir')}<b>Importar backup</b><span>De outro computador</span></button></div>
-    <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button> · <button type="button" class="link-btn" data-acao="tour">Fazer o tour guiado</button></p></div>`;
+    <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button></p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
     <label class="busca"><span class="sr">Buscar</span>${ico('busca')}<input type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>

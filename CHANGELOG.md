@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.7.0] - 2026-11-20
+
+### Adicionado
+- **Escolha do método explicada.** Cada cartão mostra o que o método mede (gasto total, só CAPEX ou os dois) e uma frase sobre a conta e a fonte.
+
+### Alterado
+- **Personalizado sem dados:** o cartão leva para Métodos, Seus dados, onde se cadastram as empresas ou os percentuais, em vez de ficar desativado.
+- **Tela vazia de Empresas:** só o link da empresa modelo; o tour fica na barra lateral.
+
 ## [3.6.1] - 2026-11-20
 
 ### Alterado

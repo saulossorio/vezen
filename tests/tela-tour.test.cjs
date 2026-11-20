@@ -69,12 +69,13 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     check(`${nomeTela}: Esc fecha o tour`, await p.locator('#tour').count() === 0);
     await ctx.close();
   }
-  // primeira visita sem nada salvo: a tela vazia também leva ao tour
+  // primeira visita sem nada salvo: a tela vazia mostra a empresa modelo; o tour fica na barra lateral
   const ctx = await b.newContext({ viewport: { width: 1360, height: 900 } }), p = await ctx.newPage();
   await p.goto(URL); await p.waitForTimeout(500);
   check('sem tour automático para navegador automatizado', await p.locator('#tour').count() === 0);
-  await p.click('.vazio [data-acao="tour"]'); await p.waitForTimeout(400);
-  check('a tela vazia de Empresas abre o tour', await p.locator('#tour.visivel').count() === 1);
+  check('a tela vazia de Empresas não repete o tour ao lado da empresa modelo', await p.locator('.vazio [data-acao="tour"]').count() === 0 && await p.locator('.vazio [data-acao="modelo"]').count() === 1);
+  await p.click('#lat-pe [data-acao="tour"]'); await p.waitForTimeout(400);
+  check('o tour abre pela barra lateral', await p.locator('#tour.visivel').count() === 1);
   await ctx.close();
 
   console.log('OK (' + ok.length + '):\n  ' + ok.join('\n  '));

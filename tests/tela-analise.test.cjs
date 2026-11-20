@@ -116,7 +116,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.click('[data-acao=menu-analise]'); await p.click('#pop [data-acao=nova]'); await p.waitForTimeout(150);
   if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Descartar")');
   await p.waitForTimeout(150);
-  ok('Nova análise começa pela escolha do método', await p.locator('[data-acao=escolher-modo]').count() === 4 && await p.locator('#form').count() === 0);
+  ok('Nova análise começa pela escolha do método', await p.locator('.comecos-met .comeco').count() === 4 && await p.locator('.comecos-met a.comeco[href="#/metodos/pers-dados"]').count() === 1 && await p.locator('#form').count() === 0);
   await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(150);
   await p.fill('#f-nome', 'Subsidiária Teste'); await p.selectOption('#f-natureza', 'subsidiaria'); await p.selectOption('#f-setor', 'industria'); await p.selectOption('#f-uf', 'SP');
   ok('Rótulo da receita para subsidiária', (await p.textContent('label[for=f-faturamento]')).includes('Receita no Brasil'));
