@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.3] - 2026-11-20
+
+### Alterado
+- **Personalizado na análise**: seção “Dados do Método Personalizado” no formulário e botão “Editar percentuais e empresas” no cartão do método, para ver e mudar os percentuais e as empresas sem sair da análise.
+
 ## [3.8.2] - 2026-11-20
 
 ### Corrigido

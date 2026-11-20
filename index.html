@@ -294,6 +294,9 @@ details > summary { cursor: pointer; }
 .comeco.sel { border-color: var(--marca); background: var(--suave); }
 .pers-inline { max-width: 900px; margin: 18px auto 0; text-align: left; }
 .pers-inline > h3 { margin: 0 0 4px; }
+#sec-pers .pers-inline { max-width: none; margin: 14px 0 0; }
+.editar-pers { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; }
+#sec-pers .sf-prog > span:first-child { white-space: normal; text-align: right; }
 .pers-inline .mudo { margin: 0 0 12px; max-width: none; text-align: left; }
 .pers-inline .acoes { justify-content: flex-start; }
 .dir-linhas { display: grid; gap: 8px; margin: 10px 0; }
@@ -3974,7 +3977,9 @@ function formAnalise() {
   const extS = { operadora: () => campoExtra(d, 'beneficiarios', 'Beneficiários', 'num'), saude: () => campoExtra(d, 'leitos', 'Leitos', 'num'), educacao: () => campoExtra(d, 'alunos', 'Alunos', 'num'), varejo: () => campoExtra(d, 'visitas', 'Visitas ao site por mês', 'num'), industria: () => campoExtra(d, 'ucs', 'Unidades consumidoras (distribuidora)', 'num'), logistica: () => campoExtra(d, 'frota', 'Frota', 'num'), tecnologia: () => campoExtra(d, 'pctTecnica', '% da equipe técnica', 'num') + campoExtra(d, 'acessos', 'Acessos (telecom)', 'num') };
   const nTec = (d.tecnologias || []).length;
   const mais = vagas + (n !== 'publico' && n !== 'terceiro' ? campoGrupo(d) : '') + (extN[n] ? extN[n]() : '') + (extS[d.setor] ? extS[d.setor]() : '') + blocoTecnologias(d);
-  return notaModelo(d) + secao('sec-ident', 'id', 'Identificação', '', ident, (cs => preenchido(d, cs) + ' de ' + cs.length)(['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio'].filter(vz)))
+  // Personalizado: os percentuais e as empresas do método podem ser vistos e editados na própria análise
+  const pers = modoDe(d) !== 'propria' ? '' : `<details class="secao-form" id="sec-pers"${UI.persEditar || UI.formDireta || UI.formMinha ? ' open' : ''}><summary><div class="sf-cab"><h2>${ico('calib')}Dados do Método Personalizado</h2><span class="sf-prog"><span>${descModo('propria', d)}</span>${ico('chev', 'chev')}</span></div></summary><div class="pers-inline">${persDados()}</div></details>`;
+  return notaModelo(d) + pers + secao('sec-ident', 'id', 'Identificação', '', ident, (cs => preenchido(d, cs) + ' de ' + cs.length)(['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio'].filter(vz)))
     + (porte ? secao('sec-porte', 'porte', ehOrgaoPublico(d) ? 'Execução orçamentária' : 'Porte', '', porte) : '')
     + (ti ? secao('sec-ti', 'sinal', 'Equipe de TI', '', ti) : '')
     + secao('sec-gasto', 'historico', 'Gasto de TI conhecido', 'Dados reais da empresa pesam mais que as médias de mercado e estreitam a faixa.', gasto)
@@ -4016,6 +4021,8 @@ function seletorEscopo(d, m) {
   if (m !== 'base') return '';
   return `<div class="campo escopo"><label for="f-escopo">O que estimar</label><select id="f-escopo" data-simples="escopo"><option value="">Gasto total de TI (CAPEX e OPEX)</option><option value="capex"${d.escopo === 'capex' ? ' selected' : ''}>Só investimento (CAPEX)</option></select></div>`;
 }
+// no Personalizado, o cartão do resultado leva aos percentuais e empresas do método, na própria análise
+const botaoEditarPers = m => m === 'propria' ? `<button type="button" class="link-btn editar-pers" data-acao="pers-editar">${ico('editar')}Editar percentuais e empresas</button>` : '';
 function seletorModo(m, suf = '', d = null) {
   return `<div class="modos" role="radiogroup" aria-label="Método">${MODOS.map(v => {
     const ok = modoDisponivel(v), r = ok && d ? calcModo(d, v) : null;
@@ -4122,7 +4129,7 @@ function atualizarPainel() {
   if (r.vazio) {
     ANIM.mostrado = null;
     el.innerHTML = `<div class="cr-topo">${saidaReceita}<div class="cr-saida"><p class="cr-rot">Investimento em TI</p><div class="vazio-res"><b>${orgao ? 'Informe a despesa de TI' : esc(r.msgVazio)}</b>${orgao ? (m === 'base' ? 'Preencha a despesa de TI, os servidores de TI ou um gasto real.' : 'Preencha a despesa de TI ou um gasto real.') : m === 'base' ? 'Preencha a receita, os funcionários, a equipe de TI ou um gasto real.' : 'Preencha a receita, os funcionários ou um gasto real.'}</div></div>${abrir}</div>
-      <div class="cr-resto"><div class="cr-in"><div class="cr-bloco cr-ano"><h3><label for="f-anoRef">Ano de referência</label></h3>${seletorAno(d)}</div><div class="cr-bloco"><h3>Método</h3>${seletorModo(m)}</div>${blocoPmd}</div></div>`;
+      <div class="cr-resto"><div class="cr-in"><div class="cr-bloco cr-ano"><h3><label for="f-anoRef">Ano de referência</label></h3>${seletorAno(d)}</div><div class="cr-bloco"><h3>Método</h3>${seletorModo(m)}${botaoEditarPers(m)}</div>${blocoPmd}</div></div>`;
     return;
   }
   const z = r.resumo, com = z.comSalarios, g = com ? z.geral : z.geralSem, c = com ? z.conservadora : z.conservadoraSem;
@@ -4136,7 +4143,7 @@ function atualizarPainel() {
     ${r.avisos.map(a => `<div class="alerta">${ico('alerta')}<p>${esc(a)}</p></div>`).join('')}
     <div class="cr-bloco"><h3>${r.capex ? 'Para o resumo' : `Para o resumo, ${com ? 'com' : 'sem'} salários da equipe de TI`}</h3><div class="cr-dois"><div><small>Geral</small><b>${fmtRS(g)}</b>${rec ? `<small>${fmtPct(g / rec.v)} da receita${r.capex || !com ? '' : ' (Índice G)'}</small>` : ''}</div><div><small>Conservadora</small><b>${fmtRS(c)}</b>${rec ? `<small>${fmtPct(c / rec.v)} da receita</small>` : ''}</div></div></div>
     <div class="cr-bloco cr-ano"><h3><label for="f-anoRef">Ano de referência</label></h3>${seletorAno(d)}</div>
-    <div class="cr-bloco"><h3>Método</h3>${seletorModo(m, '', d)}${seletorEscopo(d, m)}</div>
+    <div class="cr-bloco"><h3>Método</h3>${seletorModo(m, '', d)}${seletorEscopo(d, m)}${botaoEditarPers(m)}</div>
     ${blocoPmd}
     <div class="cr-acoes"><a class="btn" href="#/analise/${encodeURIComponent(emp.id)}/resultado">${ico('detalhe')}Ver resultado</a><button type="button" class="btn" data-acao="resumo">${ico('copiar')}Copiar resumo</button></div></div></div>`;
   animarValor($('#cr-valor'), r.F, emp.id);
@@ -4384,6 +4391,7 @@ acoes({
   'nova': () => novaAnalise(),
   'nova-modo': async b => { await novaAnalise(); if (UI.atual.dados.modo === '') { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#f-nome'); if (o) o.focus(); } },
   'voltar-metodo': () => { UI.atual.dados.modo = ''; UI.persAberto = null; navegar('#/analise/' + encodeURIComponent(UI.atual.id)); renderAqui(); },
+  'pers-editar': () => { UI.persEditar = true; if (S.calibracao.direta) abrirFormDireta(); else renderAqui(); const s = $('#sec-pers'); if (s) { s.scrollIntoView({ block: 'start', behavior: reduzMov() ? 'auto' : 'smooth' }); const b = $('#sec-pers [data-acao=dir-abrir]'); if (b) b.focus({ preventScroll: true }); } },
   'pers-abrir': b => { UI.persAberto = UI.persAberto ? null : b.dataset.v; UI.formMinha = null; UI.formDireta = null; renderAqui(); },
   'escolher-modo': b => { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#f-nome'); if (o) o.focus(); },
   'modelo': () => abrirEmpresaModelo(),
@@ -6924,6 +6932,8 @@ document.addEventListener('keydown', e => {
   }
   const t = TELAS[UI.rota.tela]; if (t && t.keydown && e.target.closest && e.target.closest('#app')) t.keydown(e);
 });
+// a seção dos dados do Personalizado na análise fica aberta ou fechada entre um desenho e outro
+document.addEventListener('toggle', e => { if (e.target.id === 'sec-pers') UI.persEditar = e.target.open; }, true);
 // cidade do formulário de empresa do Personalizado aberto fora da tela Métodos: a lista segue o estado
 document.addEventListener('change', e => { if (e.target.id === 'fm-uf' && UI.rota.tela !== 'metodos') { const dl = $('#dl-fm-cidade'); if (dl) dl.innerHTML = opcoesMunicipios(e.target.value); } });
 // dica flutuante dos botões só com ícone e das marcas dos gráficos

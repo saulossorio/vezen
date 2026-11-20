@@ -126,6 +126,10 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.click('.pers-inline [data-acao=dir-abrir]'); await p.waitForTimeout(150);
   await p.fill('[data-dirl="0"][data-parte="p"]', '2,5'); await p.press('[data-dirl="0"][data-parte="p"]', 'Enter'); await p.waitForTimeout(250);
   ok('Percentuais salvos ali mesmo abrem a análise no Personalizado, com o percentual à vista', await p.locator('#form').count() === 1 && await motor(() => UI.atual.dados.modo === 'propria' && S.calibracao.direta.pg === 0.025) && /2,50%/.test(await txt('#painel .modo-op:has(input[value=propria]) small')));
+  await p.click('#painel [data-acao=pers-editar]'); await p.waitForTimeout(200);
+  ok('Na análise, o Personalizado tem onde editar o percentual', await p.locator('#sec-pers[open] [data-dirl="0"][data-parte="p"]').count() === 1 && (await p.inputValue('#sec-pers [data-dirl="0"][data-parte="p"]')) === '2,50');
+  await p.fill('#sec-pers [data-dirl="0"][data-parte="p"]', '3'); await p.press('#sec-pers [data-dirl="0"][data-parte="p"]', 'Enter'); await p.waitForTimeout(250);
+  ok('O percentual editado na análise vale na hora', await motor(() => S.calibracao.direta.pg === 0.03) && /3,00%/.test(await txt('#painel .modo-op:has(input[value=propria]) small')) && await p.locator('#sec-pers[open]').count() === 1);
   await motor(() => { S.calibracao.direta = null; salvar(); UI.atual.dados.modo = ''; renderAqui(); }); await p.waitForTimeout(150);
   await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(150);
   await p.fill('#f-nome', 'Subsidiária Teste'); await p.selectOption('#f-natureza', 'subsidiaria'); await p.selectOption('#f-setor', 'industria'); await p.selectOption('#f-uf', 'SP');
