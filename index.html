@@ -2697,15 +2697,25 @@ function migrar(o) {
   });
   return n;
 }
+// dados salvos que não abrem: o texto original vai para CHAVE + '.ilegivel' antes de qualquer gravação, para nada se perder
+let leituraFalhou = false;
 function carregar() {
-  try { const s = localStorage.getItem(CHAVE); localStorage.setItem(CHAVE + '.t', '1'); localStorage.removeItem(CHAVE + '.t'); return s ? migrar(JSON.parse(s)) : novoEstado(); }
+  let s = null;
+  try { s = localStorage.getItem(CHAVE); localStorage.setItem(CHAVE + '.t', '1'); localStorage.removeItem(CHAVE + '.t'); }
   catch (e) { persistente = false; return novoEstado(); }
+  if (!s) return novoEstado();
+  try { return migrar(JSON.parse(s)); }
+  catch (e) {
+    leituraFalhou = true;
+    try { if (!localStorage.getItem(CHAVE + '.ilegivel')) localStorage.setItem(CHAVE + '.ilegivel', s); } catch (e2) { persistente = false; }
+    return novoEstado();
+  }
 }
 function salvar(alterou = true) {
   cacheMinha = null;
   if (alterou) S.ultimaAlteracao = new Date().toISOString();
   try { localStorage.setItem(CHAVE, JSON.stringify(S)); persistente = true; } catch (e) { persistente = false; }
-  $('#aviso-armaz').hidden = persistente;
+  $('#aviso-armaz').hidden = persistente && !leituraFalhou;
   renderNav();
 }
 function dadosVazios() {
@@ -3391,6 +3401,13 @@ async function confirmarSaida() {
   return false;
 }
 // limpo: a análise abre sem pedir confirmação ao sair, como a empresa modelo, que pode ser aberta de novo a qualquer hora
+// os quatro métodos em cartões: o que cada um mede e a conta. Na análise nova escolhe o método; na tela vazia de Empresas, abre a análise já com ele
+function cartoesMetodo(acao = 'escolher-modo') {
+  return `<div class="comecos comecos-met">${MODOS.map(v => { const M = METODOS[v], dentro = `${ico(M.ico)}<b>${nomeModo(v)}</b><em class="comeco-mede">${M.mede}</em><span>${M.breve}</span>`;
+      // Personalizado sem dados: o cartão leva para onde se cadastram as empresas ou os percentuais
+      return modoDisponivel(v) ? `<button type="button" class="comeco" data-acao="${acao}" data-v="${v}">${dentro}</button>`
+        : `<a class="comeco" href="#/metodos/pers-dados" data-v="${v}">${dentro}<span class="comeco-falta">Sem dados ainda: cadastrar empresas ou percentuais</span></a>`; }).join('')}</div>`;
+}
 async function novaAnalise(dados, limpo = false) {
   if (!(await confirmarSaida())) return;
   UI.atual = novaEmpresa(); UI.sujo = !!dados && !limpo; UI.sugestao = null; UI.cnpjMsg = '';
@@ -4315,10 +4332,7 @@ TELAS.analise = {
   render(r) {
     const emp = UI.atual, d = emp.dados, res = r.aba === 'resultado', id = encodeURIComponent(emp.id);
     if (d.modo === '') return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">Nova análise</h1></div></header>
-    <div class="vazio inicio"><h2>Método</h2><div class="comecos comecos-met">${MODOS.map(v => { const M = METODOS[v], dentro = `${ico(M.ico)}<b>${nomeModo(v)}</b><em class="comeco-mede">${M.mede}</em><span>${M.breve}</span>`;
-      // Personalizado sem dados: o cartão leva para onde se cadastram as empresas ou os percentuais
-      return modoDisponivel(v) ? `<button type="button" class="comeco" data-acao="escolher-modo" data-v="${v}">${dentro}</button>`
-        : `<a class="comeco" href="#/metodos/pers-dados" data-v="${v}">${dentro}<span class="comeco-falta">Sem dados ainda: cadastrar empresas ou percentuais</span></a>`; }).join('')}</div></div>`;
+    <div class="vazio inicio"><h2>Método</h2>${cartoesMetodo()}</div>`;
     return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">${esc(d.nome.trim() || 'Nova análise')}</h1><div class="ws-meta" id="ws-meta">${metaEmpresa(d)}</div></div><div class="acoes" id="ws-acoes">${acoesAnalise()}</div></header>
     <nav class="abas" aria-label="Partes da análise"><a href="#/analise/${id}"${res ? '' : ' aria-current="page"'}>${ico('analise')}Dados</a><a href="#/analise/${id}/resultado"${res ? ' aria-current="page"' : ''}>${ico('detalhe')}Resultado</a></nav>
     ${res ? corpoResultado(emp) : `<div class="ws-corpo"><div class="grade-ws"><form class="form-ws" id="form" autocomplete="off" onsubmit="return false" novalidate>${formAnalise()}</form><aside class="resumo-lado" aria-label="Estimativa"><div class="cartao-res" id="painel"></div><p class="sr" id="anuncio" aria-live="polite"></p></aside></div></div>`}`;
@@ -4340,6 +4354,7 @@ TELAS.analise = {
 };
 acoes({
   'nova': () => novaAnalise(),
+  'nova-modo': async b => { await novaAnalise(); if (UI.atual.dados.modo === '') { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#f-nome'); if (o) o.focus(); } },
   'escolher-modo': b => { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#f-nome'); if (o) o.focus(); },
   'modelo': () => abrirEmpresaModelo(),
   'salvar': () => salvarEmpresa(),
@@ -4815,9 +4830,8 @@ function telaEmpresas() {
   const n = S.empresas.length;
   const cab = `<div class="cab"><div class="cab-txt"><h1>Empresas</h1><p class="sub">${n ? plural(n, 'empresa analisada', 'empresas analisadas') + '. ' : ''}Os dados ficam só neste navegador.</p></div>
     <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
-  if (!n) return cab + `<div class="vazio inicio"><h2>Nenhuma empresa ainda</h2>
-    <div class="comecos"><button type="button" class="comeco prim" data-acao="nova">${ico('mais')}<b>Nova análise</b><span>Uma empresa</span></button><a class="comeco" href="#/listas/nova">${ico('tabela')}<b>Analisar uma lista</b><span>Planilha com várias empresas</span></a><button type="button" class="comeco" data-acao="importar">${ico('subir')}<b>Importar backup</b><span>De outro computador</span></button></div>
-    <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button></p></div>`;
+  if (!n) return cab + `<div class="vazio inicio"><h2>Nova análise: escolha o método</h2>${cartoesMetodo('nova-modo')}
+    <p class="vazio-modelo"><a class="link-btn" href="#/listas/nova">Analisar uma lista</a> · <button type="button" class="link-btn" data-acao="importar">Importar backup</button> · <button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button></p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
     <label class="busca"><span class="sr">Buscar</span>${ico('busca')}<input type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
@@ -6851,6 +6865,7 @@ acoes({ 'menu': () => abrirMenuLateral(), 'menu-fechar': () => fecharMenuLateral
 
 /* início */
 $('#aviso-armaz').hidden = persistente;
+if (leituraFalhou) { const av = $('#aviso-armaz'); av.textContent = 'Os dados salvos neste navegador não puderam ser abertos. Uma cópia deles ficou guardada; nada foi apagado.'; av.hidden = false; }
 if (!location.hash || !TELAS[lerRota().tela] || lerRota().tela !== location.hash.replace(/^#\/?/, '').split('/')[0]) history.replaceState(null, '', '#/empresas');
 aoMudarRota();
 setTimeout(tourInicial, 500);

@@ -36,7 +36,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   check('testes 134 de 134', /134 de 134/.test(await txt(p, '#met-testes')), (await txt(p, '#met-testes')).match(/\d+ de \d+/)[0]);
 
   // 2. análise nova: começa no Método Vezen; o Personalizado fica desabilitado sem dados
-  await ir(p, '#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
+  await ir(p, '#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   check('nova análise no Método Vezen', await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value) === 'base');
   const dis = await p.evaluate(() => [...document.querySelectorAll('#painel input[data-modo]')].map(i => i.value + ':' + i.disabled).join(','));
   check('Personalizado desabilitado sem dados', dis === 'base:false,padrao:false,fgv:false,propria:true', dis);

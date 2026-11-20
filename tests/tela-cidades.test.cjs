@@ -46,7 +46,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   check('setor dentro da cidade', await p.locator('#pers-dados .cal-local table >> nth=1 >> tbody tr').count() === 2 && /em Campinas\/SP/.test(await txt(p, '#pers-dados .cal-local table >> nth=1')));
 
   // 2. análise em São Paulo com o Personalizado
-  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
+  await ir('#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   await p.fill('#f-nome', 'Teste Cidade'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.selectOption('#f-uf', 'SP');
   await p.fill('#f-faturamento', '300.000.000'); await p.click('[data-acao=origem][data-alvo="campo:faturamento"]'); await p.click('#pop [data-o=oficial]');
   await p.fill('#f-funcionarios', '600');
@@ -106,7 +106,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   await p.click('[data-acao=minha-cancelar]'); await p.waitForTimeout(150);
 
   // 6. CNPJ: a busca só pela lupa, e o município vem com o nome oficial (no Personalizado, que usa a cidade)
-  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=propria]'); await p.waitForTimeout(200);
+  await ir('#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=propria]'); await p.waitForTimeout(200);
   await p.fill('#f-cnpj', '11.222.333/0001-81'); await p.press('#f-cnpj', 'Tab'); await p.waitForTimeout(400);
   check('CNPJ: sair do campo não busca', await p.inputValue('#f-municipio') === '' && await p.locator('[data-acao=buscar-cnpj] use[href="#i-busca"]').count() === 1);
   await p.click('[data-acao=buscar-cnpj]'); await p.waitForTimeout(1200);

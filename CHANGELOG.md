@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.7.1] - 2026-11-20
+
+### Alterado
+- **Tela vazia de Empresas** mostra os quatro métodos, com o que cada um mede; o cartão abre a análise já com o método. Lista, backup e empresa modelo ficam como links embaixo.
+
+### Corrigido
+- **Dados salvos que não abrem** não são mais apagados: o texto original fica guardado no navegador (`estimador-ti.v1.ilegivel`) e um aviso aparece no topo.
+
 ## [3.7.0] - 2026-11-20
 
 ### Adicionado

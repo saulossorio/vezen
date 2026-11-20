@@ -25,7 +25,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const salvarOk = async (espera = 200) => { await explicar(); await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(espera); };
 
   // 1. receita bruta antiga, oficial: conversão, ano e comparação (caso E da Metodologia)
-  await p.click('#app [data-acao=nova]'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
+  await p.click('#nav .lat-nova'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   ok('Nova análise abre direto no formulário, com os dois resultados no cartão', await p.locator('#sec-objetivo').count() === 0 && await p.locator('#painel .cr-saida').count() === 2 && (await motor(() => UI.atual.dados.fatEstimar)) === true);
   ok('Foco no nome da empresa', await p.evaluate(() => document.activeElement && document.activeElement.id === 'f-nome'));
   ok('Sem a caixa antiga de estimar a receita', await p.locator('[data-chk=fatEstimar]').count() === 0);
@@ -274,7 +274,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const tok = t => p.evaluate(t => { const e = document.createElement('i'); e.style.color = `var(${t})`; document.body.appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; }, t);
   ok('Empresa modelo completa: nada faltando, motivo só no que os documentos não trazem', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === '|contratos,gastoDeclarado,profTI,usuarios' && await p.locator('.chip-falta').count() === 0);
   // sem nome e sem nenhum dado, salvar também funciona: o nome fica vermelho e o aviso conta o que falta
-  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
+  await ir('#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   ok('Nome vazio fica vermelho no próprio campo', await p.locator('#f-nome').evaluate(e => getComputedStyle(e).borderTopColor) === await tok('--crit'));
   const nAntes = await motor(() => S.empresas.length);
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
@@ -282,7 +282,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/empresas');
   ok('Na lista, a empresa sem nome aparece como “(sem nome)”', (await txt('.lista-emp')).includes('(sem nome)'));
   await p.evaluate(() => { S.empresas = S.empresas.filter(e => e.dados.nome); salvar(); });
-  await ir('#/empresas'); await p.click('#app [data-acao=nova] >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
+  await ir('#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   await p.fill('#f-nome', 'Teste Sem Dado'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.fill('#f-funcionarios', '500'); await p.waitForTimeout(300);
   const vis = async c => await p.locator(`.sem-dado[data-campo=${c}]`).count() === 1 && await p.locator(`.sem-dado[data-campo=${c}]`).isVisible();
   const campoCor = (c, prop) => p.locator(`#f-${c}`).evaluate((e, k) => getComputedStyle(e)[k], prop);

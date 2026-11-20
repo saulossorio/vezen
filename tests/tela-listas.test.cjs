@@ -18,7 +18,7 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   const linhas = () => p.locator('#lote-tab tbody tr').count();
 
   // 1. telas vazias
-  check('empresas vazia oferece os três começos', await p.locator('.vazio [data-acao=nova]').count() === 1 && await p.locator('.vazio a[href="#/listas/nova"]').count() === 1 && await p.locator('.vazio [data-acao=importar]').count() === 1);
+  check('empresas vazia oferece os quatro métodos, a lista e o backup', await p.locator('.vazio .comecos-met .comeco').count() === 4 && await p.locator('.vazio [data-acao=nova-modo][data-v=fgv]').count() === 1 && await p.locator('.vazio a[href="#/listas/nova"]').count() === 1 && await p.locator('.vazio [data-acao=importar]').count() === 1);
   check('empresas vazia oferece a empresa modelo', await p.locator('.vazio [data-acao=modelo]').count() === 1);
   await ir('#/listas');
   check('listas vazia explica os passos', await p.locator('.passos-vazio li').count() === 3);
