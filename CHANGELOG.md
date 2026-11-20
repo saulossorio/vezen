@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.6.1] - 2026-11-20
+
+### Alterado
+- **Tour:** o primeiro passo diz o que o Vezen é (ferramenta para estimar dados financeiros de empresas no Brasil), sem saudação nem adjetivos.
+
 ## [3.6.0] - 2026-11-20
 
 ### Adicionado
