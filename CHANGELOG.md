@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.7.2] - 2026-11-20
+
+### Alterado
+- **Cartões dos métodos** com texto curto e sem termos técnicos.
+- **Personalizado sem dados**: o percentual da receita gasto com TI é informado no próprio cartão, que abre a análise com ele.
+- **Tela vazia de Empresas**: embaixo dos métodos, só o link da empresa modelo.
+
 ## [3.7.1] - 2026-11-20
 
 ### Alterado
