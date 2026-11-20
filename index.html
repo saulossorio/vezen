@@ -6546,7 +6546,7 @@ const naAnalise = () => UI.rota.tela === 'analise' && !!UI.atual;
 const dadosTour = () => naAnalise() ? UI.atual.dados : null;
 const pertoDe = (v, alvo) => v !== '' && v != null && Math.abs(+v - alvo) <= alvo * 0.005;
 const TOUR = [
-  { titulo: 'Vezen', texto: 'O Vezen é uma ferramenta para estimar dados financeiros de empresas no Brasil, como o investimento em TI e a receita, e mostra de onde vem cada número. Neste tour, você monta a análise do Banco do Brasil com dados oficiais. São {n} passos; dá para sair a qualquer momento.' },
+  { titulo: 'Vezen', texto: 'O Vezen é uma ferramenta para estimar dados financeiros de empresas no Brasil, como o investimento em TI e a receita, e mostra de onde vem cada número. Este tour, de {n} passos, monta a análise do Banco do Brasil com dados oficiais e pode ser encerrado a qualquer momento.' },
   { titulo: 'Empresas', texto: 'Tudo começa pela lista de empresas. É nela que ficam as análises salvas, com o valor estimado e o grau de confiança de cada uma, para consultar ou comparar depois.',
     acao: 'Clique em Empresas', alvo: ['#nav a[href="#/empresas"]'], lateral: true, clique: true },
   { titulo: 'Nova análise', texto: 'Cada empresa estimada é uma análise. Para começar a do Banco do Brasil, abra uma nova.', acao: 'Clique em Nova análise', alvo: ['#nav .lat-nova'], lateral: true, clique: true },
