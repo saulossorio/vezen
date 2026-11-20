@@ -75,7 +75,7 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   check('linha aberta como análise', /^#\/analise\//.test(await p.evaluate(() => location.hash)) && (await p.inputValue('#f-nome')).startsWith('Cliente') && (await p.inputValue('#f-funcionarios')) !== '');
   check('linha aberta já diz o que estimar', await p.locator('#sec-objetivo.pede').count() === 0 && typeof (await p.evaluate(() => UI.atual.dados.fatEstimar)) === 'boolean');
   check('origem do arquivo nos campos', (await p.evaluate(() => UI.atual.dados.funcionarios.o)) === 'terceiros' && (await txt(p, '[data-alvo="campo:funcionarios"]')).includes('Estimativa de terceiros'));
-  check('análise aberta da lista começa não salva', (await txt(p, '#ws-meta')).includes('ainda não salva'));
+  check('análise aberta da lista começa não salva', (await txt(p, '#ws-meta')).includes('Não salva'));
   // voltar pelo navegador
   await p.goBack(); await p.waitForTimeout(300);
   check('voltar do navegador volta à lista', /^#\/listas\//.test(await p.evaluate(() => location.hash)) && await linhas() === 15);

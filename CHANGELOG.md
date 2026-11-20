@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.1] - 2026-11-20
+
+### Alterado
+- Estado da análise nova: “Não salva”.
+
 ## [3.8.0] - 2026-11-20
 
 ### Alterado

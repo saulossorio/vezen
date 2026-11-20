@@ -3372,7 +3372,7 @@ function migrarGastoDeclarado(d) {
 function marcarAlterado() { UI.sujo = true; atualizarCabecalho(); }
 function estadoAtual() {
   const s = empresaSalva();
-  if (!s) return { cls: UI.sujo ? 'pend' : 'novo', txt: 'Nova, ainda não salva' };
+  if (!s) return { cls: UI.sujo ? 'pend' : 'novo', txt: 'Não salva' };
   if (UI.sujo) return { cls: 'pend', txt: 'Alterações não salvas' };
   return { cls: 'ok', txt: 'Salva em ' + dataHoraBR(s.alteradoEm) };
 }
