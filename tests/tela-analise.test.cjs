@@ -58,17 +58,17 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Voltar a 12 meses volta a receita, sem aviso de conversão', igual(await recUsada(), REC) && !(await p.textContent('#dica-rec')).includes('12 (×'));
   // receita de outros anos: uma linha por ano, como o gasto real
   await p.click('[data-acao=add-rec]'); await p.waitForTimeout(200);
-  ok('Adicionar ano cria uma linha da receita, do ano antes do mais antigo', (await p.inputValue('[data-rec="0"][data-parte="ano"]')) === '2023' && await p.locator('.rec-linha').count() === 2 && await p.locator('[data-rec="0"][data-parte="meses"]').count() === 1);
+  ok('Adicionar ano cria uma linha da receita, do ano antes do mais antigo', (await p.inputValue('[data-rec="0"][data-parte="ano"]')) === '2023' && await p.locator('.campo-rec .rec-linha').count() === 2 && await p.locator('[data-rec="0"][data-parte="meses"]').count() === 1);
   await p.fill('[data-rec="0"][data-parte="v"]', '400.000.000'); await p.waitForTimeout(250);
   ok('A linha nova pede a origem do dado', await p.locator('.origem[data-alvo="rec:0"]').isVisible() && (await txt('.origem[data-alvo="rec:0"]')).includes('Marcar origem'));
   ok('Com dois anos fechados, a receita vai ao ano de referência pelo crescimento da própria empresa', igual(await recUsada(), 500e6 * 0.82 * Math.pow(1.25, REF - 2024)) && (await p.textContent('#dica-rec')).includes('crescimento da própria receita'), await p.textContent('#dica-rec'));
   await p.click('[data-acao=del-rec]'); await p.waitForTimeout(250);
-  ok('Remover o ano volta à receita de antes', await p.locator('.rec-linha').count() === 1 && igual(await recUsada(), REC) && (await motor(() => UI.atual.dados.receitasAnos.length)) === 0);
+  ok('Remover o ano volta à receita de antes', await p.locator('.campo-rec .rec-linha').count() === 1 && igual(await recUsada(), REC) && (await motor(() => UI.atual.dados.receitasAnos.length)) === 0);
   // ano de referência: os dois resultados são dele; trocar refaz a conta
   ok('Cartão: receita e investimento do ano de referência, o último ano fechado', (await txt('#painel .cr-topo')).includes(`Receita líquida, ${REF}`) && (await txt('#painel .cr-topo')).includes(`Investimento em TI, ${REF}`) && (await p.inputValue('#f-anoRef')) === String(REF));
-  ok('Gasto declarado pede o do ano de referência', (await p.textContent('label[for=f-gastoDeclarado]')).includes(`declarado de ${REF}`));
+  ok('Gasto de TI real: a primeira linha sugere o ano de referência, com valor e período', (await p.inputValue('[data-real="0"][data-parte="ano"]')) === String(REF) && await p.locator('[data-real="0"][data-parte="meses"]').count() === 1 && await p.locator('#f-gastoDeclarado').count() === 0);
   await p.selectOption('#f-anoRef', String(REF - 1)); await p.waitForTimeout(300);
-  ok('Trocar o ano de referência refaz a conta e os rótulos', (await motor(() => UI.atual.dados.anoRef)) === String(REF - 1) && igual(await recUsada(), 500e6 * 0.82 * Math.pow(1.07, REF - 1 - 2024)) && (await txt('#painel .cr-topo')).includes(`Investimento em TI, ${REF - 1}`) && (await p.textContent('label[for=f-gastoDeclarado]')).includes(`declarado de ${REF - 1}`));
+  ok('Trocar o ano de referência refaz a conta e os rótulos', (await motor(() => UI.atual.dados.anoRef)) === String(REF - 1) && igual(await recUsada(), 500e6 * 0.82 * Math.pow(1.07, REF - 1 - 2024)) && (await txt('#painel .cr-topo')).includes(`Investimento em TI, ${REF - 1}`) && (await p.inputValue('[data-real="0"][data-parte="ano"]')) === String(REF - 1));
   await p.selectOption('#f-anoRef', String(REF)); await p.waitForTimeout(300);
   ok('O cartão mostra a receita informada, com a origem', (await txt('#cr-receita')) === await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v)) && (await txt('#painel .cr-topo')).includes('Valor informado') && (await txt('#painel .cr-topo')).includes('DRE'));
   ok('Receita e TI: o cartão mostra a receita líquida usada', (await txt('#cr-receita')) === await p.evaluate(() => fmtRS(calc(UI.atual.dados).receita.usada.v)) && (await txt('#painel .cr-topo')).includes('Valor informado'));
@@ -116,12 +116,16 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.click('[data-acao=menu-analise]'); await p.click('#pop [data-acao=nova]'); await p.waitForTimeout(150);
   if (await p.locator('#dlg[open]').count()) await p.click('#dlg button:has-text("Descartar")');
   await p.waitForTimeout(150);
-  ok('Nova análise começa pela escolha do método', await p.locator('.comecos-met .comeco').count() === 4 && await p.locator('.comecos-met [data-acao=pers-rapido]').count() === 1 && await p.locator('#form').count() === 0);
-  await p.click('[data-acao=pers-rapido]'); await p.waitForTimeout(150);
-  await p.fill('#pers-pct', '0'); await p.press('#pers-pct', 'Enter'); await p.waitForTimeout(150);
-  ok('Personalizado: percentual inválido no cartão', /entre 0 e 100/.test(await txt('.comeco-form .valid')) && await p.locator('#form').count() === 0);
-  await p.fill('#pers-pct', '2,5'); await p.press('#pers-pct', 'Enter'); await p.waitForTimeout(200);
-  ok('Personalizado: percentual informado no cartão abre a análise', await p.locator('#form').count() === 1 && await motor(() => UI.atual.dados.modo === 'propria' && S.calibracao.direta.pg === 0.025));
+  ok('Nova análise começa pela escolha do método, sem termos técnicos', await p.locator('.comecos-met .comeco').count() === 4 && await p.locator('.comecos-met [data-acao=pers-abrir]').count() === 1 && await p.locator('#form').count() === 0 && !/CAPEX|Gasto total/.test(await txt('.comecos-met')));
+  await p.click('[data-acao=escolher-modo][data-v=fgv]'); await p.waitForTimeout(150);
+  ok('Análise nova tem Voltar, que leva de volta à escolha do método', await p.locator('#ws-acoes [data-acao=voltar-metodo]').count() === 1);
+  await p.click('#ws-acoes [data-acao=voltar-metodo]'); await p.waitForTimeout(150);
+  ok('Voltar mostra os métodos de novo', await p.locator('.comecos-met').count() === 1 && await p.locator('#form').count() === 0 && await p.locator('.ws-cab a[href="#/empresas"]').count() === 1);
+  await p.click('[data-acao=pers-abrir]'); await p.waitForTimeout(150);
+  ok('Personalizado sem dados abre ali mesmo: empresas, planilha e percentuais', await p.locator('.pers-inline [data-acao=minha-importar]').count() === 1 && await p.locator('.pers-inline [data-acao=minha-nova]').count() === 1 && await p.locator('.pers-inline [data-acao=dir-abrir]').count() === 1);
+  await p.click('.pers-inline [data-acao=dir-abrir]'); await p.waitForTimeout(150);
+  await p.fill('[data-dirl="0"][data-parte="p"]', '2,5'); await p.press('[data-dirl="0"][data-parte="p"]', 'Enter'); await p.waitForTimeout(250);
+  ok('Percentuais salvos ali mesmo abrem a análise no Personalizado, com o percentual à vista', await p.locator('#form').count() === 1 && await motor(() => UI.atual.dados.modo === 'propria' && S.calibracao.direta.pg === 0.025) && /2,50%/.test(await txt('#painel .modo-op:has(input[value=propria]) small')));
   await motor(() => { S.calibracao.direta = null; salvar(); UI.atual.dados.modo = ''; renderAqui(); }); await p.waitForTimeout(150);
   await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(150);
   await p.fill('#f-nome', 'Subsidiária Teste'); await p.selectOption('#f-natureza', 'subsidiaria'); await p.selectOption('#f-setor', 'industria'); await p.selectOption('#f-uf', 'SP');
@@ -278,7 +282,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   // campo sem valor: ou tem valor, ou tem um motivo explícito; senão falta informar, e o campo fica em vermelho
   const pend = () => motor(() => pendentes(UI.atual.dados));
   const tok = t => p.evaluate(t => { const e = document.createElement('i'); e.style.color = `var(${t})`; document.body.appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; }, t);
-  ok('Empresa modelo completa: nada faltando, motivo só no que os documentos não trazem', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === '|contratos,gastoDeclarado,profTI,usuarios' && await p.locator('.chip-falta').count() === 0);
+  ok('Empresa modelo completa: nada faltando, motivo só no que os documentos não trazem', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === '|contratos,profTI,usuarios' && await p.locator('.chip-falta').count() === 0);
   // sem nome e sem nenhum dado, salvar também funciona: o nome fica vermelho e o aviso conta o que falta
   await ir('#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   ok('Nome vazio fica vermelho no próprio campo', await p.locator('#f-nome').evaluate(e => getComputedStyle(e).borderTopColor) === await tok('--crit'));
@@ -292,7 +296,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.fill('#f-nome', 'Teste Sem Dado'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.fill('#f-funcionarios', '500'); await p.waitForTimeout(300);
   const vis = async c => await p.locator(`.sem-dado[data-campo=${c}]`).count() === 1 && await p.locator(`.sem-dado[data-campo=${c}]`).isVisible();
   const campoCor = (c, prop) => p.locator(`#f-${c}`).evaluate((e, k) => getComputedStyle(e)[k], prop);
-  ok('Campos vazios que entram na conta têm o botão “Sem dado?” desde o início', (await Promise.all(['faturamento', 'usuarios', 'profTI', 'gastosReais', 'gastoDeclarado'].map(vis))).every(Boolean) && (await txt('.sem-dado[data-campo=usuarios]')) === 'Sem dado?');
+  ok('Campos vazios que entram na conta têm o botão “Sem dado?” desde o início', (await Promise.all(['faturamento', 'usuarios', 'profTI', 'gastosReais'].map(vis))).every(Boolean) && (await txt('.sem-dado[data-campo=usuarios]')) === 'Sem dado?');
   ok('O próprio campo que falta muda de cor (fundo e borda vermelhos) e o botão fica neutro', await campoCor('usuarios', 'borderTopColor') === await tok('--crit') && await campoCor('usuarios', 'backgroundColor') === await tok('--crit-f') && await p.locator('.sem-dado[data-campo=usuarios]').evaluate(e => getComputedStyle(e).color) === await tok('--cinza'));
   ok('Campo com valor segue com a cor normal', await campoCor('funcionarios', 'borderTopColor') !== await tok('--crit') && await campoCor('funcionarios', 'backgroundColor') !== await tok('--crit-f'));
   const faltam0 = await pend();

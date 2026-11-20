@@ -48,7 +48,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await p.click('#painel label.modo-op:has(input[data-modo][value=padrao])'); await p.waitForTimeout(900);
   const v1 = await txt(p, '#cr-valor');
   // só os campos que entram na conta: nos métodos por percentual somem usuários, unidades e a seção da equipe; com gasto de TI do ano, também no Vezen
-  const campos = () => p.evaluate(() => ['f-funcionarios', 'f-usuarios', 'sec-ti', 'f-gastoDeclarado'].filter(id => document.getElementById(id)).join());
+  const campos = () => p.evaluate(() => ['f-funcionarios', 'f-usuarios', 'sec-ti'].filter(id => document.getElementById(id)).join());
   check('CR1: formulário com segmento, estado, receita e funcionários', await campos() === 'f-funcionarios' && await p.locator('#f-segCR').count() === 1 && await p.locator('#f-setor, #f-municipio').count() === 0 && await p.inputValue('#f-segCR') === 'servicos' && await p.evaluate(() => !pendentes(UI.atual.dados).some(c => SO_VEZEN.includes(c))), await campos());
   check('Vezen: todos os campos, e eles somem com gasto de TI do ano', await p.evaluate(() => { const d = JSON.parse(JSON.stringify(UI.atual.dados)); d.modo = 'base'; const antes = SO_VEZEN.filter(c => entraNaConta(d, c)).length; d.gastoDeclarado = { v: 1e6, o: 'oficial' }; return antes === SO_VEZEN.length && !SO_VEZEN.some(c => entraNaConta(d, c)) && entraNaConta(d, 'funcionarios'); }));
   check('CR1 muda o valor e usa só o caminho do percentual', v0 !== v1 && await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value === 'padrao' && calc(UI.atual.dados).ests.map(e => e.cod).join() === 'EP'), `${v0} → ${v1}`);
@@ -70,7 +70,6 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
     && await p.evaluate(() => { const r = calc(UI.atual.dados); return r.modoCalc === 'fgv' && !r.capex && Math.abs(r.F / (r.receita.usada.v * 0.145) - 1) < 1e-9; }) && !/CAPEX/.test(await txt(p, '#painel .cr-rot >> nth=1')));
   await p.click('#painel label.modo-op:has(input[data-modo][value=padrao])'); await p.waitForTimeout(700);
   // gasto real de 2024 (antes do ano de referência) para a análise entrar no Personalizado depois
-  await p.click('[data-acao=add-real]'); await p.waitForTimeout(200);
   await p.fill('[data-real="0"][data-parte="ano"]', '2024'); await p.fill('[data-real="0"][data-parte="v"]', '4.000.000'); await p.press('[data-real="0"][data-parte="v"]', 'Tab'); await p.waitForTimeout(300);
   check('a análise só entra no Personalizado quando a pessoa marca', !(await p.isChecked('#f-usarCalib')) && await p.evaluate(() => UI.atual.foraCalibracao === true));
   await p.check('#f-usarCalib'); await p.waitForTimeout(100);
@@ -171,14 +170,19 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await ir(p, '#/metodos');
   await p.click('[data-acao=dir-abrir]'); await p.waitForTimeout(200);
   await p.click('[data-acao=dir-salvar]'); await p.waitForTimeout(200);
-  check('percentual geral obrigatório', /entre 0 e 100/.test(await txt(p, '.cal-form .valid')));
-  await p.fill('#dir-geral', '2'); await p.fill('#dir-industria', '1,5'); await p.fill('#dir-comercio', 'abc'); await p.click('[data-acao=dir-salvar]'); await p.waitForTimeout(200);
-  check('percentual inválido avisa no setor', /Entre 0 e 100/.test(await txt(p, '.campo:has(#dir-comercio) .valid')) && !(await p.evaluate(() => !!(S.calibracao.direta && S.calibracao.direta.ativa))));
-  await p.fill('#dir-comercio', ''); await p.press('#dir-geral', 'Enter'); await p.waitForTimeout(300);
-  check('percentuais salvos e em uso', await p.evaluate(() => JSON.stringify(S.calibracao.direta)) === '{"ativa":true,"pg":0.02,"ps":{"industria":0.015},"s":0.5}' && /Em uso: percentuais informados por você/.test(await txt(p, '#pers-dados .cal-uso')) && /Percentuais informados por você/.test(await txt(p, '#pers-dados')));
-  check('tabela dos percentuais sem coluna de empresas', await p.locator('#pers-dados .cal-bloco:nth-child(1) th:text-is("Empresas")').count() === 0 && /1,50%/.test(await txt(p, '#pers-dados .cal-bloco:nth-child(1)')));
+  check('percentual obrigatório', /entre 0 e 100/.test(await txt(p, '.cal-form .valid')));
+  const linha = async (i, l, uf, v) => { if (i) { await p.click('[data-acao=dir-add]'); await p.waitForTimeout(120); } if (l) await p.selectOption(`[data-dirl="${i}"][data-parte="l"]`, l); if (uf) await p.selectOption(`[data-dirl="${i}"][data-parte="uf"]`, uf); await p.fill(`[data-dirl="${i}"][data-parte="p"]`, v); };
+  await linha(0, '', '', '2'); await linha(1, 'industria', '', '1,5'); await linha(2, 'industria', 'SP', '3'); await linha(3, 'comercio', '', 'abc');
+  await p.click('[data-acao=dir-salvar]'); await p.waitForTimeout(200);
+  check('percentual inválido avisa na linha', /entre 0 e 100/.test(await txt(p, '.dir-linha:has([data-dirl="3"]) .valid')) && !(await p.evaluate(() => !!(S.calibracao.direta && S.calibracao.direta.ativa))));
+  await p.click('[data-acao=dir-del][data-i="3"]'); await p.waitForTimeout(150);
+  check('as linhas digitadas ficam ao tirar uma', await p.inputValue('[data-dirl="2"][data-parte="p"]') === '3' && await p.inputValue('[data-dirl="2"][data-parte="uf"]') === 'SP');
+  await p.press('[data-dirl="0"][data-parte="p"]', 'Enter'); await p.waitForTimeout(300);
+  check('percentuais por setor e estado salvos e em uso', await p.evaluate(() => JSON.stringify(S.calibracao.direta)) === '{"ativa":true,"pg":0.02,"ps":{"industria":0.015},"pu":{"industria|SP":0.03},"s":0.5}' && /Em uso: percentuais informados por você/.test(await txt(p, '#pers-dados .cal-uso')) && /Percentuais informados pelo usuário/.test(await txt(p, '#pers-dados')), await p.evaluate(() => JSON.stringify(S.calibracao.direta)));
+  check('tabela dos percentuais por setor e estado', await p.locator('#pers-dados .cal-bloco:nth-child(1) th:text-is("Empresas")').count() === 0 && (await p.locator('#pers-dados .cal-bloco:nth-child(1) tbody tr').evaluateAll(trs => trs.map(tr => [...tr.cells].map(c => c.textContent.trim()).join('|')))).join(';').includes('SP|3,00%'), (await p.locator('#pers-dados .cal-bloco:nth-child(1) tbody tr').evaluateAll(trs => trs.map(tr => [...tr.cells].map(c => c.textContent.trim()).join('|')))).join(';'));
+  check('o percentual mais específico vale primeiro', await p.evaluate(() => { const D = S.calibracao.direta; return pctDireto(D, 'industria', 'SP').p === 0.03 && pctDireto(D, 'industria', 'RJ').p === 0.015 && pctDireto(D, 'varejo', 'SP').p === 0.02 && pctDireto(D, 'publico', 'SP') === null; }));
   await ir(p, '#/empresas'); await p.click('.lista-emp .emp-nome >> nth=0'); await p.waitForTimeout(500);
-  check('análise: Personalizado com o percentual geral digitado (serviços sem valor próprio)', await p.evaluate(() => { UI.atual.dados.modo = 'propria'; const r = calc(UI.atual.dados); return r.modoCalc === 'propria' && r.ests.some(e => e.cod === 'EP') && Math.abs(r.modelo.p - 0.02) < 1e-12; }) && /Percentuais informados por você/.test(await txt(p, '#painel .modo-op:has(input[value=propria]) small')));
+  check('análise: Personalizado com o percentual geral digitado (serviços sem valor próprio)', await p.evaluate(() => { UI.atual.dados.modo = 'propria'; const r = calc(UI.atual.dados); return r.modoCalc === 'propria' && r.ests.some(e => e.cod === 'EP') && Math.abs(r.modelo.p - 0.02) < 1e-12; }) && /^Informado: 2,00% da receita/.test(await txt(p, '#painel .modo-op:has(input[value=propria]) small')), await txt(p, '#painel .modo-op:has(input[value=propria]) small'));
   check('confiança com percentuais digitados: aproximada', /Aproximada: percentuais informados por você/.test(await (async () => { await p.click('#painel label.modo-op:has(input[data-modo][value=propria])'); await p.waitForTimeout(400); return txt(p, '#painel .cr-conf'); })()));
   await ir(p, '#/metodos'); await p.click('[data-acao=dir-abrir]'); await p.waitForTimeout(150); await p.click('[data-acao=dir-desligar]'); await p.waitForTimeout(300);
   check('voltar às empresas desliga os percentuais', await p.evaluate(() => S.calibracao.direta === null) && /Ainda sem efeito: 1 empresa \(1 análise salva com gasto real\)/.test(await txt(p, '#pers-dados .cal-uso')), await txt(p, '#pers-dados .cal-uso'));

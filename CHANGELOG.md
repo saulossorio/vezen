@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.0] - 2026-11-20
+
+### Alterado
+- **Método Personalizado**: os percentuais informados são por setor e estado (linhas setor × estado, com “todos” para o resto; vale a linha mais específica). O cartão do método, sem dados, abre ali mesmo as empresas, a planilha e os percentuais; com os percentuais salvos, a análise abre no método e mostra o percentual em uso.
+- **Gasto de TI real** no formato da receita: a primeira linha já vem com o ano de referência, valor e período (o valor de menos de 12 meses é levado ao ano). O campo separado do gasto declarado saiu; o valor salvo nele vira a linha do ano de referência.
+- **Análise nova** tem o botão Voltar, que volta à escolha do método; a escolha do método volta para Empresas.
+- **Cartões dos métodos** sem o selo do que medem; **tour** com textos curtos.
+
 ## [3.7.2] - 2026-11-20
 
 ### Alterado

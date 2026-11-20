@@ -35,7 +35,7 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
       'Origem do dado': async () => { await p.click('#app .origem[data-alvo="campo:faturamento"]'); await p.click('#pop [data-o="oficial"]'); },
       'Funcionários': async () => { await p.fill('#f-funcionarios', '85206'); await p.press('#f-funcionarios', 'Tab'); },
       'Dado não encontrado': async () => { await p.click('#app .sem-dado[data-campo="profTI"]'); await p.click('#pop [data-s="nao-encontrado"]'); },
-      'Gasto de TI real': async () => { await p.click('#app [data-acao="add-real"]'); await p.fill('#app [data-real][data-parte="ano"]', '2025'); await p.fill('#app [data-real][data-parte="v"]', '6.800.000.000'); await p.press('#app [data-real][data-parte="v"]', 'Tab'); }
+      'Gasto de TI real': async () => { await p.fill('#app [data-real="0"][data-parte="v"]', '6.800.000.000'); await p.press('#app [data-real="0"][data-parte="v"]', 'Tab'); }
     };
     const tarefa = await p.evaluate(() => TOUR.map(x => !!x.tarefa));
     for (let i = 1; i < titulos.length; i++) {
