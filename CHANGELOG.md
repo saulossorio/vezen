@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.2.3] - 2026-11-21
+
+### Alterado
+- Método Personalizado sem dados: volta a ser clicável e mostra "Sem dados ainda · Adicionar dados". No resultado detalhado, escolher o método leva à análise, onde estão os campos dele. A versão 4.2.2 o deixava desabilitado.
+- Resultado detalhado, Dados usados: o rótulo é texto corrido, e um termo do glossário como "Gasto de TI" não se divide mais em colunas. A origem e o detalhe ficam na mesma linha. Os cartões se distribuem como o `.stat-grid` do Grin, sem um cartão sozinho numa linha.
+- Resultado detalhado, Ajustes pelo perfil: o fator e o efeito (por exemplo "× 1,17 +17%") ficam na mesma linha, numa coluna de largura fixa.
+- Resultado no celular: a origem de um dado (por exemplo "Terceiros") quebra dentro do cartão e não cria rolagem lateral.
+- Gráficos do resultado: a largura desconta o índice lateral, e os gráficos não são mais reduzidos com texto menor. A projeção tem espaço para os valores do eixo e mostra só o valor de cada ano. A taxa, igual em todos os anos, aparece embaixo do gráfico.
+
 ## [4.2.2] - 2026-11-21
 
 ### Alterado

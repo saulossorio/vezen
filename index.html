@@ -3205,6 +3205,8 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .modo-op:has(input:checked) { border-color: var(--primary); background: var(--brand-bg); box-shadow: 0 0 0 3px var(--highlight); }
 .modo-op:has(input:focus-visible) { outline: 2px solid var(--ring); outline-offset: 2px; }
 .modo-op.off { cursor: not-allowed; }
+.mo-add { color: var(--brand-fg); font-weight: var(--weight-semibold); text-decoration: underline; text-underline-offset: 3px; }
+.modo-op.sem-dados:hover .mo-add { color: var(--foreground); }
 .modo-op.off b, .modo-op.off .mo-val { color: var(--muted-foreground); font-weight: var(--weight-medium); }
 .modo-op b { display: block; font-size: var(--text-sm); }
 .modo-op small { display: block; color: var(--muted-foreground); font-size: var(--text-xs); line-height: 1.3; }
@@ -3363,6 +3365,10 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .hb-rot { display: flex; align-items: center; gap: 8px; font-size: var(--text-sm); }
 .hb-rot .ico { color: var(--muted-foreground); }
 .hb-rot small { display: block; color: var(--muted-foreground); font-size: var(--text-xs); }
+@media (min-width: 641px) {
+  .hb-val.aj { display: flex; align-items: baseline; justify-content: flex-end; gap: 8px; min-width: 150px; }
+  .hb-val.aj small { display: inline; min-width: 68px; text-align: left; }
+}
 .hb-trilha { position: relative; height: 18px; background: var(--muted); border-radius: 4px; }
 .hb-trilha.meio::before { content: ''; position: absolute; left: 50%; top: -4px; bottom: -4px; width: 1px; background: var(--border-strong); }
 .hb-val { text-align: right; font-weight: var(--weight-semibold); font-size: var(--text-base); white-space: nowrap; }
@@ -3383,11 +3389,15 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .graf text { fill: var(--muted-foreground); font-family: var(--font-sans); font-size: var(--text-xs); font-variant-numeric: tabular-nums; }
 .graf .grade-l { stroke: var(--chart-grid); }
 .graf .eixo { stroke: var(--border-strong); }
-.dados-grade { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
-.dado { padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; gap: 3px; }
-.dado small { display: flex; align-items: center; gap: 6px; color: var(--muted-foreground); font-size: var(--text-xs); }
+.dados-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 10px; } /* como o .stat-grid do Grin: sem cartão sozinho numa linha */
+.dado { padding: 12px 14px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--surface); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.dado small { display: block; color: var(--muted-foreground); font-size: var(--text-xs); line-height: 1.4; }
+.dado small:first-child .ico { vertical-align: -2px; margin-right: 6px; }
+.dado .du-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 2px; }
+.dado .du-meta > * { max-width: 100%; min-width: 0; }
+.dado .du-meta .o-chip { white-space: normal; height: auto; } /* origem longa quebra dentro do cartão estreito */
 .dado small .ico { width: 14px; height: 14px; }
-.dado b { font-size: var(--text-base); }
+.dado b { font-size: var(--text-lg); font-variant-numeric: tabular-nums; }
 .dado.falta { background: var(--muted); border-style: dashed; }
 .dado.falta b { color: var(--muted-foreground); font-weight: var(--weight-medium); font-size: var(--text-sm); }
 .rec-top { display: flex; gap: 10px 16px; align-items: baseline; flex-wrap: wrap; margin-bottom: 12px; }
@@ -3768,7 +3778,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.2.2';
+const VERSAO_APP = '4.2.3';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5775,7 +5785,9 @@ function tabelaDados(cab, linhas) { return `<details class="dados-tab"><summary>
 // largura útil dentro de um painel: os gráficos são desenhados na escala 1:1, com texto legível no celular
 function larguraGraf(desconto = 0) {
   const app = $('#app'); if (!app || !app.clientWidth) return 720;
-  const cs = getComputedStyle(app), w = app.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 46 - desconto;
+  // no resultado, o índice lateral (200 px e o espaço) ocupa parte da largura
+  const indice = UI.rota && UI.rota.aba === 'resultado' && window.innerWidth > 1180 ? 228 : 0;
+  const cs = getComputedStyle(app), w = app.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - 50 - desconto - indice;
   return Math.max(280, Math.min(1100, Math.floor(w)));
 }
 const limitesCaminho = c => [c.v * Math.exp(-Z90 * c.s), c.v * Math.exp(Z90 * c.s)];
@@ -5875,7 +5887,7 @@ function graficoAjustes(r, d) {
   const pos = v => clamp(Math.log(v) / Math.log(2), -1, 1) * 50;
   const barra = (v, cls = '') => { const p = pos(v); return Math.abs(p) < 0.4 ? '' : p > 0 ? `<span class="hb-b dir ${cls}" style="left:50%;width:${p}%"></span>` : `<span class="hb-b esq ${cls}" style="left:${50 + p}%;width:${-p}%"></span>`; };
   const pct = v => Math.abs(v - 1) < 0.005 ? 'sem efeito' : (v > 1 ? '+' : '−') + nf(Math.abs(v - 1) * 100, 0) + '%';
-  const linha = ([i, nome, v], tot) => `<div class="hb-rot">${ico(i)}<span>${tot ? '<b>' + esc(nome) + '</b>' : esc(nome)}</span></div><div class="hb-trilha meio" data-tip="${esc(nome + ': × ' + nf(v, 3))}">${barra(v, tot ? 'total' : '')}</div><div class="hb-val">× ${nf(v, 2)}<small>${pct(v)}</small></div>`;
+  const linha = ([i, nome, v], tot) => `<div class="hb-rot">${ico(i)}<span>${tot ? '<b>' + esc(nome) + '</b>' : esc(nome)}</span></div><div class="hb-trilha meio" data-tip="${esc(nome + ': × ' + nf(v, 3))}">${barra(v, tot ? 'total' : '')}</div><div class="hb-val aj">× ${nf(v, 2)}<small>${pct(v)}</small></div>`;
   return `<div class="hbar">${ls.map(x => linha(x)).join('')}${mods.length ? '<div class="fo-linha-sep"></div>' + linha(['ajuste', 'Total dos ajustes da empresa', r.Mmod], true) : ''}
     <span></span><div class="hb-eixo"><span>÷ 2</span><span>sem efeito</span><span>× 2</span></div><span></span></div>
     ${mods.length ? `<p class="text-secondary" style="font-size:.84rem;margin-top:10px">O total junta os ajustes da empresa (sem porte e região) e fica entre × ${nf(Mo.mMin, 1)} e × ${nf(Mo.mMax, 1)}.</p>` : ''}${tabela}`;
@@ -5933,7 +5945,7 @@ function graficoProjecao(res) {
   const pj = res.projecao, reais = res.reais;
   const anos = [...reais.map(x => x.ano), ...pj.map(p => p.ano)];
   const a0 = Math.min(...anos), a1 = Math.max(...anos);
-  const W = larguraGraf(), H = W < 560 ? 280 : 320, m = { l: 64, r: 24, t: 30, b: 34 };
+  const W = larguraGraf(), H = W < 560 ? 280 : 320, m = { l: 76, r: 24, t: 24, b: 34 };
   const ymax = Math.max(...pj.map(p => Math.max(p.hi, p.acel)), ...reais.map(x => x.v)) * 1.05;
   const X = escLin(a0 - 0.4, a1 + 0.4, m.l, W - m.r), Y = escLin(0, ymax, H - m.b, m.t);
   const caminho = k => pj.map((p, i) => (i ? 'L' : 'M') + X(p.ano).toFixed(1) + ',' + Y(p[k]).toFixed(1)).join('');
@@ -5943,7 +5955,8 @@ function graficoProjecao(res) {
   let gy = ''; for (let v = 0; v <= ymax; v += st) gy += `<line class="grade-l" x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${m.l - 8}" y="${Y(v) + 4}" text-anchor="end">${v ? 'R$ ' + rsCurto(v) : '0'}</text>`;
   let gx = ''; for (let a = a0; a <= a1; a++) gx += `<text x="${X(a)}" y="${H - m.b + 18}" text-anchor="middle">${a}</text>`;
   const halo = 'paint-order="stroke" stroke="var(--surface)" stroke-width="4" stroke-linejoin="round"';
-  const rot = pj.slice(1).map((p, i) => W < 560 && i < pj.length - 2 ? '' : `<text x="${X(p.ano)}" y="${Y(Math.max(p.base, p.acel)) - 24}" text-anchor="middle" font-weight="650" style="fill:var(--foreground)" ${halo}>${rsCurto(p.base)}</text><text x="${X(p.ano)}" y="${Y(Math.max(p.base, p.acel)) - 11}" text-anchor="middle" font-size="10" ${halo}>${(p.base >= pj[i].base ? '+' : '−') + nf(Math.abs(p.base / pj[i].base - 1) * 100, 1)}%</text>`).join('');
+  // um rótulo por ano, só com o valor da base; a taxa é a mesma em todos os anos e aparece embaixo do gráfico
+  const rot = pj.slice(1).map((p, i) => W < 560 && i < pj.length - 2 ? '' : `<text x="${X(p.ano)}" y="${Y(Math.max(p.base, p.acel)) - 10}" text-anchor="middle" font-weight="650" style="fill:var(--foreground)" ${halo}>${rsCurto(p.base)}</text>`).join('');
   const pts = pj.map(p => `<circle cx="${X(p.ano)}" cy="${Y(p.base)}" r="4.5" fill="var(--surface)" stroke="var(--chart-1)" stroke-width="2"><title>${p.ano}: ${fmtRS(p.base)} (faixa ${fmtRS(p.lo)} a ${fmtRS(p.hi)}; crescimento menor ${fmtRS(p.cons)}; maior ${fmtRS(p.acel)})</title></circle>`).join('');
   const rr = reais.map(x => `<circle cx="${X(x.ano)}" cy="${Y(x.v)}" r="5.5" fill="var(--chart-2)" stroke="var(--surface)" stroke-width="2"><title>Gasto real ${x.ano}: ${fmtRS(x.v)}</title></circle>`).join('');
   const fonte = { historico: 'histórico de gasto real', media: 'média do setor', manual: 'informada por você' }[res.g === undefined ? 'media' : res.gFonte];
@@ -6652,10 +6665,11 @@ function seletorEscopo(d, m) {
 const botaoEditarPers = m => m === 'propria' ? `<button type="button" class="link-btn link editar-pers" data-acao="pers-editar">${ico('editar')}Editar percentuais e empresas</button>` : '';
 function seletorModo(m, suf = '', d = null) {
   return `<div class="modos" role="radiogroup" aria-label="Método">${MODOS.map(v => {
-    // o Personalizado sem dados pode ser escolhido: a análise pede os dados dele primeiro
-    // no resultado não há formulário para preencher: sem dados, o Personalizado fica desabilitado
-    const ok = modoDisponivel(v), livre = ok || (v === 'propria' && suf !== '-res'), r = ok && d ? calcModo(d, v) : null;
-    return `<label class="modo-op${livre ? '' : ' off'}"><input type="radio" name="modo${suf}" value="${v}" data-modo${m === v ? ' checked' : ''}${livre ? '' : ' disabled'}><span><b>${nomeModo(v)}</b><small>${descModo(v, d)}</small></span><span class="mo-val">${r && !r.vazio ? fmtRS(r.F) : ok ? '' : '—'}</span></label>`;
+    // o Personalizado sem dados pode ser escolhido: mostra "Adicionar dados" e a análise abre os campos dele
+    const ok = modoDisponivel(v), semDados = !ok && v === 'propria', livre = ok || semDados, r = ok && d ? calcModo(d, v) : null;
+    const val = r && !r.vazio ? fmtRS(r.F) : ok || semDados ? '' : '—';
+    const desc = semDados ? `${descModo(v, d)} · <span class="mo-add">Adicionar dados</span>` : descModo(v, d);
+    return `<label class="modo-op${livre ? '' : ' off'}${semDados ? ' sem-dados' : ''}"><input type="radio" name="modo${suf}" value="${v}" data-modo${m === v ? ' checked' : ''}${livre ? '' : ' disabled'}><span><b>${nomeModo(v)}</b><small>${desc}</small></span><span class="mo-val">${val}</span></label>`;
   }).join('')}</div>`;
 }
 // nas listas, um menu simples
@@ -6665,6 +6679,8 @@ function seletorModoLista(m, id) {
 function mudarModo(v) {
   if (!UI.atual) return;
   UI.atual.dados.modo = MODOS.includes(v) ? v : 'base'; marcarAlterado();
+  // Personalizado sem dados, escolhido no resultado: volta para a análise, onde estão os campos dele
+  if (UI.rota.aba === 'resultado' && v === 'propria' && !modoDisponivel(v)) { navegar(`#/analise/${UI.atual.id}`); return; }
   if (UI.rota.aba === 'resultado') renderAqui(); else rerenderAnalise();
   const f = document.querySelector('#app input[data-modo]:checked'); if (f) f.focus({ preventScroll: true });
 }
@@ -7198,12 +7214,12 @@ function listaDados(d, r) {
   if (d.natureza === 'publico') add('contratos', rotContratos(d) + (ehOrgaoPublico(d) ? ', ' + nomeEtapa(d) : ''), 'governo', fmtRS);
   add('gastoDeclarado', 'Gasto de TI declarado do ano', 'doc', fmtRS);
   const rs = r.reais || [], u = rs[rs.length - 1];
-  out.push({ c: 'gastosReais', rot: 'Gasto de TI real', i: 'historico', val: u ? fmtRS(u.v) + ' em ' + u.ano : null, o: u ? (u.o || '') : null, extra: rs.length > 1 ? rs.length + ' anos informados' : '' });
+  out.push({ c: 'gastosReais', rot: 'Gasto de TI real', i: 'historico', val: u ? fmtRS(u.v) : null, o: u ? (u.o || '') : null, extra: u ? 'de ' + u.ano + (rs.length > 1 ? ', ' + rs.length + ' anos informados' : '') : '' });
   return out;
 }
 function dadosUsados(r, d) {
   return `<div class="dados-grade">${listaDados(d, r).map(x => x.val != null
-    ? `<div class="dado"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.val}</b>${origemChip(x.o, x.c === 'faturamento')}${x.extra ? `<small>${esc(x.extra)}</small>` : ''}</div>`
+    ? `<div class="dado"><small>${ico(x.i)}${esc(x.rot)}</small><b>${x.val}</b><div class="du-meta">${origemChip(x.o, x.c === 'faturamento')}${x.extra ? `<small>${esc(x.extra)}</small>` : ''}</div></div>`
     : `<div class="dado falta${estadoSemDado(d, x.c) === 'pendente' ? ' pendente' : ''}"><small>${ico(x.i)}${esc(x.rot)}</small>${chipSemDado(d, x.c) ? chipSemDado(d, x.c) + (x.extra ? `<small>${esc(x.extra)}</small>` : '') : x.extra ? `<b>${esc(x.extra)}</b>` : `<b>${estadoSemDado(d, x.c) === 'pendente' ? 'falta informar' : 'não informado'}</b>`}</div>`).join('')}</div>`;
 }
 function subReceita(r) {
@@ -7249,7 +7265,7 @@ function atualizarProjecao() {
 function heroResultado(r, d) {
   const z = r.resumo, com = z.comSalarios, rec = r.receita && r.receita.usada, ult = r.projecao[r.projecao.length - 1];
   const nMod = r.ests.filter(e => e.modelo).length, nReal = r.ests.length - nMod, g = com ? z.geral : z.geralSem, c = com ? z.conservadora : z.conservadoraSem;
-  const W = Math.max(280, Math.min(560, Math.round(larguraGraf(240) * 0.56)));
+  const W = Math.max(280, Math.min(560, Math.round(larguraGraf() * 0.56)));
   return `<section class="painel card res-sec" id="res-estimativa" aria-label="Estimativa"><div class="hero-res">
     <div><p class="cr-rot">${r.capex ? 'Investimento anual em TI (CAPEX) estimado' : 'Investimento anual em TI estimado'}, ${r.ano} <span class="chip-modo badge ${clsModo(r.modoCalc)}">${nomeModo(r.modoCalc)}</span></p>
       <div class="cr-valor">${fmtRS(r.F)}</div>
@@ -7288,7 +7304,7 @@ function secaoRes(id, icone, tit, sub, corpo, extra = '') {
 function corpoResultado(emp) {
   const d = emp.dados, r = calc(d), id = encodeURIComponent(emp.id);
   if (r.vazio) return `<div class="vazio empty-state"><h2>${esc(r.msgVazio)}</h2><p>Volte aos dados e preencha a receita, os funcionários, a equipe de TI ou um gasto real.</p><div class="acoes"><a class="btn primary" href="#/analise/${id}">${ico('voltar')}Voltar aos dados</a></div></div>`;
-  const pmd = proximosDados(d, r), W = larguraGraf(240), temRec = r.receita && (r.receita.usada || r.receita.estimativa);
+  const pmd = proximosDados(d, r), W = larguraGraf(), temRec = r.receita && (r.receita.usada || r.receita.estimativa);
   const secoes = [
     ['res-estimativa', 'Estimativa', heroResultado(r, d)],
     ['res-resumo', 'Para o resumo', secaoRes('res-resumo', 'faixa', 'Estimativas para o resumo', `Geral é o valor central. Conservadora é o percentil ${Math.round(r.resumo.q * 100)}: em ${Math.round((1 - r.resumo.q) * 100)} de cada 100 casos o gasto real fica acima dela. Salários de outras áreas, RH e administrativo nunca entram; os da equipe de TI entram conforme a opção ao lado.`, graficoEstimativas(r), `<div class="acoes">${seletorSalarios(r.resumo.comSalarios, '-res')}<button type="button" class="btn" data-acao="resumo">${ico('copiar')}Copiar resumo</button></div>`)],
