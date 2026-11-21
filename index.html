@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.26, copiado de https://github.com/saulossorio/grin/releases/tag/v2.26 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.27, copiado de https://github.com/saulossorio/grin/releases/tag/v2.27 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.26 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.27 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -165,7 +165,6 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
   --size-avatar: 40px;
   --size-screen: 1200px;
   --size-content: 1440px;
-  --size-start: 680px;
   --size-prose: 72ch;
   --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'Geist Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -1903,26 +1902,22 @@ a.tab { text-decoration: none; }
 
 /* ---------- components/start/start.css ---------- */
 /* Grin start screen (also: tela inicial, home, welcome, primeira tela). The first screen of a tool, before there is data
-   to work on: title, short description, the main actions and the signature. One centered column (--size-start),
-   centered vertically in the window, with the signature at the bottom of the window in the same width.
-   Markup: <main class="page-content start-screen"><div class="start-screen-body">…</div><footer class="app-footer">…</footer></main>
-   Working screens (lists, forms, analyses) use the normal page layout, never this one. */
-.start-screen { align-items: center; padding-top: 0; }
-.start-screen > * { width: min(var(--size-start), 100%); }
-.start-screen-body { display: flex; flex-direction: column; gap: var(--space-4); margin-block: auto; padding-top: 32px; }
-.start-screen-body h1 { font-size: var(--text-3xl); }
-.start-screen-body > .lead, .start-screen-body > header > .lead { margin-top: -8px; }
-.start-screen > .app-footer { margin-top: 32px; }
-.start-screen .action-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-@media (max-width: 560px) { .start-screen .action-cards { grid-template-columns: 1fr; } }
+   to work on. It uses the same structure as every other screen: the page header (.page-header) in the same place and
+   size, the content below it with the page width, and the signature at the bottom of the window. Only the description
+   is limited to --size-prose, for line length. Nothing is centered in a narrow column, so the title and the content do
+   not jump when the person moves to another screen.
+   Markup: <div class="page-header">…h1, p.page-description…</div>
+           <main class="page-content start-screen"><div class="start-screen-body">…</div><footer class="app-footer">…</footer></main> */
+.start-screen-body { display: flex; flex-direction: column; gap: var(--space-4); }
+.page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 
 </style>
 <script id="grin-js" defer>
-/* Grin 2.26 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.27 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.26';
+Grin.version = '2.27';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2874,9 +2869,7 @@ li { margin: 3px 0; }
 .principal > #app { width: 100%; flex: 1 0 auto; } /* em coluna flex, margin auto encolheria o conteúdo */
 .principal > .app-footer { flex: none; width: calc(100% - 64px); max-width: var(--size-content); margin: 0 auto; padding-block: 16px 20px; }
 @media (max-width: 960px) { .principal > .app-footer { width: calc(100% - 32px); } }
-/* tela inicial (Empresas sem empresas): padrão Tela inicial do Grin; a assinatura fica fora do #app e acompanha a coluna */
-#app.start-screen { display: flex; flex-direction: column; padding-bottom: 0; }
-.principal:has(> #app.start-screen) > .app-footer { max-width: var(--size-start); margin-top: 32px; }
+/* tela inicial (Empresas sem empresas): padrão Tela inicial do Grin, com o mesmo cabeçalho e as mesmas margens das outras telas */
 .start-screen .cab { margin-bottom: 0; }
 .start-screen .vazio.inicio { padding: 8px 0 0; text-align: left; align-items: stretch; }
 .start-screen .cab { align-items: flex-start; }
@@ -3284,6 +3277,7 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .indice-lado button:hover { color: var(--foreground); border-left-color: var(--border-strong); }
 .res-sec { scroll-margin-top: 72px; }
 .hero-res { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px 28px; align-items: start; }
+/* os números ficam embaixo da régua, na coluna do valor, para a coluna não ficar vazia ao lado do painel de confiança e métodos */
 @media (max-width: 860px) { .hero-res { grid-template-columns: minmax(0, 1fr); } }
 .hero-res .cr-valor { font-size: var(--text-4xl); }
 .hero-conf { background: var(--muted); border-radius: var(--radius-lg); padding: 14px 16px; }
@@ -3771,7 +3765,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.2.0';
+const VERSAO_APP = '4.2.1';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -7254,18 +7248,18 @@ function heroResultado(r, d) {
   return `<section class="painel card res-sec" id="res-estimativa" aria-label="Estimativa"><div class="hero-res">
     <div><p class="cr-rot">${r.capex ? 'Investimento anual em TI (CAPEX) estimado' : 'Investimento anual em TI estimado'}, ${r.ano} <span class="chip-modo badge ${clsModo(r.modoCalc)}">${nomeModo(r.modoCalc)}</span></p>
       <div class="cr-valor">${fmtRS(r.F)}</div>
-      <p class="cr-faixa">Faixa provável <b>${fmtRS(r.p10)} a ${fmtRS(r.p90)}</b> <span class="text-secondary">(${fmtSinal(r.pctLo)} a ${fmtSinal(r.pctHi)})</span></p>${r.fatorCapex ? `<p class="cr-faixa">Gasto total de TI ${fmtRS(r.totalTI)} × ${fmtPct(r.fatorCapex, 0)} de investimento (FGV${r.linhaId === 'bancos' ? ', FEBRABAN' : ''})</p>` : ''}${regua(r, W)}</div>
+      <p class="cr-faixa">Faixa provável <b>${fmtRS(r.p10)} a ${fmtRS(r.p90)}</b> <span class="text-secondary">(${fmtSinal(r.pctLo)} a ${fmtSinal(r.pctHi)})</span></p>${r.fatorCapex ? `<p class="cr-faixa">Gasto total de TI ${fmtRS(r.totalTI)} × ${fmtPct(r.fatorCapex, 0)} de investimento (FGV${r.linhaId === 'bancos' ? ', FEBRABAN' : ''})</p>` : ''}${regua(r, W)}
+      <dl class="numeros">
+        <div><dt>Receita líquida, ${r.ano}</dt><dd id="res-receita-num">${rec ? fmtRS(rec.v) : '—'}<small>${!rec ? 'faltam funcionários e setor' : r.receita.modo === 'informada' ? 'valor informado' : `faixa ${fmtRS(rec.p10)} a ${fmtRS(rec.p90)}`}</small></dd></div>
+        <div><dt>Geral, ${com ? 'com' : 'sem'} salários de TI</dt><dd>${fmtRS(g)}<small>para o resumo</small></dd></div>
+        <div><dt>Conservadora</dt><dd>${fmtRS(c)}<small>percentil ${Math.round(z.q * 100)}</small></dd></div>
+        <div><dt>Parte da receita</dt><dd>${rec ? fmtPct(g / rec.v) : '—'}<small>${rec ? 'receita de ' + fmtRS(rec.v) : 'sem receita'}</small></dd></div>
+        <div><dt>Caminhos usados</dt><dd>${r.E4ativo ? 1 : r.ests.length}<small>${r.E4ativo ? 'o gasto declarado substitui os outros' : `${nMod} por médias, ${nReal} por ${nReal === 1 ? 'dado real' : 'dados reais'}`}</small></dd></div>
+        <div><dt>Projeção para ${ult.ano}</dt><dd>${fmtRS(ult.base)}<small>${fmtPct(r.g)} ao ano</small></dd></div>
+      </dl></div>
     <div class="hero-conf">${chipConf(r)}<div class="medida"><span class="trilha"><i class="c-${clsNivel(r.icNivel)}" style="width:${r.ic}%"></i></span><b>${r.ic} de 100</b></div><p>${esc(rotuloConfianca(r))}</p>
       <div class="res-ano"><label for="f-anoRef-res">Ano de referência</label>${seletorAno(d, '-res')}</div>
-      <div style="margin-top:12px">${seletorModo(modoDe(d), '-res', d)}</div></div></div>
-    <dl class="numeros">
-      <div><dt>Receita líquida, ${r.ano}</dt><dd id="res-receita-num">${rec ? fmtRS(rec.v) : '—'}<small>${!rec ? 'faltam funcionários e setor' : r.receita.modo === 'informada' ? 'valor informado' : `faixa ${fmtRS(rec.p10)} a ${fmtRS(rec.p90)}`}</small></dd></div>
-      <div><dt>Geral, ${com ? 'com' : 'sem'} salários de TI</dt><dd>${fmtRS(g)}<small>para o resumo</small></dd></div>
-      <div><dt>Conservadora</dt><dd>${fmtRS(c)}<small>percentil ${Math.round(z.q * 100)}</small></dd></div>
-      <div><dt>Parte da receita</dt><dd>${rec ? fmtPct(g / rec.v) : '—'}<small>${rec ? 'receita de ' + fmtRS(rec.v) : 'sem receita'}</small></dd></div>
-      <div><dt>Caminhos usados</dt><dd>${r.E4ativo ? 1 : r.ests.length}<small>${r.E4ativo ? 'o gasto declarado substitui os outros' : `${nMod} por médias, ${nReal} por ${nReal === 1 ? 'dado real' : 'dados reais'}`}</small></dd></div>
-      <div><dt>Projeção para ${ult.ano}</dt><dd>${fmtRS(ult.base)}<small>${fmtPct(r.g)} ao ano</small></dd></div>
-    </dl></section>`;
+      <div style="margin-top:12px">${seletorModo(modoDe(d), '-res', d)}</div></div></div></section>`;
 }
 function secaoRes(id, icone, tit, sub, corpo, extra = '') {
   return `<section class="painel card res-sec" id="${id}" aria-labelledby="${id}-t"><div class="painel-cab"><div><h2 id="${id}-t">${ico(icone)}${tit}</h2>${sub ? `<p>${sub}</p>` : ''}</div>${extra}</div>${corpo}</section>`;
@@ -7497,7 +7491,7 @@ function telaEmpresas() {
   const n = S.empresas.length;
   const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Empresas</h1><p class="sub page-description">${n ? plural(n, 'empresa analisada', 'empresas analisadas') + '. ' : ''}Os dados ficam só neste navegador.</p></div>
     <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn primary" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
-  // sem empresas: tela inicial do Grin (.start-screen), em coluna centralizada; com empresas, a lista
+  // sem empresas: tela inicial do Grin (.start-screen), com o cabeçalho das outras telas; com empresas, a lista
   if (!n) return `<div class="start-screen-body">${cab}<div class="vazio empty-state inicio"><h2>Nova análise: escolha o método</h2>${cartoesMetodo('nova-modo')}
     <p class="vazio-modelo"><button type="button" class="link-btn link" data-acao="modelo">Ver empresa modelo</button></p></div></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
@@ -9584,7 +9578,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.26</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.27</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 acoes({ 'menu': () => abrirMenuLateral(), 'menu-fechar': () => fecharMenuLateral(), 'recolher': () => alternarLateral(), 'tema': () => alternarTema() });

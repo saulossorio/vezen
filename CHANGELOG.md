@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.2.1] - 2026-11-21
+
+### Alterado
+- Grin 2.27. A tela inicial volta a ter o cabeçalho no mesmo lugar das outras telas, com as mesmas margens. Os quatro métodos ficam numa linha, na largura da página. A coluna centralizada da 4.2.0 mudava a posição do título ao passar para outra tela.
+- Resultado detalhado: os números (receita, geral, conservadora, parte da receita, caminhos e projeção) ficam embaixo da régua, na coluna do valor. Antes ficavam embaixo do cartão inteiro, e a coluna do valor ficava vazia ao lado do painel de confiança e métodos.
+
 ## [4.2.0] - 2026-11-21
 
 ### Alterado
