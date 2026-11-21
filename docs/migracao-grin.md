@@ -1,6 +1,6 @@
 # Migração para o Grin
 
-O Vezen usa o Grin 2.19, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.19. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
+O Vezen usa o Grin 2.20, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.20. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
 
 ## Como o Grin entra no arquivo
 
@@ -8,8 +8,8 @@ O Vezen é um único `index.html` que funciona sem internet. Por isso o Grin ent
 
 | Bloco | Origem |
 |---|---|
-| `<style id="grin">` | `dist/grin.inline.css` da v2.19, com Geist e Geist Mono embutidas |
-| `<script id="grin-js" defer>` | `dist/grin.js` da v2.19 |
+| `<style id="grin">` | `dist/grin.inline.css` da v2.20, com Geist e Geist Mono embutidas |
+| `<script id="grin-js" defer>` | `dist/grin.js` da v2.20 |
 | Comentário antes dos dois blocos | Versão, link da release e o texto da licença SIL Open Font License 1.1 das fontes |
 
 Para atualizar, leia o CHANGELOG do Grin entre as versões, substitua os dois blocos e o número da versão no comentário e confira as telas.
@@ -152,12 +152,12 @@ Estas partes não têm equivalente no Grin. Ficam no `<style id="estilo">`, rees
 | Na lista de empresas, a coluna Setor e lugar quebra a linha | As células do `.table` não quebram linha; a tabela passava da largura de 1200 px. |
 | Nas tabelas de leitura (`.table.compact`) o texto quebra a linha | São tabelas com frases (parâmetros, fontes, testes). |
 | Rótulo dos indicadores da lista em linha, não em flex | O rótulo tem termos do glossário no meio do texto; em flex, cada termo ia para uma coluna. |
-| Ajuste de 4 px no título das etapas horizontais | No Grin 2.19 a linha entre as etapas começa 4 px antes do título. |
-| Ajuste `Document.prototype.closest` no início do `ui-base` | No Grin 2.19, `tabs.js` chama `e.target.closest` em todo clique e tecla no `document`; um evento disparado no próprio `document` gerava erro. |
 | Na tela de 1200 px, o cartão do resultado fica ao lado do formulário | Com a barra lateral e as margens do Grin, a área de conteúdo passou de 876 para 888 px, acima do limite de 879 px em que o cartão vai para baixo. |
 | Versão 4.0.0 | A interface inteira mudou de design system; cálculos, dados salvos e arquivos exportados não mudaram. |
 
 ## Propostas para o Grin
+
+Todas as propostas abaixo entraram no Grin 2.20. Os dois ajustes que o Vezen fazia por conta própria (a linha das etapas horizontais e o `Document.prototype.closest`) saíram na versão 4.0.1, porque o Grin passou a resolver os dois casos. Os recursos novos (controles de 40 px, abas como links, saída animada de menus, `.alert.brand`, barra em partes e campo com dado que falta) ainda não são usados pelo Vezen; adotá-los é uma mudança de tela à parte.
 
 | Proposta | Detalhe |
 |---|---|

@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.0.1] - 2026-11-21
+
+### Alterado
+- **Grin 2.20.** O Grin embutido passa da 2.19 para a 2.20, que corrige os problemas encontrados na migração. Saem os dois ajustes que o Vezen fazia por conta própria: a linha entre as etapas horizontais e a proteção para eventos disparados no próprio `document`.
+
+### Não mudou
+- Cálculos, parâmetros, dados salvos no navegador, importação e exportação de arquivos, textos e telas. Todos os testes de motor e de tela passam como na 4.0.0.
+
 ## [4.0.0] - 2026-11-21
 
 ### Alterado
