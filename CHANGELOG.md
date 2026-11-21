@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.9.3] - 2026-11-20
+
+### Alterado
+- **Marca**: estrela de quatro pontas feita de quatro triângulos equiláteros, na cor do tema (também no ícone da aba).
+- **Versão** num selo ao lado do nome Vezen, no topo do menu.
+
 ## [3.9.2] - 2026-11-20
 
 ### Alterado
