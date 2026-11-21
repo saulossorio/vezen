@@ -2913,7 +2913,7 @@ textarea.prompt { min-height: 260px; font-size: var(--text-sm); }
 .emp-nome:hover { text-decoration: underline; }
 .emp-sub { font-size: var(--text-xs); color: var(--muted-foreground); margin-top: 1px; }
 .emp-val { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
-.lista-emp td:not(.numeric):not(.acoes-cel) { white-space: normal; } /* nome, setor e lugar quebram a linha; a tabela cabe nos 1200 px */
+.lista-emp td:nth-child(3) { white-space: normal; min-width: 160px; } /* setor e lugar quebram a linha */
 .regua.mini-regua { display: block; width: 112px; height: 12px; }
 .acoes-cel { width: 1%; white-space: nowrap; text-align: right; }
 .lembrete { display: flex; gap: 12px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 10px 14px; border-radius: var(--radius-lg); background: var(--warn-bg); border: 1px solid var(--warn-border); margin-bottom: 14px; font-size: var(--text-sm); }
@@ -3635,7 +3635,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '3.9.3';
+const VERSAO_APP = '4.0.0';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
