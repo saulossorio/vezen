@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.1.2] - 2026-11-21
+
+### Alterado
+- Grin 2.25. Em Empresas, Métodos e Glossário a tela ocupa pelo menos a altura da janela. Com pouco conteúdo, a assinatura fica no fim da janela. Com mais conteúdo, fica depois dele e rola junto.
+
 ## [4.1.1] - 2026-11-21
 
 ### Alterado
