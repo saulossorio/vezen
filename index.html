@@ -294,16 +294,21 @@ details > summary { cursor: pointer; }
 .comeco.sel { border-color: var(--marca); background: var(--suave); }
 .pers-inline { max-width: 900px; margin: 18px auto 0; text-align: left; }
 .pers-inline > h3 { margin: 0 0 4px; }
-#sec-pers .pers-inline { max-width: none; margin: 14px 0 0; }
+#sec-pers.pers-inline { max-width: none; margin: 0; }
+.pers-mais { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--linha); }
 .editar-pers { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; }
-#sec-pers .sf-prog > span:first-child { white-space: normal; text-align: right; }
 .pers-inline .mudo { margin: 0 0 12px; max-width: none; text-align: left; }
 .pers-inline .acoes { justify-content: flex-start; }
 .dir-linhas { display: grid; gap: 8px; margin: 10px 0; }
-.dir-linha { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1.2fr) 130px auto; gap: 8px; align-items: center; }
+.dir-linha { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 120px 36px; gap: 8px; align-items: center; }
 .dir-cab { font-size: .8rem; color: var(--cinza); }
 .dir-linha .valid { grid-column: 1 / -1; margin: 0; }
-@media (max-width: 720px) { .dir-linha { grid-template-columns: 1fr 1fr; } }
+.dir-add { display: inline-flex; align-items: center; gap: 6px; }
+.dir-acoes { margin-top: 16px; }
+.pers-sec .cal-form { margin-top: 12px; }
+.pers-bloqueio { margin: 0 0 14px; }
+fieldset.bloqueado { border: 0; padding: 0; margin: 0; min-width: 0; display: grid; gap: inherit; opacity: .45; }
+@media (max-width: 720px) { .dir-linha { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .dir-cab { display: none; } }
 .comeco:disabled { opacity: .5; cursor: not-allowed; }
 .comeco:disabled:hover { background: var(--superficie); border-color: var(--linha-forte); }
 .comeco.prim { background: var(--marca); border-color: var(--marca); color: var(--marca-texto); }
@@ -3431,10 +3436,7 @@ async function confirmarSaida() {
 // os quatro métodos em cartões: o que cada um mede e a conta. Na análise nova escolhe o método; na tela vazia de Empresas, abre a análise já com ele
 function cartoesMetodo(acao = 'escolher-modo') {
   return `<div class="comecos comecos-met">${MODOS.map(v => { const M = METODOS[v], dentro = `${ico(M.ico)}<b>${nomeModo(v)}</b><span>${M.breve}</span>`;
-      if (modoDisponivel(v)) return `<button type="button" class="comeco" data-acao="${acao}" data-v="${v}">${dentro}</button>`;
-      // Personalizado sem dados: o cartão abre, embaixo, o lugar de informar empresas, planilha ou percentuais
-      return `<button type="button" class="comeco${UI.persAberto ? ' sel' : ''}" data-acao="pers-abrir" data-v="${acao}" aria-expanded="${!!UI.persAberto}">${dentro}<span class="comeco-falta">Informar os dados</span></button>`; }).join('')}</div>`
-    + (UI.persAberto ? `<section class="pers-inline" aria-labelledby="pers-inline-tit"><h3 id="pers-inline-tit">Dados do Método Personalizado</h3><p class="mudo">Empresas com receita e gasto de TI, uma planilha delas, ou o percentual da receita gasto com TI por setor e estado.</p>${persDados()}</section>` : '');
+      return `<button type="button" class="comeco" data-acao="${acao}" data-v="${v}">${dentro}</button>`; }).join('')}</div>`;
 }
 async function novaAnalise(dados, limpo = false) {
   if (!(await confirmarSaida())) return;
@@ -3977,13 +3979,15 @@ function formAnalise() {
   const extS = { operadora: () => campoExtra(d, 'beneficiarios', 'Beneficiários', 'num'), saude: () => campoExtra(d, 'leitos', 'Leitos', 'num'), educacao: () => campoExtra(d, 'alunos', 'Alunos', 'num'), varejo: () => campoExtra(d, 'visitas', 'Visitas ao site por mês', 'num'), industria: () => campoExtra(d, 'ucs', 'Unidades consumidoras (distribuidora)', 'num'), logistica: () => campoExtra(d, 'frota', 'Frota', 'num'), tecnologia: () => campoExtra(d, 'pctTecnica', '% da equipe técnica', 'num') + campoExtra(d, 'acessos', 'Acessos (telecom)', 'num') };
   const nTec = (d.tecnologias || []).length;
   const mais = vagas + (n !== 'publico' && n !== 'terceiro' ? campoGrupo(d) : '') + (extN[n] ? extN[n]() : '') + (extS[d.setor] ? extS[d.setor]() : '') + blocoTecnologias(d);
-  // Personalizado: os percentuais e as empresas do método podem ser vistos e editados na própria análise
-  const pers = modoDe(d) !== 'propria' ? '' : `<details class="secao-form" id="sec-pers"${UI.persEditar || UI.formDireta || UI.formMinha ? ' open' : ''}><summary><div class="sf-cab"><h2>${ico('calib')}Dados do Método Personalizado</h2><span class="sf-prog"><span>${descModo('propria', d)}</span>${ico('chev', 'chev')}</span></div></summary><div class="pers-inline">${persDados()}</div></details>`;
-  return notaModelo(d) + pers + secao('sec-ident', 'id', 'Identificação', '', ident, (cs => preenchido(d, cs) + ' de ' + cs.length)(['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio'].filter(vz)))
+  // Personalizado: os dados do método vêm primeiro, na própria análise; sem eles, o resto do formulário fica bloqueado
+  const pedePers = modoPedido(d) === 'propria', persOk = modoDisponivel('propria');
+  const pers = pedePers ? secaoPers() : '';
+  const resto = secao('sec-ident', 'id', 'Identificação', '', ident, (cs => preenchido(d, cs) + ' de ' + cs.length)(['nome', 'cnpj', 'natureza', 'setor', 'uf', 'municipio'].filter(vz)))
     + (porte ? secao('sec-porte', 'porte', ehOrgaoPublico(d) ? 'Execução orçamentária' : 'Porte', '', porte) : '')
     + (ti ? secao('sec-ti', 'sinal', 'Equipe de TI', '', ti) : '')
     + secao('sec-gasto', 'historico', 'Gasto de TI conhecido', 'Dados reais da empresa pesam mais que as médias de mercado e estreitam a faixa.', gasto)
-    + `<details class="secao-form" id="sec-mais"${nTec || (d.extras && Object.values(d.extras).some(v => v !== '' && v != null)) ? ' open' : ''}><summary><div class="sf-cab"><h2>${ico('chip')}Mais sobre a empresa</h2><span class="sf-prog"><span id="tec-n">${nTec ? plural(nTec, 'tecnologia marcada', 'tecnologias marcadas') : 'só registro'}</span> ${ico('chev', 'chev')}</span></div></summary><p class="sf-desc">Ficam salvos com a análise, mas não mudam o valor.</p><div class="grade-campos">${mais}</div></details>`
+    + `<details class="secao-form" id="sec-mais"${nTec || (d.extras && Object.values(d.extras).some(v => v !== '' && v != null)) ? ' open' : ''}><summary><div class="sf-cab"><h2>${ico('chip')}Mais sobre a empresa</h2><span class="sf-prog"><span id="tec-n">${nTec ? plural(nTec, 'tecnologia marcada', 'tecnologias marcadas') : 'só registro'}</span> ${ico('chev', 'chev')}</span></div></summary><p class="sf-desc">Ficam salvos com a análise, mas não mudam o valor.</p><div class="grade-campos">${mais}</div></details>`;
+  return notaModelo(d) + pers + (pedePers && !persOk ? `<fieldset class="bloqueado" disabled>${resto}</fieldset>` : resto)
     + `<div class="rodape-form">${chipEstado()}<button type="button" class="btn prim" data-acao="salvar">${ico('salvar')}Salvar</button></div>`;
 }
 
@@ -4012,7 +4016,7 @@ function descModo(m, d = null) {
   if (m === 'padrao') { const cp = calPadrao(); return cp ? (cp.ti && cp.ti.tabela ? 'Só investimento (CAPEX), por segmento e estado' : `Receita × percentual da base ${esc(cp.rotulo || 'CR1')}`) : 'Sem base em uso'; }
   if (m === 'fgv') return 'Receita × Índice G do setor (FGV)';
   if (m === 'propria') { const n = contagemMinha().total, D = S.calibracao.direta, pd = D && D.ativa ? (d && pctDireto(D, linhaDe(d), d.uf)) || (D.pg != null ? { p: D.pg, rot: rotDireta('', '') } : null) : null;
-    return modoDisponivel('propria') ? (D && D.ativa ? (pd ? `Informado: ${fmtPct(pd.p, 2)} da receita, ${esc(pd.rot.charAt(0).toLowerCase() + pd.rot.slice(1))}` : 'Percentuais informados pelo usuário') : plural(n, 'empresa sua', 'empresas suas')) : n ? 'Faltam dados: veja Métodos' : 'Informe empresas ou percentuais em Métodos'; }
+    return modoDisponivel('propria') ? (D && D.ativa ? (pd ? `Informado: ${fmtPct(pd.p, 2)} da receita, ${esc(pd.rot.charAt(0).toLowerCase() + pd.rot.slice(1))}` : 'Percentuais informados pelo usuário') : plural(n, 'empresa sua', 'empresas suas')) : n ? 'Faltam dados' : 'Sem dados ainda'; }
   return 'Pesquisas públicas, até 7 caminhos';
 }
 // o que o valor mede: gasto total de TI ou só o investimento (CAPEX)
@@ -4025,8 +4029,9 @@ function seletorEscopo(d, m) {
 const botaoEditarPers = m => m === 'propria' ? `<button type="button" class="link-btn editar-pers" data-acao="pers-editar">${ico('editar')}Editar percentuais e empresas</button>` : '';
 function seletorModo(m, suf = '', d = null) {
   return `<div class="modos" role="radiogroup" aria-label="Método">${MODOS.map(v => {
-    const ok = modoDisponivel(v), r = ok && d ? calcModo(d, v) : null;
-    return `<label class="modo-op${ok ? '' : ' off'}"><input type="radio" name="modo${suf}" value="${v}" data-modo${m === v ? ' checked' : ''}${ok ? '' : ' disabled'}><span><b>${nomeModo(v)}</b><small>${descModo(v, d)}</small></span><span class="mo-val">${r && !r.vazio ? fmtRS(r.F) : ok ? '' : '—'}</span></label>`;
+    // o Personalizado sem dados pode ser escolhido: a análise pede os dados dele primeiro
+    const ok = modoDisponivel(v), livre = ok || v === 'propria', r = ok && d ? calcModo(d, v) : null;
+    return `<label class="modo-op${livre ? '' : ' off'}"><input type="radio" name="modo${suf}" value="${v}" data-modo${m === v ? ' checked' : ''}${livre ? '' : ' disabled'}><span><b>${nomeModo(v)}</b><small>${descModo(v, d)}</small></span><span class="mo-val">${r && !r.vazio ? fmtRS(r.F) : ok ? '' : '—'}</span></label>`;
   }).join('')}</div>`;
 }
 // nas listas, um menu simples
@@ -4114,7 +4119,7 @@ function atualizarPainel() {
   const vc = $('#v-cnpj'); if (vc) vc.innerHTML = [v.cnpj || UI.cnpjMsg, v.cnpjFilial].filter(Boolean).join('<br>');
   atualizarReceitaUI(d, r);
   atualizarSemDado();
-  const pmd = proximosDados(d, r), m = modoDe(d);
+  const pmd = proximosDados(d, r), m = modoPedido(d) === 'propria' ? 'propria' : modoDe(d); // o Personalizado pedido fica marcado, mesmo sem dados
   // recomendações num acordeão fechado: úteis, mas discretas
   const blocoPmd = pmd.length ? `<details class="cr-bloco cr-dicas" data-dicas${UI.dicasAbertas ? ' open' : ''}><summary>${ico('lampada')}<span>Como aumentar a confiança</span><span class="ganho">até +${Math.max(...pmd.map(p => p.ganho))}</span>${ico('chev', 'chev')}</summary>${listaPmd(pmd)}</details>` : '';
   // os dois resultados sempre à vista: a receita líquida (informada ou estimada, com a origem) e o investimento em TI
@@ -4389,11 +4394,10 @@ TELAS.analise = {
 };
 acoes({
   'nova': () => novaAnalise(),
-  'nova-modo': async b => { await novaAnalise(); if (UI.atual.dados.modo === '') { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#f-nome'); if (o) o.focus(); } },
-  'voltar-metodo': () => { UI.atual.dados.modo = ''; UI.persAberto = null; navegar('#/analise/' + encodeURIComponent(UI.atual.id)); renderAqui(); },
-  'pers-editar': () => { UI.persEditar = true; if (S.calibracao.direta) abrirFormDireta(); else renderAqui(); const s = $('#sec-pers'); if (s) { s.scrollIntoView({ block: 'start', behavior: reduzMov() ? 'auto' : 'smooth' }); const b = $('#sec-pers [data-acao=dir-abrir]'); if (b) b.focus({ preventScroll: true }); } },
-  'pers-abrir': b => { UI.persAberto = UI.persAberto ? null : b.dataset.v; UI.formMinha = null; UI.formDireta = null; renderAqui(); },
-  'escolher-modo': b => { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#f-nome'); if (o) o.focus(); },
+  'nova-modo': async b => { await novaAnalise(); if (UI.atual.dados.modo === '') { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#sec-pers [data-dirl="0"][data-parte="p"]') || $('#f-nome'); if (o) o.focus(); } },
+  'voltar-metodo': () => { UI.atual.dados.modo = ''; UI.formDireta = null; UI.formMinha = null; navegar('#/analise/' + encodeURIComponent(UI.atual.id)); renderAqui(); },
+  'pers-editar': () => { if (!UI.formDireta && !UI.formMinha) UI.formDireta = novoFormDireta(); renderAqui(); const s = $('#sec-pers'); if (s) { s.scrollIntoView({ block: 'start', behavior: reduzMov() ? 'auto' : 'smooth' }); const i = $('#sec-pers [data-dirl="0"][data-parte="p"]'); if (i) i.focus({ preventScroll: true }); } },
+  'escolher-modo': b => { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#sec-pers [data-dirl="0"][data-parte="p"]') || $('#f-nome'); if (o) o.focus(); },
   'modelo': () => abrirEmpresaModelo(),
   'salvar': () => salvarEmpresa(),
   'descartar': () => descartar(),
@@ -5343,7 +5347,7 @@ async function lerBaseNova(f) {
     UI.formMinha = null;
     recalcularBaseNova();
     // vindo dos cartões dos métodos, a importação volta para a análise no fim
-    if (UI.rota.tela !== 'metodos') { UI.persVolta = UI.persAberto ? location.hash : null; navegar('#/metodos/pers-dados'); } else render(true);
+    if (UI.rota.tela !== 'metodos') { UI.persVolta = UI.rota.tela === 'analise' ? location.hash : null; navegar('#/metodos/pers-dados'); } else render(true);
   } catch (e) {
     await perguntar(`<h2>Não deu para ler ${esc(f.name)}</h2><p>${esc(e.message || String(e))}</p><p class="mudo">Formatos aceitos: relatório do CRM (.xls), Excel (.xlsx), CSV ou texto separado por ponto e vírgula, e Parquet.</p>`, [['Fechar', null, 'prim']]);
   }
@@ -5447,7 +5451,7 @@ function salvarMinha() {
     func: fu > 0 ? Math.round(fu) : null, funcTI: fti > 0 ? Math.round(fti) : null, naoDivulga: false, checaRedondo: false, ignorarND: false, origem: 'manual', criadoEm: antigo ? antigo.criadoEm : new Date().toISOString() };
   if (antigo) S.calibracao.minhas[S.calibracao.minhas.indexOf(antigo)] = x;
   else { if (S.calibracao.minhas.length >= MAX_MINHAS) { toast(`A lista já tem ${nf(MAX_MINHAS, 0)} empresas, o máximo.`); return; } S.calibracao.minhas.push(x); }
-  UI.formMinha = null; salvar(); render(); if (!continuarPers()) irParaMinha();
+  UI.formMinha = null; salvar(); render(); irParaMinha();
   toast(antigo ? 'Empresa alterada na minha calibração.' : 'Empresa adicionada na minha calibração.');
 }
 async function removerMinha(id) {
@@ -5939,16 +5943,25 @@ function pctDireto(D, l, uf) {
   if (uf && pu['|' + uf] != null) return { p: pu['|' + uf], rot: rotDireta('', uf) };
   return D.pg != null ? { p: D.pg, rot: rotDireta('', '') } : null;
 }
-function formDireta() {
+// seção do Personalizado na análise: os percentuais (ou as empresas) do método, antes dos dados da empresa
+function secaoPers() {
+  const D = S.calibracao.direta, direta = !!(D && D.ativa), c = contagemMinha(), ok = modoDisponivel('propria'), porEmpresas = ok && !direta;
+  if (!porEmpresas && !UI.formMinha && !UI.formDireta) UI.formDireta = novoFormDireta();
+  const corpo = UI.formMinha ? formMinha() : UI.formDireta ? formDireta(true) : '';
+  const est = ok ? `<p class="cal-uso">${ico('check')}<span>Em uso: ${direta ? 'percentuais informados' : `${plural(c.total, 'empresa', 'empresas')} (${descMinha()})`}.</span></p>`
+    : `<div class="alerta pers-bloqueio">${ico('alerta')}<p>Informe ao menos um percentual, ou empresas com receita e gasto de TI, para preencher o resto da análise.</p></div>`;
+  const bts = `<div class="acoes">${porEmpresas && !UI.formDireta ? `<button type="button" class="btn" data-acao="dir-abrir">${ico('editar')}Informar percentuais</button>` : ''}<button type="button" class="btn" data-acao="minha-importar">${ico('subir')}Importar planilha de empresas</button>${UI.formMinha ? '' : `<button type="button" class="btn" data-acao="minha-nova">${ico('mais')}Adicionar empresa</button>`}</div>`;
+  return `<section class="secao-form pers-sec pers-inline" id="sec-pers" aria-labelledby="sec-pers-t"><div class="sf-cab"><h2 id="sec-pers-t">${ico('calib')}Dados do Método Personalizado</h2></div><p class="sf-desc">Percentual da receita gasto com TI por setor e estado, ou empresas com receita e gasto de TI.</p>${est}${corpo}<div class="pers-mais">${bts}</div></section>`;
+}
+function formDireta(fixo = false) {
   const f = UI.formDireta, err = f.erros || {};
   const sel = (i, parte, ops, v) => `<select data-dirl="${i}" data-parte="${parte}" aria-label="${parte === 'l' ? 'Setor' : 'Estado'}">${ops.map(([k, t]) => `<option value="${k}"${k === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
   const opsL = [['', 'Todos os setores'], ...setoresDiretos().map(l => [l, nomeLinha(l)])], opsU = [['', 'Todos os estados'], ...PAIS.ufs.map(u => [u, u])];
   return `<div class="cal-form" role="group" aria-labelledby="dir-tit"><h3 id="dir-tit">Percentual da receita gasto com TI</h3><p class="mudo">Por setor e estado. A linha mais específica vale primeiro; “Todos” cobre o que não tiver linha própria.</p>
     <div class="dir-linhas"><div class="dir-linha dir-cab" aria-hidden="true"><span>Setor</span><span>Estado</span><span>Percentual</span><span></span></div>
     ${f.linhas.map((x, i) => `<div class="dir-linha">${sel(i, 'l', opsL, x.l)}${sel(i, 'uf', opsU, x.uf)}<div class="entrada com-suf"><input data-dirl="${i}" data-parte="p" inputmode="decimal" autocomplete="off" aria-label="Percentual" placeholder="1,5" value="${esc(x.p)}"><span class="suf">%</span></div>${f.linhas.length > 1 ? btnIco('lixo', 'Remover esta linha', `data-acao="dir-del" data-i="${i}"`, 'peq perigo') : '<span></span>'}${err[i] ? `<div class="valid">${esc(err[i])}</div>` : ''}</div>`).join('')}</div>
-    <div class="acoes"><button type="button" class="btn peq" data-acao="dir-add">${ico('mais')}Adicionar linha</button></div>
-    ${err.geral ? `<div class="valid">${esc(err.geral)}</div>` : ''}
-    <div class="acoes"><button type="button" class="btn prim" data-acao="dir-salvar">${ico('check')}Usar estes percentuais</button>${S.calibracao.direta ? `<button type="button" class="btn" data-acao="dir-desligar">${ico('desfazer')}Voltar às empresas</button>` : ''}<button type="button" class="btn" data-acao="dir-cancelar">Cancelar</button></div></div>`;
+    <button type="button" class="link-btn dir-add" data-acao="dir-add">${ico('mais')}Adicionar linha</button>
+    <div class="acoes dir-acoes"><button type="button" class="btn prim" data-acao="dir-salvar">${ico('check')}${fixo ? 'Salvar percentuais' : 'Usar estes percentuais'}</button>${S.calibracao.direta ? `<button type="button" class="btn" data-acao="dir-desligar">${ico('lixo')}Remover percentuais</button>` : ''}${fixo ? '' : '<button type="button" class="btn" data-acao="dir-cancelar">Cancelar</button>'}</div></div>`;
 }
 // o formulário guarda o que está na tela antes de acrescentar, tirar ou salvar linhas
 function lerFormDireta() {
@@ -5956,9 +5969,9 @@ function lerFormDireta() {
   document.querySelectorAll('[data-dirl]').forEach(el => { const x = f.linhas[+el.dataset.dirl]; if (x) x[el.dataset.parte] = el.value; });
   return f;
 }
+const novoFormDireta = () => { const L = linhasDireta(S.calibracao.direta).map(x => ({ l: x.l, uf: x.uf, p: nf(x.p * 100, 2) })); return { linhas: L.length ? L : [{ l: '', uf: '', p: '' }], erros: {} }; };
 function abrirFormDireta() {
-  const L = linhasDireta(S.calibracao.direta).map(x => ({ l: x.l, uf: x.uf, p: nf(x.p * 100, 2) }));
-  UI.formDireta = { linhas: L.length ? L : [{ l: '', uf: '', p: '' }], erros: {} }; UI.formMinha = null; renderAqui();
+  UI.formDireta = novoFormDireta(); UI.formMinha = null; renderAqui();
   const i = $('[data-dirl="0"][data-parte="p"]'); if (i) i.focus();
 }
 function salvarDireta() {
@@ -5973,15 +5986,8 @@ function salvarDireta() {
   });
   if (Object.keys(e).length) { f.erros = e; renderAqui(); return; }
   S.calibracao.direta = D;
-  UI.formDireta = null; salvar(); toast('Percentuais em uso no Método Personalizado');
-  if (!continuarPers()) renderAqui();
-}
-// com dados suficientes, o painel aberto nos cartões dos métodos segue para a análise com o Personalizado
-function continuarPers() {
-  if (!UI.persAberto || !modoDisponivel('propria')) return false;
-  const acao = UI.persAberto; UI.persAberto = null;
-  ACOES[acao]({ dataset: { v: 'propria' } });
-  return true;
+  UI.formDireta = null; salvar(); toast('Percentuais salvos');
+  renderAqui();
 }
 /* ---------- tabelas de uma calibração: percentual de TI, receita por funcionário e lugares ---------- */
 function liLocal(A, minG) {
@@ -6116,7 +6122,7 @@ acoes({
   'dir-add': () => { const f = lerFormDireta(); if (!f) return; f.linhas.push({ l: '', uf: '', p: '' }); renderAqui(); const i = $(`[data-dirl="${f.linhas.length - 1}"][data-parte="l"]`); if (i) i.focus(); },
   'dir-del': b => { const f = lerFormDireta(); if (!f) return; f.linhas.splice(+b.dataset.i, 1); f.erros = {}; renderAqui(); },
   'dir-cancelar': () => { UI.formDireta = null; renderAqui(); },
-  'dir-desligar': () => { S.calibracao.direta = null; UI.formDireta = null; salvar(); renderAqui(); toast('O gasto de TI volta a usar as suas empresas'); }
+  'dir-desligar': () => { S.calibracao.direta = null; UI.formDireta = null; salvar(); renderAqui(); toast('Percentuais removidos'); }
 });
 </script>
 <script id="ui-glossario">
@@ -6932,8 +6938,6 @@ document.addEventListener('keydown', e => {
   }
   const t = TELAS[UI.rota.tela]; if (t && t.keydown && e.target.closest && e.target.closest('#app')) t.keydown(e);
 });
-// a seção dos dados do Personalizado na análise fica aberta ou fechada entre um desenho e outro
-document.addEventListener('toggle', e => { if (e.target.id === 'sec-pers') UI.persEditar = e.target.open; }, true);
 // cidade do formulário de empresa do Personalizado aberto fora da tela Métodos: a lista segue o estado
 document.addEventListener('change', e => { if (e.target.id === 'fm-uf' && UI.rota.tela !== 'metodos') { const dl = $('#dl-fm-cidade'); if (dl) dl.innerHTML = opcoesMunicipios(e.target.value); } });
 // dica flutuante dos botões só com ícone e das marcas dos gráficos

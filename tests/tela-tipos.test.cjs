@@ -39,12 +39,12 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await ir(p, '#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   check('nova análise no Método Vezen', await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value) === 'base');
   const dis = await p.evaluate(() => [...document.querySelectorAll('#painel input[data-modo]')].map(i => i.value + ':' + i.disabled).join(','));
-  check('Personalizado desabilitado sem dados', dis === 'base:false,padrao:false,fgv:false,propria:true', dis);
+  check('Personalizado pode ser escolhido sem dados (pede os dados primeiro)', dis === 'base:false,padrao:false,fgv:false,propria:false', dis);
   await p.fill('#f-nome', 'Teste Serviços'); await p.selectOption('#f-setor', 'servicos'); await p.selectOption('#f-uf', 'SP');
   await p.fill('#f-faturamento', '300.000.000'); await p.fill('#f-funcionarios', '600'); await p.waitForTimeout(700);
   const v0 = await txt(p, '#cr-valor');
   check('cartão no Vezen mostra quanto daria o CR1', /R\$/.test(await txt(p, '#painel .modo-op:has(input[value=padrao]) .mo-val')), await txt(p, '#painel .modo-op:has(input[value=padrao])'));
-  check('nomes e descrições dos métodos no cartão', (await txt(p, '#painel .modo-op:has(input[value=base]) b')) === 'Método Vezen' && /^Só investimento \(CAPEX\), por segmento e estado/.test(await txt(p, '#painel .modo-op:has(input[value=padrao]) small')) && /Métodos$/.test(await txt(p, '#painel .modo-op:has(input[value=propria]) small')));
+  check('nomes e descrições dos métodos no cartão', (await txt(p, '#painel .modo-op:has(input[value=base]) b')) === 'Método Vezen' && /^Só investimento \(CAPEX\), por segmento e estado/.test(await txt(p, '#painel .modo-op:has(input[value=padrao]) small')) && /^(Sem dados ainda|Faltam dados)$/.test(await txt(p, '#painel .modo-op:has(input[value=propria]) small')));
   await p.click('#painel label.modo-op:has(input[data-modo][value=padrao])'); await p.waitForTimeout(900);
   const v1 = await txt(p, '#cr-valor');
   // só os campos que entram na conta: nos métodos por percentual somem usuários, unidades e a seção da equipe; com gasto de TI do ano, também no Vezen

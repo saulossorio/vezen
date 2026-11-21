@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.9.0] - 2026-11-20
+
+### Alterado
+- **Personalizado**: na análise, a seção “Dados do Método Personalizado” vem primeiro, sempre aberta, com os percentuais prontos para editar. Sem nenhum percentual nem empresas suficientes, o resto do formulário fica bloqueado. O cartão do Personalizado na escolha do método abre a análise direto, e o método pode ser escolhido sem dados.
+- Formulário dos percentuais: colunas alinhadas, “Adicionar linha” separado dos botões, “Remover percentuais” no lugar de “Voltar às empresas”.
+
 ## [3.8.3] - 2026-11-20
 
 ### Alterado
