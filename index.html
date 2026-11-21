@@ -2889,33 +2889,27 @@ fieldset.bloqueado { border: 0; padding: 0; margin: 0; min-width: 0; display: gr
 .passos-vazio { padding: 0; }
 @media (max-width: 720px) { .passos-vazio { grid-template-columns: 1fr; } }
 
-/* menus e janelinhas */
-.menu-pop { position: fixed; z-index: 80; min-width: 200px; max-width: min(360px, calc(100vw - 16px)); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 6px; }
-.menu-pop .mi { display: flex; align-items: flex-start; gap: 10px; width: 100%; padding: 8px 10px; border: 0; background: none; border-radius: var(--radius-sm); text-align: left; cursor: pointer; font-size: 1rem; color: var(--foreground); text-decoration: none; }
-.menu-pop .mi:hover, .menu-pop .mi:focus-visible { background: var(--hover); outline: none; }
-.menu-pop .mi[aria-checked="true"] { background: var(--row-selected); }
-.menu-pop .mi small { display: block; color: var(--muted-foreground); font-size: .8rem; margin-top: 1px; line-height: 1.35; }
-.menu-pop .mi .ico { margin-top: 2px; }
-.menu-pop .mi.perigo { color: var(--crit-fg); }
-.menu-pop hr { border: 0; border-top: 1px solid var(--border); margin: 6px 4px; }
-.pop-ajuda { padding: 14px 16px; max-width: min(380px, calc(100vw - 16px)); }
-.pop-ajuda h4 { margin: 0 0 6px; display: flex; justify-content: space-between; gap: 10px; align-items: center; }
-.pop-ajuda p { font-size: .9rem; margin: 0 0 8px; }
-.pop-ajuda ul { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-direction: column; gap: 6px; }
-.pop-ajuda li { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0; font-size: .9rem; }
-.pop-ajuda .pop-nota { color: var(--muted-foreground); font-size: .8rem; margin: 8px 0 0; }
+/* menus e janelinhas: .menu e .popover do Grin. Entram e saem pela transição do Vezen (.visivel), que espera a saída antes de tirar do DOM */
+.menu-pop { position: fixed; max-width: min(360px, calc(100vw - 16px)); animation: none; }
+.menu-pop.menu { z-index: 90; }
+.menu-pop .menu-item:has(small) { white-space: normal; }
+.menu-pop .menu-item > span:last-child { flex: 1 1 auto; min-width: 0; }
+.pop-ajuda { gap: 6px; max-width: min(380px, calc(100vw - 16px)); }
+.pop-ajuda .popover-title { align-items: center; }
+.pop-ajuda ul { list-style: none; padding: 0; margin: 2px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.pop-ajuda li { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 0; }
+.pop-ajuda .pop-nota { font-size: var(--text-xs); margin: 4px 0 0; }
 .pop-ajuda .lista-orig li { align-items: flex-start; justify-content: flex-start; }
 .pop-ajuda .lista-orig b { display: block; }
-.pop-ajuda .lista-orig span { font-size: .84rem; color: var(--muted-foreground); }
-dialog#dlg { border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 0; width: min(560px, calc(100vw - 24px)); background: var(--surface); color: var(--foreground); box-shadow: var(--shadow-lg); }
-dialog#dlg.largo { width: min(880px, calc(100vw - 24px)); }
-dialog#dlg::backdrop { background: var(--overlay); }
-#dlg-corpo { padding: 22px 24px 8px; max-height: calc(100vh - 160px); overflow: auto; }
-#dlg-corpo h2 { margin-bottom: 10px; font-size: 1.2rem; }
-#dlg-corpo p { color: var(--muted-foreground); }
-#dlg-acoes { display: flex; justify-content: flex-end; gap: 8px; padding: 14px 24px 20px; flex-wrap: wrap; }
-.toast { position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px); background: var(--foreground); color: var(--background); padding: 10px 16px; border-radius: var(--radius-lg); font-size: .9rem; z-index: 95; opacity: 0; pointer-events: none; transition: opacity var(--dur-fast), transform var(--dur-fast); max-width: calc(100vw - 32px); }
-.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.pop-ajuda .lista-orig span { color: var(--muted-foreground); }
+/* diálogo: .dialog do Grin, com o título dentro do corpo */
+#dlg-corpo { max-height: calc(100vh - 160px); padding-top: 24px; }
+#dlg-corpo > * { margin: 0; }
+#dlg-corpo h2 { color: var(--foreground); font-size: var(--text-xl); }
+/* aviso rápido: a aparência do .toast do Grin, num elemento só que entra e sai */
+#toast.toast { position: fixed; right: 24px; bottom: 24px; z-index: 99; max-width: min(420px, calc(100vw - 32px)); opacity: 0; transform: translateY(8px); pointer-events: none; animation: none; transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
+#toast.toast.show { opacity: 1; transform: none; }
+@media (max-width: 520px) { #toast.toast { left: 16px; right: 16px; bottom: 16px; } }
 .passos { padding-left: 20px; color: var(--muted-foreground); }
 textarea.prompt { min-height: 260px; font-size: .88rem; }
 
@@ -3034,7 +3028,7 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .tec-lista { position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 40; max-height: min(340px, 52vh); overflow-y: auto; overscroll-behavior: contain; background: var(--surface); border: 1px solid var(--border-strong); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); padding: 4px;
   visibility: hidden; opacity: 0; transform: translateY(-4px); pointer-events: none; transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), visibility 0s linear var(--dur-fast); }
 .tec-combo.aberto .tec-lista { visibility: visible; opacity: 1; transform: none; pointer-events: auto; transition-delay: 0s; }
-.tec-cats:not([hidden]), .tec-itens:not([hidden]) { animation: camada 170ms var(--ease); }
+.tec-cats:not([hidden]), .tec-itens:not([hidden]) { animation: grin-slide-in var(--dur) var(--ease); }
 .tec-cat { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 10px; border: 0; border-radius: var(--radius-sm); background: none; color: var(--foreground); font: inherit; font-size: 1rem; text-align: left; cursor: pointer; }
 .tec-cat:hover, .tec-cat:focus-visible { background: var(--hover); }
 .tec-cat > .ico:first-child { color: var(--muted-foreground); }
@@ -3517,78 +3511,63 @@ tr.r-falha td { background: var(--crit-bg); }
 .gl-item.destaque { animation: gl-destaque 2.4s var(--ease); }
 @keyframes gl-destaque { 0%, 55% { background: var(--brand-bg); border-color: var(--brand-border); } 100% { background: var(--surface); border-color: var(--border); } }
 
-/* ===================== TRANSIÇÕES: curtas, só como resposta a uma ação ===================== */
-@keyframes surgir { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
-@keyframes camada { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
-@keyframes dlg-entra { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
-@keyframes veu-entra { from { opacity: 0; } to { opacity: 1; } }
-.surge, .tag-tec.novo { animation: surgir var(--dur-fast) var(--ease); }
-#app.entra { animation: surgir 200ms var(--ease); }
+/* ===================== TRANSIÇÕES: as durações e curvas do Grin, só como resposta a uma ação; "reduzir movimento" desliga tudo (global do Grin) ===================== */
+@keyframes surgir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } } /* o grin-rise, com o nome que o teste de transições lê */
+.surge, .tag-tec.novo { animation: grin-rise var(--dur) var(--ease); }
+#app.entra { animation: surgir var(--dur) var(--ease); }
 /* janelinhas presas a um botão: entram e saem com um leve deslize */
-.menu-pop { opacity: 0; transform: translateY(5px) scale(.98); transform-origin: top left; pointer-events: none; transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+.menu-pop { opacity: 0; transform: translateY(4px) scale(.98); transform-origin: top left; pointer-events: none; transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
 .menu-pop.visivel { opacity: 1; transform: none; pointer-events: auto; }
-.menu-pop .mi { transition: background-color var(--dur-fast); }
-/* diálogo */
-dialog#dlg[open] { animation: dlg-entra 190ms var(--ease); }
-dialog#dlg[open]::backdrop { animation: veu-entra 190ms ease-out; }
-dialog#dlg.saindo { opacity: 0; transform: translateY(6px) scale(.985); pointer-events: none; transition: opacity 110ms ease-in, transform 110ms ease-in; }
-dialog#dlg.saindo::backdrop { opacity: 0; transition: opacity 110ms ease-in; }
+/* diálogo: entra pelo .dialog do Grin; sai com a classe saindo */
+dialog#dlg.saindo { opacity: 0; transform: translateY(6px) scale(.98); pointer-events: none; transition: opacity var(--dur-fast) var(--ease-in-out), transform var(--dur-fast) var(--ease-in-out); }
+dialog#dlg.saindo::backdrop { opacity: 0; transition: opacity var(--dur-fast) var(--ease-in-out); }
 /* campos, botões e marcas: a cor muda aos poucos quando o estado muda */
-input[type="text"], input[type="search"], input:not([type]), select, textarea { transition: border-color var(--dur-fast), background-color var(--dur-fast), box-shadow var(--dur-fast); }
+.input, .select, .textarea { transition: border-color var(--dur-fast), background-color var(--dur-fast), box-shadow var(--dur-fast); }
 .campo-rot label, .dado, .dado b { transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast); }
 .origem, .modo-op, .tag-tec, .tec-cat, .tec-op, .tec-voltar, .estado, .estado i, .chip-falta { transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast), transform var(--dur-fast); }
 .tag-tec.saindo { opacity: 0; transform: scale(.9); pointer-events: none; }
 /* seções que abrem e fecham: onde o navegador sabe animar a altura, anima; nos outros, abre direto */
 details { interpolate-size: allow-keywords; }
-details::details-content { block-size: 0; overflow: hidden; transition: block-size 200ms var(--ease), content-visibility 200ms allow-discrete; }
+details::details-content { block-size: 0; overflow: hidden; transition: block-size var(--dur) var(--ease), content-visibility var(--dur) allow-discrete; }
 details[open]::details-content { block-size: auto; }
 
-/* ===================== TOUR GUIADO ===================== */
-/* véu escuro com um recorte no ponto mostrado; o recorte e o cartão deslizam de um passo para o outro */
-.tour { --veu-tour: oklch(0.14 0.01 210 / 0.56); }
-:root[data-theme="dark"] .tour { --veu-tour: oklch(0.03 0 0 / 0.74); }
-.tour { position: fixed; inset: 0; z-index: 120; opacity: 0; transition: opacity 220ms var(--ease); }
+/* ===================== TOUR GUIADO: .tour, .tour-spot, .tour-card e .progress do Grin =====================
+   O que é do Vezen: faixas que seguram o clique fora do recorte, o recorte que pulsa quando espera um clique,
+   o cartão que balança ao clicar fora, a ação pedida e a mensagem de cada tentativa. */
 .tour.visivel { opacity: 1; }
-/* a camada toda deixa passar o clique; quem segura são as faixas em volta do recorte e o cartão */
-.tour { pointer-events: none; }
 .tour-bloq, .tour-cartao { pointer-events: auto; }
 .tour-bloq { position: fixed; background: transparent; }
-.tour-luz { position: fixed; border-radius: var(--radius-lg); pointer-events: none; box-shadow: 0 0 0 3px var(--primary), 0 0 0 200vmax var(--veu-tour);
-  transition: top 340ms var(--ease), left 340ms var(--ease), width 340ms var(--ease), height 340ms var(--ease), box-shadow 340ms var(--ease); }
-.tour-luz.sem-alvo { box-shadow: 0 0 0 0 transparent, 0 0 0 200vmax var(--veu-tour); }
-.tour-luz.clique { animation: tour-pulso 1.6s var(--ease) infinite; }
-@keyframes tour-pulso { 0%, 100% { box-shadow: 0 0 0 3px var(--primary), 0 0 0 200vmax var(--veu-tour); } 50% { box-shadow: 0 0 0 7px oklch(0.8 0.15 128 / 0.55), 0 0 0 200vmax var(--veu-tour); } }
-.tour-cartao { position: fixed; width: min(380px, calc(100vw - 32px)); background: var(--surface); color: var(--foreground); border: 1px solid var(--border); border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg); padding: 16px 18px 14px; transition: top 340ms var(--ease), left 340ms var(--ease), opacity 160ms var(--ease), transform 160ms var(--ease); }
+.tour-luz { pointer-events: none; }
+.tour-luz.sem-alvo { box-shadow: 0 0 0 200vmax var(--overlay); }
+.tour-luz.clique { animation: tour-pulso 1.6s var(--ease-in-out) infinite; }
+@keyframes tour-pulso { 0%, 100% { box-shadow: 0 0 0 3px var(--primary), 0 0 0 200vmax var(--overlay); } 50% { box-shadow: 0 0 0 7px var(--highlight), 0 0 0 200vmax var(--overlay); } }
+.tour-cartao { gap: 0; }
 .tour-cartao.troca { opacity: 0; transform: translateY(6px); }
-.tour-cartao.chama { animation: tour-chama 380ms var(--ease); }
+.tour-cartao.chama { animation: tour-chama var(--dur-slow) var(--ease); }
 @keyframes tour-chama { 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } 100% { transform: none; } }
 .tour-cartao.folha { width: auto; }
-.tour-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px -6px 8px 0; }
-.tour-passo { font-size: .8rem; font-weight: 650; letter-spacing: .02em; color: var(--link); text-transform: uppercase; }
-.tour-barra { height: 4px; border-radius: 4px; background: var(--muted); overflow: hidden; margin-bottom: 14px; }
-.tour-barra i { display: block; height: 100%; width: 0; background: var(--primary); border-radius: 4px; transition: width 340ms var(--ease); }
-.tour-cartao h2 { font-size: 1.12rem; line-height: 1.3; margin: 0 0 6px; outline: none; }
-.tour-cartao p { margin: 0; line-height: 1.5; color: var(--muted-foreground); font-size: 1rem; }
-.tour-acao { display: flex; align-items: center; gap: 8px; margin-top: 12px !important; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--brand-bg); border: 1px solid var(--brand-border); color: var(--foreground) !important; font-weight: 600; font-size: .9rem !important; }
-.tour-acao .ico { width: 16px; height: 16px; color: var(--link); flex: none; }
-.tour-msg { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 220ms var(--ease), opacity 220ms var(--ease), margin 220ms var(--ease); margin-top: 0; }
+.tour-topo { margin-bottom: 8px; }
+.tour-barra { margin-bottom: 14px; }
+.tour-cartao h2 { margin: 0 0 6px; }
+.tour-acao { display: flex; align-items: center; gap: 8px; margin-top: 12px !important; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--brand-bg); border: 1px solid var(--brand-border); color: var(--foreground) !important; font-weight: var(--weight-semibold); font-size: var(--text-sm) !important; }
+.tour-acao .ico { width: 16px; height: 16px; color: var(--brand-fg); flex: none; }
+.tour-msg { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows var(--dur) var(--ease), opacity var(--dur) var(--ease), margin var(--dur) var(--ease); margin-top: 0; }
 .tour-msg > div { overflow: hidden; }
 .tour-msg.visivel { grid-template-rows: 1fr; opacity: 1; margin-top: 12px; }
-.tour-msg p { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: var(--radius-sm); font-size: .88rem !important; }
+/* a mensagem tem a aparência do .alert do Grin, nos tons info, crit e ok */
+.tour-msg p { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid; color: var(--foreground) !important; font-size: var(--text-sm) !important; }
 .tour-msg .ico { width: 16px; height: 16px; flex: none; margin-top: 2px; }
-.tour-msg.dica p { background: var(--info-bg); border: 1px solid var(--info-border); color: var(--foreground); }
-.tour-msg.erro p { background: var(--crit-bg); border: 1px solid var(--crit-border); color: var(--foreground); }
-.tour-msg.ok p { background: var(--ok-bg); border: 1px solid var(--ok-border); color: var(--foreground); }
-.tour-msg.erro .ico { color: var(--crit-fg); } .tour-msg.dica .ico { color: var(--info-fg); } .tour-msg.ok .ico { color: var(--ok-fg); }
+.tour-msg.dica p { background: var(--info-bg); border-color: var(--info-border); } .tour-msg.dica .ico { color: var(--info-fg); }
+.tour-msg.erro p { background: var(--crit-bg); border-color: var(--crit-border); } .tour-msg.erro .ico { color: var(--crit-fg); }
+.tour-msg.ok p { background: var(--ok-bg); border-color: var(--ok-border); } .tour-msg.ok .ico { color: var(--ok-fg); }
 /* menus abertos pela pessoa durante o tour (origem, sem dado) ficam acima do véu */
 .com-tour .menu-pop { z-index: 125; }
-.tour-pe .btn.espera { opacity: .5; }
-.tour-pe { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 16px; }
+.tour-pe { justify-content: space-between; margin-top: 16px; }
 .tour-pe > span { display: flex; gap: 8px; }
-.tour-pe .link-btn { color: var(--muted-foreground); font-size: .88rem; }
+.tour-pe .btn.espera { opacity: .5; }
+.tour-pe .link { color: var(--muted-foreground); font-size: var(--text-sm); }
 .tour-pe .btn[hidden] { display: none; }
-@media (max-width: 600px) { .tour-pe .btn { padding: 6px 12px; } }
+@media (max-width: 600px) { .tour-pe .btn { padding: 0 12px; } }
 </style>
 </head>
 <body>
@@ -3688,7 +3667,7 @@ details[open]::details-content { block-size: auto; }
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
 <input type="file" id="arq-base" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
 <input type="file" id="arq-lista" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
-<dialog id="dlg"><div id="dlg-corpo"></div><div id="dlg-acoes"></div></dialog>
+<dialog id="dlg" class="dialog"><div id="dlg-corpo" class="dialog-body"></div><div id="dlg-acoes" class="dialog-footer"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script id="parquet">
 /* Leitor de Parquet embutido, para ler a base de empresas sem internet.
@@ -5540,7 +5519,7 @@ const acoes = mapa => Object.assign(ACOES, mapa);
 /* ---------- diálogo, aviso rápido e dica flutuante ---------- */
 function perguntar(html, botoes, largo) {
   return new Promise(res => {
-    const dlg = $('#dlg'); dlg.classList.toggle('largo', !!largo); $('#dlg-corpo').innerHTML = html;
+    const dlg = $('#dlg'); dlg.classList.toggle('wide', !!largo); $('#dlg-corpo').innerHTML = html;
     const ac = $('#dlg-acoes'); ac.innerHTML = '';
     botoes.forEach(([rot, val, cls]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + (cls || ''); b.textContent = rot; b.onclick = async () => { await fecharDlg(); res(val); }; ac.appendChild(b); });
     // o evento close do diálogo anterior chega depois; só conta como cancelar se este diálogo já fechou
@@ -5583,7 +5562,7 @@ function abrirPop(ancora, html, { cls = '', papel = 'menu', rotulo = '' } = {}) 
   fecharPop();
   if (mesmo) return null;
   const el = document.createElement('div');
-  el.className = 'menu-pop ' + cls; el.id = 'pop'; el.setAttribute('role', papel); if (rotulo) el.setAttribute('aria-label', rotulo);
+  el.className = 'menu-pop ' + (papel === 'menu' ? 'menu ' : 'popover open ') + cls; el.id = 'pop'; el.setAttribute('role', papel); if (rotulo) el.setAttribute('aria-label', rotulo);
   el.innerHTML = html; document.body.appendChild(el);
   posicionarPop(el, ancora);
   void el.offsetWidth; el.classList.add('visivel');
@@ -5609,7 +5588,7 @@ function fecharPop(focar) {
 }
 // menu de opções simples: [[acao, rótulo, ícone, attrs extras, cls]]
 function abrirMenuAcoes(ancora, itens) {
-  return abrirPop(ancora, itens.map(x => x === '-' ? '<hr>' : `<button type="button" class="mi${x[4] ? ' ' + x[4] : ''}" role="menuitem" data-acao="${x[0]}" ${x[3] || ''}>${ico(x[2])}<span>${x[1]}</span></button>`).join(''));
+  return abrirPop(ancora, itens.map(x => x === '-' ? '<div class="menu-separator" role="separator"></div>' : `<button type="button" class="mi menu-item${x[4] ? ' ' + x[4] : ''}" role="menuitem" data-acao="${x[0]}" ${x[3] || ''}>${ico(x[2])}<span>${x[1]}</span></button>`).join(''));
 }
 
 /* ---------- arquivos e área de transferência ---------- */
@@ -6101,9 +6080,9 @@ const botaoAjuda = (chave, rot) => `<button type="button" class="ajuda help-butt
 function abrirAjuda(btn) {
   const d = UI.atual ? UI.atual.dados : dadosVazios(), k = btn.dataset.chave, ls = linksCampo(k, d);
   const corpo = k === 'origens' ? `<p>${esc(textoAjuda(k, d))}</p><ul class="lista-orig">${ORIGENS.map(([v, t, desc]) => `<li><span class="o-chip o-${v}">${ico(ICO_ORIGEM[v])}</span><div><b>${t}</b><span>${desc}</span></div></li>`).join('')}</ul>` : `<p>${esc(textoAjuda(k, d))}</p>`;
-  const links = ls.length ? `<b style="font-size:.84rem">Onde encontrar</b><ul>${ls.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.nome)}</a><span class="selo ${l.selo === 'Oficial' ? 'oficial' : 'agregador'}">${esc(SELO_TXT[l.selo] || l.selo)}</span></li>`).join('')}</ul><p class="pop-nota">Fontes oficiais primeiro. Os links abrem em outra aba.</p>` : '';
+  const links = ls.length ? `<b class="text-sm">Onde encontrar</b><ul>${ls.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.nome)}</a><span class="selo ${l.selo === 'Oficial' ? 'oficial' : 'agregador'}">${esc(SELO_TXT[l.selo] || l.selo)}</span></li>`).join('')}</ul><p class="pop-nota">Fontes oficiais primeiro. Os links abrem em outra aba.</p>` : '';
   const met = AJUDA_MET[k] ? `<p class="pop-nota"><a href="#/metodos/${AJUDA_MET[k]}" target="_blank" rel="noopener">Como entra na conta</a></p>` : '';
-  abrirPop(btn, `<h4>${esc(btn.dataset.rot)}<button type="button" class="btn ghost icon xs" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>${corpo}${links}${met}`, { cls: 'pop-ajuda', papel: 'dialog', rotulo: btn.dataset.rot });
+  abrirPop(btn, `<h4 class="popover-title">${esc(btn.dataset.rot)}<button type="button" class="btn ghost icon xs" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>${corpo}${links}${met}`, { cls: 'pop-ajuda', papel: 'dialog', rotulo: btn.dataset.rot });
 }
 // origem do dado: um botão pequeno abaixo do campo, que só aparece quando há valor
 function botaoOrigem(alvo, o, temValor) {
@@ -6112,7 +6091,7 @@ function botaoOrigem(alvo, o, temValor) {
 }
 function abrirOrigem(btn) {
   const atual = lerOrigem(btn.dataset.alvo), rec = ehAlvoReceita(btn.dataset.alvo);
-  abrirPop(btn, ORIGENS.map(([v, t, desc]) => [v, rotOrigem(v, rec), rec && v === 'oficial' ? DESC_DRE : desc]).map(([v, t, desc]) => `<button type="button" class="mi" role="menuitemradio" aria-checked="${atual === v}" data-acao="origem-escolher" data-alvo="${btn.dataset.alvo}" data-o="${v}"><span class="o-${v}">${ico(ICO_ORIGEM[v])}</span><span><b>${t}</b><small>${desc}</small></span></button>`).join(''), { rotulo: 'Origem do dado' });
+  abrirPop(btn, ORIGENS.map(([v, t, desc]) => [v, rotOrigem(v, rec), rec && v === 'oficial' ? DESC_DRE : desc]).map(([v, t, desc]) => `<button type="button" class="mi menu-item" role="menuitemradio" aria-checked="${atual === v}" data-acao="origem-escolher" data-alvo="${btn.dataset.alvo}" data-o="${v}"><span class="o-${v}">${ico(ICO_ORIGEM[v])}</span><span><b>${t}</b><small>${desc}</small></span></button>`).join(''), { rotulo: 'Origem do dado' });
 }
 function alvoOrigem(alvo) { const [tipo, k] = alvo.split(':'), d = UI.atual.dados; return tipo === 'real' ? d.gastosReais[+k] : tipo === 'rec' ? d.receitasAnos[+k] : (d[k] = d[k] || { v: '', o: '' }); }
 function lerOrigem(alvo) { const x = alvoOrigem(alvo); return x ? x.o || '' : ''; }
@@ -6186,8 +6165,8 @@ function botaoSemDado(c, d) {
 }
 function abrirSemDado(btn) {
   const c = btn.dataset.campo, d = UI.atual.dados, atual = (d.semDado || {})[c] || '';
-  abrirPop(btn, CAMPOS_SEM_DADO[c].ops.map(k => `<button type="button" class="mi" role="menuitemradio" aria-checked="${atual === k}" data-acao="sem-dado-escolher" data-campo="${c}" data-s="${k}"><span class="sdc-${k}">${ico(SEM_DADO[k].ico)}</span><span><b>${SEM_DADO[k].menu}</b><small>${SEM_DADO[k].sub}</small></span></button>`).join('')
-    + (atual ? `<button type="button" class="mi" role="menuitem" data-acao="sem-dado-escolher" data-campo="${c}" data-s=""><span>${ico('desfazer')}</span><span><b>Limpar</b></span></button>` : ''), { rotulo: 'Por que está sem valor' });
+  abrirPop(btn, CAMPOS_SEM_DADO[c].ops.map(k => `<button type="button" class="mi menu-item" role="menuitemradio" aria-checked="${atual === k}" data-acao="sem-dado-escolher" data-campo="${c}" data-s="${k}"><span class="sdc-${k}">${ico(SEM_DADO[k].ico)}</span><span><b>${SEM_DADO[k].menu}</b><small>${SEM_DADO[k].sub}</small></span></button>`).join('')
+    + (atual ? `<button type="button" class="mi menu-item" role="menuitem" data-acao="sem-dado-escolher" data-campo="${c}" data-s=""><span>${ico('desfazer')}</span><span><b>Limpar</b></span></button>` : ''), { rotulo: 'Por que está sem valor' });
 }
 function escolherSemDado(c, s) {
   const d = UI.atual.dados; d.semDado = d.semDado || {};
@@ -6962,7 +6941,7 @@ acoes({
   'descartar': () => descartar(),
   'excluir-atual': () => excluirEmpresa(UI.atual.id),
   'duplicar-atual': () => duplicarEmpresa(UI.atual.id),
-  'menu-analise': b => { const salvo = empresaSalva(); abrirMenuAcoes(b, [['nova', 'Nova análise', 'mais'], ...(salvo ? [['duplicar-atual', 'Duplicar', 'copiar']] : []), ...(UI.sujo ? [['descartar', salvo ? 'Descartar alterações' : 'Descartar esta análise', 'desfazer']] : []), ...(salvo ? ['-', ['excluir-atual', 'Excluir empresa', 'lixo', '', 'perigo']] : [])]); },
+  'menu-analise': b => { const salvo = empresaSalva(); abrirMenuAcoes(b, [['nova', 'Nova análise', 'mais'], ...(salvo ? [['duplicar-atual', 'Duplicar', 'copiar']] : []), ...(UI.sujo ? [['descartar', salvo ? 'Descartar alterações' : 'Descartar esta análise', 'desfazer']] : []), ...(salvo ? ['-', ['excluir-atual', 'Excluir empresa', 'lixo', '', 'danger']] : [])]); },
   'ajuda': b => abrirAjuda(b),
   'pop-fechar': () => fecharPop(true),
   'origem': b => abrirOrigem(b),
@@ -7265,7 +7244,7 @@ Responda em português, só com o que segue, sem texto antes ou depois:
 3. "Observações:" no máximo três frases curtas, só se algo mudar a leitura (ano diferente do pedido, valor do grupo e não do CNPJ, dúvida sobre a empresa certa).`;
 }
 function dialogoTexto(titulo, intro, idTexto, texto, rotCopiar, extra = '', nota = '') {
-  const dlg = $('#dlg'); dlg.classList.add('largo');
+  const dlg = $('#dlg'); dlg.classList.add('wide');
   $('#dlg-corpo').innerHTML = `<h2>${titulo}</h2>${intro}${extra}<label for="${idTexto}" class="sr sr-only">${titulo}</label><textarea id="${idTexto}" class="textarea prompt" spellcheck="false">${esc(texto)}</textarea>${nota ? `<p style="font-size:.86rem;margin-top:10px">${nota}</p>` : ''}`;
   const ac = $('#dlg-acoes'); ac.innerHTML = '';
   const fechar = document.createElement('button'); fechar.className = 'btn'; fechar.type = 'button'; fechar.textContent = 'Fechar'; fechar.onclick = () => fecharDlg();
@@ -7516,8 +7495,8 @@ function exportarExcel(ids) {
 }
 // o menu de exportar: Excel para ler e compartilhar, e o arquivo técnico para restaurar o Vezen
 function abrirMenuExportar(btn) {
-  abrirPop(btn, `<button type="button" class="mi" role="menuitem" data-acao="exp-xlsx">${ico('tabela')}<span><b>Excel (.xlsx)</b><small>Para abrir, ler e compartilhar</small></span></button>
-    <button type="button" class="mi" role="menuitem" data-acao="exp-json">${ico('baixar')}<span><b>Backup para restaurar (.json)</b><small>Arquivo técnico, para voltar ao Vezen depois</small></span></button>`, { rotulo: 'Exportar' });
+  abrirPop(btn, `<button type="button" class="mi menu-item" role="menuitem" data-acao="exp-xlsx">${ico('tabela')}<span><b>Excel (.xlsx)</b><small>Para abrir, ler e compartilhar</small></span></button>
+    <button type="button" class="mi menu-item" role="menuitem" data-acao="exp-json">${ico('baixar')}<span><b>Backup para restaurar (.json)</b><small>Arquivo técnico, para voltar ao Vezen depois</small></span></button>`, { rotulo: 'Exportar' });
 }
 async function importarArquivoJSON(f) {
   let o; try { o = JSON.parse(await f.text()); } catch (err) { return avisar('Arquivo inválido', 'O arquivo não é um JSON válido desta ferramenta.'); }
@@ -7566,7 +7545,7 @@ TELAS.empresas = {
 };
 acoes({
   'menu-empresas': b => abrirMenuAcoes(b, [['modelo', 'Empresa modelo', 'lampada'], '-', ['exp-xlsx', 'Baixar em Excel', 'tabela'], ['exp-csv', 'Baixar em CSV', 'tabela'], '-', ['exp-json', 'Backup para restaurar (.json)', 'baixar'], ['importar', 'Importar backup', 'subir']]),
-  'menu-emp': b => abrirMenuAcoes(b, [['abrir-emp', 'Abrir', 'editar', `data-id="${b.dataset.id}"`], ['dup-emp', 'Duplicar', 'copiar', `data-id="${b.dataset.id}"`], '-', ['del-emp', 'Excluir', 'lixo', `data-id="${b.dataset.id}"`, 'perigo']]),
+  'menu-emp': b => abrirMenuAcoes(b, [['abrir-emp', 'Abrir', 'editar', `data-id="${b.dataset.id}"`], ['dup-emp', 'Duplicar', 'copiar', `data-id="${b.dataset.id}"`], '-', ['del-emp', 'Excluir', 'lixo', `data-id="${b.dataset.id}"`, 'danger']]),
   'abrir-emp': b => navegar('#/analise/' + encodeURIComponent(b.dataset.id)),
   'dup-emp': b => duplicarEmpresa(b.dataset.id),
   'del-emp': b => excluirEmpresa(b.dataset.id),
@@ -7836,7 +7815,7 @@ acoes({
   'criar-lista': () => criarLista(),
   'csv-lista': () => csvLista(listaPorId(UI.rota.id)),
   'xlsx-lista': () => excelLista(listaPorId(UI.rota.id)),
-  'menu-lista': b => abrirMenuAcoes(b, [['renomear-lista', 'Renomear', 'editar'], ['xlsx-lista', 'Baixar em Excel', 'tabela'], ['csv-lista', 'Baixar em CSV', 'tabela'], '-', ['excluir-lista', 'Excluir lista', 'lixo', `data-id="${UI.rota.id}"`, 'perigo']]),
+  'menu-lista': b => abrirMenuAcoes(b, [['renomear-lista', 'Renomear', 'editar'], ['xlsx-lista', 'Baixar em Excel', 'tabela'], ['csv-lista', 'Baixar em CSV', 'tabela'], '-', ['excluir-lista', 'Excluir lista', 'lixo', `data-id="${UI.rota.id}"`, 'danger']]),
   'renomear-lista': async () => {
     const L = listaPorId(UI.rota.id); if (!L) return;
     const r = await perguntar(`<h2>Renomear a lista</h2><label for="dlg-nome" class="sr sr-only">Nome</label><input class="input" type="text" id="dlg-nome" value="${esc(L.nome)}">`, [['Cancelar', null], ['Renomear', 'ok', 'primary']]);
@@ -9122,7 +9101,7 @@ TELAS.glossario = {
 /* ---------- janelinha com a definição, aberta pelas siglas do texto ---------- */
 function abrirTermo(btn) {
   const g = GL_POR_ID.get(btn.dataset.gl); if (!g) return;
-  abrirPop(btn, `<div data-termo-proprio="${g.id}"><h4><span>${esc(g.t)}${g.n ? ` <small>${esc(g.n)}</small>` : ''}</span><button type="button" class="btn ghost icon xs" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>
+  abrirPop(btn, `<div data-termo-proprio="${g.id}"><h4 class="popover-title"><span>${esc(g.t)}${g.n ? ` <small>${esc(g.n)}</small>` : ''}</span><button type="button" class="btn ghost icon xs" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>
     <p class="pop-def">${esc(g.d)}</p><p class="pop-nota"><a href="#/glossario/${g.id}">Ver no glossário</a></p></div>`, { cls: 'pop-ajuda pop-termo', papel: 'dialog', rotulo: g.t });
 }
 // a letra escolhida filtra a lista; clicar de novo nela, ou em Todas, mostra tudo
@@ -9278,14 +9257,14 @@ async function esperarParado(el, seq) {
 
 function montarTour() {
   const raiz = document.createElement('div'); raiz.className = 'tour'; raiz.id = 'tour';
-  raiz.innerHTML = `${['c', 'd', 'b', 'e', 'furo'].map(l => `<div class="tour-bloq" data-l="${l}"></div>`).join('')}<div class="tour-luz sem-alvo"></div>
-    <section class="tour-cartao" role="dialog" aria-labelledby="tour-tit" aria-describedby="tour-txt">
-      <div class="tour-topo"><span class="tour-passo" id="tour-passo"></span><button type="button" class="btn ghost icon xs" data-t="fechar" aria-label="Fechar o tour" data-tip="Fechar o tour">${ico('x')}</button></div>
-      <div class="tour-barra" aria-hidden="true"><i></i></div>
+  raiz.innerHTML = `${['c', 'd', 'b', 'e', 'furo'].map(l => `<div class="tour-bloq" data-l="${l}"></div>`).join('')}<div class="tour-luz tour-spot sem-alvo"></div>
+    <section class="tour-cartao tour-card" role="dialog" aria-labelledby="tour-tit" aria-describedby="tour-txt">
+      <div class="tour-topo tour-top"><span class="tour-passo tour-count" id="tour-passo"></span><button type="button" class="btn ghost icon xs" data-t="fechar" aria-label="Fechar o tour" data-tip="Fechar o tour">${ico('x')}</button></div>
+      <div class="tour-barra progress sm" aria-hidden="true"><i></i></div>
       <h2 id="tour-tit" tabindex="-1"></h2><p id="tour-txt"></p>
       <p class="tour-acao" hidden></p>
       <div class="tour-msg" aria-live="polite"><div><p></p></div></div>
-      <div class="tour-pe"><button type="button" class="link-btn link" data-t="pular">Pular tour</button>
+      <div class="tour-pe tour-actions"><button type="button" class="link-btn link" data-t="pular">Pular tour</button>
         <span><button type="button" class="btn" data-t="voltar">Voltar</button><button type="button" class="btn" data-t="repetir" hidden>Tentar de novo</button><button type="button" class="btn primary" data-t="proximo">Próximo</button></span></div>
     </section>`;
   document.body.appendChild(raiz);
