@@ -1,6 +1,6 @@
 # Migração para o Grin
 
-O Vezen usa o Grin 2.20, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.20. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
+O Vezen usa o Grin 2.22, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.22. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
 
 ## Como o Grin entra no arquivo
 
@@ -8,8 +8,8 @@ O Vezen é um único `index.html` que funciona sem internet. Por isso o Grin ent
 
 | Bloco | Origem |
 |---|---|
-| `<style id="grin">` | `dist/grin.inline.css` da v2.20, com Geist e Geist Mono embutidas |
-| `<script id="grin-js" defer>` | `dist/grin.js` da v2.20 |
+| `<style id="grin">` | `dist/grin.inline.css` da v2.22, com Geist e Geist Mono embutidas |
+| `<script id="grin-js" defer>` | `dist/grin.js` da v2.22 |
 | Comentário antes dos dois blocos | Versão, link da release e o texto da licença SIL Open Font License 1.1 das fontes |
 
 Para atualizar, leia o CHANGELOG do Grin entre as versões, substitua os dois blocos e o número da versão no comentário e confira as telas.
@@ -171,3 +171,7 @@ Todas as propostas abaixo entraram no Grin 2.20. Os dois ajustes que o Vezen faz
 | Alerta no tom da marca | `.alert.brand`, para notas informativas que não são aviso. |
 | Barra com dois trechos | Uma variação do `.bar-list` com parte e total. |
 | Campo que falta | Um estado documentado para campo obrigatório sem valor, com fundo e borda vermelhos, além do `aria-invalid`. |
+
+## Partes obrigatórias do Grin
+
+Desde a versão 4.1.0 o Vezen tem as partes que o Grin exige em toda ferramenta. O logo leva a versão na `.tag`. O botão de recolher é o `.sidebar-toggle`, redondo na borda, embora o comportamento continue sendo o do Vezen (`vezen.lateral`, `data-lateral`). O botão de tema mostra sol e lua, e o painel Aparência (`data-appearance`) fica logo abaixo dele. A assinatura `.app-footer` aparece no fim de cada tela. O tema escolhido no painel Aparência passa pelo Grin, e o Vezen acompanha pelo evento `grin:theme`, guardando a escolha em `vezen.tema`.

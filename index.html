@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.20, copiado de https://github.com/saulossorio/grin/releases/tag/v2.20 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.22, copiado de https://github.com/saulossorio/grin/releases/tag/v2.22 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.20 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.22 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1879,13 +1879,30 @@ a.tab { text-decoration: none; }
   .page-description { font-size: var(--text-base); }
 }
 
+/* ---------- components/appearance/appearance.css ---------- */
+/* Grin appearance panel: theme, high contrast, density and font size. Filled by appearance.js. */
+.appearance { width: max-content; min-width: 288px; gap: 16px; }
+.appearance .select { width: 100%; }
+.appearance .segmented { width: 100%; flex-wrap: nowrap; }
+.appearance .segmented label { flex: 1 1 0; }
+.appearance .segmented span { width: 100%; justify-content: center; padding: 0 8px; }
+.appearance .slider-end.small { font-size: 12px; }
+.appearance .slider-end.large { font-size: 18px; }
+
+/* Signature at the end of every page of a tool: name, version and author, and the Grin version it uses */
+.app-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 24px; margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-soft); color: var(--muted-foreground); font-size: var(--text-sm); }
+.app-footer b { color: var(--foreground); font-weight: var(--weight-semibold); }
+.app-footer > :last-child { margin-left: auto; }
+.app-footer a { color: inherit; }
+.app-footer a:hover { color: var(--foreground); }
+
 </style>
 <script id="grin-js" defer>
-/* Grin 2.20 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.22 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.20';
+Grin.version = '2.22';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2021,7 +2038,7 @@ Object.assign(Grin, { ICONS, icon, paintIcons, parseColor, contrast, toHex, toke
 // Markup hooks (no extra JS needed):
 //   <select data-theme-select>               options: system, light, dark
 //   <button data-set-theme="dark">           sets a theme
-//   <button data-theme-toggle>               toggles light/dark; updates its .label text
+//   <button data-theme-toggle>               toggles light/dark; shows a sun ("Tema claro") in the dark theme and a moon ("Tema escuro") in the light theme
 //   <button data-contrast-toggle>            turns high contrast on/off; aria-pressed shows the state (or a checkbox switch: checked)
 //   <input type="radio" data-set-density value="comfortable|compact">
 //   <input type="radio" data-set-scale value="100|112|125">  or  <input type="range" class="slider" data-set-scale min="100" max="125" data-stops="100,112.5,125">
@@ -2029,6 +2046,7 @@ Object.assign(Grin, { ICONS, icon, paintIcons, parseColor, contrast, toHex, toke
 // ?theme=dark and ?contrast=more in the URL set them on load (handy to share a preview). ?theme=hc = high contrast.
 // To avoid a flash of the wrong theme, also put the inline snippet from README.md in <head>.
 
+const { icon } = Grin;
 const KEY = 'grin';
 const read = (k, fallback) => { try { return localStorage.getItem(`${KEY}-${k}`) ?? fallback; } catch { return fallback; } };
 const write = (k, v) => { try { localStorage.setItem(`${KEY}-${k}`, v); } catch { /* private mode: lasts for this visit */ } };
@@ -2080,7 +2098,13 @@ function sync() {
     // 'input' only repaints the slider; a 'change' here would call setScale again, in a loop
     if (el.type === 'range') { el.value = s === '112' ? '112.5' : s; el.dispatchEvent(new Event('input', { bubbles: true })); } else el.checked = el.value === s;
   });
-  document.querySelectorAll('[data-theme-toggle] .label').forEach((el) => { el.textContent = effectiveTheme() === 'dark' ? 'Tema claro' : 'Tema escuro'; });
+  const dark = effectiveTheme() === 'dark';
+  document.querySelectorAll('[data-theme-toggle]').forEach((el) => {
+    const label = dark ? 'Tema claro' : 'Tema escuro';
+    const text = el.querySelector('.label'); if (text) text.textContent = label; else el.setAttribute('aria-label', label);
+    const ic = el.querySelector('svg, i[data-icon]');
+    if (ic) { const size = +(ic.getAttribute('width') || ic.dataset.size || 16); ic.outerHTML = icon(dark ? 'sun' : 'moon', size); }
+  });
 }
 
 // Apply on load. The old 'hc' theme value becomes light + high contrast.
@@ -2089,7 +2113,9 @@ const fromUrl = params.get('theme');
 if (fromUrl === 'hc') { write('theme', 'light'); write('contrast', 'more'); } else if (['light', 'dark', 'system'].includes(fromUrl)) write('theme', fromUrl);
 if (['more', 'normal', 'system'].includes(params.get('contrast'))) write('contrast', params.get('contrast'));
 if (getTheme() === 'hc') { write('theme', 'light'); write('contrast', 'more'); }
-const t0 = getTheme(); if (t0 !== 'system') root.setAttribute('data-theme', t0); else root.removeAttribute('data-theme');
+// Only applies a saved choice. With no choice it leaves data-theme as it is, so a tool that set its own theme
+// before this script ran keeps it.
+const t0 = getTheme(); if (t0 !== 'system') root.setAttribute('data-theme', t0);
 const c0 = getContrast(); if (c0 !== 'system') root.setAttribute('data-contrast', c0);
 if (read('density', 'comfortable') === 'compact') root.setAttribute('data-density', 'compact');
 const s0 = read('scale', '100'); if (s0 !== '100') root.setAttribute('data-scale', s0);
@@ -2484,6 +2510,41 @@ document.addEventListener('click', (e) => {
 });
 }
 
+// ---------- components/appearance/appearance.js ----------
+{
+// Grin appearance panel (also: acessibilidade, preferências de tela, settings). The same four controls in every tool:
+// theme, high contrast, density and font size. Markup: an empty <div class="popover appearance" id="…" data-appearance>
+// opened by a button with data-popover="…" (popover.js). This script fills it; theme.js and slider.js make it work.
+// Every tool built with Grin has this panel, in the top bar or in the sidebar footer next to the theme button.
+const { paintSliders } = Grin;
+const { sync } = Grin;
+let n = 0;
+function mountAppearance(root = document) {
+  root.querySelectorAll('[data-appearance]:not([data-ready])').forEach((panel) => {
+    const k = `grin-ap${n++}`;
+    panel.setAttribute('role', 'dialog');
+    panel.setAttribute('aria-label', 'Aparência');
+    panel.innerHTML = `<span class="popover-title">Aparência</span>
+      <div class="field"><label class="field-label" for="${k}-theme">Tema</label><select class="select" id="${k}-theme" data-theme-select><option value="system">Do sistema</option><option value="light">Claro</option><option value="dark">Escuro</option></select></div>
+      <label class="switch"><input type="checkbox" role="switch" data-contrast-toggle>Alto contraste</label>
+      <div class="field"><span class="field-label" id="${k}-dl">Densidade</span><div class="segmented" role="radiogroup" aria-labelledby="${k}-dl">
+        <label><input type="radio" name="${k}-density" value="comfortable" data-set-density><span>Confortável</span></label>
+        <label><input type="radio" name="${k}-density" value="compact" data-set-density><span>Compacta</span></label>
+      </div></div>
+      <div class="slider-field">
+        <div class="slider-head"><label class="field-label" for="${k}-scale">Tamanho da fonte</label><output for="${k}-scale" data-format="percent">100%</output></div>
+        <div class="slider-row"><span class="slider-end small" aria-hidden="true">A</span><input class="slider" type="range" id="${k}-scale" min="100" max="125" step="any" data-stops="100,112.5,125" value="100" data-set-scale><span class="slider-end large" aria-hidden="true">A</span></div>
+        <div class="slider-ticks" aria-hidden="true"><span data-value="100">100%</span><span data-value="112.5">112,5%</span><span data-value="125">125%</span></div>
+      </div>`;
+    panel.dataset.ready = '';
+  });
+  sync();
+  paintSliders(root);
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => mountAppearance(), { once: true }); else mountAppearance();
+Object.assign(Grin, { mountAppearance });
+}
+
 // ---------- components/combobox/combobox.js ----------
 {
 // Grin combobox. Markup: .combobox[.multiple] > .combobox-control > input.combobox-input[aria-controls=list-id]
@@ -2769,13 +2830,13 @@ li { margin: 3px 0; }
 .ico.p { width: 16px; height: 16px; }
 
 /* ===================== CASCA: barra lateral (sidebar do Grin), topo do celular e conteúdo =====================
-   A casca não usa .app do Grin: recolher a barra e o menu do celular são do Vezen (vezen.lateral, data-lateral). */
+   A casca não usa .app do Grin: recolher a barra e o menu do celular são do Vezen (vezen.lateral, data-lateral),
+   mas o botão de recolher é o do Grin (.sidebar-toggle, redondo na borda) e a largura recolhida é a do Grin. */
 .casca { display: grid; grid-template-columns: auto minmax(0, 1fr); min-height: 100vh; }
 .lateral.sidebar { transition-duration: var(--dur); } /* recolher e abrir no celular com a duração padrão do Grin */
 .lat-marca { align-items: center; margin-bottom: 12px; }
 .lat-marca svg { flex: none; }
 .lat-marca .lat-fechar { margin-left: auto; display: none; }
-.lat-marca .lat-recolher { margin-left: auto; }
 .lat-nova { width: 100%; margin: 0 0 14px; }
 .lat-sub .ico { display: none; }
 .lat-dados { font-size: var(--text-sm); color: var(--muted-foreground); padding: 4px 12px 6px; line-height: var(--leading-ui); }
@@ -2787,12 +2848,18 @@ li { margin: 3px 0; }
 #app { max-width: calc(var(--size-content) + 64px); margin: 0 auto; padding: 32px 32px 64px; outline: none; }
 .veu-menu { display: none; }
 .aviso-armaz { padding-inline: 32px; }
+/* assinatura do Grin no fim de cada tela, alinhada com o conteúdo */
+.principal { display: flex; flex-direction: column; min-height: 100vh; }
+.principal > #app { width: 100%; } /* em coluna flex, margin auto encolheria o conteúdo */
+.principal > .app-footer { width: calc(100% - 64px); max-width: var(--size-content); margin: auto auto 32px; }
+@media (max-width: 960px) { .principal > .app-footer { width: calc(100% - 32px); margin-bottom: 24px; } }
 @media (min-width: 961px) {
   /* recolhida: só os ícones, como .sidebar.collapsed do Grin, em 64 px */
-  [data-lateral="recolhida"] .sidebar { width: 64px; padding-inline: 8px; }
+  [data-lateral="recolhida"] .sidebar { width: var(--size-sidebar-collapsed); padding-inline: 12px; }
+  [data-lateral="recolhida"] .sidebar-toggle { left: calc(var(--size-sidebar-collapsed) - 14px); }
+  [data-lateral="recolhida"] .sidebar-toggle svg { transform: rotate(180deg); }
   [data-lateral="recolhida"] .sidebar .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   [data-lateral="recolhida"] .lat-marca { flex-direction: column; align-items: center; gap: 10px; padding: 6px 0; }
-  [data-lateral="recolhida"] .lat-marca .lat-recolher { margin: 0; }
   [data-lateral="recolhida"] .lat-ver, [data-lateral="recolhida"] .nav-count, [data-lateral="recolhida"] .lat-dados { display: none; }
   [data-lateral="recolhida"] .nav-item, [data-lateral="recolhida"] .lat-nova { justify-content: center; padding: 0; }
   [data-lateral="recolhida"] .lat-nova { width: 48px; align-self: center; }
@@ -3616,6 +3683,7 @@ details[open]::details-content { block-size: auto; }
 <symbol id="i-antena" viewBox="0 0 24 24"><path d="M12 12v9"/><circle cx="12" cy="10" r="2"/><path d="M8 6.5a5.5 5.5 0 0 0 0 7M16 6.5a5.5 5.5 0 0 1 0 7M5 4a9 9 0 0 0 0 12M19 4a9 9 0 0 1 0 12"/></symbol>
 <symbol id="i-servicos" viewBox="0 0 24 24"><path d="M14.5 6.5a4 4 0 0 0-5.3 5.3L4 17l3 3 5.2-5.2a4 4 0 0 0 5.3-5.3l-2.6 2.6-2.4-.6-.6-2.4z"/></symbol>
 <symbol id="i-atualizar" viewBox="0 0 24 24"><path d="M19.5 10.5A7.6 7.6 0 0 0 6 7.2L4.5 9"/><path d="M4.5 4.8V9h4.2"/><path d="M4.5 13.5A7.6 7.6 0 0 0 18 16.8l1.5-1.8"/><path d="M19.5 19.2V15h-4.2"/></symbol>
+<symbol id="i-ajustes" viewBox="0 0 24 24"><path d="M21 4h-7M10 4H3M21 12h-9M8 12H3M21 20h-5M12 20H3M14 2v4M8 10v4M16 18v4"/></symbol>
 <symbol id="i-painel" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></symbol>
 <symbol id="i-nada" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></symbol>
 <symbol id="i-glossario" viewBox="0 0 24 24"><rect x="4" y="3.5" width="13.5" height="17" rx="2"/><path d="M17.5 7.5h2.5M17.5 12h2.5M17.5 16.5h2.5"/><path d="M7.7 15.5l2.8-7 2.8 7M8.8 13h3.4"/></symbol>
@@ -3627,7 +3695,7 @@ details[open]::details-content { block-size: auto; }
 </defs></svg>
 <div class="casca" id="casca">
   <aside class="lateral sidebar" id="lateral" aria-label="Navegação">
-    <div class="lat-marca app-logo"><svg width="24" height="24" aria-hidden="true"><use href="#i-marca"/></svg><span class="rot label">Vezen</span><span class="lat-ver tag" id="lat-ver"></span><button type="button" class="btn ghost icon xs lat-recolher" data-acao="recolher" aria-controls="lateral"><svg class="ico" aria-hidden="true"><use href="#i-painel"/></svg></button><button type="button" class="btn ghost icon xs lat-fechar" data-acao="menu-fechar" aria-label="Fechar menu"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="lat-marca app-logo"><svg width="24" height="24" aria-hidden="true"><use href="#i-marca"/></svg><span class="rot label">Vezen</span><span class="lat-ver tag" id="lat-ver"></span><button type="button" class="sidebar-toggle lat-recolher" data-acao="recolher" aria-controls="lateral"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button><button type="button" class="btn ghost icon xs lat-fechar" data-acao="menu-fechar" aria-label="Fechar menu"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div>
     <nav class="lat-nav" id="nav" aria-label="Telas"></nav>
     <div class="lat-pe sidebar-footer" id="lat-pe"></div>
   </aside>
@@ -3636,6 +3704,7 @@ details[open]::details-content { block-size: auto; }
     <header class="topo-movel topbar"><button type="button" class="btn ghost icon" data-acao="menu" aria-label="Abrir menu" aria-controls="lateral"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button><svg width="24" height="24" aria-hidden="true"><use href="#i-marca"/></svg><span class="tm-tit" id="topo-tit">Vezen</span></header>
     <div id="aviso-armaz" class="aviso-armaz banner warn" hidden>O navegador não permite salvar: os dados desta sessão não ficam guardados. Exporte um backup antes de fechar.</div>
     <main id="app" tabindex="-1"></main>
+    <footer class="app-footer" id="assinatura"></footer>
   </div>
 </div>
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
@@ -3643,6 +3712,7 @@ details[open]::details-content { block-size: auto; }
 <input type="file" id="arq-lista" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
 <dialog id="dlg" class="dialog"><div id="dlg-corpo" class="dialog-body"></div><div id="dlg-acoes" class="dialog-footer"></div></dialog>
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<div class="popover appearance" id="aparencia" data-appearance></div>
 <script id="parquet">
 /* Leitor de Parquet embutido, para ler a base de empresas sem internet.
    hyparquet 1.31.5 e hyparquet-compressors 1.1.2: Copyright (c) Hyperparam. fzstd 0.1.1: Copyright (c) 2020 Arjun Barrett.
@@ -3671,7 +3741,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.0.1';
+const VERSAO_APP = '4.1.0';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5385,10 +5455,21 @@ function aplicarTema(t) {
 function alternarTema() {
   const novo = document.documentElement.dataset.tema === 'escuro' ? 'claro' : 'escuro';
   try { localStorage.setItem(CHAVE_TEMA, novo); } catch (e) { /* só nesta sessão */ }
-  aplicarTema(novo); renderNav();
+  aplicarTema(novo); window.Grin?.setTheme?.(novo === 'escuro' ? 'dark' : 'light'); renderNav();
   if (['analise', 'listas', 'empresas'].includes(UI.rota.tela)) render();
 }
 aplicarTema(temaSalvo());
+/* O painel Aparência do Grin troca o tema pelo Grin: o Vezen acompanha e guarda a escolha como a sua.
+   Ao abrir, o Grin recebe a escolha guardada do Vezen, para os dois ficarem iguais. */
+document.documentElement.addEventListener('grin:theme', () => {
+  const g = window.Grin?.getTheme?.(); if (!g) return;
+  const novo = g === 'system' ? null : g === 'dark' ? 'escuro' : 'claro';
+  if (novo === temaSalvo()) return;
+  try { if (novo) localStorage.setItem(CHAVE_TEMA, novo); else localStorage.removeItem(CHAVE_TEMA); } catch (e) { /* só nesta sessão */ }
+  aplicarTema(novo); renderNav();
+  if (['analise', 'listas', 'empresas'].includes(UI.rota.tela)) render();
+});
+document.addEventListener('DOMContentLoaded', () => { const t = temaSalvo(); if (t && window.Grin?.setTheme) Grin.setTheme(t === 'escuro' ? 'dark' : 'light'); });
 
 /* ---------- barra lateral recolhida: só os ícones, com o nome de cada tela ao passar o mouse ---------- */
 const lateralRecolhida = () => document.documentElement.dataset.lateral === 'recolhida';
@@ -5479,7 +5560,8 @@ function renderNav() {
   $('#lat-pe').innerHTML = `${S.empresas.length || S.listas.length ? `<div class="lat-dados${atencao ? ' atencao' : ''}">${b ? 'Último backup ' + haDias(d) + (pend ? ', com alterações depois' : '') : 'Nenhum backup exportado ainda'}</div>
     <button type="button" class="lat-item nav-item small" data-acao="exp-menu" aria-haspopup="menu" aria-expanded="false"${tip('Exportar as empresas')}>${ico('baixar')}<span class="rot label">Exportar</span>${atencao ? '<i class="ponto dot warn" aria-hidden="true"></i>' : ''}</button>` : ''}
     <button type="button" class="lat-item nav-item small" data-acao="tour"${tip('Tour guiado')}>${ico('ajuda')}<span class="rot label">Tour guiado</span></button>
-    <button type="button" class="lat-item nav-item small" data-acao="tema"${tip(escuro ? 'Tema claro' : 'Tema escuro')}>${ico(escuro ? 'sol' : 'lua')}<span class="rot label">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>`;
+    <button type="button" class="lat-item nav-item small" data-acao="tema"${tip(escuro ? 'Tema claro' : 'Tema escuro')}>${ico(escuro ? 'sol' : 'lua')}<span class="rot label">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>
+    <button type="button" class="lat-item nav-item small" data-popover="aparencia" aria-expanded="false"${tip('Aparência')}>${ico('ajustes')}<span class="rot label">Aparência</span></button>`;
 }
 function abrirMenuLateral() { $('#casca').classList.add('menu-aberto'); const p = $('#nav a'); if (p) p.focus(); }
 function fecharMenuLateral() { $('#casca').classList.remove('menu-aberto'); }
@@ -9468,6 +9550,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.22</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 acoes({ 'menu': () => abrirMenuLateral(), 'menu-fechar': () => fecharMenuLateral(), 'recolher': () => alternarLateral(), 'tema': () => alternarTema() });

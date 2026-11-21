@@ -230,7 +230,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
 
   // barra lateral recolhida: só ícones, com o nome ao passar o mouse; fica recolhida ao recarregar
   await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
-  ok('Barra lateral recolhida', await p.evaluate(() => document.documentElement.dataset.lateral === 'recolhida' && document.querySelector('.lateral').getBoundingClientRect().width <= 64));
+  ok('Barra lateral recolhida', await p.evaluate(() => document.documentElement.dataset.lateral === 'recolhida' && document.querySelector('.lateral').getBoundingClientRect().width <= 72)); // largura recolhida do Grin (--size-sidebar-collapsed)
   ok('Recolhida: itens com o nome na dica e para leitores de tela', await p.evaluate(() => [...document.querySelectorAll('#nav .lat-item')].every(a => a.dataset.tip && a.textContent.trim())));
   await p.reload(); await p.waitForTimeout(300);
   ok('Recolhida continua ao recarregar', await p.evaluate(() => document.documentElement.dataset.lateral === 'recolhida'));

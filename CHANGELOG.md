@@ -2,6 +2,19 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.1.0] - 2026-11-21
+
+### Adicionado
+- **Painel Aparência do Grin** no pé da barra lateral, logo abaixo do botão de tema, com tema, alto contraste, densidade e tamanho da fonte. O tema escolhido ali e o do botão ficam sempre iguais.
+- **Assinatura** no fim de cada tela: "Vezen 4.1.0 · por Saúl Ossorio", com a versão do Grin usada.
+
+### Alterado
+- **Grin 2.22.** O botão de recolher a barra lateral passa a ser o do Grin, redondo na borda da barra, e a barra recolhida tem a largura do Grin (72 px).
+- Corrigido o tema: o Grin 2.20 apagava o tema escolhido no Vezen ao carregar e a tela seguia o tema do sistema.
+
+### Não mudou
+- Cálculos, parâmetros, dados salvos no navegador, importação e exportação de arquivos e textos das telas.
+
 ## [4.0.1] - 2026-11-21
 
 ### Alterado
