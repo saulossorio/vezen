@@ -144,6 +144,8 @@ input, select, textarea, button { font: inherit; color: inherit; }
 .lat-grupo { font-size: .78rem; color: var(--cinza); padding: 2px 10px 4px; }
 .lat-pe { margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--linha); padding-top: 8px; }
 .lat-pe .lat-item { font-size: .88rem; color: var(--cinza); }
+.lat-versao { font-size: .75rem; color: var(--cinza); padding: 6px 10px 2px; }
+[data-lateral="recolhida"] .lat-versao { padding: 6px 0 2px; text-align: center; font-size: .65rem; }
 .lat-dados { font-size: .8rem; color: var(--cinza); padding: 4px 10px 2px; line-height: 1.4; }
 .lat-dados.atencao { color: var(--aviso); }
 .topo-movel { display: none; position: sticky; top: 0; z-index: 30; align-items: center; gap: 8px; padding: 8px 12px; background: var(--fundo); border-bottom: 1px solid var(--linha); min-height: 52px; }
@@ -1169,6 +1171,8 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 "use strict";
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
+// versão do Vezen, à vista no rodapé do menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
+const VERSAO_APP = '3.9.2';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -2975,7 +2979,8 @@ function renderNav() {
   $('#lat-pe').innerHTML = `${S.empresas.length || S.listas.length ? `<div class="lat-dados${atencao ? ' atencao' : ''}">${b ? 'Último backup ' + haDias(d) + (pend ? ', com alterações depois' : '') : 'Nenhum backup exportado ainda'}</div>
     <button type="button" class="lat-item" data-acao="exp-menu" aria-haspopup="menu" aria-expanded="false"${tip('Exportar as empresas')}>${ico('baixar')}<span class="rot">Exportar</span>${atencao ? '<i class="ponto" aria-hidden="true"></i>' : ''}</button>` : ''}
     <button type="button" class="lat-item" data-acao="tour"${tip('Tour guiado')}>${ico('ajuda')}<span class="rot">Tour guiado</span></button>
-    <button type="button" class="lat-item" data-acao="tema"${tip(escuro ? 'Tema claro' : 'Tema escuro')}>${ico(escuro ? 'sol' : 'lua')}<span class="rot">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>`;
+    <button type="button" class="lat-item" data-acao="tema"${tip(escuro ? 'Tema claro' : 'Tema escuro')}>${ico(escuro ? 'sol' : 'lua')}<span class="rot">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>
+    <div class="lat-versao">Versão ${VERSAO_APP}</div>`;
 }
 function abrirMenuLateral() { $('#casca').classList.add('menu-aberto'); const p = $('#nav a'); if (p) p.focus(); }
 function fecharMenuLateral() { $('#casca').classList.remove('menu-aberto'); }
@@ -3450,7 +3455,7 @@ async function novaAnalise(dados, limpo = false) {
   if (dados) UI.atual.dados = Object.assign(dadosVazios(), dados);
   else UI.atual.dados.modo = ''; // análise nova: o método é escolhido antes dos dados
   navegar('#/analise/' + UI.atual.id);
-  setTimeout(() => { const o = $('#f-nome'); if (o && !dados) o.focus(); }, 0);
+  setTimeout(() => { const o = $('#f-nome'); if (o && !dados) o.focus({ preventScroll: true }); }, 0);
 }
 /* ---------- empresa modelo: um caso real, com dados públicos e fontes oficiais, para ver a ferramenta funcionando ---------- */
 // Banco do Brasil, com os números dos documentos do próprio banco. O gasto real de TI publicado deixa a confiança alta.

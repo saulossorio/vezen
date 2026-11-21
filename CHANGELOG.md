@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.9.2] - 2026-11-20
+
+### Alterado
+- Versão do Vezen à vista no rodapé do menu lateral.
+
+### Corrigido
+- Nova análise pela tela de Empresas abria rolada até o nome da empresa: o foco no nome não rola mais a página.
+
 ## [3.9.1] - 2026-11-20
 
 ### Corrigido

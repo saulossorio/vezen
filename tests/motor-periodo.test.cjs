@@ -12,6 +12,8 @@ const base = { nome: 'Empresa A', natureza: 'privada', setor: 'varejo', uf: 'SP'
 const calc = (extra = {}, PP = P) => M.calcular(copia(Object.assign({}, base, extra)), PP, { ano: 2026 });
 const r12 = calc({ fatMeses: '12' }), rSem = calc();
 
+const vApp = (html.match(/const VERSAO_APP = '([^']+)'/) || [])[1], vPkg = require('../package.json').version, vLog = (fs.readFileSync(path.join(__dirname, '..', 'CHANGELOG.md'), 'utf8').match(/## \[([^\]]+)\]/) || [])[1];
+ok('Versão à vista igual à do package.json e do CHANGELOG', vApp === vPkg && vPkg === vLog, [vApp, vPkg, vLog].join(' / '));
 ok('Parâmetro: incerteza por mês que falta, com a fonte marcada como suposição inicial', P.receita.sMeses > 0 && !!M.PAIS.fontes['receita.sMeses'] && M.PAIS.fontes['receita.sMeses'].aprox === true, String(P.receita.sMeses));
 ok('Sem período ou com 12 meses: nada muda', rSem.F === r12.F && rSem.p10 === r12.p10 && rSem.p90 === r12.p90 && rSem.receita.usada.v === 120e6 && r12.receita.informada.meses === 12 && r12.receita.informada.fm === 1);
 for (const [meses, fator] of [[9, 12 / 9], [6, 2], [3, 4]]) {
