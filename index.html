@@ -3372,24 +3372,27 @@ tr.fora td { opacity: .55; }
 .d-lead { margin: 0 0 14px; color: var(--muted-foreground); }
 .d-bloco { margin-top: 24px; }
 .doc-sec > h2 + .d-bloco { margin-top: 0; }
-.fx { margin: 10px 0; padding: 12px 16px; border-left: 3px solid var(--primary); background: var(--muted); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; overflow-x: auto; font-family: 'Cambria Math', 'STIX Two Math', Georgia, serif; font-size: var(--text-lg); line-height: 1.45; }
-.fx var, .fx-in var, .letras dt var { font-style: italic; }
+/* fórmula: o .formula do Grin (fundo, borda, Geist Mono; letras em itálico na cor da marca), em grade alinhada pelo sinal de igual */
+.fx { margin: 12px 0; padding: 16px 20px; border: 1px solid var(--border); background: var(--sidebar); border-radius: var(--radius-lg); overflow-x: auto; font-family: var(--font-mono); font-size: var(--text-base); line-height: 1.5; }
+.fx var, .fx-in var, .letras dt var, .letras dt { font-family: var(--font-sans); font-style: italic; font-weight: var(--weight-semibold); color: var(--brand-fg); }
 .fx sub, .fx-in sub, .letras sub { font-size: .7em; }
 .fx-g { display: grid; grid-template-columns: max-content max-content max-content minmax(0, 1fr); column-gap: 10px; row-gap: 8px; align-items: baseline; }
 .fx-e { text-align: right; white-space: nowrap; }
 .fx-i { color: var(--muted-foreground); }
 .fx-d { white-space: nowrap; }
 .fx-n { font-family: var(--font-sans); font-size: var(--text-xs); color: var(--muted-foreground); padding-left: 14px; }
-.fx-n var { font-family: 'Cambria Math', 'STIX Two Math', Georgia, serif; font-size: var(--text-base); }
+.fx-n var { font-size: var(--text-sm); }
 /* no celular a fórmula quebra nos espaços, e a condição desce para baixo dela */
 @media (max-width: 640px) { .fx-g { grid-template-columns: max-content max-content minmax(0, 1fr); } .fx-d { white-space: normal; } .fx-n { grid-column: 3; padding-left: 0; margin-top: -6px; } .fx-n:empty { display: none; } }
-.fx-in { font-family: 'Cambria Math', 'STIX Two Math', Georgia, serif; font-size: var(--text-base); }
+.fx-in { font-family: var(--font-mono); font-size: 0.95em; }
 /* legenda: símbolo, o que é e o valor em uso, com as colunas alinhadas entre as linhas */
+/* legenda das letras: o .symbols do Grin, com uma linha entre os itens */
 .letras { display: grid; grid-template-columns: max-content minmax(0, 1fr) max-content; gap: 0; margin: 4px 0 12px; font-size: var(--text-sm); }
 .letras > div { display: contents; }
-.letras dt, .letras dd { margin: 0; padding: 6px 0; border-bottom: 1px solid var(--border-soft); }
-.letras dt { font-family: 'Cambria Math', 'STIX Two Math', Georgia, serif; font-size: var(--text-base); padding-right: 20px; white-space: nowrap; }
-.letras .letras-v { color: var(--muted-foreground); text-align: right; padding-left: 16px; white-space: nowrap; }
+.letras dt, .letras dd { margin: 0; padding: 8px 0; border-bottom: 1px solid var(--border-soft); }
+.letras dd { color: var(--muted-foreground); }
+.letras dt { padding-right: 20px; white-space: nowrap; }
+.letras .letras-v { color: var(--foreground); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; text-align: right; padding-left: 16px; white-space: nowrap; }
 @media (max-width: 640px) { .letras { grid-template-columns: max-content minmax(0, 1fr); } .letras dt { grid-row: span 2; } .letras dd:not(.letras-v) { border-bottom: 0; padding-bottom: 0; } .letras .letras-v { text-align: left; padding: 0 0 6px; white-space: normal; } .letras .letras-v:empty { padding: 0; } }
 .notas { margin: 8px 0 0; padding-left: 18px; color: var(--muted-foreground); font-size: var(--text-sm); }
 .notas li { margin: 4px 0; }
