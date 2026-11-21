@@ -2729,7 +2729,7 @@ th, td { padding: 8px 12px; border-bottom: 1px solid var(--border-soft); vertica
 td.n, th.n { text-align: right; white-space: nowrap; }
 tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
 /* ícones do Vezen: desenho de 24 px com traço 2, como os do Grin */
-.ico { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ico { display: inline; width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .ico.p { width: 16px; height: 16px; }
 
 /* ===================== CASCA: barra lateral (sidebar do Grin), topo do celular e conteúdo =====================
@@ -2780,40 +2780,13 @@ tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
   .aviso-armaz { padding-inline: 16px; }
 }
 
-/* ===================== CONTROLES ===================== */
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: var(--control-h); padding: 6px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border-strong); background: var(--surface); color: var(--foreground); font-weight: 550; font-size: 1rem; cursor: pointer; text-decoration: none; white-space: nowrap; transition: background var(--dur-fast), border-color var(--dur-fast); }
-.btn:hover { background: var(--muted); }
-.btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: default; }
-.btn.prim { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
-.btn.prim:hover:not(:disabled) { background: oklch(0.72 0.17 128); border-color: oklch(0.72 0.17 128); }
-.btn.fant { border-color: transparent; background: none; }
-.btn.fant:hover { background: var(--hover); }
-.btn.perigo { color: var(--crit-fg); }
-.btn.perigo-forte { background: var(--crit-solid); border-color: var(--crit-solid); color: #fff; }
-.btn.peq { min-height: 30px; padding: 3px 10px; font-size: .86rem; }
-.btn.ico-so { padding: 6px; width: var(--control-h); }
-.btn.peq.ico-so { width: 30px; padding: 4px; }
-.link-btn { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; text-underline-offset: 2px; cursor: pointer; font: inherit; }
-.link-btn.perigo { color: var(--crit-fg); }
+/* ===================== CONTROLES: botão, campo, input-group, checkbox e segmented do Grin ===================== */
+/* ação destrutiva secundária (ao lado da principal): texto vermelho sobre o botão padrão */
+.btn.perigo, .btn.perigo svg { color: var(--crit-fg); }
 .acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-input[type="text"], input[type="search"], input:not([type]), select, textarea { width: 100%; height: var(--control-h); padding: 7px 11px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--surface); transition: border-color var(--dur-fast), box-shadow var(--dur-fast); }
-/* lista sem a aparência do sistema, para ter a altura dos campos; a seta é desenhada com a cor do texto */
-select { appearance: none; -webkit-appearance: none; padding-right: 34px; text-overflow: ellipsis; cursor: pointer;
-  background-image: linear-gradient(45deg, transparent 50%, var(--muted-foreground) 50%), linear-gradient(135deg, var(--muted-foreground) 50%, transparent 50%);
-  background-position: calc(100% - 18px) 52%, calc(100% - 13px) 52%; background-size: 5px 5px; background-repeat: no-repeat; }
-select:disabled { cursor: not-allowed; opacity: .6; }
-textarea { height: auto; min-height: 120px; resize: vertical; line-height: 1.5; }
-input:focus-visible, select:focus-visible, textarea:focus-visible { outline: none; border-color: var(--ring); box-shadow: 0 0 0 3px oklch(0.75 0.15 128 / 0.35); }
-input::placeholder { color: var(--muted-foreground); opacity: .75; }
-input[type="checkbox"], input[type="radio"] { accent-color: var(--chart-1); width: 16px; height: 16px; margin: 0; flex: none; }
-.chk-linha { display: inline-flex; align-items: flex-start; gap: 9px; cursor: pointer; font-size: 1rem; }
-.chk-linha input { margin-top: 3px; }
-.seg { display: inline-flex; padding: 3px; gap: 2px; border-radius: var(--radius-lg); background: var(--muted); border: 1px solid var(--border); flex-wrap: wrap; }
-.seg-op { position: relative; display: inline-flex; }
-.seg-op input { position: absolute; opacity: 0; inset: 0; cursor: pointer; width: 100%; height: 100%; margin: 0; }
-.seg-op span { display: inline-flex; align-items: center; min-height: calc(var(--control-h) - 8px); padding: 0 12px; border-radius: var(--radius-sm); font-size: .88rem; font-weight: 550; color: var(--muted-foreground); white-space: nowrap; }
-.seg-op input:checked + span { background: var(--surface); color: var(--foreground); box-shadow: var(--shadow-sm); }
-.seg-op input:focus-visible + span { outline: 2px solid var(--ring); outline-offset: 1px; }
+.checkbox:has(.dica), .checkbox.conf { align-items: flex-start; }
+.checkbox:has(.dica) input { margin-top: 1px; }
+.segmented { flex-wrap: wrap; }
 .seg-op.off span { opacity: .45; }
 .seg-op.off input { cursor: not-allowed; }
 
@@ -2854,7 +2827,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: var(--chart-1); widt
 .nota { background: var(--muted); border-color: var(--border); color: var(--muted-foreground); }
 .alerta > .ico { color: var(--warn-fg); margin-top: 1px; } .info-caixa > .ico { color: var(--info-fg); margin-top: 1px; }
 .alerta p, .info-caixa p, .nota p { margin: 0; }
-.dica { display: block; font-size: .84rem; color: var(--muted-foreground); line-height: 1.45; }
+.dica { display: block; font-size: var(--text-sm); color: var(--muted-foreground); line-height: var(--leading-ui); } /* como o .field-hint do Grin */
 .valid { font-size: .84rem; color: var(--crit-fg); margin: 4px 0 0; min-height: 0; }
 .valid:empty { display: none; }
 
@@ -2939,9 +2912,6 @@ fieldset.bloqueado { border: 0; padding: 0; margin: 0; min-width: 0; display: gr
 .pop-ajuda .lista-orig li { align-items: flex-start; justify-content: flex-start; }
 .pop-ajuda .lista-orig b { display: block; }
 .pop-ajuda .lista-orig span { font-size: .84rem; color: var(--muted-foreground); }
-.ajuda { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; border: 0; background: none; color: var(--muted-foreground); cursor: pointer; padding: 0; flex: none; }
-.ajuda:hover { background: var(--hover); color: var(--foreground); }
-.ajuda .ico { width: 17px; height: 17px; }
 dialog#dlg { border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 0; width: min(560px, calc(100vw - 24px)); background: var(--surface); color: var(--foreground); box-shadow: var(--shadow-lg); }
 dialog#dlg.largo { width: min(880px, calc(100vw - 24px)); }
 dialog#dlg::backdrop { background: var(--overlay); }
@@ -3023,22 +2993,14 @@ details.secao-form > summary .sf-cab { margin: 0; }
 details.secao-form[open] > summary { margin-bottom: 12px; }
 details.secao-form > summary .chev { transition: transform var(--dur-fast); }
 details.secao-form[open] > summary .chev { transform: rotate(180deg); }
-.campo { min-width: 0; }
-.campo-rot { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; min-height: 22px; }
-.campo-rot label, .campo-rot .rot { font-weight: 600; font-size: .9rem; }
-.campo-rot .ajuda { margin-left: auto; }
-.entrada { position: relative; display: flex; align-items: center; }
-.entrada .pre, .entrada .suf { position: absolute; top: 50%; transform: translateY(-50%); color: var(--muted-foreground); font-size: .86rem; pointer-events: none; }
-.entrada .pre { left: 11px; } .entrada .suf { right: 11px; }
-.entrada.com-pre input { padding-left: 36px; }
-.entrada.com-suf input { padding-right: 70px; }
-.entrada.com-acao input { padding-right: 44px; }
-.acao-dentro { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 32px; height: 32px; display: inline-grid; place-items: center; border: 0; border-radius: var(--radius-sm); background: none; color: var(--muted-foreground); cursor: pointer; }
-.acao-dentro:hover { background: var(--hover); color: var(--foreground); }
+/* campo: o .field do Grin (rótulo, controle, mensagem); o rótulo divide a linha com a ajuda */
+.campo-rot { display: flex; align-items: center; gap: 6px; min-height: 24px; }
+.campo-rot label, .campo-rot .rot { font-size: var(--text-sm); font-weight: var(--weight-medium); }
+.campo-rot .help-button { margin-left: auto; }
+.input-group .input-addon { font-size: var(--text-sm); }
+.acao-dentro[aria-busy="true"] .ico { animation: grin-spin .9s linear infinite; }
 .acao-dentro:disabled { cursor: progress; }
-.acao-dentro[aria-busy="true"] .ico { animation: gira .9s linear infinite; }
-@keyframes gira { to { transform: rotate(360deg); } }
-.campo-pe { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; margin-top: 6px; }
+.campo-pe { display: flex; align-items: center; gap: 6px 12px; flex-wrap: wrap; }
 .campo-pe:empty { display: none; }
 .origem { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); background: var(--muted); border-radius: 999px; padding: 1px 8px 1px 6px; font-size: .78rem; font-weight: 600; cursor: pointer; white-space: nowrap; min-height: 24px; }
 .origem .ico { width: 14px; height: 14px; }
@@ -3048,7 +3010,7 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 /* motivos: as cores seguem o sentido. Âmbar é dado que falta e foi explicado; verde é não se aplica; vermelho é o próprio campo que falta */
 .sdc-nao-encontrado, .sdc-nao-divulga { color: var(--warn-fg); }
 .sdc-nao-se-aplica { color: var(--ok-fg); }
-.campo:has(.sem-dado[data-estado="pendente"]) .entrada input { background: var(--crit-bg); border-color: var(--crit-fg); }
+.campo:has(.sem-dado[data-estado="pendente"]) .input-group, .campo:has(.sem-dado[data-estado="pendente"]) .input-group .input { background: var(--crit-bg); border-color: var(--crit-fg); }
 .campo:has(.sem-dado[data-estado="pendente"]) .campo-rot label { color: var(--crit-fg); }
 .campo:has(.sem-dado[data-campo="gastosReais"][data-estado="pendente"]) .reais { background: var(--crit-bg); border: 1px solid var(--crit-fg); border-radius: var(--radius-lg); padding: 10px; }
 .dado.pendente { background: var(--crit-bg); border-color: var(--crit-border); }
@@ -5223,7 +5185,7 @@ const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const ico = (n, cls = '') => `<svg class="ico${cls ? ' ' + cls : ''}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
-const btnIco = (n, rot, attrs = '', cls = '') => `<button type="button" class="btn ico-so ${cls}" aria-label="${esc(rot)}" data-tip="${esc(rot)}" ${attrs}>${ico(n)}</button>`;
+const btnIco = (n, rot, attrs = '', cls = '') => `<button type="button" class="btn icon ${cls}" aria-label="${esc(rot)}" data-tip="${esc(rot)}" ${attrs}>${ico(n)}</button>`;
 const reduzMov = () => !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -5608,7 +5570,7 @@ function fecharDlg() {
   });
 }
 $('#dlg').addEventListener('cancel', e => { e.preventDefault(); fecharDlg(); });
-function avisar(titulo, texto) { return perguntar(`<h2>${esc(titulo)}</h2><p>${texto}</p>`, [['Fechar', null, 'prim']]); }
+function avisar(titulo, texto) { return perguntar(`<h2>${esc(titulo)}</h2><p>${texto}</p>`, [['Fechar', null, 'primary']]); }
 function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2800);
@@ -5997,7 +5959,7 @@ function acoesAnalise() {
   // análise nova, ainda não salva: volta para a escolha do método, com o que já foi digitado
   return `${salvo ? '' : `<button type="button" class="btn" data-acao="voltar-metodo">${ico('voltar')}Voltar</button>`}<button type="button" class="btn" data-acao="prompt-ia">${ico('ia')}Pesquisar com IA</button>
     ${btnIco('mais-v', 'Mais ações', 'data-acao="menu-analise" aria-haspopup="menu" aria-expanded="false"')}
-    <button type="button" class="btn prim" data-acao="salvar" ${limpo ? 'disabled' : ''}>${ico(limpo ? 'check' : 'salvar')}${limpo ? 'Salva' : 'Salvar'}</button>`;
+    <button type="button" class="btn primary" data-acao="salvar" ${limpo ? 'disabled' : ''}>${ico(limpo ? 'check' : 'salvar')}${limpo ? 'Salva' : 'Salvar'}</button>`;
 }
 // cabeçalho, título e barra lateral acompanham o nome e o estado de salvamento
 function atualizarCabecalho() {
@@ -6029,7 +5991,7 @@ async function confirmarSaida() {
   if (!UI.atual || !UI.sujo) return true;
   const nome = UI.atual.dados.nome.trim();
   const resp = await perguntar(`<h2>Salvar as alterações${nome ? ' de ' + esc(nome) : ''}?</h2><p>A análise aberta tem alterações que ainda não foram salvas.</p>`,
-    [['Cancelar', null], ['Descartar alterações', 'descartar', 'perigo'], ['Salvar', 'salvar', 'prim']]);
+    [['Cancelar', null], ['Descartar alterações', 'descartar', 'perigo'], ['Salvar', 'salvar', 'primary']]);
   if (resp === 'salvar') return salvarEmpresa();
   if (resp === 'descartar') { UI.sujo = false; return true; }
   return false;
@@ -6096,7 +6058,7 @@ async function duplicarEmpresa(id) {
 async function excluirEmpresa(id) {
   const o = S.empresas.find(x => x.id === id); if (!o) return;
   const ok = await perguntar(`<h2>Excluir ${esc(o.dados.nome || 'esta empresa')}?</h2><p>Não dá para desfazer.</p>`,
-    [['Cancelar', false], ['Excluir empresa', true, 'perigo-forte']]);
+    [['Cancelar', false], ['Excluir empresa', true, 'danger']]);
   if (!ok) return;
   S.empresas = S.empresas.filter(x => x.id !== id); UI.sel.delete(id);
   if (UI.atual && UI.atual.id === id) { UI.atual = null; UI.sujo = false; }
@@ -6106,7 +6068,7 @@ async function excluirEmpresa(id) {
 async function descartar() {
   const salvo = empresaSalva();
   const ok = await perguntar(salvo ? '<h2>Descartar as alterações?</h2><p>A empresa volta ao que estava salvo.</p>' : '<h2>Descartar esta análise?</h2><p>Ela ainda não foi salva e será perdida.</p>',
-    [['Cancelar', false], ['Descartar', true, 'perigo-forte']]);
+    [['Cancelar', false], ['Descartar', true, 'danger']]);
   if (!ok) return;
   if (salvo) { abrirRascunho(salvo); renderAqui(); toast('Alterações descartadas'); }
   else { UI.atual = null; UI.sujo = false; navegar('#/empresas'); }
@@ -6146,13 +6108,13 @@ const AJUDA_MET = { uf: 'met-ajustes', natureza: 'met-setores', setor: 'met-seto
   digital: 'met-ajustes', gastosReais: 'met-caminhos', gastoDeclarado: 'met-caminhos', adicoes: 'met-caminhos', contratos: 'met-caminhos', enquadramento: 'met-pequenas', tiMatriz: 'met-ajustes',
   globalRec: 'met-receita', globalPart: 'met-receita', globalFunc: 'met-receita', origens: 'met-incerteza' };
 const textoAjuda = (k, d) => { const a = AJUDA[k]; return typeof a === 'function' ? a(d) : a || ''; };
-const botaoAjuda = (chave, rot) => `<button type="button" class="ajuda" data-acao="ajuda" data-chave="${chave}" data-rot="${esc(rot)}" aria-label="Sobre ${esc(rot)}" aria-haspopup="dialog" aria-expanded="false">${ico('ajuda')}</button>`;
+const botaoAjuda = (chave, rot) => `<button type="button" class="ajuda help-button" data-acao="ajuda" data-chave="${chave}" data-rot="${esc(rot)}" aria-label="Sobre ${esc(rot)}" aria-haspopup="dialog" aria-expanded="false">${ico('ajuda')}</button>`;
 function abrirAjuda(btn) {
   const d = UI.atual ? UI.atual.dados : dadosVazios(), k = btn.dataset.chave, ls = linksCampo(k, d);
   const corpo = k === 'origens' ? `<p>${esc(textoAjuda(k, d))}</p><ul class="lista-orig">${ORIGENS.map(([v, t, desc]) => `<li><span class="o-chip o-${v}">${ico(ICO_ORIGEM[v])}</span><div><b>${t}</b><span>${desc}</span></div></li>`).join('')}</ul>` : `<p>${esc(textoAjuda(k, d))}</p>`;
   const links = ls.length ? `<b style="font-size:.84rem">Onde encontrar</b><ul>${ls.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.nome)}</a><span class="selo ${l.selo === 'Oficial' ? 'oficial' : 'agregador'}">${esc(SELO_TXT[l.selo] || l.selo)}</span></li>`).join('')}</ul><p class="pop-nota">Fontes oficiais primeiro. Os links abrem em outra aba.</p>` : '';
   const met = AJUDA_MET[k] ? `<p class="pop-nota"><a href="#/metodos/${AJUDA_MET[k]}" target="_blank" rel="noopener">Como entra na conta</a></p>` : '';
-  abrirPop(btn, `<h4>${esc(btn.dataset.rot)}<button type="button" class="btn fant ico-so peq" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>${corpo}${links}${met}`, { cls: 'pop-ajuda', papel: 'dialog', rotulo: btn.dataset.rot });
+  abrirPop(btn, `<h4>${esc(btn.dataset.rot)}<button type="button" class="btn ghost icon xs" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>${corpo}${links}${met}`, { cls: 'pop-ajuda', papel: 'dialog', rotulo: btn.dataset.rot });
 }
 // origem do dado: um botão pequeno abaixo do campo, que só aparece quando há valor
 function botaoOrigem(alvo, o, temValor) {
@@ -6275,29 +6237,29 @@ const chipFaltam = d => { const n = pendentes(d).length; return n ? `<button typ
 // a busca do CNPJ só acontece quando a pessoa pede: lupa para buscar, setas para atualizar o que já veio da Receita
 function botaoCNPJ(d) {
   const ja = !!(d.cnpjInfo && Object.keys(d.cnpjInfo).length), rot = ja ? 'Atualizar com os dados da Receita Federal e a DRE da CVM' : 'Buscar os dados deste CNPJ na Receita Federal e a DRE na CVM';
-  return `<button type="button" class="acao-dentro" data-acao="buscar-cnpj" aria-label="${rot}" data-tip="${rot}">${ico(ja ? 'atualizar' : 'busca')}</button>`;
+  return `<button type="button" class="acao-dentro btn ghost icon xs" data-acao="buscar-cnpj" aria-label="${rot}" data-tip="${rot}">${ico(ja ? 'atualizar' : 'busca')}</button>`;
 }
 function seloCNPJ(d, c) { return d.viaCNPJ && d.viaCNPJ[c] ? '<span class="selo cnpj">via CNPJ</span>' : ''; }
 const temValor = f => !!f && f.v !== '' && f.v != null && !Number.isNaN(f.v);
 // campo numérico com origem do dado
 function campoNum(d, c, rot, opt = {}) {
   const f = d[c] || { v: '', o: '' }, cls = (opt.pre ? ' com-pre' : '') + (opt.un ? ' com-suf' : '');
-  return `<div class="campo${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${AJUDA[c] ? botaoAjuda(c, rot) : ''}</div>
-    ${opt.antes ? `<div class="linha-dupla">${opt.antes}</div>` : ''}<div class="entrada${cls}">${opt.pre ? `<span class="pre">${opt.pre}</span>` : ''}<input type="text" inputmode="decimal" id="f-${c}" data-campo="${c}" data-parte="v" value="${esc(fmtIn(f.v))}" ${opt.ph ? `placeholder="${esc(opt.ph)}"` : ''} autocomplete="off">${opt.un ? `<span class="suf">${opt.un}</span>` : ''}</div>
+  return `<div class="campo field${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${AJUDA[c] ? botaoAjuda(c, rot) : ''}</div>
+    ${opt.antes ? `<div class="linha-dupla">${opt.antes}</div>` : ''}<div class="entrada input-group${cls}">${opt.pre ? `<span class="pre input-addon">${opt.pre}</span>` : ''}<input class="input" type="text" inputmode="decimal" id="f-${c}" data-campo="${c}" data-parte="v" value="${esc(fmtIn(f.v))}" ${opt.ph ? `placeholder="${esc(opt.ph)}"` : ''} autocomplete="off">${opt.un ? `<span class="suf input-addon">${opt.un}</span>` : ''}</div>
     <div class="campo-pe">${botaoOrigem('campo:' + c, f.o, temValor(f))}${CAMPOS_SEM_DADO[c] ? botaoSemDado(c, d) : ''}${opt.dica ? `<span class="dica">${opt.dica}</span>` : ''}</div><p class="valid" id="v-${c}"></p></div>`;
 }
-const seletorEtapa = d => `<span class="seg" role="radiogroup" aria-label="Etapa da despesa">${ETAPAS_DESPESA.map(([v, t]) => `<label class="seg-op"><input type="radio" name="contratosEtapa" value="${v}" data-simples="contratosEtapa" ${etapaDespesa(d) === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>`;
+const seletorEtapa = d => `<span class="seg segmented" role="radiogroup" aria-label="Etapa da despesa">${ETAPAS_DESPESA.map(([v, t]) => `<label class="seg-op"><input type="radio" name="contratosEtapa" value="${v}" data-simples="contratosEtapa" ${etapaDespesa(d) === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>`;
 function campoTexto(d, c, rot, opt = {}) {
-  return `<div class="campo${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${opt.ajuda ? botaoAjuda(c, rot) : ''}</div><input type="text" id="f-${c}" data-simples="${c}" value="${esc(d[c])}" ${opt.extra || ''} autocomplete="off">${opt.pe ? `<div class="campo-pe">${opt.pe}</div>` : ''}${opt.dica ? `<div class="campo-pe"><span class="dica">${opt.dica}</span></div>` : ''}<p class="valid" id="v-${c}">${opt.valid || ''}</p></div>`;
+  return `<div class="campo field${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${opt.ajuda ? botaoAjuda(c, rot) : ''}</div><input class="input" type="text" id="f-${c}" data-simples="${c}" value="${esc(d[c])}" ${opt.extra || ''} autocomplete="off">${opt.pe ? `<div class="campo-pe">${opt.pe}</div>` : ''}${opt.dica ? `<div class="campo-pe"><span class="dica">${opt.dica}</span></div>` : ''}<p class="valid" id="v-${c}">${opt.valid || ''}</p></div>`;
 }
 function campoSelect(d, c, rot, ops, opt = {}) {
-  return `<div class="campo${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${opt.ajuda ? botaoAjuda(c, rot) : ''}</div><select id="f-${c}" data-simples="${c}" ${opt.rerender ? 'data-rerender' : ''}>${ops.map(([v, t]) => `<option value="${esc(v)}" ${String(d[c]) === String(v) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>${opt.dica ? `<div class="campo-pe"><span class="dica">${opt.dica}</span></div>` : ''}</div>`;
+  return `<div class="campo field${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${opt.ajuda ? botaoAjuda(c, rot) : ''}</div><select class="select" id="f-${c}" data-simples="${c}" ${opt.rerender ? 'data-rerender' : ''}>${ops.map(([v, t]) => `<option value="${esc(v)}" ${String(d[c]) === String(v) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>${opt.dica ? `<div class="campo-pe"><span class="dica">${opt.dica}</span></div>` : ''}</div>`;
 }
 // campos extras: só registro, a não ser os que mudam a intensidade digital automática
 function campoExtra(d, k, rot, tipo, papel, ops) {
   const v = (d.extras || {})[k] ?? '', dica = papel ? `<div class="campo-pe"><span class="dica">${papel}</span></div>` : '';
-  if (tipo === 'select') return `<div class="campo"><div class="campo-rot"><label for="x-${k}">${esc(rot)}</label></div><select id="x-${k}" data-extra="${k}" ${papel ? 'data-rerender' : ''}>${ops.map(([a, b]) => `<option value="${a}" ${v === a ? 'selected' : ''}>${b}</option>`).join('')}</select>${dica}</div>`;
-  return `<div class="campo"><div class="campo-rot"><label for="x-${k}">${esc(rot)}</label></div><input type="text" ${tipo === 'num' ? 'inputmode="decimal" data-num' : ''} id="x-${k}" data-extra="${k}" value="${esc(tipo === 'num' ? fmtIn(v) : v)}" autocomplete="off">${dica}</div>`;
+  if (tipo === 'select') return `<div class="campo field"><div class="campo-rot"><label for="x-${k}">${esc(rot)}</label></div><select class="select" id="x-${k}" data-extra="${k}" ${papel ? 'data-rerender' : ''}>${ops.map(([a, b]) => `<option value="${a}" ${v === a ? 'selected' : ''}>${b}</option>`).join('')}</select>${dica}</div>`;
+  return `<div class="campo field"><div class="campo-rot"><label for="x-${k}">${esc(rot)}</label></div><input class="input" type="text" ${tipo === 'num' ? 'inputmode="decimal" data-num' : ''} id="x-${k}" data-extra="${k}" value="${esc(tipo === 'num' ? fmtIn(v) : v)}" autocomplete="off">${dica}</div>`;
 }
 function rotulos(d) {
   const n = d.natureza, s = d.setor, orgao = ehOrgaoPublico(d);
@@ -6321,26 +6283,26 @@ function rotulos(d) {
 // cada linha diz o ano, o valor e quantos meses ele cobre (balanço trimestral ou semestral, IF.data); a conta usa a linha do ano de referência
 // a primeira linha fica nos campos de sempre (faturamento, fatAno, fatMeses); as outras, em receitasAnos
 const PERIODOS_VALOR = [['12', '12 meses'], ['9', '9 meses'], ['6', '6 meses'], ['3', '3 meses']];
-const seletorPeriodo = (attrs, v) => `<select ${attrs}>${PERIODOS_VALOR.map(([k, t]) => `<option value="${k}"${String(v || '12') === k ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
+const seletorPeriodo = (attrs, v) => `<select class="select" ${attrs}>${PERIODOS_VALOR.map(([k, t]) => `<option value="${k}"${String(v || '12') === k ? ' selected' : ''}>${t}</option>`).join('')}</select>`;
 function campoReceita(d, R) {
   const f = d.faturamento || { v: '', o: '' }, L = P().setores[linhaDe(d)], tipo = d.fatTipo === 'bruta' ? 'bruta' : 'liquida', outras = d.receitasAnos || [], per = !R.orgao;
-  const seg = R.tipo && (L.ded || 0) > 0 ? `<span class="seg" role="radiogroup" aria-label="O valor informado é">${[['liquida', 'Receita líquida'], ['bruta', 'Faturamento bruto']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="fatTipo" value="${v}" data-simples="fatTipo" ${tipo === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>` : '';
+  const seg = R.tipo && (L.ded || 0) > 0 ? `<span class="seg segmented" role="radiogroup" aria-label="O valor informado é">${[['liquida', 'Receita líquida'], ['bruta', 'Faturamento bruto']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="fatTipo" value="${v}" data-simples="fatTipo" ${tipo === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>` : '';
   // a origem fica numa linha própria, embaixo do valor, como nos outros campos
-  const linha = (ano, valor, periodo, origem, del) => `<div class="rec-linha">${ano}<div class="entrada com-pre"><span class="pre">R$</span>${valor}</div>${per ? periodo : ''}<span class="rec-o">${origem}</span>${del}</div>`;
-  const l0 = linha(`<input type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" aria-label="Ano" value="${esc(d.fatAno)}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off">`,
-    `<input type="text" inputmode="decimal" id="f-faturamento" data-campo="faturamento" data-parte="v" value="${esc(fmtIn(f.v))}" autocomplete="off">`,
+  const linha = (ano, valor, periodo, origem, del) => `<div class="rec-linha">${ano}<div class="entrada input-group com-pre"><span class="pre input-addon">R$</span>${valor}</div>${per ? periodo : ''}<span class="rec-o">${origem}</span>${del}</div>`;
+  const l0 = linha(`<input class="input" type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" aria-label="Ano" value="${esc(d.fatAno)}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off">`,
+    `<input class="input" type="text" inputmode="decimal" id="f-faturamento" data-campo="faturamento" data-parte="v" value="${esc(fmtIn(f.v))}" autocomplete="off">`,
     seletorPeriodo('id="f-fatMeses" data-simples="fatMeses" aria-label="Período"', d.fatMeses), botaoOrigem('campo:faturamento', f.o, temValor(f)), '<span aria-hidden="true"></span>');
-  const ls = outras.map((x, i) => linha(`<input type="text" inputmode="numeric" data-rec="${i}" data-parte="ano" aria-label="Ano" value="${esc(x.ano)}" maxlength="4" autocomplete="off">`,
-    `<input type="text" inputmode="decimal" data-rec="${i}" data-parte="v" aria-label="Receita de ${esc(x.ano || 'outro ano')}" value="${esc(fmtIn(x.v))}" autocomplete="off">`,
+  const ls = outras.map((x, i) => linha(`<input class="input" type="text" inputmode="numeric" data-rec="${i}" data-parte="ano" aria-label="Ano" value="${esc(x.ano)}" maxlength="4" autocomplete="off">`,
+    `<input class="input" type="text" inputmode="decimal" data-rec="${i}" data-parte="v" aria-label="Receita de ${esc(x.ano || 'outro ano')}" value="${esc(fmtIn(x.v))}" autocomplete="off">`,
     seletorPeriodo(`data-rec="${i}" data-parte="meses" aria-label="Período"`, x.meses), botaoOrigem('rec:' + i, x.o, temValor(x)), btnIco('lixo', 'Remover este ano', `data-acao="del-rec" data-i="${i}"`, 'peq perigo')));
   // viaCVM guarda a fonte oficial da receita: a DRE na CVM ou, com f: 'ifdata', o balanço no IF.data
   const via = d.viaCVM, viaIf = via && via.f === 'ifdata';
   const cvm = !via ? '' : viaIf ? `<span class="dica dica-cvm">${ico('doc')}Balanço de ${esc(via.ano)} no IF.data do Banco Central${via.c ? ', do conglomerado' : ''}: intermediação financeira mais tarifas e serviços. <a href="${esc(PAIS.linkIfdata)}" target="_blank" rel="noopener">Abrir o IF.data</a></span>`
     : `<span class="dica dica-cvm">${ico('doc')}DRE de ${esc(via.ano)} publicada na CVM. <a href="${esc(via.link)}" target="_blank" rel="noopener">Abrir o documento</a></span>`;
-  return `<div class="campo largo campo-rec"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}</label>${via ? `<span class="selo cnpj">via ${viaIf ? 'IF.data' : 'CVM'}</span>` : ''}${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
+  return `<div class="campo field largo campo-rec"><div class="campo-rot"><label for="f-faturamento">${esc(R.fat)}</label>${via ? `<span class="selo cnpj">via ${viaIf ? 'IF.data' : 'CVM'}</span>` : ''}${seloCNPJ(d, 'faturamento')}${botaoAjuda('faturamento', R.fat)}</div>
     ${seg ? `<div class="linha-dupla">${seg}</div>` : ''}
     <div class="rec-anos${per ? '' : ' sem-periodo'}"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span>${per ? '<span>Período</span>' : ''}</div>${l0}${ls.join('')}</div>
-    <div class="reais-acoes"><button type="button" class="btn peq" data-acao="add-rec">${ico('mais')}Adicionar ano</button>${botaoSemDado('faturamento', d)}</div>
+    <div class="reais-acoes"><button type="button" class="btn xs" data-acao="add-rec">${ico('mais')}Adicionar ano</button>${botaoSemDado('faturamento', d)}</div>
     ${cvm ? `<div class="campo-pe">${cvm}</div>` : ''}<div class="campo-pe"><span class="dica" id="dica-rec"></span></div><div class="campo-pe" id="rec-usada"></div><p class="valid" id="v-faturamento"></p>
     ${R.estimavel ? `<div id="rec-est" class="calc-caixa" hidden></div>${d.natureza === 'subsidiaria' ? blocoGlobal(d) : ''}` : ''}</div>`;
 }
@@ -6364,10 +6326,10 @@ function blocoGlobal(d) {
   const moedas = [['BRL', 'Real (R$)'], ...PAIS.cambio.moedas, ['outra', 'Outra moeda']];
   return `<div class="rec-global"><h4>${ico('globo')}Receita global do grupo <span class="selo">opcional</span></h4>
     <div class="grade-campos">
-    <div class="campo largo"><div class="campo-rot"><label for="f-globalRec">Receita global, na moeda original</label>${botaoAjuda('globalRec', 'Receita global')}</div><input type="text" inputmode="decimal" id="f-globalRec" data-campo="globalRec" data-parte="v" value="${esc(fmtIn(g.v))}" autocomplete="off"><div class="campo-pe">${botaoOrigem('campo:globalRec', g.o, temValor(g))}</div><p class="valid" id="v-globalRec"></p></div>
-    <div class="campo"><div class="campo-rot"><label for="f-globalMoeda">Moeda</label></div><select id="f-globalMoeda" data-simples="globalMoeda" data-rerender>${moedas.map(([v, t]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></div>
-    <div class="campo"><div class="campo-rot"><label for="f-globalAno">Ano da receita global</label></div><input type="text" inputmode="numeric" id="f-globalAno" data-simples="globalAno" value="${esc(d.globalAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></div>
-    ${m === 'BRL' ? '' : `<div class="campo largo"><div class="campo-rot"><label for="f-globalTaxa">Câmbio: reais por 1 ${m === 'outra' ? 'unidade da moeda' : m}</label></div><div class="linha-dupla" style="margin-top:0"><input type="text" inputmode="decimal" id="f-globalTaxa" data-simples-num="globalTaxa" value="${esc(fmtIn(d.globalTaxa))}" autocomplete="off" style="flex:1 1 160px;width:auto">${m === 'outra' ? '' : `<button type="button" class="btn peq" data-acao="buscar-ptax">${ico('busca')}Buscar PTAX</button>`}</div><div class="campo-pe"><span class="dica" id="dica-taxa">${dicaTaxa(d)}</span></div></div>`}
+    <div class="campo field largo"><div class="campo-rot"><label for="f-globalRec">Receita global, na moeda original</label>${botaoAjuda('globalRec', 'Receita global')}</div><input class="input" type="text" inputmode="decimal" id="f-globalRec" data-campo="globalRec" data-parte="v" value="${esc(fmtIn(g.v))}" autocomplete="off"><div class="campo-pe">${botaoOrigem('campo:globalRec', g.o, temValor(g))}</div><p class="valid" id="v-globalRec"></p></div>
+    <div class="campo field"><div class="campo-rot"><label for="f-globalMoeda">Moeda</label></div><select class="select" id="f-globalMoeda" data-simples="globalMoeda" data-rerender>${moedas.map(([v, t]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></div>
+    <div class="campo field"><div class="campo-rot"><label for="f-globalAno">Ano da receita global</label></div><input class="input" type="text" inputmode="numeric" id="f-globalAno" data-simples="globalAno" value="${esc(d.globalAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></div>
+    ${m === 'BRL' ? '' : `<div class="campo field largo"><div class="campo-rot"><label for="f-globalTaxa">Câmbio: reais por 1 ${m === 'outra' ? 'unidade da moeda' : m}</label></div><div class="linha-dupla" style="margin-top:0"><input class="input" type="text" inputmode="decimal" id="f-globalTaxa" data-simples-num="globalTaxa" value="${esc(fmtIn(d.globalTaxa))}" autocomplete="off" style="flex:1 1 160px;width:auto">${m === 'outra' ? '' : `<button type="button" class="btn xs" data-acao="buscar-ptax">${ico('busca')}Buscar PTAX</button>`}</div><div class="campo-pe"><span class="dica" id="dica-taxa">${dicaTaxa(d)}</span></div></div>`}
     ${campoNum(d, 'globalPart', 'Participação do Brasil na receita do grupo', { un: '%' })}
     ${campoNum(d, 'globalFunc', 'Funcionários no mundo', { un: 'pessoas' })}
     </div></div>`;
@@ -6442,9 +6404,9 @@ const TEC_PROPRIOS = ['dev-interno', 'app-interno', 'app-cliente', 'portal', 'ap
 const TEC_DIGITAIS = ['dev-interno', 'app-cliente', 'portal', 'api', 'ecommerce', 'nuvem', 'datalake', 'ia', 'genai'];
 function dicasTecnologia(d) {
   const sel = new Set(d.tecnologias || []), out = [];
-  if (TEC_PROPRIOS.some(k => sel.has(k)) && !valorPos(d.profTI)) out.push(`<div class="dica-acao">${ico('lampada')}<span>Sistemas e apps próprios entram no cálculo pela <b>equipe de TI</b>: informe quantos profissionais de TI a empresa tem, contando os desenvolvedores.</span><button type="button" class="btn peq" data-acao="ir-campo" data-campo="profTI">Ir para o campo</button></div>`);
+  if (TEC_PROPRIOS.some(k => sel.has(k)) && !valorPos(d.profTI)) out.push(`<div class="dica-acao">${ico('lampada')}<span>Sistemas e apps próprios entram no cálculo pela <b>equipe de TI</b>: informe quantos profissionais de TI a empresa tem, contando os desenvolvedores.</span><button type="button" class="btn xs" data-acao="ir-campo" data-campo="profTI">Ir para o campo</button></div>`);
   const nDig = TEC_DIGITAIS.filter(k => sel.has(k)).length;
-  if (nDig >= 3 && !d.digital && nivelDigitalAuto(d) !== 'alta') out.push(`<div class="dica-acao">${ico('lampada')}<span>${nDig} sinais de empresa digital marcados, e a intensidade digital está em <b>média</b> (automática). Se a empresa for muito digital, use <b>alta</b>: multiplica por ${nf(P().modificadores.digital.alta, 1)} os cálculos pela receita e por usuários.</span><button type="button" class="btn peq" data-acao="digital-alta">Usar alta</button></div>`);
+  if (nDig >= 3 && !d.digital && nivelDigitalAuto(d) !== 'alta') out.push(`<div class="dica-acao">${ico('lampada')}<span>${nDig} sinais de empresa digital marcados, e a intensidade digital está em <b>média</b> (automática). Se a empresa for muito digital, use <b>alta</b>: multiplica por ${nf(P().modificadores.digital.alta, 1)} os cálculos pela receita e por usuários.</span><button type="button" class="btn xs" data-acao="digital-alta">Usar alta</button></div>`);
   return out.join('');
 }
 // as escolhidas ficam como marcas pequenas, que se removem com um clique
@@ -6458,13 +6420,13 @@ function blocoTecnologias(d) {
   const itens = TECNOLOGIAS.map((g, i) => `<div class="tec-itens" data-i="${i}" hidden>${g.itens.map(([id, nome, ex]) =>
     `<label class="tec-op" data-q="${esc(norm([nome, ex, g.g].join(' ')))}"><input type="checkbox" data-tec="${id}" tabindex="-1" ${sel.has(id) ? 'checked' : ''}><span>${esc(nome)}${ex ? `<small>${esc(ex)}</small>` : ''}<em>${esc(g.g)}</em></span></label>`).join('')}</div>`).join('');
   return `<div class="largo"><div class="campo-rot"><label for="tec-busca">Tecnologias que a empresa usa</label>${botaoAjuda('tecnologias', 'Tecnologias')}</div>
-    <div class="tec-combo" id="tec-combo"><div class="entrada com-acao"><input type="text" id="tec-busca" data-tec-busca role="combobox" aria-expanded="false" aria-controls="tec-lista" aria-autocomplete="list" placeholder="Buscar: ERP, nuvem, SAP, CRM..." autocomplete="off">
-      <button type="button" class="acao-dentro" data-acao="tec-abrir" tabindex="-1" aria-label="Mostrar a lista de tecnologias">${ico('chev', 'chev')}</button></div>
+    <div class="tec-combo" id="tec-combo"><div class="entrada input-group com-acao"><input class="input" type="text" id="tec-busca" data-tec-busca role="combobox" aria-expanded="false" aria-controls="tec-lista" aria-autocomplete="list" placeholder="Buscar: ERP, nuvem, SAP, CRM..." autocomplete="off">
+      <button type="button" class="acao-dentro btn ghost icon xs" data-acao="tec-abrir" tabindex="-1" aria-label="Mostrar a lista de tecnologias">${ico('chev', 'chev')}</button></div>
       <div class="tec-lista" id="tec-lista" role="group" aria-label="Tecnologias"><button type="button" class="tec-voltar" data-acao="tec-voltar" tabindex="-1" hidden>${ico('chev', 'chev-esq')}<span></span></button>
         <div class="tec-cats">${cats}</div>${itens}<p class="tec-vazio" hidden>Nenhuma tecnologia encontrada.</p></div></div>
     <p class="sr sr-only" id="tec-aviso" aria-live="polite"></p>
     <div class="tec-tags" id="tec-tags">${marcasTec(d)}</div>
-    <div class="campo" style="margin-top:12px"><div class="campo-rot"><label for="f-tecOutras">Outras tecnologias</label></div><input type="text" id="f-tecOutras" data-simples="tecOutras" value="${esc(d.tecOutras || '')}" placeholder="Ex.: ServiceNow, Zendesk" autocomplete="off"></div>
+    <div class="campo field" style="margin-top:12px"><div class="campo-rot"><label for="f-tecOutras">Outras tecnologias</label></div><input class="input" type="text" id="f-tecOutras" data-simples="tecOutras" value="${esc(d.tecOutras || '')}" placeholder="Ex.: ServiceNow, Zendesk" autocomplete="off"></div>
     <div id="tec-dicas" style="display:grid;gap:8px;margin-top:10px">${dicasTecnologia(d)}</div></div>`;
 }
 function atualizarTecUI() {
@@ -6533,8 +6495,8 @@ document.addEventListener('pointerdown', e => { if (tecAberta() && !e.target.clo
 // grupo econômico: sugestão pelos sócios que são empresas no CNPJ
 function campoGrupo(d) {
   const v = (d.extras || {}).grupo ?? '', socios = ((d.cnpjInfo || {}).sociosPJ || []).filter(nm => norm(nm) !== norm(v));
-  return `<div class="campo largo"><div class="campo-rot"><label for="x-grupo">Grupo econômico</label>${botaoAjuda('grupo', 'Grupo econômico')}</div><input type="text" id="x-grupo" data-extra="grupo" value="${esc(v)}" placeholder="Nome da controladora ou do grupo" autocomplete="off">
-    ${socios.length ? `<div class="dica-acao" style="margin-top:8px">${ico('grupo')}<span>Sócio que é empresa, pelo CNPJ: <b>${socios.map(esc).join(', ')}</b>. Pode ser o grupo.</span><button type="button" class="btn peq" data-acao="usar-grupo" data-nome="${esc(socios[0])}">Usar este nome</button></div>` : ''}</div>`;
+  return `<div class="campo field largo"><div class="campo-rot"><label for="x-grupo">Grupo econômico</label>${botaoAjuda('grupo', 'Grupo econômico')}</div><input class="input" type="text" id="x-grupo" data-extra="grupo" value="${esc(v)}" placeholder="Nome da controladora ou do grupo" autocomplete="off">
+    ${socios.length ? `<div class="dica-acao" style="margin-top:8px">${ico('grupo')}<span>Sócio que é empresa, pelo CNPJ: <b>${socios.map(esc).join(', ')}</b>. Pode ser o grupo.</span><button type="button" class="btn xs" data-acao="usar-grupo" data-nome="${esc(socios[0])}">Usar este nome</button></div>` : ''}</div>`;
 }
 
 /* ---------- formulário em seções ---------- */
@@ -6555,9 +6517,9 @@ function formAnalise() {
     + (n === 'subsidiaria' && entraNaConta(d, 'tiMatriz') ? campoSelect(d, 'tiMatriz', 'Onde a TI é gerida', [['', 'Sem informação'], ['brasil', 'No Brasil'], ['matriz', 'Na matriz']], { rerender: true, ajuda: true }) : '')
     + (n === 'publico' ? campoSelect(d, 'tipoPublico', 'Tipo de órgão', [['', 'Órgão público (administração direta, autarquia, fundação pública)'], ['estatal', 'Estatal (empresa pública ou sociedade de economia mista)']], { rerender: true, largo: true }) : '');
   const ident = campoTexto(d, 'nome', 'Nome da empresa', { largo: true, extra: 'required aria-required="true"' })
-    + `<div class="campo"><div class="campo-rot"><label for="f-cnpj">CNPJ</label>${botaoAjuda('cnpj', 'CNPJ')}</div><div class="entrada com-acao"><input type="text" inputmode="numeric" id="f-cnpj" data-cnpj value="${esc(d.cnpj)}" placeholder="00.000.000/0000-00" autocomplete="off">${botaoCNPJ(d)}</div><div class="campo-pe">${infoCNPJ}</div><p class="valid" id="v-cnpj">${UI.cnpjMsg}</p></div>`
+    + `<div class="campo field"><div class="campo-rot"><label for="f-cnpj">CNPJ</label>${botaoAjuda('cnpj', 'CNPJ')}</div><div class="entrada input-group com-acao"><input class="input" type="text" inputmode="numeric" id="f-cnpj" data-cnpj value="${esc(d.cnpj)}" placeholder="00.000.000/0000-00" autocomplete="off">${botaoCNPJ(d)}</div><div class="campo-pe">${infoCNPJ}</div><p class="valid" id="v-cnpj">${UI.cnpjMsg}</p></div>`
     + campoSelect(d, 'natureza', 'Natureza', natOps, { rerender: true, ajuda: true })
-    + (sug ? `<div class="sugestao largo">${ico('info')}<span>Sugestão pelo CNPJ: ${sug.natureza ? '<b>' + esc(PAIS.naturezas.find(x => x.id === sug.natureza).nome) + (sug.natureza === 'publico' ? (sug.tipoPublico === 'estatal' ? ' (estatal)' : ' (órgão público)') : '') + '</b>' : ''}${sug.natureza && sug.setor ? ' e ' : ''}${sug.setor ? '<b>' + esc(PAIS.filtrosSetor.find(s => s.id === sug.setor).nome) + '</b>' : ''}.</span><button type="button" class="btn peq prim" data-acao="usar-sug">Usar sugestão</button><button type="button" class="btn peq" data-acao="ignorar-sug">Ignorar</button></div>` : '')
+    + (sug ? `<div class="sugestao largo">${ico('info')}<span>Sugestão pelo CNPJ: ${sug.natureza ? '<b>' + esc(PAIS.naturezas.find(x => x.id === sug.natureza).nome) + (sug.natureza === 'publico' ? (sug.tipoPublico === 'estatal' ? ' (estatal)' : ' (órgão público)') : '') + '</b>' : ''}${sug.natureza && sug.setor ? ' e ' : ''}${sug.setor ? '<b>' + esc(PAIS.filtrosSetor.find(s => s.id === sug.setor).nome) + '</b>' : ''}.</span><button type="button" class="btn xs primary" data-acao="usar-sug">Usar sugestão</button><button type="button" class="btn xs" data-acao="ignorar-sug">Ignorar</button></div>` : '')
     + (vz('setor') ? campoSelect(d, 'setor', 'Setor', setOps, { rerender: true, ajuda: true }) : '')
     + (TS && vz(TS.campo) ? campoSelect(Object.assign({}, d, { [TS.campo]: segmentoTab(d, TS) }), TS.campo, TS.rotSeg, Object.entries(TS.tabela).map(([k, x]) => [k, x.nome]), { rerender: true, largo: true }) : '')
     + (vz('uf') ? campoSelect(d, 'uf', 'UF', [['', 'Selecione'], ...PAIS.ufs.map(u => [u, u])], { ajuda: true }) : '')
@@ -6571,13 +6533,13 @@ function formAnalise() {
   const ti = vz('profTI') ? campoNum(d, 'profTI', rotProfTI(d), { un: 'pessoas' })
     + campoNum(d, 'salarioTI', 'Salário médio da equipe de TI', { pre: 'R$', un: 'por mês', dica: 'Opcional.' })
     + (!vz('digital') ? '' : campoSelect(d, 'digital', 'Intensidade digital', [['', 'Automática (' + nivelDigitalAuto(d) + ')'], ['baixa', 'Baixa'], ['media', 'Média'], ['alta', 'Alta']], { ajuda: true })) : '';
-  const vagas = `<div class="campo"><div class="campo-rot"><label for="f-vagasTI">Vagas de TI abertas</label>${botaoAjuda('vagasTI', 'Vagas de TI')}</div><input type="text" inputmode="numeric" id="f-vagasTI" data-simples="vagasTI" value="${esc(d.vagasTI)}" autocomplete="off"></div>`;
+  const vagas = `<div class="campo field"><div class="campo-rot"><label for="f-vagasTI">Vagas de TI abertas</label>${botaoAjuda('vagasTI', 'Vagas de TI')}</div><input class="input" type="text" inputmode="numeric" id="f-vagasTI" data-simples="vagasTI" value="${esc(d.vagasTI)}" autocomplete="off"></div>`;
   // gasto de TI real: uma linha por ano, como a receita; a primeira aparece sempre, com o ano de referência sugerido
   const rl = reais.length ? reais : [{ ano: '', v: '', o: '', meses: '12' }];
-  const gasto = `<div class="campo largo"><div class="campo-rot"><span class="rot">Gasto de TI real</span>${botaoAjuda('gastosReais', 'Gasto real')}</div>
-      <div class="rec-anos reais"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span><span>Período</span></div>${rl.map((x, i) => `<div class="rec-linha"><input type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano || (reais.length ? '' : anoDe(d)))}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off"><div class="entrada com-pre"><span class="pre">R$</span><input type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || anoDe(d))}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}" autocomplete="off"></div>${seletorPeriodo(`data-real="${i}" data-parte="meses" aria-label="Período"`, x.meses)}<span class="rec-o">${botaoOrigem('real:' + i, x.o, temValor(x))}</span>${rl.length > 1 ? btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq perigo') : '<span aria-hidden="true"></span>'}</div>`).join('')}</div>
-      <div class="reais-acoes"><button type="button" class="btn peq" data-acao="add-real">${ico('mais')}Adicionar ano</button>${botaoSemDado('gastosReais', d)}</div><p class="valid" id="v-reais"></p></div>`
-    + (!temGastoReal(d) ? '' : `<div class="campo largo"><label class="chk-linha"><input type="checkbox" id="f-usarCalib" data-usar-calib ${emp.foraCalibracao ? '' : 'checked'}><span>Usar esta empresa no Método Personalizado<span class="dica">O gasto real entra nos percentuais do método. Vale depois de salvar.</span></span></label></div>`);
+  const gasto = `<div class="campo field largo"><div class="campo-rot"><span class="rot">Gasto de TI real</span>${botaoAjuda('gastosReais', 'Gasto real')}</div>
+      <div class="rec-anos reais"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span><span>Período</span></div>${rl.map((x, i) => `<div class="rec-linha"><input class="input" type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano || (reais.length ? '' : anoDe(d)))}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off"><div class="entrada input-group com-pre"><span class="pre input-addon">R$</span><input class="input" type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || anoDe(d))}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}" autocomplete="off"></div>${seletorPeriodo(`data-real="${i}" data-parte="meses" aria-label="Período"`, x.meses)}<span class="rec-o">${botaoOrigem('real:' + i, x.o, temValor(x))}</span>${rl.length > 1 ? btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq perigo') : '<span aria-hidden="true"></span>'}</div>`).join('')}</div>
+      <div class="reais-acoes"><button type="button" class="btn xs" data-acao="add-real">${ico('mais')}Adicionar ano</button>${botaoSemDado('gastosReais', d)}</div><p class="valid" id="v-reais"></p></div>`
+    + (!temGastoReal(d) ? '' : `<div class="campo field largo"><label class="checkbox"><input type="checkbox" id="f-usarCalib" data-usar-calib ${emp.foraCalibracao ? '' : 'checked'}><span>Usar esta empresa no Método Personalizado<span class="dica">O gasto real entra nos percentuais do método. Vale depois de salvar.</span></span></label></div>`);
   // só registro: não muda a conta
   const extN = {
     listada: () => campoExtra(d, 'valorMercado', 'Valor de mercado', 'num'),
@@ -6596,7 +6558,7 @@ function formAnalise() {
     + secao('sec-gasto', 'historico', 'Gasto de TI conhecido', 'Dados reais da empresa pesam mais que as médias de mercado e estreitam a faixa.', gasto)
     + `<details class="secao-form" id="sec-mais"${nTec || (d.extras && Object.values(d.extras).some(v => v !== '' && v != null)) ? ' open' : ''}><summary><div class="sf-cab"><h2>${ico('chip')}Mais sobre a empresa</h2><span class="sf-prog"><span id="tec-n">${nTec ? plural(nTec, 'tecnologia marcada', 'tecnologias marcadas') : 'só registro'}</span> ${ico('chev', 'chev')}</span></div></summary><p class="sf-desc">Ficam salvos com a análise, mas não mudam o valor.</p><div class="grade-campos">${mais}</div></details>`;
   return notaModelo(d) + pers + (pedePers && !persOk ? `<fieldset class="bloqueado" disabled>${resto}</fieldset>` : resto)
-    + `<div class="rodape-form">${chipEstado()}<button type="button" class="btn prim" data-acao="salvar">${ico('salvar')}Salvar</button></div>`;
+    + `<div class="rodape-form">${chipEstado()}<button type="button" class="btn primary" data-acao="salvar">${ico('salvar')}Salvar</button></div>`;
 }
 
 function validar(d) {
@@ -6631,10 +6593,10 @@ function descModo(m, d = null) {
 const rotuloTI = r => r.capex ? 'Investimento em TI (CAPEX)' : 'Investimento em TI';
 function seletorEscopo(d, m) {
   if (m !== 'base') return '';
-  return `<div class="campo escopo"><label for="f-escopo">O que estimar</label><select id="f-escopo" data-simples="escopo"><option value="">Gasto total de TI (CAPEX e OPEX)</option><option value="capex"${d.escopo === 'capex' ? ' selected' : ''}>Só investimento (CAPEX)</option></select></div>`;
+  return `<div class="campo field escopo"><label for="f-escopo">O que estimar</label><select class="select" id="f-escopo" data-simples="escopo"><option value="">Gasto total de TI (CAPEX e OPEX)</option><option value="capex"${d.escopo === 'capex' ? ' selected' : ''}>Só investimento (CAPEX)</option></select></div>`;
 }
 // no Personalizado, o cartão do resultado leva aos percentuais e empresas do método, na própria análise
-const botaoEditarPers = m => m === 'propria' ? `<button type="button" class="link-btn editar-pers" data-acao="pers-editar">${ico('editar')}Editar percentuais e empresas</button>` : '';
+const botaoEditarPers = m => m === 'propria' ? `<button type="button" class="link-btn link editar-pers" data-acao="pers-editar">${ico('editar')}Editar percentuais e empresas</button>` : '';
 function seletorModo(m, suf = '', d = null) {
   return `<div class="modos" role="radiogroup" aria-label="Método">${MODOS.map(v => {
     // o Personalizado sem dados pode ser escolhido: a análise pede os dados dele primeiro
@@ -6644,7 +6606,7 @@ function seletorModo(m, suf = '', d = null) {
 }
 // nas listas, um menu simples
 function seletorModoLista(m, id) {
-  return `<select id="${id}" data-lote-modo aria-label="Método">${MODOS.map(v => `<option value="${v}" ${m === v ? 'selected' : ''} ${modoDisponivel(v) ? '' : 'disabled'}>${nomeModo(v)}${modoDisponivel(v) ? '' : ' (indisponível)'}</option>`).join('')}</select>`;
+  return `<select class="select" id="${id}" data-lote-modo aria-label="Método">${MODOS.map(v => `<option value="${v}" ${m === v ? 'selected' : ''} ${modoDisponivel(v) ? '' : 'disabled'}>${nomeModo(v)}${modoDisponivel(v) ? '' : ' (indisponível)'}</option>`).join('')}</select>`;
 }
 function mudarModo(v) {
   if (!UI.atual) return;
@@ -6655,7 +6617,7 @@ function mudarModo(v) {
 // ano de referência da análise: por padrão o último ano fechado; o ano em curso também vale
 function seletorAno(d, suf = '') {
   const a = anoDe(d), anos = [ANO, ANO - 1, ANO - 2, ANO - 3, ANO - 4];
-  return `<select id="f-anoRef${suf}" data-anoref aria-label="Ano de referência">${anos.map(x => `<option value="${x}"${x === a ? ' selected' : ''}>${x}${x === ANO ? ' (em curso)' : ''}</option>`).join('')}</select>`;
+  return `<select class="select" id="f-anoRef${suf}" data-anoref aria-label="Ano de referência">${anos.map(x => `<option value="${x}"${x === a ? ' selected' : ''}>${x}${x === ANO ? ' (em curso)' : ''}</option>`).join('')}</select>`;
 }
 function mudarAnoRef(v) {
   if (!UI.atual) return;
@@ -6663,7 +6625,7 @@ function mudarAnoRef(v) {
   if (UI.rota.aba === 'resultado') renderAqui(); else rerenderAnalise();
 }
 function seletorSalarios(com, suf = '') {
-  return `<span class="seg seg-sal" role="radiogroup" aria-label="Salários da equipe de TI nas estimativas">${[['com', 'Com salários de TI'], ['sem', 'Sem salários de TI']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="salariosTI${suf}" value="${v}" data-salarios ${(com ? 'com' : 'sem') === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>`;
+  return `<span class="seg segmented seg-sal" role="radiogroup" aria-label="Salários da equipe de TI nas estimativas">${[['com', 'Com salários de TI'], ['sem', 'Sem salários de TI']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="salariosTI${suf}" value="${v}" data-salarios ${(com ? 'com' : 'sem') === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>`;
 }
 function mudarSalarios(v) {
   if (!UI.atual) return;
@@ -6687,7 +6649,7 @@ function listaPmd(pmd) {
   return `<ul class="pmd">${pmd.map(p => `<li><button type="button" data-acao="ir-campo" data-campo="${p.id}">${ico(ICO_PMD[p.id] || 'lampada')}<span>${esc(p.rot)}</span><span class="ganho">+${p.ganho}</span></button></li>`).join('')}</ul>`;
 }
 // com a área estreita o cartão fica preso embaixo da tela, só com os valores; este botão abre o resto
-const botaoCartao = ab => `<button type="button" class="cr-abrir btn peq" data-acao="cartao-abrir" aria-expanded="${ab}" aria-label="${ab ? 'Mostrar menos da estimativa' : 'Ver detalhes da estimativa'}"><span class="cr-abrir-rot">${ab ? 'Menos' : 'Detalhes'}</span>${ico('chev', 'chev')}</button>`;
+const botaoCartao = ab => `<button type="button" class="cr-abrir btn xs" data-acao="cartao-abrir" aria-expanded="${ab}" aria-label="${ab ? 'Mostrar menos da estimativa' : 'Ver detalhes da estimativa'}"><span class="cr-abrir-rot">${ab ? 'Menos' : 'Detalhes'}</span>${ico('chev', 'chev')}</button>`;
 // o que mais aumentaria a confiança, sem o que a pessoa já disse que não achou, que a empresa não divulga ou que não se aplica
 const proximosDados = (d, r) => proximoMelhorDado(d, ...contexto(r.modoCalc, d), r).filter(p => !(d.semDado || {})[p.id === 'gastoReal' ? 'gastosReais' : p.id]);
 // caminhos que se afastam: a média de mercado longe de um dado real não é erro de dado, e o resultado segue o dado real
@@ -7220,8 +7182,8 @@ function blocoReceitaDet(r) {
 function blocoProjecao(r) {
   const d = UI.atual.dados;
   return `<div class="painel-cab"><div><h2>${ico('projecao')}Projeção</h2><p>O gasto dos próximos anos pela taxa de crescimento, com os cenários de crescimento menor e maior.</p></div><div class="proj-ctrl">
-    <label for="g-horiz">Horizonte</label><select id="g-horiz"><option value="3" ${UI.horizonte === 3 ? 'selected' : ''}>3 anos</option><option value="5" ${UI.horizonte !== 3 ? 'selected' : ''}>5 anos</option></select>
-    <label for="g-manual">Crescimento (% ao ano)</label><input type="text" inputmode="decimal" id="g-manual" value="${esc(fmtIn(d.gManual))}" placeholder="${nf(r.g * 100, 1)}">
+    <label for="g-horiz">Horizonte</label><select class="select" id="g-horiz"><option value="3" ${UI.horizonte === 3 ? 'selected' : ''}>3 anos</option><option value="5" ${UI.horizonte !== 3 ? 'selected' : ''}>5 anos</option></select>
+    <label for="g-manual">Crescimento (% ao ano)</label><input class="input" type="text" inputmode="decimal" id="g-manual" value="${esc(fmtIn(d.gManual))}" placeholder="${nf(r.g * 100, 1)}">
   </div></div>${graficoProjecao(r)}`;
 }
 function atualizarProjecao() {
@@ -7255,7 +7217,7 @@ function secaoRes(id, icone, tit, sub, corpo, extra = '') {
 }
 function corpoResultado(emp) {
   const d = emp.dados, r = calc(d), id = encodeURIComponent(emp.id);
-  if (r.vazio) return `<div class="vazio"><h2>${esc(r.msgVazio)}</h2><p>Volte aos dados e preencha a receita, os funcionários, a equipe de TI ou um gasto real.</p><div class="acoes"><a class="btn prim" href="#/analise/${id}">${ico('voltar')}Voltar aos dados</a></div></div>`;
+  if (r.vazio) return `<div class="vazio"><h2>${esc(r.msgVazio)}</h2><p>Volte aos dados e preencha a receita, os funcionários, a equipe de TI ou um gasto real.</p><div class="acoes"><a class="btn primary" href="#/analise/${id}">${ico('voltar')}Voltar aos dados</a></div></div>`;
   const pmd = proximosDados(d, r), W = larguraGraf(240), temRec = r.receita && (r.receita.usada || r.receita.estimativa);
   const secoes = [
     ['res-estimativa', 'Estimativa', heroResultado(r, d)],
@@ -7315,10 +7277,10 @@ Responda em português, só com o que segue, sem texto antes ou depois:
 }
 function dialogoTexto(titulo, intro, idTexto, texto, rotCopiar, extra = '', nota = '') {
   const dlg = $('#dlg'); dlg.classList.add('largo');
-  $('#dlg-corpo').innerHTML = `<h2>${titulo}</h2>${intro}${extra}<label for="${idTexto}" class="sr sr-only">${titulo}</label><textarea id="${idTexto}" class="prompt" spellcheck="false">${esc(texto)}</textarea>${nota ? `<p style="font-size:.86rem;margin-top:10px">${nota}</p>` : ''}`;
+  $('#dlg-corpo').innerHTML = `<h2>${titulo}</h2>${intro}${extra}<label for="${idTexto}" class="sr sr-only">${titulo}</label><textarea id="${idTexto}" class="textarea prompt" spellcheck="false">${esc(texto)}</textarea>${nota ? `<p style="font-size:.86rem;margin-top:10px">${nota}</p>` : ''}`;
   const ac = $('#dlg-acoes'); ac.innerHTML = '';
   const fechar = document.createElement('button'); fechar.className = 'btn'; fechar.type = 'button'; fechar.textContent = 'Fechar'; fechar.onclick = () => fecharDlg();
-  const copiarB = document.createElement('button'); copiarB.className = 'btn prim'; copiarB.type = 'button'; copiarB.innerHTML = ico('copiar') + rotCopiar;
+  const copiarB = document.createElement('button'); copiarB.className = 'btn primary'; copiarB.type = 'button'; copiarB.innerHTML = ico('copiar') + rotCopiar;
   copiarB.onclick = async () => { const ok = await copiarTexto($('#' + idTexto)); copiarB.textContent = ok ? 'Copiado' : 'Selecione o texto e copie com Ctrl+C'; if (ok) toast('Copiado'); };
   ac.append(fechar, copiarB);
   dlg.onclose = null;
@@ -7448,11 +7410,11 @@ function empresasFiltradas() {
 function listaEmpresasHtml() {
   const L = empresasFiltradas(), n = UI.sel.size, todas = L.length && L.every(x => UI.sel.has(x.e.id));
   const barraSel = n ? `<div class="barra-sel" role="region" aria-label="Empresas selecionadas"><b>${plural(n, 'selecionada', 'selecionadas')}</b>
-    <button type="button" class="btn peq" data-acao="comparar" ${n < 2 || n > 4 ? 'disabled' : ''} data-tip="Compare de 2 a 4 empresas">${ico('colunas')}Comparar</button>
-    <button type="button" class="btn peq" data-acao="exp-xlsx-sel">${ico('baixar')}Baixar Excel</button>
-    <button type="button" class="btn peq perigo" data-acao="excluir-sel">${ico('lixo')}Excluir</button>
-    <button type="button" class="link-btn" data-acao="limpar-sel">Limpar seleção</button></div>` : '';
-  if (!L.length) return barraSel + `<div class="nota">${ico('busca')}<p>Nenhuma empresa com esses filtros. <button type="button" class="link-btn" data-acao="limpar-filtros">Limpar filtros</button></p></div>`;
+    <button type="button" class="btn xs" data-acao="comparar" ${n < 2 || n > 4 ? 'disabled' : ''} data-tip="Compare de 2 a 4 empresas">${ico('colunas')}Comparar</button>
+    <button type="button" class="btn xs" data-acao="exp-xlsx-sel">${ico('baixar')}Baixar Excel</button>
+    <button type="button" class="btn xs perigo" data-acao="excluir-sel">${ico('lixo')}Excluir</button>
+    <button type="button" class="link-btn link" data-acao="limpar-sel">Limpar seleção</button></div>` : '';
+  if (!L.length) return barraSel + `<div class="nota">${ico('busca')}<p>Nenhuma empresa com esses filtros. <button type="button" class="link-btn link" data-acao="limpar-filtros">Limpar filtros</button></p></div>`;
   const linhas = L.map(({ e, r }) => {
     const d = e.dados, ur = ultimoReal(d), aberta = UI.atual && UI.atual.id === e.id && UI.sujo;
     return `<tr>
@@ -7474,20 +7436,20 @@ function lembreteBackup() {
   const b = S.ultimoBackup, d = diasDesde(b), pendente = !b || (S.ultimaAlteracao && S.ultimaAlteracao > b);
   if (b && d <= 7 && !pendente) return '';
   const txt = !b ? 'Nenhum backup exportado ainda. Se os dados do navegador forem apagados, as empresas e a calibração se perdem.' : `Último backup ${haDias(d)}${pendente ? ', com alterações depois dele' : ''}.`;
-  return `<div class="lembrete" role="status"><span>${ico('alerta', 'p')} ${txt}</span><button type="button" class="btn peq prim" data-acao="exp-json">Exportar backup agora</button></div>`;
+  return `<div class="lembrete" role="status"><span>${ico('alerta', 'p')} ${txt}</span><button type="button" class="btn xs primary" data-acao="exp-json">Exportar backup agora</button></div>`;
 }
 function telaEmpresas() {
   const n = S.empresas.length;
   const cab = `<div class="cab"><div class="cab-txt"><h1>Empresas</h1><p class="sub">${n ? plural(n, 'empresa analisada', 'empresas analisadas') + '. ' : ''}Os dados ficam só neste navegador.</p></div>
-    <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn prim" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
+    <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn primary" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
   if (!n) return cab + `<div class="vazio inicio"><h2>Nova análise: escolha o método</h2>${cartoesMetodo('nova-modo')}
-    <p class="vazio-modelo"><button type="button" class="link-btn" data-acao="modelo">Ver empresa modelo</button></p></div>`;
+    <p class="vazio-modelo"><button type="button" class="link-btn link" data-acao="modelo">Ver empresa modelo</button></p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
-    <label class="busca"><span class="sr sr-only">Buscar</span>${ico('busca')}<input type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
-    <select data-filtro="setor" aria-label="Setor"><option value="">Todos os setores</option>${setores.map(s => `<option value="${s}" ${f.setor === s ? 'selected' : ''}>${esc(nomeFiltro(s))}</option>`).join('')}</select>
-    <select data-filtro="conf" aria-label="Confiança"><option value="">Qualquer confiança</option>${[['alta', 'Confiança alta'], ['media', 'Confiança média'], ['baixa', 'Confiança baixa'], ['vazia', 'Sem estimativa']].map(([v, t]) => `<option value="${v}" ${f.conf === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
-    <select data-filtro="ordem" aria-label="Ordenar">${ORDENS_EMP.map(([v, t]) => `<option value="${v}" ${f.ordem === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+    <label class="busca"><span class="sr sr-only">Buscar</span>${ico('busca')}<input class="input" type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
+    <select class="select" data-filtro="setor" aria-label="Setor"><option value="">Todos os setores</option>${setores.map(s => `<option value="${s}" ${f.setor === s ? 'selected' : ''}>${esc(nomeFiltro(s))}</option>`).join('')}</select>
+    <select class="select" data-filtro="conf" aria-label="Confiança"><option value="">Qualquer confiança</option>${[['alta', 'Confiança alta'], ['media', 'Confiança média'], ['baixa', 'Confiança baixa'], ['vazia', 'Sem estimativa']].map(([v, t]) => `<option value="${v}" ${f.conf === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+    <select class="select" data-filtro="ordem" aria-label="Ordenar">${ORDENS_EMP.map(([v, t]) => `<option value="${v}" ${f.ordem === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
     <div id="emp-lista">${listaEmpresasHtml()}</div>`;
 }
 function atualizarListaEmpresas() { const el = $('#emp-lista'); if (el) el.innerHTML = listaEmpresasHtml(); }
@@ -7496,7 +7458,7 @@ function atualizarListaEmpresas() { const el = $('#emp-lista'); if (el) el.inner
 function telaComparar() {
   const emps = S.empresas.filter(e => UI.sel.has(e.id)).slice(0, 4);
   const cab = `<div class="cab"><div class="cab-txt"><h1>Comparação</h1><p class="sub">Valor central e faixa provável de cada empresa, no mesmo eixo.</p></div><div class="acoes"><a class="btn" href="#/empresas">${ico('voltar')}Voltar às empresas</a></div></div>`;
-  if (emps.length < 2) return cab + `<div class="vazio"><h2>Escolha de 2 a 4 empresas</h2><p>Marque as empresas na lista e clique em Comparar.</p><div class="acoes"><a class="btn prim" href="#/empresas">Ir para as empresas</a></div></div>`;
+  if (emps.length < 2) return cab + `<div class="vazio"><h2>Escolha de 2 a 4 empresas</h2><p>Marque as empresas na lista e clique em Comparar.</p><div class="acoes"><a class="btn primary" href="#/empresas">Ir para as empresas</a></div></div>`;
   const rs = emps.map(e => ({ e, r: calc(e.dados) }));
   const linhas = [['Setor', x => esc(nomeSetor(x.e.dados))], ['Lugar', x => esc(lugarTxt(x.e.dados) || '—')], ['Valor central', x => x.r.vazio ? '—' : '<b>' + fmtRS(x.r.F) + '</b>'],
     ['Faixa provável', x => x.r.vazio ? '—' : fmtRS(x.r.p10) + ' a ' + fmtRS(x.r.p90)], ['Confiança', x => x.r.vazio ? '—' : chipConf(x.r)], ['Método', x => nomeModo(x.r.modoCalc)],
@@ -7572,10 +7534,10 @@ async function importarArquivoJSON(f) {
   let o; try { o = JSON.parse(await f.text()); } catch (err) { return avisar('Arquivo inválido', 'O arquivo não é um JSON válido desta ferramenta.'); }
   if (!Array.isArray(o.empresas)) return avisar('Arquivo sem empresas', 'Escolha um backup exportado pelo Vezen.');
   const m = migrar(o);
-  const modo = await perguntar(`<h2>Importar ${plural(m.empresas.length, 'empresa', 'empresas')}${m.listas.length ? ' e ' + plural(m.listas.length, 'lista', 'listas') : ''}</h2><p><b>Juntar</b> mantém o que já está aqui; empresas repetidas (mesmo CNPJ ou nome) ficam com a versão mais recente. <b>Substituir</b> troca tudo, inclusive parâmetros e calibração.</p>`, [['Cancelar', null], ['Substituir', 'sub'], ['Juntar', 'jun', 'prim']]);
+  const modo = await perguntar(`<h2>Importar ${plural(m.empresas.length, 'empresa', 'empresas')}${m.listas.length ? ' e ' + plural(m.listas.length, 'lista', 'listas') : ''}</h2><p><b>Juntar</b> mantém o que já está aqui; empresas repetidas (mesmo CNPJ ou nome) ficam com a versão mais recente. <b>Substituir</b> troca tudo, inclusive parâmetros e calibração.</p>`, [['Cancelar', null], ['Substituir', 'sub'], ['Juntar', 'jun', 'primary']]);
   if (!modo) return;
   if (modo === 'sub') {
-    const ok = await perguntar('<h2>Substituir todos os dados?</h2><p>As empresas, listas, parâmetros e calibração atuais serão apagados deste navegador.</p>', [['Cancelar', false], ['Substituir', true, 'perigo-forte']]);
+    const ok = await perguntar('<h2>Substituir todos os dados?</h2><p>As empresas, listas, parâmetros e calibração atuais serão apagados deste navegador.</p>', [['Cancelar', false], ['Substituir', true, 'danger']]);
     if (!ok) return;
     S.empresas = m.empresas; S.listas = m.listas; S.parametros = m.parametros; S.calibracao = m.calibracao; UI.atual = null; UI.sujo = false; UI.par = null; UI.parErros = {}; UI.sel.clear();
     S.ultimoBackup = m.ultimoBackup || new Date().toISOString(); S.ultimaAlteracao = S.ultimoBackup;
@@ -7595,7 +7557,7 @@ async function importarArquivoJSON(f) {
 }
 async function excluirSelecionadas() {
   const ids = [...UI.sel].filter(id => S.empresas.some(e => e.id === id)), n = ids.length; if (!n) return;
-  const ok = await perguntar(`<h2>Excluir ${plural(n, 'empresa', 'empresas')}?</h2><p>Elas saem da lista e da calibração. Não dá para desfazer. Se quiser guardar, exporte um backup antes.</p>`, [['Cancelar', false], ['Excluir', true, 'perigo-forte']]);
+  const ok = await perguntar(`<h2>Excluir ${plural(n, 'empresa', 'empresas')}?</h2><p>Elas saem da lista e da calibração. Não dá para desfazer. Se quiser guardar, exporte um backup antes.</p>`, [['Cancelar', false], ['Excluir', true, 'danger']]);
   if (!ok) return;
   S.empresas = S.empresas.filter(e => !UI.sel.has(e.id));
   if (UI.atual && UI.sel.has(UI.atual.id)) { UI.atual = null; UI.sujo = false; }
@@ -7668,8 +7630,8 @@ function etapasLote(at) {
 function telaLoteArquivo() {
   return `<div class="cab"><div class="cab-txt"><h1>Analisar uma lista</h1><p class="sub">Estime o investimento em TI de várias empresas de uma vez, a partir de uma planilha.</p></div><div class="acoes"><a class="btn" href="#/listas">${ico('voltar')}Voltar às listas</a></div></div>
   ${etapasLote('arquivo')}
-  <div class="soltar" id="soltar-lista">${ico('subir')}<b>Arraste a planilha para cá</b><p>ou</p><button type="button" class="btn prim" data-acao="escolher-lista">Escolher arquivo</button><p>Relatório do CRM (.xls), Excel (.xlsx), CSV ou Parquet. Uma linha por empresa.</p></div>
-  <div class="info-caixa">${ico('info')}<p>O arquivo é lido só neste navegador: nada é enviado pela internet. Precisa de pelo menos o nome e um dado de porte (receita ou funcionários); setor, estado, cidade, equipe de TI e gasto de TI real deixam a estimativa melhor. <button type="button" class="link-btn" data-acao="modelo-lista">Baixar uma planilha modelo</button>.</p></div>`;
+  <div class="soltar" id="soltar-lista">${ico('subir')}<b>Arraste a planilha para cá</b><p>ou</p><button type="button" class="btn primary" data-acao="escolher-lista">Escolher arquivo</button><p>Relatório do CRM (.xls), Excel (.xlsx), CSV ou Parquet. Uma linha por empresa.</p></div>
+  <div class="info-caixa">${ico('info')}<p>O arquivo é lido só neste navegador: nada é enviado pela internet. Precisa de pelo menos o nome e um dado de porte (receita ou funcionários); setor, estado, cidade, equipe de TI e gasto de TI real deixam a estimativa melhor. <button type="button" class="link-btn link" data-acao="modelo-lista">Baixar uma planilha modelo</button>.</p></div>`;
 }
 async function lerArquivoLista(f) {
   toast('Lendo ' + f.name + '…');
@@ -7696,15 +7658,15 @@ function telaLoteColunas() {
   const B = UI.lote, n = B.linhas.length;
   const opsOrigem = ORIGENS.map(([v, t]) => `<option value="${v}" ${B.origem === v ? 'selected' : ''}>${t}</option>`).join('');
   return `<div class="cab"><div class="cab-txt"><h1>Conferir as colunas</h1><p class="sub">${esc(B.nome)}: ${esc(B.tab.formato)}, ${plural(B.tab.linhas.length, 'linha', 'linhas')} e ${plural(B.tab.colunas.length, 'coluna', 'colunas')}.</p></div>
-    <div class="acoes"><button type="button" class="btn" data-acao="cancelar-lote">Cancelar</button><button type="button" class="btn prim" data-acao="criar-lista" ${B.comEstimativa ? '' : 'disabled'}>${ico('check')}Estimar ${plural(n, 'empresa', 'empresas')}</button></div></div>
+    <div class="acoes"><button type="button" class="btn" data-acao="cancelar-lote">Cancelar</button><button type="button" class="btn primary" data-acao="criar-lista" ${B.comEstimativa ? '' : 'disabled'}>${ico('check')}Estimar ${plural(n, 'empresa', 'empresas')}</button></div></div>
   ${etapasLote('colunas')}
   ${B.erro ? `<div class="alerta critico">${ico('alerta')}<p>${esc(B.erro)}</p></div>` : `<div class="${B.comEstimativa ? 'info-caixa' : 'alerta'}">${ico(B.comEstimativa ? 'info' : 'alerta')}<p><b>${plural(n, 'empresa', 'empresas')}</b> no arquivo (repetidas, com o mesmo CNPJ ou nome, entram uma vez). <b>${nf(B.comEstimativa, 0)}</b> ${B.comEstimativa === 1 ? 'tem' : 'têm'} dados para estimar; as outras ficam na lista marcadas como sem dados de porte.</p></div>`}
   <section class="painel" style="margin-top:16px"><div class="painel-cab"><div><h2>${ico('tabela')}O que cada coluna é</h2><p>Sugerido pelos títulos. Confira principalmente a receita, os funcionários e o gasto de TI.</p></div></div>${htmlMapaColunas(B, false)}</section>
   <section class="painel"><div class="painel-cab"><div><h2>${ico('param')}Como estimar</h2><p>Dá para mudar depois, na própria lista.</p></div></div>
     <div class="opcoes-lote">
-      <div class="campo"><div class="campo-rot"><label for="lt-nome">Nome da lista</label></div><input type="text" id="lt-nome" data-lote="nomeLista" value="${esc(B.nomeLista)}"></div>
-      <div class="campo"><div class="campo-rot"><label for="lt-modo">Método</label></div>${seletorModoLista(B.modo, 'lt-modo')}</div>
-      <div class="campo"><div class="campo-rot"><label for="lt-origem">Origem dos números do arquivo</label>${botaoAjuda('origens', 'Origem do dado')}</div><select id="lt-origem" data-lote="origem">${opsOrigem}</select></div>
+      <div class="campo field"><div class="campo-rot"><label for="lt-nome">Nome da lista</label></div><input class="input" type="text" id="lt-nome" data-lote="nomeLista" value="${esc(B.nomeLista)}"></div>
+      <div class="campo field"><div class="campo-rot"><label for="lt-modo">Método</label></div>${seletorModoLista(B.modo, 'lt-modo')}</div>
+      <div class="campo field"><div class="campo-rot"><label for="lt-origem">Origem dos números do arquivo</label>${botaoAjuda('origens', 'Origem do dado')}</div><select class="select" id="lt-origem" data-lote="origem">${opsOrigem}</select></div>
       
     </div></section>`;
 }
@@ -7720,10 +7682,10 @@ function criarLista() {
 
 /* ---------- listas salvas ---------- */
 function telaListas() {
-  const cab = `<div class="cab"><div class="cab-txt"><h1>Listas</h1><p class="sub">Planilhas de empresas estimadas de uma vez. Cada empresa pode virar uma análise completa.</p></div><div class="acoes"><a class="btn prim" href="#/listas/nova">${ico('subir')}Analisar uma lista</a></div></div>`;
+  const cab = `<div class="cab"><div class="cab-txt"><h1>Listas</h1><p class="sub">Planilhas de empresas estimadas de uma vez. Cada empresa pode virar uma análise completa.</p></div><div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a></div></div>`;
   if (!S.listas.length) return cab + `<div class="vazio"><h2>Nenhuma lista ainda</h2><p>Use uma planilha do CRM, do Excel ou um CSV com várias empresas. A ferramenta estima todas de uma vez, com a faixa provável e a confiança de cada uma.</p>
     <ol class="passos-vazio"><li><b>1. Escolher o arquivo</b>Uma linha por empresa, com nome e algum dado de porte.</li><li><b>2. Conferir as colunas</b>A ferramenta sugere o que cada coluna é; você confirma.</li><li><b>3. Ver as estimativas</b>Filtre, ordene, baixe em CSV ou abra uma empresa para detalhar.</li></ol>
-    <div class="acoes"><a class="btn prim" href="#/listas/nova">${ico('subir')}Analisar uma lista</a><button type="button" class="btn" data-acao="modelo-lista">${ico('baixar')}Baixar planilha modelo</button></div></div>`;
+    <div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a><button type="button" class="btn" data-acao="modelo-lista">${ico('baixar')}Baixar planilha modelo</button></div></div>`;
   const linhas = S.listas.map(L => {
     const rs = calcularLista(L), ok = rs.filter(x => !x.r.vazio), soma = ok.reduce((a, x) => a + x.r.F, 0);
     return `<tr><td><a class="emp-nome" href="#/listas/${encodeURIComponent(L.id)}">${esc(L.nome)}</a><div class="emp-sub">${esc(L.arquivo)}</div></td><td class="n">${nf(L.linhas.length, 0)}</td><td class="n">${nf(ok.length, 0)}</td><td class="n">${ok.length ? fmtRS(soma) : '—'}</td><td><span class="chip-modo ${clsModo(L.modo)}">${nomeModo(L.modo)}</span></td><td>${dataBR(L.criadoEm)}</td><td class="acoes-cel">${btnIco('lixo', 'Excluir lista', `data-acao="excluir-lista" data-id="${L.id}"`, 'peq fant perigo')}</td></tr>`;
@@ -7747,7 +7709,7 @@ function filtrarLote(rs) {
 function tabelaLoteHtml(L, rs) {
   const F = filtrarLote(rs), f = UI.loteVer, pags = Math.max(1, Math.ceil(F.length / POR_PAGINA)), pag = Math.min(f.pag, pags - 1), vis = F.slice(pag * POR_PAGINA, (pag + 1) * POR_PAGINA);
   const sel = UI.loteSel || new Set(), nSel = [...sel].filter(i => rs[i] && !rs[i].r.vazio).length;
-  const barra = sel.size ? `<div class="barra-sel"><b>${plural(sel.size, 'selecionada', 'selecionadas')}</b><button type="button" class="btn peq prim" data-acao="salvar-linhas" ${nSel ? '' : 'disabled'}>${ico('salvar')}Salvar ${nSel ? plural(nSel, 'empresa', 'empresas') : ''} em Empresas</button><button type="button" class="link-btn" data-acao="limpar-sel-lote">Limpar seleção</button></div>` : '';
+  const barra = sel.size ? `<div class="barra-sel"><b>${plural(sel.size, 'selecionada', 'selecionadas')}</b><button type="button" class="btn xs primary" data-acao="salvar-linhas" ${nSel ? '' : 'disabled'}>${ico('salvar')}Salvar ${nSel ? plural(nSel, 'empresa', 'empresas') : ''} em Empresas</button><button type="button" class="link-btn link" data-acao="limpar-sel-lote">Limpar seleção</button></div>` : '';
   if (!F.length) return barra + `<div class="nota">${ico('busca')}<p>Nenhuma empresa com esses filtros.</p></div>`;
   const linhas = vis.map(({ i, x, r }) => {
     const rec = r.receita && r.receita.usada, est = rec && r.receita.modo !== 'informada';
@@ -7757,11 +7719,11 @@ function tabelaLoteHtml(L, rs) {
       <td class="n">${rec ? fmtRS(rec.v) + (est ? '<div class="emp-sub">estimada</div>' : '') : '<span class="text-secondary">—</span>'}</td>
       <td class="n">${x.f ? nf(x.f, 0) : '<span class="text-secondary">—</span>'}</td>
       ${r.vazio ? '<td class="n falta" colspan="3">Faltam dados de porte</td>' : `<td class="n"><div class="emp-val"><b>${fmtRS(r.F)}</b>${miniRegua(r)}</div></td><td class="n">${fmtRS(r.resumo.conservadora)}</td><td>${chipConf(r)}</td>`}
-      <td class="acoes-cel">${r.vazio ? '' : `<button type="button" class="btn peq" data-acao="abrir-linha" data-i="${i}">Abrir</button>`}</td></tr>`;
+      <td class="acoes-cel">${r.vazio ? '' : `<button type="button" class="btn xs" data-acao="abrir-linha" data-i="${i}">Abrir</button>`}</td></tr>`;
   }).join('');
   const todas = vis.length && vis.every(o => sel.has(o.i));
   return barra + `<div class="tab-wrap"><table class="lote-tab lista-emp"><thead><tr><th><input type="checkbox" data-sel-lote-todas ${todas ? 'checked' : ''} aria-label="Selecionar as empresas desta página"></th><th>Empresa</th><th>Setor e lugar</th><th class="n">Receita líquida</th><th class="n">Funcionários</th><th class="n">Investimento em TI</th><th class="n">Conservadora</th><th>Confiança</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div>
-  <div class="paginas"><span>${F.length === rs.length ? plural(F.length, 'empresa', 'empresas') : `${nf(F.length, 0)} de ${plural(rs.length, 'empresa', 'empresas')}`}${pags > 1 ? `, página ${pag + 1} de ${pags}` : ''}</span>${pags > 1 ? `<span class="acoes"><button type="button" class="btn peq" data-acao="pag-lote" data-p="${pag - 1}" ${pag ? '' : 'disabled'}>${ico('voltar')}Anterior</button><button type="button" class="btn peq" data-acao="pag-lote" data-p="${pag + 1}" ${pag < pags - 1 ? '' : 'disabled'}>Próxima${ico('seta')}</button></span>` : ''}</div>`;
+  <div class="paginas"><span>${F.length === rs.length ? plural(F.length, 'empresa', 'empresas') : `${nf(F.length, 0)} de ${plural(rs.length, 'empresa', 'empresas')}`}${pags > 1 ? `, página ${pag + 1} de ${pags}` : ''}</span>${pags > 1 ? `<span class="acoes"><button type="button" class="btn xs" data-acao="pag-lote" data-p="${pag - 1}" ${pag ? '' : 'disabled'}>${ico('voltar')}Anterior</button><button type="button" class="btn xs" data-acao="pag-lote" data-p="${pag + 1}" ${pag < pags - 1 ? '' : 'disabled'}>Próxima${ico('seta')}</button></span>` : ''}</div>`;
 }
 function telaLista(L) {
   const rs = calcularLista(L), ok = rs.filter(x => !x.r.vazio), soma = ok.reduce((a, x) => a + x.r.F, 0), conf = { alta: 0, media: 0, baixa: 0 };
@@ -7777,15 +7739,15 @@ function telaLista(L) {
     <div class="kpi"><small>Confiança</small><b>${nf(conf.alta, 0)} / ${nf(conf.media, 0)} / ${nf(conf.baixa, 0)}</b><span>alta, média e baixa</span></div>
   </div>
   <section class="painel" style="margin-bottom:16px"><div class="opcoes-lote">
-    <div class="campo"><div class="campo-rot"><label for="lr-modo">Método</label></div>${seletorModoLista(L.modo, 'lr-modo')}</div>
-    <div class="campo"><div class="campo-rot"><label for="lr-origem">Origem dos números do arquivo</label>${botaoAjuda('origens', 'Origem do dado')}</div><select id="lr-origem" data-lista="origem">${opsOrigem}</select></div>
+    <div class="campo field"><div class="campo-rot"><label for="lr-modo">Método</label></div>${seletorModoLista(L.modo, 'lr-modo')}</div>
+    <div class="campo field"><div class="campo-rot"><label for="lr-origem">Origem dos números do arquivo</label>${botaoAjuda('origens', 'Origem do dado')}</div><select class="select" id="lr-origem" data-lista="origem">${opsOrigem}</select></div>
     
   </div></section>
   <div class="barra-ferr" role="search">
-    <label class="busca"><span class="sr sr-only">Buscar</span>${ico('busca')}<input type="search" data-lote-f="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
-    <select data-lote-f="setor" aria-label="Setor"><option value="">Todos os setores</option>${setores.map(s => `<option value="${esc(s)}" ${f.setor === s ? 'selected' : ''}>${esc(s === '@publico' ? 'Setor público' : nomeFiltro(s))}</option>`).join('')}</select>
-    <select data-lote-f="conf" aria-label="Confiança"><option value="">Qualquer confiança</option>${[['alta', 'Confiança alta'], ['media', 'Confiança média'], ['baixa', 'Confiança baixa'], ['vazia', 'Sem estimativa']].map(([v, t]) => `<option value="${v}" ${f.conf === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
-    <select data-lote-f="ordem" aria-label="Ordenar">${ORDENS_LOTE.map(([v, t]) => `<option value="${v}" ${f.ordem === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+    <label class="busca"><span class="sr sr-only">Buscar</span>${ico('busca')}<input class="input" type="search" data-lote-f="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
+    <select class="select" data-lote-f="setor" aria-label="Setor"><option value="">Todos os setores</option>${setores.map(s => `<option value="${esc(s)}" ${f.setor === s ? 'selected' : ''}>${esc(s === '@publico' ? 'Setor público' : nomeFiltro(s))}</option>`).join('')}</select>
+    <select class="select" data-lote-f="conf" aria-label="Confiança"><option value="">Qualquer confiança</option>${[['alta', 'Confiança alta'], ['media', 'Confiança média'], ['baixa', 'Confiança baixa'], ['vazia', 'Sem estimativa']].map(([v, t]) => `<option value="${v}" ${f.conf === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
+    <select class="select" data-lote-f="ordem" aria-label="Ordenar">${ORDENS_LOTE.map(([v, t]) => `<option value="${v}" ${f.ordem === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
   <div id="lote-tab">${tabelaLoteHtml(L, rs)}</div>`;
 }
 function atualizarTabelaLote() { const L = listaPorId(UI.rota.id), el = $('#lote-tab'); if (L && el) el.innerHTML = tabelaLoteHtml(L, calcularLista(L)); }
@@ -7821,7 +7783,7 @@ function salvarLinhas(L, idx) {
 }
 async function excluirLista(id) {
   const L = listaPorId(id); if (!L) return;
-  const ok = await perguntar(`<h2>Excluir a lista ${esc(L.nome)}?</h2><p>As ${nf(L.linhas.length, 0)} empresas da lista somem daqui. As que você salvou em Empresas continuam lá.</p>`, [['Cancelar', false], ['Excluir lista', true, 'perigo-forte']]);
+  const ok = await perguntar(`<h2>Excluir a lista ${esc(L.nome)}?</h2><p>As ${nf(L.linhas.length, 0)} empresas da lista somem daqui. As que você salvou em Empresas continuam lá.</p>`, [['Cancelar', false], ['Excluir lista', true, 'danger']]);
   if (!ok) return;
   S.listas = S.listas.filter(l => l !== L); salvar();
   if (UI.rota.id === id) navegar('#/listas'); else renderAqui();
@@ -7888,7 +7850,7 @@ acoes({
   'menu-lista': b => abrirMenuAcoes(b, [['renomear-lista', 'Renomear', 'editar'], ['xlsx-lista', 'Baixar em Excel', 'tabela'], ['csv-lista', 'Baixar em CSV', 'tabela'], '-', ['excluir-lista', 'Excluir lista', 'lixo', `data-id="${UI.rota.id}"`, 'perigo']]),
   'renomear-lista': async () => {
     const L = listaPorId(UI.rota.id); if (!L) return;
-    const r = await perguntar(`<h2>Renomear a lista</h2><label for="dlg-nome" class="sr sr-only">Nome</label><input type="text" id="dlg-nome" value="${esc(L.nome)}">`, [['Cancelar', null], ['Renomear', 'ok', 'prim']]);
+    const r = await perguntar(`<h2>Renomear a lista</h2><label for="dlg-nome" class="sr sr-only">Nome</label><input class="input" type="text" id="dlg-nome" value="${esc(L.nome)}">`, [['Cancelar', null], ['Renomear', 'ok', 'primary']]);
     if (r === 'ok') { const v = ($('#dlg-nome') || {}).value; if (v && v.trim()) { L.nome = v.trim(); salvar(); renderAqui(); } }
   },
   'excluir-lista': b => excluirLista(b.dataset.id),
@@ -7957,7 +7919,7 @@ async function lerBaseNova(f) {
     // vindo dos cartões dos métodos, a importação volta para a análise no fim
     if (UI.rota.tela !== 'metodos') { UI.persVolta = UI.rota.tela === 'analise' ? location.hash : null; navegar('#/metodos/pers-dados'); } else render(true);
   } catch (e) {
-    await perguntar(`<h2>Não deu para ler ${esc(f.name)}</h2><p>${esc(e.message || String(e))}</p><p class="text-secondary">Formatos aceitos: relatório do CRM (.xls), Excel (.xlsx), CSV ou texto separado por ponto e vírgula, e Parquet.</p>`, [['Fechar', null, 'prim']]);
+    await perguntar(`<h2>Não deu para ler ${esc(f.name)}</h2><p>${esc(e.message || String(e))}</p><p class="text-secondary">Formatos aceitos: relatório do CRM (.xls), Excel (.xlsx), CSV ou texto separado por ponto e vírgula, e Parquet.</p>`, [['Fechar', null, 'primary']]);
   }
 }
 const MAX_MINHAS = 5000;
@@ -7965,7 +7927,7 @@ function irParaMinha() { const s = $('#pers-dados'); if (s) s.scrollIntoView({ b
 async function usarBaseNova() {
   const B = UI.baseNova; if (!B || !B.cal) return;
   const j = juntarMinhas(S.calibracao.minhas, B.novas || []);
-  if (j.lista.length > MAX_MINHAS) { await perguntar(`<h2>Lista grande demais</h2><p>O Método Personalizado guarda até ${nf(MAX_MINHAS, 0)} empresas neste navegador; com este arquivo seriam ${nf(j.lista.length, 0)}. Remova empresas da lista ou importe um arquivo menor.</p>`, [['Fechar', null, 'prim']]); return; }
+  if (j.lista.length > MAX_MINHAS) { await perguntar(`<h2>Lista grande demais</h2><p>O Método Personalizado guarda até ${nf(MAX_MINHAS, 0)} empresas neste navegador; com este arquivo seriam ${nf(j.lista.length, 0)}. Remova empresas da lista ou importe um arquivo menor.</p>`, [['Fechar', null, 'primary']]); return; }
   S.calibracao.minhas = j.lista;
   S.calibracao.mapaUlt = Object.assign(copiar(B.mapa), { colunas: B.tab.colunas.slice() });
   UI.baseNova = null; salvar();
@@ -7980,18 +7942,18 @@ function tabelaMinhas(cm) {
   let h = `<h3>Suas empresas (${nf(L.length, 0)})</h3><div class="tab-wrap tab-rola"><table class="tab-minhas"><thead><tr><th>Empresa</th><th>Setor</th><th>Cidade</th><th class="n">Receita líquida</th><th class="n">Funcionários</th><th class="n">Equipe de TI</th><th class="n">Gasto de TI real</th><th class="n">% da receita</th><th>Origem</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>`;
   for (const x of L.slice().reverse().slice(0, lim)) {
     const l = lt[x.id], fora = l && !corte && l.foraFaixa;
-    const div = !l ? '—' : l.semReceita ? '<small class="text-secondary">sem receita do ano</small>' : fmtPct(l.r, 2) + (fora ? `<label class="chk-linha conf"><input type="checkbox" data-minha-conf="${x.id}"${x.confirmado ? ' checked' : ''}> Valor certo</label>` : l.suspeita ? ' <small class="text-secondary">fora do padrão</small>' : '');
+    const div = !l ? '—' : l.semReceita ? '<small class="text-secondary">sem receita do ano</small>' : fmtPct(l.r, 2) + (fora ? `<label class="checkbox conf"><input type="checkbox" data-minha-conf="${x.id}"${x.confirmado ? ' checked' : ''}> Valor certo</label>` : l.suspeita ? ' <small class="text-secondary">fora do padrão</small>' : '');
     h += `<tr><td>${esc(x.nome || '(sem nome)')}</td><td>${esc(nomeFiltro(x.setor))}</td><td>${esc(lugarTxt({ municipio: x.cidade, uf: x.uf }) || '—')}</td><td class="n">${valorAno(x.receita, ultAno(x.receita))}</td><td class="n">${x.func ? nf(x.func, 0) : '—'}</td><td class="n">${x.funcTI ? nf(x.funcTI, 0) : '—'}</td>
     <td class="n">${valorAno(x.gastoTI, ultAno(x.gastoTI))}</td><td class="n">${div}</td><td>${x.origem === 'manual' ? 'digitada' : esc(x.arquivo || 'planilha')}</td>
-    <td class="acoes-cel">${x.origem === 'manual' ? btnIco('editar', 'Editar', `data-minha-edit="${x.id}"`, 'peq') : ''}${btnIco('lixo', 'Remover', `data-minha-del="${x.id}"`, 'peq perigo')}</td></tr>`;
+    <td class="acoes-cel">${x.origem === 'manual' ? btnIco('editar', 'Editar', `data-minha-edit="${x.id}"`, 'xs') : ''}${btnIco('lixo', 'Remover', `data-minha-del="${x.id}"`, 'peq perigo')}</td></tr>`;
   }
   h += '</tbody></table></div>';
   const arqs = {}; for (const x of L) if (x.origem !== 'manual') arqs[x.arquivo || 'planilha'] = (arqs[x.arquivo || 'planilha'] || 0) + 1;
   const pe = [];
-  if (L.length > lim) pe.push(`Mostrando as ${nf(lim, 0)} mais recentes de ${nf(L.length, 0)}. <button type="button" class="link-btn" data-acao="minha-todas">Mostrar todas</button>`);
+  if (L.length > lim) pe.push(`Mostrando as ${nf(lim, 0)} mais recentes de ${nf(L.length, 0)}. <button type="button" class="link-btn link" data-acao="minha-todas">Mostrar todas</button>`);
   if (corte === 0 && Object.values(lt).some(l => l.foraFaixa)) pe.push('Percentual abaixo de 1/5 ou acima de 5 vezes a mediana das outras empresas costuma ser erro de digitação: a empresa só entra no percentual se você marcar “Valor certo”.');
   h += pe.length ? `<p class="text-secondary">${pe.join(' ')}</p>` : '';
-  h += `<div class="cal-arqs">${Object.entries(arqs).map(([a, n]) => `<span>${esc(a)}: ${nf(n, 0)} ${n === 1 ? 'empresa' : 'empresas'} <button type="button" class="link-btn" data-minha-arq="${esc(a)}">remover</button></span>`).join('')}<button type="button" class="link-btn perigo" data-acao="minha-limpar">Remover todas as empresas da lista</button></div>`;
+  h += `<div class="cal-arqs">${Object.entries(arqs).map(([a, n]) => `<span>${esc(a)}: ${nf(n, 0)} ${n === 1 ? 'empresa' : 'empresas'} <button type="button" class="link-btn link" data-minha-arq="${esc(a)}">remover</button></span>`).join('')}<button type="button" class="link-btn link link danger" data-acao="minha-limpar">Remover todas as empresas da lista</button></div>`;
   return h;
 }
 function tabelaSalvas(cm) {
@@ -8003,7 +7965,7 @@ function tabelaSalvas(cm) {
     if (l.semReceita) { h += `<tr class="${l.excluida ? 'fora' : ''}"><td>${chkUsar(l)}</td><td>${esc(l.emp.dados.nome)}</td><td colspan="7" class="text-secondary">Sem receita informada do ano do gasto: não entra no percentual.</td></tr>`; continue; }
     const susp = !corte && l.foraFaixa;
     const obs = l.excluida ? 'Fora da calibração (desmarcada por você)'
-      : susp ? `<label class="chk-linha"><input type="checkbox" data-confirma="${l.emp.id}" ${l.emp.calibConfirmado ? 'checked' : ''}> Possível erro de digitação; confirmar valor</label>` : l.suspeita ? 'Muito fora do padrão: fica de fora' : '';
+      : susp ? `<label class="checkbox"><input type="checkbox" data-confirma="${l.emp.id}" ${l.emp.calibConfirmado ? 'checked' : ''}> Possível erro de digitação; confirmar valor</label>` : l.suspeita ? 'Muito fora do padrão: fica de fora' : '';
     h += `<tr class="${l.excluida ? 'fora' : ''}"><td>${chkUsar(l)}</td><td>${esc(l.emp.dados.nome)}</td><td>${esc(nomeLinha(l.linhaId))}</td><td class="n">${l.ano}</td><td class="n">${fmtRS(l.R)}</td><td class="n">${fmtRS(l.rec)}</td><td class="n">${fmtPct(l.r, 2)}</td>
     <td>${l.excluida || l.suspeita ? '—' : (l.dentroPct ? 'sim' : 'não')}</td><td>${obs}</td></tr>`;
   }
@@ -8012,19 +7974,19 @@ function tabelaSalvas(cm) {
 // formulário de uma empresa digitada
 function formMinha() {
   const f = UI.formMinha, v = f.v, err = f.erros || {};
-  const campo = (id, rot, html, dica) => `<div class="campo"><label for="fm-${id}">${rot}</label>${html}${dica ? `<span class="dica">${dica}</span>` : ''}<div class="valid" id="fm-err-${id}">${esc(err[id] || '')}</div></div>`;
-  const num = (id, ph) => `<input id="fm-${id}" data-fm="${id}" inputmode="decimal" autocomplete="off" value="${esc(v[id] ?? '')}"${ph ? ` placeholder="${ph}"` : ''}>`;
+  const campo = (id, rot, html, dica) => `<div class="campo field"><label for="fm-${id}">${rot}</label>${html}${dica ? `<span class="dica">${dica}</span>` : ''}<div class="valid" id="fm-err-${id}">${esc(err[id] || '')}</div></div>`;
+  const num = (id, ph) => `<input class="input" id="fm-${id}" data-fm="${id}" inputmode="decimal" autocomplete="off" value="${esc(v[id] ?? '')}"${ph ? ` placeholder="${ph}"` : ''}>`;
   return `<div class="cal-form" role="group" aria-labelledby="fm-tit"><h3 id="fm-tit">${f.id ? 'Editar empresa' : 'Adicionar empresa'}</h3><div class="cal-form-grade">
-    ${campo('nome', 'Empresa', `<input id="fm-nome" data-fm="nome" autocomplete="off" value="${esc(v.nome || '')}">`, 'Opcional. Com o nome, a mesma empresa numa planilha atualiza esta linha.')}
-    ${campo('setor', 'Setor', `<select id="fm-setor" data-fm="setor"><option value="">Escolha o setor</option>${opsSetor(v.setor, false)}</select>`)}
-    ${campo('uf', 'Estado', `<select id="fm-uf" data-fm="uf"><option value="">Sem informação</option>${PAIS.ufs.map(u => `<option${u === v.uf ? ' selected' : ''}>${u}</option>`).join('')}</select>`)}
-    ${campo('cidade', 'Cidade', `<input id="fm-cidade" data-fm="cidade" list="dl-fm-cidade" autocomplete="off" value="${esc(v.cidade || '')}"><datalist id="dl-fm-cidade">${opcoesMunicipios(v.uf)}</datalist>`, 'Opcional. Escolha da lista do estado.')}
-    ${campo('ano', 'Ano dos valores', `<input id="fm-ano" data-fm="ano" inputmode="numeric" autocomplete="off" value="${esc(v.ano ?? '')}">`)}
+    ${campo('nome', 'Empresa', `<input class="input" id="fm-nome" data-fm="nome" autocomplete="off" value="${esc(v.nome || '')}">`, 'Opcional. Com o nome, a mesma empresa numa planilha atualiza esta linha.')}
+    ${campo('setor', 'Setor', `<select class="select" id="fm-setor" data-fm="setor"><option value="">Escolha o setor</option>${opsSetor(v.setor, false)}</select>`)}
+    ${campo('uf', 'Estado', `<select class="select" id="fm-uf" data-fm="uf"><option value="">Sem informação</option>${PAIS.ufs.map(u => `<option${u === v.uf ? ' selected' : ''}>${u}</option>`).join('')}</select>`)}
+    ${campo('cidade', 'Cidade', `<input class="input" id="fm-cidade" data-fm="cidade" list="dl-fm-cidade" autocomplete="off" value="${esc(v.cidade || '')}"><datalist id="dl-fm-cidade">${opcoesMunicipios(v.uf)}</datalist>`, 'Opcional. Escolha da lista do estado.')}
+    ${campo('ano', 'Ano dos valores', `<input class="input" id="fm-ano" data-fm="ano" inputmode="numeric" autocomplete="off" value="${esc(v.ano ?? '')}">`)}
     ${campo('receita', 'Receita líquida (R$)', num('receita', 'ex.: 250.000.000 ou 250 mi'))}
     ${campo('func', 'Funcionários', num('func'))}
     ${campo('functi', 'Equipe de TI (pessoas)', num('functi'), 'Opcional.')}
     ${campo('gasto', 'Gasto de TI real no ano (R$)', num('gasto', 'ex.: 3,5 mi'), 'Só valor real, publicado ou declarado pela empresa.')}
-  </div><div class="acoes"><button class="btn prim" data-acao="minha-salvar">${ico('check')}${f.id ? 'Salvar alterações' : 'Adicionar à lista'}</button><button class="btn" data-acao="minha-cancelar">Cancelar</button></div></div>`;
+  </div><div class="acoes"><button class="btn primary" data-acao="minha-salvar">${ico('check')}${f.id ? 'Salvar alterações' : 'Adicionar à lista'}</button><button class="btn" data-acao="minha-cancelar">Cancelar</button></div></div>`;
 }
 function abrirFormMinha(x) {
   const aR = x ? ultAno(x.receita) : null, aG = x ? ultAno(x.gastoTI) : null, a = aG || aR, fmt = v => v ? fmtIn(v) : '';
@@ -8071,7 +8033,7 @@ async function removerMinha(id) {
 }
 async function removerVariasMinha(arq) {
   const L = S.calibracao.minhas, fica = arq == null ? [] : L.filter(x => (x.origem === 'manual' ? null : x.arquivo || 'planilha') !== arq), n = L.length - fica.length;
-  const ok = await perguntar(`<h2>Remover ${nf(n, 0)} ${n === 1 ? 'empresa' : 'empresas'}?</h2><p>${arq == null ? 'A lista da minha calibração fica vazia.' : `Saem as empresas importadas de “${esc(arq)}”.`} As análises salvas com gasto real continuam e não são afetadas. Se quiser guardar a lista, baixe antes.</p>`, [['Cancelar', false], ['Remover', true, 'perigo-forte']]);
+  const ok = await perguntar(`<h2>Remover ${nf(n, 0)} ${n === 1 ? 'empresa' : 'empresas'}?</h2><p>${arq == null ? 'A lista da minha calibração fica vazia.' : `Saem as empresas importadas de “${esc(arq)}”.`} As análises salvas com gasto real continuam e não são afetadas. Se quiser guardar a lista, baixe antes.</p>`, [['Cancelar', false], ['Remover', true, 'danger']]);
   if (!ok) return;
   S.calibracao.minhas = fica; UI.formMinha = null; salvar(); render(); irParaMinha();
   toast(`${nf(n, 0)} ${n === 1 ? 'empresa removida' : 'empresas removidas'}.`);
@@ -8096,15 +8058,15 @@ function htmlMapaColunas(B, comOpcoes) {
   for (const p of PAPEIS_BASE) {
     if (!comOpcoes && p.id === 'naoDivulga') continue;
     const x = m.papeis[p.id], col = x ? x.cols[0] : '';
-    h += `<label for="mp-${p.id}">${esc(p.rot)}</label><div class="mapa-c"><div class="mapa-sel"><select id="mp-${p.id}" data-mapa="${p.id}">${ops(col, 'Não usar')}</select>`;
-    if (p.serie && x) h += `<select id="mp-${p.id}-ano" data-mapa-ano="${p.id}" aria-label="Ano de ${esc(p.rot)}">${ops(x.ano || '', 'Ano: no título ou sem ano')}</select><select id="mp-${p.id}-un" data-mapa-unid="${p.id}" aria-label="Unidade de ${esc(p.rot)}">${[[1, 'em reais'], [1e3, 'em R$ mil'], [1e6, 'em R$ milhões']].map(([v, tx]) => `<option value="${v}"${(x.unid || 1) === v ? ' selected' : ''}>${tx}</option>`).join('')}</select>`;
+    h += `<label for="mp-${p.id}">${esc(p.rot)}</label><div class="mapa-c"><div class="mapa-sel"><select class="select" id="mp-${p.id}" data-mapa="${p.id}">${ops(col, 'Não usar')}</select>`;
+    if (p.serie && x) h += `<select class="select" id="mp-${p.id}-ano" data-mapa-ano="${p.id}" aria-label="Ano de ${esc(p.rot)}">${ops(x.ano || '', 'Ano: no título ou sem ano')}</select><select class="select" id="mp-${p.id}-un" data-mapa-unid="${p.id}" aria-label="Unidade de ${esc(p.rot)}">${[[1, 'em reais'], [1e3, 'em R$ mil'], [1e6, 'em R$ milhões']].map(([v, tx]) => `<option value="${v}"${(x.unid || 1) === v ? ' selected' : ''}>${tx}</option>`).join('')}</select>`;
     h += `</div>${col ? `<small class="text-secondary">${nf(B.cont[col] || 0, 0)} preenchidas${B.amostra[col] ? '; ex.: ' + esc(B.amostra[col]) : ''}${x.cols.length > 1 ? `; mais ${x.cols.length - 1} coluna(s) com o ano no título` : ''}</small>` : ''}</div>`;
   }
   h += '</div>';
-  if (comOpcoes) h += `<h3>Opções</h3><div class="cal-ops"><label class="chk-linha"><input type="checkbox" id="mp-op-red" data-mapa-op="ignorarRedondos"${m.opcoes.ignorarRedondos ? ' checked' : ''}> Ignorar receitas em milhões exatos (costumam ser estimativas)</label>
-    <label class="chk-linha"><input type="checkbox" id="mp-op-nd" data-mapa-op="ignorarNaoDivulga"${m.opcoes.ignorarNaoDivulga ? ' checked' : ''}> Ignorar receitas de empresas marcadas como “não divulga dados financeiros”</label></div>`;
+  if (comOpcoes) h += `<h3>Opções</h3><div class="cal-ops"><label class="checkbox"><input type="checkbox" id="mp-op-red" data-mapa-op="ignorarRedondos"${m.opcoes.ignorarRedondos ? ' checked' : ''}> Ignorar receitas em milhões exatos (costumam ser estimativas)</label>
+    <label class="checkbox"><input type="checkbox" id="mp-op-nd" data-mapa-op="ignorarNaoDivulga"${m.opcoes.ignorarNaoDivulga ? ' checked' : ''}> Ignorar receitas de empresas marcadas como “não divulga dados financeiros”</label></div>`;
   const segs = setoresDaBase(t, m);
-  h += `<details class="cal-seg"${B.segAberto ? ' open' : ''}><summary>Setor da ferramenta para cada segmento da planilha (${segs.length})</summary><div class="tab-wrap"><table><thead><tr><th>Segmento na planilha</th><th class="n">Empresas</th><th>Setor na ferramenta</th></tr></thead><tbody>${segs.map((s, i) => `<tr><td>${esc(s.chave)}</td><td class="n">${s.n}</td><td><select id="mp-seg-${i}" data-mapa-setor="${esc(s.chave)}" aria-label="Setor para ${esc(s.chave)}">${opsSetor(m.setores[s.chave] ?? s.auto)}</select></td></tr>`).join('')}</tbody></table></div></details>`;
+  h += `<details class="cal-seg"${B.segAberto ? ' open' : ''}><summary>Setor da ferramenta para cada segmento da planilha (${segs.length})</summary><div class="tab-wrap"><table><thead><tr><th>Segmento na planilha</th><th class="n">Empresas</th><th>Setor na ferramenta</th></tr></thead><tbody>${segs.map((s, i) => `<tr><td>${esc(s.chave)}</td><td class="n">${s.n}</td><td><select class="select" id="mp-seg-${i}" data-mapa-setor="${esc(s.chave)}" aria-label="Setor para ${esc(s.chave)}">${opsSetor(m.setores[s.chave] ?? s.auto)}</select></td></tr>`).join('')}</tbody></table></div></details>`;
   return h;
 }
 function mudarMapaDe(B, t) {
@@ -8144,7 +8106,7 @@ function telaMetodos() {
   return `<div class="cab"><div class="cab-txt"><h1>Métodos</h1><p class="sub">Fórmulas e parâmetros de cada método. Vezen, CR e FGV são fixos; o Personalizado usa os seus dados.</p></div>
     <div class="acoes"><a class="btn" href="#/testes">${ico('testes')}Testes de aceitação</a></div></div>
   <div class="doc-grade met-corpo"><nav class="doc-ind" aria-label="Seções">${SECOES_METODOS.map(([g, ss]) => `<p class="ind-grupo">${g}</p>${ss.map(([id, , t]) => `<button type="button" data-acao="rolar" data-alvo="${id}"${ENTRADA.has(id) ? ' class="ind-entrada"' : ''}>${t}</button>`).join('')}`).join('')}</nav>
-  <div class="doc-corpo">${SECOES_METODOS.map(([g, ss]) => `<h2 class="met-grupo" data-sem-termos>${g}</h2>` + ss.map(([id, i, t]) => `<section class="painel doc-sec met-sec${ENTRADA.has(id) ? ' met-entrada' : ''}" id="${id}" aria-labelledby="${id}-t"><h2 id="${id}-t">${ico(i)}${t}${ENTRADA.has(id) ? '<span class="selo entrada">entrada de dados</span>' : ''}</h2>${CORPO_METODOS[id](Pm)}</section>`).join('')).join('')}</div></div>`;
+  <div class="doc-corpo">${SECOES_METODOS.map(([g, ss]) => `<h2 class="met-grupo" data-sem-termos>${g}</h2>` + ss.map(([id, i, t]) => `<section class="painel doc-sec met-sec${ENTRADA.has(id) ? ' met-entrada' : ''}" id="${id}" aria-labelledby="${id}-t"><h2 id="${id}-t">${ico(i)}${t}${ENTRADA.has(id) ? '<span class="selo entrada input-group">entrada de dados</span>' : ''}</h2>${CORPO_METODOS[id](Pm)}</section>`).join('')).join('')}</div></div>`;
 }
 
 /* ---------- peças da documentação ---------- */
@@ -8232,7 +8194,7 @@ const FX = {
 /* ---------- visão geral: os dois resultados e os quatro métodos ---------- */
 function metInicio() {
   const usos = m => S.empresas.filter(e => modoDe(e.dados) === m).length;
-  const cartao = m => { const x = METODOS[m], ok = modoDisponivel(m), n = usos(m); return `<div class="tipo${ok ? ' em-uso' : ''}"><h3>${ico(x.ico)}${x.nome}</h3><p>${x.resumo}</p><div class="tipo-pe"><span class="${ok ? 'estado ok' : 'estado'}"><i aria-hidden="true"></i>${ok ? (n ? plural(n, 'análise salva', 'análises salvas') : 'Disponível') : 'Sem dados ainda'}</span><button type="button" class="link-btn" data-acao="rolar" data-alvo="${x.ancora}">Fórmula</button></div></div>`; };
+  const cartao = m => { const x = METODOS[m], ok = modoDisponivel(m), n = usos(m); return `<div class="tipo${ok ? ' em-uso' : ''}"><h3>${ico(x.ico)}${x.nome}</h3><p>${x.resumo}</p><div class="tipo-pe"><span class="${ok ? 'estado ok' : 'estado'}"><i aria-hidden="true"></i>${ok ? (n ? plural(n, 'análise salva', 'análises salvas') : 'Disponível') : 'Sem dados ainda'}</span><button type="button" class="link-btn link" data-acao="rolar" data-alvo="${x.ancora}">Fórmula</button></div></div>`; };
   return `<dl class="ficha"><div><dt>Receita líquida</dt><dd>Do ano de referência da análise (padrão: o último ano fechado). Informada, ou estimada quando falta.</dd></div>
     <div><dt>Investimento em TI</dt><dd>Do mesmo ano, com faixa provável e índice de confiança.</dd></div></dl>
   <div class="tipos">${MODOS.map(cartao).join('')}</div>
@@ -8247,7 +8209,7 @@ function metInicio() {
 
 /* ---------- Método Vezen ---------- */
 function metVisao(Pm) {
-  const passo = (t, alvo, corpo) => `<li><div class="passo-cab"><h3>${t}</h3><button type="button" class="link-btn" data-acao="rolar" data-alvo="${alvo}">Detalhes</button></div>${corpo}</li>`;
+  const passo = (t, alvo, corpo) => `<li><div class="passo-cab"><h3>${t}</h3><button type="button" class="link-btn link" data-acao="rolar" data-alvo="${alvo}">Detalhes</button></div>${corpo}</li>`;
   return `<p class="d-lead">Ano de referência: o da análise; por padrão, o último ano fechado. Valores em reais nominais.</p>
   <ol class="passos">
     ${passo('Receita líquida', 'met-receita', eqs(FX.receita()) + legDe(Pm, ['V', 'd', 'm', 'gR', 'a']))}
@@ -8519,7 +8481,7 @@ function persDados() {
     L.length ? `<button type="button" class="btn" data-acao="minha-baixar" data-tip="Lista em CSV, para editar no Excel e importar de novo">${ico('baixar')}Baixar lista</button>`
       : `<button type="button" class="btn" data-acao="minha-modelo" data-tip="Planilha vazia com as colunas que a ferramenta reconhece">${ico('baixar')}Baixar modelo</button>`,
     `<button type="button" class="btn" data-acao="minha-nova">${ico('mais')}Adicionar empresa</button>`,
-    `<button type="button" class="btn${direta ? ' prim' : ''}" data-acao="dir-abrir">${ico('editar')}${direta ? 'Editar percentuais' : 'Informar percentuais'}</button>`];
+    `<button type="button" class="btn${direta ? ' primary' : ''}" data-acao="dir-abrir">${ico('editar')}${direta ? 'Editar percentuais' : 'Informar percentuais'}</button>`];
   let h = `<div class="acoes" style="margin-bottom:14px">${bts.join('')}</div>`;
   if (UI.formMinha) h += formMinha();
   if (UI.formDireta) h += formDireta();
@@ -8563,13 +8525,13 @@ function secaoPers() {
 }
 function formDireta(fixo = false) {
   const f = UI.formDireta, err = f.erros || {};
-  const sel = (i, parte, ops, v) => `<select data-dirl="${i}" data-parte="${parte}" aria-label="${parte === 'l' ? 'Setor' : 'Estado'}">${ops.map(([k, t]) => `<option value="${k}"${k === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
+  const sel = (i, parte, ops, v) => `<select class="select" data-dirl="${i}" data-parte="${parte}" aria-label="${parte === 'l' ? 'Setor' : 'Estado'}">${ops.map(([k, t]) => `<option value="${k}"${k === v ? ' selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
   const opsL = [['', 'Todos os setores'], ...setoresDiretos().map(l => [l, nomeLinha(l)])], opsU = [['', 'Todos os estados'], ...PAIS.ufs.map(u => [u, u])];
   return `<div class="cal-form" role="group" aria-labelledby="dir-tit"><h3 id="dir-tit">Percentual da receita gasto com TI</h3><p class="text-secondary">Por setor e estado. A linha mais específica vale primeiro; “Todos” cobre o que não tiver linha própria.</p>
     <div class="dir-linhas"><div class="dir-linha dir-cab" aria-hidden="true"><span>Setor</span><span>Estado</span><span>Percentual</span><span></span></div>
-    ${f.linhas.map((x, i) => `<div class="dir-linha">${sel(i, 'l', opsL, x.l)}${sel(i, 'uf', opsU, x.uf)}<div class="entrada com-suf"><input data-dirl="${i}" data-parte="p" inputmode="decimal" autocomplete="off" aria-label="Percentual" placeholder="1,5" value="${esc(x.p)}"><span class="suf">%</span></div>${f.linhas.length > 1 ? btnIco('lixo', 'Remover esta linha', `data-acao="dir-del" data-i="${i}"`, 'peq perigo') : '<span></span>'}${err[i] ? `<div class="valid">${esc(err[i])}</div>` : ''}</div>`).join('')}</div>
-    <button type="button" class="link-btn dir-add" data-acao="dir-add">${ico('mais')}Adicionar linha</button>
-    <div class="acoes dir-acoes"><button type="button" class="btn prim" data-acao="dir-salvar">${ico('check')}${fixo ? 'Salvar percentuais' : 'Usar estes percentuais'}</button>${S.calibracao.direta ? `<button type="button" class="btn" data-acao="dir-desligar">${ico('lixo')}Remover percentuais</button>` : ''}${fixo ? '' : '<button type="button" class="btn" data-acao="dir-cancelar">Cancelar</button>'}</div></div>`;
+    ${f.linhas.map((x, i) => `<div class="dir-linha">${sel(i, 'l', opsL, x.l)}${sel(i, 'uf', opsU, x.uf)}<div class="entrada input-group com-suf"><input class="input" data-dirl="${i}" data-parte="p" inputmode="decimal" autocomplete="off" aria-label="Percentual" placeholder="1,5" value="${esc(x.p)}"><span class="suf input-addon">%</span></div>${f.linhas.length > 1 ? btnIco('lixo', 'Remover esta linha', `data-acao="dir-del" data-i="${i}"`, 'peq perigo') : '<span></span>'}${err[i] ? `<div class="valid">${esc(err[i])}</div>` : ''}</div>`).join('')}</div>
+    <button type="button" class="link-btn link dir-add" data-acao="dir-add">${ico('mais')}Adicionar linha</button>
+    <div class="acoes dir-acoes"><button type="button" class="btn primary" data-acao="dir-salvar">${ico('check')}${fixo ? 'Salvar percentuais' : 'Usar estes percentuais'}</button>${S.calibracao.direta ? `<button type="button" class="btn" data-acao="dir-desligar">${ico('lixo')}Remover percentuais</button>` : ''}${fixo ? '' : '<button type="button" class="btn" data-acao="dir-cancelar">Cancelar</button>'}</div></div>`;
 }
 // o formulário guarda o que está na tela antes de acrescentar, tirar ou salvar linhas
 function lerFormDireta() {
@@ -8655,7 +8617,7 @@ function tabelasCalibracao(cal, minha) {
 function secaoBaseNova() {
   const B = UI.baseNova, cal = B.cal, nNovas = B.novas ? B.novas.length : 0;
   return `<div class="cab"><div class="cab-txt"><h1>Importar para o Método Personalizado</h1><p class="sub">${esc(B.nome)}: ${esc(B.tab.formato)}, ${plural(B.tab.linhas.length, 'linha', 'linhas')} e ${plural(B.tab.colunas.length, 'coluna', 'colunas')}. ${plural(nNovas, 'empresa nova', 'empresas novas')}; a mesma empresa (CNPJ ou nome) atualiza a linha que já está na lista.</p></div>
-    <div class="acoes"><button type="button" class="btn" data-acao="cancelar-base">Cancelar</button><button type="button" class="btn prim" data-acao="usar-base"${nNovas > 0 ? '' : ' disabled'}>${ico('check')}Adicionar ${plural(nNovas, 'empresa', 'empresas')}</button></div></div>
+    <div class="acoes"><button type="button" class="btn" data-acao="cancelar-base">Cancelar</button><button type="button" class="btn primary" data-acao="usar-base"${nNovas > 0 ? '' : ' disabled'}>${ico('check')}Adicionar ${plural(nNovas, 'empresa', 'empresas')}</button></div></div>
   <section class="painel"><div class="painel-cab"><div><h2>${ico('tabela')}O que cada coluna é</h2><p>Sugerido pelos títulos. Confira principalmente o gasto de TI: use só valores reais, publicados ou declarados pelas empresas.</p></div></div>${htmlMapaColunas(B, true)}</section>
   <section class="painel"><div class="painel-cab"><div><h2>${ico('calib')}Prévia, com a lista e este arquivo</h2></div></div>${cal ? tabelasCalibracao(cal, true) : `<div class="alerta critico">${ico('alerta')}<p>${esc(B.erro || 'Não deu para calcular com estas colunas.')}</p></div>`}</section>`;
 }
@@ -9129,8 +9091,8 @@ function telaGlossario() {
   for (const g of glOrdem()) { const l = glLetra(g); if (!grupos.has(l)) grupos.set(l, []); grupos.get(l).push(g); }
   return `<div class="cab"><div class="cab-txt"><h1>Glossário</h1><p class="sub">Siglas e termos usados na ferramenta. No texto, os termos sublinhados abrem a definição.</p></div></div>
   <div class="barra-ferr" role="search">
-    <label class="busca"><span class="sr sr-only">Buscar termo</span>${ico('busca')}<input type="search" id="gl-busca" data-gl-busca value="${esc(f.q)}" placeholder="Buscar termo" autocomplete="off"></label>
-    <select id="gl-cat" data-gl-cat aria-label="Categoria"><option value="">Todas as categorias</option>${GL_CATS.map(([id, nome]) => `<option value="${id}"${id === f.cat ? ' selected' : ''}>${esc(nome)}</option>`).join('')}</select>
+    <label class="busca"><span class="sr sr-only">Buscar termo</span>${ico('busca')}<input class="input" type="search" id="gl-busca" data-gl-busca value="${esc(f.q)}" placeholder="Buscar termo" autocomplete="off"></label>
+    <select class="select" id="gl-cat" data-gl-cat aria-label="Categoria"><option value="">Todas as categorias</option>${GL_CATS.map(([id, nome]) => `<option value="${id}"${id === f.cat ? ' selected' : ''}>${esc(nome)}</option>`).join('')}</select>
   </div>
   <nav class="gl-letras" aria-label="Filtrar por letra"><button type="button" class="gl-lt gl-todas" data-acao="gl-letra" data-l="" aria-pressed="${!f.letra}">Todas</button>${[...new Set([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', ...grupos.keys()])].map(l => `<button type="button" class="gl-lt" data-acao="gl-letra" data-l="${l}" aria-pressed="${f.letra === l}">${l}</button>`).join('')}</nav>
   <p class="text-secondary gl-conta" id="gl-conta" role="status"></p>
@@ -9171,7 +9133,7 @@ TELAS.glossario = {
 /* ---------- janelinha com a definição, aberta pelas siglas do texto ---------- */
 function abrirTermo(btn) {
   const g = GL_POR_ID.get(btn.dataset.gl); if (!g) return;
-  abrirPop(btn, `<div data-termo-proprio="${g.id}"><h4><span>${esc(g.t)}${g.n ? ` <small>${esc(g.n)}</small>` : ''}</span><button type="button" class="btn fant ico-so peq" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>
+  abrirPop(btn, `<div data-termo-proprio="${g.id}"><h4><span>${esc(g.t)}${g.n ? ` <small>${esc(g.n)}</small>` : ''}</span><button type="button" class="btn ghost icon xs" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>
     <p class="pop-def">${esc(g.d)}</p><p class="pop-nota"><a href="#/glossario/${g.id}">Ver no glossário</a></p></div>`, { cls: 'pop-ajuda pop-termo', papel: 'dialog', rotulo: g.t });
 }
 // a letra escolhida filtra a lista; clicar de novo nela, ou em Todas, mostra tudo
@@ -9329,13 +9291,13 @@ function montarTour() {
   const raiz = document.createElement('div'); raiz.className = 'tour'; raiz.id = 'tour';
   raiz.innerHTML = `${['c', 'd', 'b', 'e', 'furo'].map(l => `<div class="tour-bloq" data-l="${l}"></div>`).join('')}<div class="tour-luz sem-alvo"></div>
     <section class="tour-cartao" role="dialog" aria-labelledby="tour-tit" aria-describedby="tour-txt">
-      <div class="tour-topo"><span class="tour-passo" id="tour-passo"></span><button type="button" class="btn fant ico-so peq" data-t="fechar" aria-label="Fechar o tour" data-tip="Fechar o tour">${ico('x')}</button></div>
+      <div class="tour-topo"><span class="tour-passo" id="tour-passo"></span><button type="button" class="btn ghost icon xs" data-t="fechar" aria-label="Fechar o tour" data-tip="Fechar o tour">${ico('x')}</button></div>
       <div class="tour-barra" aria-hidden="true"><i></i></div>
       <h2 id="tour-tit" tabindex="-1"></h2><p id="tour-txt"></p>
       <p class="tour-acao" hidden></p>
       <div class="tour-msg" aria-live="polite"><div><p></p></div></div>
-      <div class="tour-pe"><button type="button" class="link-btn" data-t="pular">Pular tour</button>
-        <span><button type="button" class="btn" data-t="voltar">Voltar</button><button type="button" class="btn" data-t="repetir" hidden>Tentar de novo</button><button type="button" class="btn prim" data-t="proximo">Próximo</button></span></div>
+      <div class="tour-pe"><button type="button" class="link-btn link" data-t="pular">Pular tour</button>
+        <span><button type="button" class="btn" data-t="voltar">Voltar</button><button type="button" class="btn" data-t="repetir" hidden>Tentar de novo</button><button type="button" class="btn primary" data-t="proximo">Próximo</button></span></div>
     </section>`;
   document.body.appendChild(raiz);
   raiz.addEventListener('click', e => {
