@@ -3438,6 +3438,12 @@ function cartoesMetodo(acao = 'escolher-modo') {
   return `<div class="comecos comecos-met">${MODOS.map(v => { const M = METODOS[v], dentro = `${ico(M.ico)}<b>${nomeModo(v)}</b><span>${M.breve}</span>`;
       return `<button type="button" class="comeco" data-acao="${acao}" data-v="${v}">${dentro}</button>`; }).join('')}</div>`;
 }
+// método escolhido: a análise abre do topo; sem dados do Personalizado, o cursor vai ao percentual, senão ao nome
+function abrirComMetodo(v) {
+  UI.atual.dados.modo = v; UI.formDireta = null; UI.formMinha = null; renderAqui();
+  window.scrollTo(0, 0);
+  const o = (v === 'propria' && !modoDisponivel('propria') && $('#sec-pers [data-dirl="0"][data-parte="p"]')) || $('#f-nome'); if (o) o.focus({ preventScroll: true });
+}
 async function novaAnalise(dados, limpo = false) {
   if (!(await confirmarSaida())) return;
   UI.atual = novaEmpresa(); UI.sujo = !!dados && !limpo; UI.sugestao = null; UI.cnpjMsg = '';
@@ -4394,10 +4400,10 @@ TELAS.analise = {
 };
 acoes({
   'nova': () => novaAnalise(),
-  'nova-modo': async b => { await novaAnalise(); if (UI.atual.dados.modo === '') { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#sec-pers [data-dirl="0"][data-parte="p"]') || $('#f-nome'); if (o) o.focus(); } },
+  'nova-modo': async b => { await novaAnalise(); if (UI.atual.dados.modo === '') abrirComMetodo(b.dataset.v); },
   'voltar-metodo': () => { UI.atual.dados.modo = ''; UI.formDireta = null; UI.formMinha = null; navegar('#/analise/' + encodeURIComponent(UI.atual.id)); renderAqui(); },
   'pers-editar': () => { if (!UI.formDireta && !UI.formMinha) UI.formDireta = novoFormDireta(); renderAqui(); const s = $('#sec-pers'); if (s) { s.scrollIntoView({ block: 'start', behavior: reduzMov() ? 'auto' : 'smooth' }); const i = $('#sec-pers [data-dirl="0"][data-parte="p"]'); if (i) i.focus({ preventScroll: true }); } },
-  'escolher-modo': b => { UI.atual.dados.modo = b.dataset.v; renderAqui(); const o = $('#sec-pers [data-dirl="0"][data-parte="p"]') || $('#f-nome'); if (o) o.focus(); },
+  'escolher-modo': b => abrirComMetodo(b.dataset.v),
   'modelo': () => abrirEmpresaModelo(),
   'salvar': () => salvarEmpresa(),
   'descartar': () => descartar(),

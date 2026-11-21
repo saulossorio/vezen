@@ -126,6 +126,10 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await p.fill('[data-dirl="0"][data-parte="p"]', '2,5'); await p.press('[data-dirl="0"][data-parte="p"]', 'Enter'); await p.waitForTimeout(250);
   ok('Com um percentual, o formulário libera e o percentual fica à vista para editar', await p.locator('fieldset.bloqueado').count() === 0 && await motor(() => UI.atual.dados.modo === 'propria' && S.calibracao.direta.pg === 0.025) && (await p.inputValue('#sec-pers [data-dirl="0"][data-parte="p"]')) === '2,50' && /2,50%/.test(await txt('#painel .modo-op:has(input[value=propria]) small')));
   await p.fill('#sec-pers [data-dirl="0"][data-parte="p"]', '3'); await p.press('#sec-pers [data-dirl="0"][data-parte="p"]', 'Enter'); await p.waitForTimeout(250);
+  await motor(() => { UI.atual.dados.modo = ''; renderAqui(); }); await p.waitForTimeout(150);
+  await p.click('[data-acao=escolher-modo][data-v=propria]'); await p.waitForTimeout(200);
+  ok('Personalizado com dados abre a análise do topo, com a seção do método à vista', await motor(() => scrollY === 0 && document.activeElement.id === 'f-nome' && document.getElementById('sec-pers').getBoundingClientRect().top < innerHeight / 2));
+  await p.fill('#sec-pers [data-dirl="0"][data-parte="p"]', '3'); await p.press('#sec-pers [data-dirl="0"][data-parte="p"]', 'Enter'); await p.waitForTimeout(250);
   ok('O percentual editado na análise vale na hora', await motor(() => S.calibracao.direta.pg === 0.03) && /3,00%/.test(await txt('#painel .modo-op:has(input[value=propria]) small')));
   await motor(() => { S.calibracao.direta = null; salvar(); UI.atual.dados.modo = ''; renderAqui(); }); await p.waitForTimeout(150);
   await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(150);

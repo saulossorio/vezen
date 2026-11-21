@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.9.1] - 2026-11-20
+
+### Corrigido
+- Escolher o método abre a análise do topo; o cursor vai ao percentual só quando o Personalizado ainda não tem dados (senão, ao nome da empresa).
+
 ## [3.9.0] - 2026-11-20
 
 ### Alterado
