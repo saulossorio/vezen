@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.2.0] - 2026-11-21
+
+### Alterado
+- Grin 2.26. Empresas sem nenhuma empresa usa o padrão Tela inicial do Grin, como o Laika. O conteúdo fica numa coluna centralizada de 680 px, no centro vertical da janela, os quatro métodos ficam em duas colunas e a assinatura fica no fim, na mesma largura. Com empresas, a tela continua sendo a lista.
+
 ## [4.1.2] - 2026-11-21
 
 ### Alterado
