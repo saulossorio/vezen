@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.1.1] - 2026-11-21
+
+### Alterado
+- Grin 2.23. A assinatura aparece só em Empresas, a tela inicial, e na documentação (Métodos e Glossário). Fica logo depois do conteúdo e rola com ele. Saiu das telas de trabalho (análise, listas e testes).
+
 ## [4.1.0] - 2026-11-21
 
 ### Adicionado
