@@ -2732,66 +2732,52 @@ tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
 .ico { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .ico.p { width: 16px; height: 16px; }
 
-/* ===================== CASCA: barra lateral, topo do celular, conteúdo ===================== */
-.app { display: grid; grid-template-columns: 252px minmax(0, 1fr); min-height: 100vh; }
-.lateral { position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; padding: 14px 10px 12px; gap: 6px; }
-.lat-marca { display: flex; align-items: center; gap: 8px; padding: 4px 8px 12px; font-weight: 700; font-size: 1.12rem; }
+/* ===================== CASCA: barra lateral (sidebar do Grin), topo do celular e conteúdo =====================
+   A casca não usa .app do Grin: recolher a barra e o menu do celular são do Vezen (vezen.lateral, data-lateral). */
+.casca { display: grid; grid-template-columns: auto minmax(0, 1fr); min-height: 100vh; }
+.lateral.sidebar { transition-duration: var(--dur); } /* recolher e abrir no celular com a duração padrão do Grin */
+.lat-marca { align-items: center; margin-bottom: 12px; }
 .lat-marca svg { flex: none; }
 .lat-marca .lat-fechar { margin-left: auto; display: none; }
-.lat-marca .lat-recolher { margin-left: auto; color: var(--muted-foreground); }
+.lat-marca .lat-recolher { margin-left: auto; }
+.lat-nova { width: 100%; margin: 0 0 14px; }
 .lat-sub .ico { display: none; }
-.lat-nav { display: flex; flex-direction: column; gap: 2px; }
-.lat-nova { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin: 2px 0 10px; padding: 9px 10px; border: 0; border-radius: var(--radius-sm); background: var(--primary); color: var(--primary-foreground); font: inherit; font-size: 1rem; font-weight: 650; cursor: pointer; transition: background var(--dur-fast) var(--ease); }
-.lat-nova:hover { background: oklch(0.72 0.17 128); }
-.lat-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: var(--radius-sm); color: var(--foreground); text-decoration: none; font-weight: 500; font-size: 1rem; border: 0; background: none; width: 100%; text-align: left; cursor: pointer; }
-.lat-item:hover { background: var(--hover); }
-.lat-item[aria-current="page"] { background: var(--sidebar-active); font-weight: 600; }
-.lat-item .lat-n { margin-left: auto; font-size: .78rem; color: var(--muted-foreground); font-weight: 500; }
-.lat-item .ponto, .lat-sub .ponto { width: 7px; height: 7px; border-radius: 50%; background: var(--warn-border); margin-left: auto; flex: none; }
-.lat-sub { display: flex; align-items: center; gap: 8px; margin: 0 0 2px 28px; padding: 5px 10px; border-radius: var(--radius-sm); color: var(--muted-foreground); text-decoration: none; font-size: .88rem; border-left: 2px solid var(--border-strong); border-top-left-radius: 0; border-bottom-left-radius: 0; }
-.lat-sub span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lat-sub:hover { background: var(--hover); color: var(--foreground); }
-.lat-sub[aria-current="page"] { color: var(--foreground); font-weight: 600; border-left-color: var(--primary); }
-.lat-sep { height: 1px; background: var(--border); margin: 10px 8px; }
-.lat-grupo { font-size: .78rem; color: var(--muted-foreground); padding: 2px 10px 4px; }
-.lat-pe { margin-top: auto; display: flex; flex-direction: column; gap: 2px; border-top: 1px solid var(--border); padding-top: 8px; }
-.lat-pe .lat-item { font-size: .88rem; color: var(--muted-foreground); }
-.lat-ver { font-size: .75rem; font-weight: 600; color: var(--link); background: var(--brand-bg); border: 1px solid var(--brand-border); border-radius: 999px; padding: 1px 8px; line-height: 1.4; }
-[data-lateral="recolhida"] .lat-ver { display: none; }
-.lat-dados { font-size: .8rem; color: var(--muted-foreground); padding: 4px 10px 2px; line-height: 1.4; }
+.lat-dados { font-size: var(--text-sm); color: var(--muted-foreground); padding: 4px 12px 6px; line-height: var(--leading-ui); }
 .lat-dados.atencao { color: var(--warn-fg); }
-.topo-movel { display: none; position: sticky; top: 0; z-index: 30; align-items: center; gap: 8px; padding: 8px 12px; background: var(--background); border-bottom: 1px solid var(--border); min-height: 52px; }
-.topo-movel .tm-tit { font-weight: 650; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lat-item .ponto { margin-left: auto; }
+.topo-movel { display: none; }
+.topo-movel .tm-tit { font-weight: var(--weight-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .principal { min-width: 0; }
-#app { max-width: 1280px; margin: 0 auto; padding: 28px 36px 72px; outline: none; }
+#app { max-width: calc(var(--size-content) + 64px); margin: 0 auto; padding: 32px 32px 64px; outline: none; }
 .veu-menu { display: none; }
+.aviso-armaz { padding-inline: 32px; }
 @media (min-width: 961px) {
-  .app { transition: grid-template-columns var(--dur-fast) ease; }
-  [data-lateral="recolhida"] .app { grid-template-columns: 64px minmax(0, 1fr); }
-  [data-lateral="recolhida"] .lateral { padding-inline: 8px; overflow-x: hidden; }
-  [data-lateral="recolhida"] .lateral .rot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  [data-lateral="recolhida"] .lat-marca { flex-direction: column; gap: 10px; padding: 4px 0 10px; }
+  /* recolhida: só os ícones, como .sidebar.collapsed do Grin, em 64 px */
+  [data-lateral="recolhida"] .sidebar { width: 64px; padding-inline: 8px; }
+  [data-lateral="recolhida"] .sidebar .label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  [data-lateral="recolhida"] .lat-marca { flex-direction: column; align-items: center; gap: 10px; padding: 6px 0; }
   [data-lateral="recolhida"] .lat-marca .lat-recolher { margin: 0; }
-  [data-lateral="recolhida"] .lat-item, [data-lateral="recolhida"] .lat-sub { position: relative; justify-content: center; padding: 9px 0; margin: 0; border-left: 0; border-radius: var(--radius-sm); }
+  [data-lateral="recolhida"] .lat-ver, [data-lateral="recolhida"] .nav-count, [data-lateral="recolhida"] .lat-dados { display: none; }
+  [data-lateral="recolhida"] .nav-item, [data-lateral="recolhida"] .lat-nova { justify-content: center; padding: 0; }
+  [data-lateral="recolhida"] .lat-nova { width: 48px; align-self: center; }
+  [data-lateral="recolhida"] .nav-sub { margin: 2px 0; padding: 0; border: 0; }
   [data-lateral="recolhida"] .lat-sub .ico { display: block; }
-  [data-lateral="recolhida"] .lat-sub[aria-current="page"] { background: var(--sidebar-active); }
-  [data-lateral="recolhida"] .lat-nova { padding: 9px 0; margin-bottom: 8px; }
-  [data-lateral="recolhida"] .lat-n, [data-lateral="recolhida"] .lat-dados { display: none; }
-  [data-lateral="recolhida"] .ponto { position: absolute; top: 6px; right: 9px; margin: 0; }
-  [data-lateral="recolhida"] .lat-sep { margin-inline: 4px; }
+  [data-lateral="recolhida"] .lat-sub[aria-current="page"] { background: var(--sidebar-active); box-shadow: inset 0 0 0 1px var(--brand-border); }
+  [data-lateral="recolhida"] .lat-sub[aria-current="page"]::before { display: none; }
+  [data-lateral="recolhida"] .ponto { position: absolute; top: 6px; right: 8px; margin: 0; }
+  [data-lateral="recolhida"] .nav-divider { margin-inline: 4px; }
 }
-.aviso-armaz { background: var(--warn-bg); color: var(--warn-fg); border-bottom: 1px solid var(--warn-border); padding: 8px 36px; font-size: .9rem; }
 @media (max-width: 960px) {
-  .app { grid-template-columns: minmax(0, 1fr); }
-  .lateral { position: fixed; inset: 0 auto 0 0; width: min(300px, 86vw); z-index: 60; transform: translateX(-102%); transition: transform var(--dur-fast) ease; box-shadow: var(--shadow-lg); }
-  .app.menu-aberto .lateral { transform: none; }
-  .app.menu-aberto .veu-menu { display: block; position: fixed; inset: 0; background: var(--overlay); z-index: 55; }
+  .casca { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { position: fixed; inset: 0 auto 0 0; z-index: 60; width: min(300px, 86vw); transform: translateX(-102%); transition: transform var(--dur) var(--ease); box-shadow: var(--shadow-lg); }
+  .casca.menu-aberto .sidebar { transform: none; }
+  .casca.menu-aberto .veu-menu { display: block; position: fixed; inset: 0; background: var(--overlay); backdrop-filter: blur(2px); z-index: 55; animation: grin-fade var(--dur) ease-out; }
   .lat-marca .lat-fechar { display: inline-flex; }
   .lat-marca .lat-recolher { display: none; }
-  .topo-movel { display: flex; }
+  .topo-movel { display: flex; padding: 0 12px; gap: 8px; height: 52px; }
   :root { --topo-fixo: 52px; }
-  #app { padding: 18px 16px 64px; }
-  .aviso-armaz { padding: 8px 16px; }
+  #app { padding: 20px 16px 64px; }
+  .aviso-armaz { padding-inline: 16px; }
 }
 
 /* ===================== CONTROLES ===================== */
@@ -2956,8 +2942,6 @@ fieldset.bloqueado { border: 0; padding: 0; margin: 0; min-width: 0; display: gr
 .ajuda { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; border-radius: 50%; border: 0; background: none; color: var(--muted-foreground); cursor: pointer; padding: 0; flex: none; }
 .ajuda:hover { background: var(--hover); color: var(--foreground); }
 .ajuda .ico { width: 17px; height: 17px; }
-.tip { position: fixed; z-index: 90; max-width: 300px; padding: 6px 9px; border-radius: var(--radius-sm); background: var(--foreground); color: var(--background); font-size: .8rem; line-height: 1.4; pointer-events: none; opacity: 0; transition: opacity 120ms; }
-.tip.show { opacity: 1; }
 dialog#dlg { border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 0; width: min(560px, calc(100vw - 24px)); background: var(--surface); color: var(--foreground); box-shadow: var(--shadow-lg); }
 dialog#dlg.largo { width: min(880px, calc(100vw - 24px)); }
 dialog#dlg::backdrop { background: var(--overlay); }
@@ -3544,7 +3528,7 @@ tr.r-falha td { background: var(--crit-bg); }
 
 @media print {
   .lateral, .topo-movel, .abas, .acoes, .cr-acoes, .indice-lado { display: none !important; }
-  .app { display: block; } #app { padding: 0; max-width: none; }
+  .casca { display: block; } #app { padding: 0; max-width: none; }
   .painel, .secao-form, .cartao-res { box-shadow: none; break-inside: avoid; }
 }
 
@@ -3601,7 +3585,7 @@ dialog#dlg.saindo::backdrop { opacity: 0; transition: opacity 110ms ease-in; }
 /* campos, botões e marcas: a cor muda aos poucos quando o estado muda */
 input[type="text"], input[type="search"], input:not([type]), select, textarea { transition: border-color var(--dur-fast), background-color var(--dur-fast), box-shadow var(--dur-fast); }
 .campo-rot label, .dado, .dado b { transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast); }
-.origem, .lat-item, .lat-sub, .modo-op, .tag-tec, .tec-cat, .tec-op, .tec-voltar, .estado, .estado i, .chip-falta { transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast), transform var(--dur-fast); }
+.origem, .modo-op, .tag-tec, .tec-cat, .tec-op, .tec-voltar, .estado, .estado i, .chip-falta { transition: color var(--dur-fast), background-color var(--dur-fast), border-color var(--dur-fast), opacity var(--dur-fast), transform var(--dur-fast); }
 .tag-tec.saindo { opacity: 0; transform: scale(.9); pointer-events: none; }
 /* seções que abrem e fecham: onde o navegador sabe animar a altura, anima; nos outros, abre direto */
 details { interpolate-size: allow-keywords; }
@@ -3737,16 +3721,16 @@ details[open]::details-content { block-size: auto; }
 <symbol id="i-globo" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3z"/></symbol>
 <symbol id="i-marca" viewBox="0 0 28 28"><path d="M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z" style="fill: var(--primary)" stroke="none"/></symbol>
 </defs></svg>
-<div class="app" id="casca">
-  <aside class="lateral" id="lateral" aria-label="Navegação">
-    <div class="lat-marca"><svg width="24" height="24" aria-hidden="true"><use href="#i-marca"/></svg><span class="rot">Vezen</span><span class="lat-ver" id="lat-ver"></span><button type="button" class="btn fant ico-so peq lat-recolher" data-acao="recolher" aria-controls="lateral"><svg class="ico" aria-hidden="true"><use href="#i-painel"/></svg></button><button type="button" class="btn fant ico-so peq lat-fechar" data-acao="menu-fechar" aria-label="Fechar menu"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+<div class="casca" id="casca">
+  <aside class="lateral sidebar" id="lateral" aria-label="Navegação">
+    <div class="lat-marca app-logo"><svg width="24" height="24" aria-hidden="true"><use href="#i-marca"/></svg><span class="rot label">Vezen</span><span class="lat-ver tag" id="lat-ver"></span><button type="button" class="btn ghost icon xs lat-recolher" data-acao="recolher" aria-controls="lateral"><svg class="ico" aria-hidden="true"><use href="#i-painel"/></svg></button><button type="button" class="btn ghost icon xs lat-fechar" data-acao="menu-fechar" aria-label="Fechar menu"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div>
     <nav class="lat-nav" id="nav" aria-label="Telas"></nav>
-    <div class="lat-pe" id="lat-pe"></div>
+    <div class="lat-pe sidebar-footer" id="lat-pe"></div>
   </aside>
   <div class="veu-menu" data-acao="menu-fechar"></div>
   <div class="principal">
-    <header class="topo-movel"><button type="button" class="btn fant ico-so" data-acao="menu" aria-label="Abrir menu" aria-controls="lateral"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button><svg width="24" height="24" aria-hidden="true"><use href="#i-marca"/></svg><span class="tm-tit" id="topo-tit">Vezen</span></header>
-    <div id="aviso-armaz" class="aviso-armaz" hidden>O navegador não permite salvar: os dados desta sessão não ficam guardados. Exporte um backup antes de fechar.</div>
+    <header class="topo-movel topbar"><button type="button" class="btn ghost icon" data-acao="menu" aria-label="Abrir menu" aria-controls="lateral"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button><svg width="24" height="24" aria-hidden="true"><use href="#i-marca"/></svg><span class="tm-tit" id="topo-tit">Vezen</span></header>
+    <div id="aviso-armaz" class="aviso-armaz banner warn" hidden>O navegador não permite salvar: os dados desta sessão não ficam guardados. Exporte um backup antes de fechar.</div>
     <main id="app" tabindex="-1"></main>
   </div>
 </div>
@@ -5581,19 +5565,19 @@ function renderNav() {
   // recolhida, cada item mostra só o ícone; o nome continua lá para leitores de tela e aparece ao passar o mouse
   const tip = rot => lateralRecolhida() ? ` data-tip="${esc(rot)}"` : '';
   nav.innerHTML = `
-    <button type="button" class="lat-nova" data-acao="nova"${tip('Nova análise')}>${ico('mais')}<span class="rot">Nova análise</span></button>
-    <a class="lat-item" href="#/empresas"${cur(t === 'empresas')}${tip('Empresas')}>${ico('empresas')}<span class="rot">Empresas</span><span class="lat-n">${S.empresas.length || ''}</span></a>
-    ${a ? `<a class="lat-sub" href="#/analise/${encodeURIComponent(a.id)}"${cur(t === 'analise')} title="${esc(nomeA)}"${tip(nomeA)}>${ico('analise')}<span class="rot">${esc(nomeA)}</span>${UI.sujo ? '<i class="ponto" aria-label="alterações não salvas"></i>' : ''}</a>` : ''}
-    <a class="lat-item" href="#/listas"${cur(t === 'listas')}${tip('Listas')}>${ico('tabela')}<span class="rot">Listas</span><span class="lat-n">${S.listas.length || ''}</span></a>
-    <div class="lat-sep" role="separator"></div>
-    <a class="lat-item" href="#/metodos"${cur(t === 'metodos' || t === 'testes')}${tip('Métodos')}>${ico('metodo')}<span class="rot">Métodos</span></a>
-    <a class="lat-item" href="#/glossario"${cur(t === 'glossario')}${tip('Glossário')}>${ico('glossario')}<span class="rot">Glossário</span></a>`;
+    <button type="button" class="lat-nova btn primary" data-acao="nova"${tip('Nova análise')}>${ico('mais')}<span class="rot label">Nova análise</span></button>
+    <a class="lat-item nav-item" href="#/empresas"${cur(t === 'empresas')}${tip('Empresas')}>${ico('empresas')}<span class="rot label">Empresas</span><span class="lat-n nav-count">${S.empresas.length || ''}</span></a>
+    ${a ? `<div class="nav-sub"><a class="lat-sub nav-item" href="#/analise/${encodeURIComponent(a.id)}"${cur(t === 'analise')} title="${esc(nomeA)}"${tip(nomeA)}>${ico('analise')}<span class="rot label">${esc(nomeA)}</span>${UI.sujo ? '<i class="ponto dot warn" aria-label="alterações não salvas"></i>' : ''}</a></div>` : ''}
+    <a class="lat-item nav-item" href="#/listas"${cur(t === 'listas')}${tip('Listas')}>${ico('tabela')}<span class="rot label">Listas</span><span class="lat-n nav-count">${S.listas.length || ''}</span></a>
+    <div class="lat-sep nav-divider" role="separator"></div>
+    <a class="lat-item nav-item" href="#/metodos"${cur(t === 'metodos' || t === 'testes')}${tip('Métodos')}>${ico('metodo')}<span class="rot label">Métodos</span></a>
+    <a class="lat-item nav-item" href="#/glossario"${cur(t === 'glossario')}${tip('Glossário')}>${ico('glossario')}<span class="rot label">Glossário</span></a>`;
   const escuro = document.documentElement.dataset.tema === 'escuro', b = S.ultimoBackup, d = diasDesde(b);
   const pend = !b || (S.ultimaAlteracao && S.ultimaAlteracao > b), atencao = S.empresas.length && (!b || d > 7 || pend);
   $('#lat-pe').innerHTML = `${S.empresas.length || S.listas.length ? `<div class="lat-dados${atencao ? ' atencao' : ''}">${b ? 'Último backup ' + haDias(d) + (pend ? ', com alterações depois' : '') : 'Nenhum backup exportado ainda'}</div>
-    <button type="button" class="lat-item" data-acao="exp-menu" aria-haspopup="menu" aria-expanded="false"${tip('Exportar as empresas')}>${ico('baixar')}<span class="rot">Exportar</span>${atencao ? '<i class="ponto" aria-hidden="true"></i>' : ''}</button>` : ''}
-    <button type="button" class="lat-item" data-acao="tour"${tip('Tour guiado')}>${ico('ajuda')}<span class="rot">Tour guiado</span></button>
-    <button type="button" class="lat-item" data-acao="tema"${tip(escuro ? 'Tema claro' : 'Tema escuro')}>${ico(escuro ? 'sol' : 'lua')}<span class="rot">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>`;
+    <button type="button" class="lat-item nav-item small" data-acao="exp-menu" aria-haspopup="menu" aria-expanded="false"${tip('Exportar as empresas')}>${ico('baixar')}<span class="rot label">Exportar</span>${atencao ? '<i class="ponto dot warn" aria-hidden="true"></i>' : ''}</button>` : ''}
+    <button type="button" class="lat-item nav-item small" data-acao="tour"${tip('Tour guiado')}>${ico('ajuda')}<span class="rot label">Tour guiado</span></button>
+    <button type="button" class="lat-item nav-item small" data-acao="tema"${tip(escuro ? 'Tema claro' : 'Tema escuro')}>${ico(escuro ? 'sol' : 'lua')}<span class="rot label">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>`;
 }
 function abrirMenuLateral() { $('#casca').classList.add('menu-aberto'); const p = $('#nav a'); if (p) p.focus(); }
 function fecharMenuLateral() { $('#casca').classList.remove('menu-aberto'); }
@@ -5629,7 +5613,7 @@ function toast(msg) {
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
   clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2800);
 }
-const tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl);
+const tipEl = document.createElement('div'); tipEl.className = 'tip tooltip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl);
 let tipAlvo = null;
 function mostrarTip(el) {
   const t = el.getAttribute('data-tip'); if (!t) return;
