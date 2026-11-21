@@ -2907,9 +2907,7 @@ textarea.prompt { min-height: 260px; font-size: var(--text-sm); }
 
 /* ===================== EMPRESAS ===================== */
 .barra-ferr { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-.barra-ferr .busca { flex: 1 1 260px; max-width: 380px; position: relative; }
-.barra-ferr .busca .ico { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted-foreground); pointer-events: none; }
-.barra-ferr .busca input { padding-left: 36px; }
+.barra-ferr .busca { flex: 1 1 260px; max-width: 380px; }
 .barra-ferr select { width: auto; min-width: 150px; }
 .barra-sel { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 12px; border-radius: var(--radius-lg); background: var(--row-selected); border: 1px solid var(--brand-border); margin-bottom: 12px; font-size: var(--text-sm); }
 .emp-nome { font-weight: var(--weight-semibold); color: var(--foreground); text-decoration: none; }
@@ -3463,37 +3461,28 @@ tr.r-falha td { background: var(--crit-bg); }
 
 /* ===================== GLOSSÁRIO ===================== */
 /* sigla ou termo do texto: sublinhado pontilhado discreto, que abre a definição */
-.gl-link { cursor: help; text-decoration: underline dotted; text-decoration-thickness: 1.5px; text-underline-offset: 3px; text-decoration-color: var(--border-strong); border-radius: 3px; transition: background-color var(--dur-fast), text-decoration-color var(--dur-fast); }
-.gl-link:hover, .gl-link[aria-expanded="true"] { background: var(--brand-bg); text-decoration-color: var(--link); }
-.gl-link:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+/* sigla do texto: o .term do Grin */
+.gl-link:focus-visible { outline-offset: 1px; }
 .pop-termo { max-width: min(340px, calc(100vw - 16px)); }
-.pop-termo h4 { align-items: flex-start; }
-.pop-termo h4 small { display: block; margin-top: 1px; font-weight: var(--weight-regular); font-size: var(--text-xs); color: var(--muted-foreground); line-height: 1.35; }
+.pop-termo .popover-title { align-items: flex-start; }
 .pop-termo .pop-def { margin: 0; }
-/* filtro por letra, como as abas de um dicionário: fica à vista enquanto a lista rola */
-.gl-letras { position: sticky; top: var(--topo-fixo, 0px); z-index: 6; display: flex; flex-wrap: wrap; gap: 2px; margin: 0 0 8px; padding: 8px 0; background: var(--background); border-bottom: 1px solid var(--border-soft); }
-.gl-lt { min-width: 32px; height: 32px; padding: 0 8px; border: 1px solid transparent; border-radius: var(--radius-sm); background: none; color: var(--foreground); font-size: var(--text-sm); font-weight: var(--weight-semibold); cursor: pointer; transition: background-color var(--dur-fast), border-color var(--dur-fast), color var(--dur-fast); }
-.gl-lt:hover:not(:disabled) { background: var(--hover); }
-.gl-lt[aria-pressed="true"] { background: var(--brand-bg); border-color: var(--brand-border); }
-.gl-lt:disabled { color: var(--border-strong); opacity: .5; cursor: default; }
-.gl-todas { padding: 0 12px; font-weight: var(--weight-medium); }
+/* glossário: .letter-index, .glossary-group, .glossary-item e .glossary-head do Grin; a barra de letras fica abaixo do topo do celular */
+.gl-letras { top: var(--topo-fixo, 0px); margin: 0 0 8px; }
+.gl-todas { padding: 0 12px; }
 .gl-conta { margin: 0 0 6px; font-size: var(--text-sm); }
-.gl-grupo[hidden], .gl-item[hidden] { display: none; }
-.gl-letra { margin: 24px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--border); font-size: var(--text-base); font-weight: var(--weight-semibold); color: var(--muted-foreground); }
-.gl-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: 14px 18px 12px; scroll-margin-top: 80px; }
+.gl-letra { margin: 24px 0 8px; }
+.gl-item { scroll-margin-top: 80px; }
 .gl-item + .gl-item { margin-top: 10px; }
 .gl-item:focus { outline: none; }
-.gl-cab { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 10px; margin-bottom: 4px; }
-.gl-cab h3 { margin: 0; font-size: var(--text-lg); }
-.gl-nome { color: var(--muted-foreground); font-size: var(--text-sm); }
 .gl-cat { margin-left: auto; align-self: center; }
-.gl-def { margin: 0 0 6px; }
-.gl-linha { margin: 2px 0 0; font-size: var(--text-sm); color: var(--muted-foreground); }
+.gl-def { margin: 0; }
+.gl-item .gl-def { color: var(--foreground); }
+.gl-linha { margin: 0; font-size: var(--text-sm); }
 .gl-linha b { margin-right: 8px; color: var(--foreground); font-weight: var(--weight-semibold); }
 .gl-linha a { overflow-wrap: anywhere; }
 .vazio-busca { margin: 28px 0; text-align: center; color: var(--muted-foreground); }
 .gl-item.destaque { animation: gl-destaque 2.4s var(--ease); }
-@keyframes gl-destaque { 0%, 55% { background: var(--brand-bg); border-color: var(--brand-border); } 100% { background: var(--surface); border-color: var(--border); } }
+@keyframes gl-destaque { 0%, 55% { background: var(--brand-bg); border-color: var(--brand-border); box-shadow: 0 0 0 3px var(--highlight); } 100% { background: var(--surface); border-color: var(--border); } }
 
 /* ===================== TRANSIÇÕES: as durações e curvas do Grin, só como resposta a uma ação; "reduzir movimento" desliga tudo (global do Grin) ===================== */
 @keyframes surgir { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } } /* o grin-rise, com o nome que o teste de transições lê */
@@ -7398,7 +7387,7 @@ function telaEmpresas() {
     <p class="vazio-modelo"><button type="button" class="link-btn link" data-acao="modelo">Ver empresa modelo</button></p></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
-    <label class="busca"><span class="sr sr-only">Buscar</span>${ico('busca')}<input class="input" type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
+    <label class="busca search"><span class="sr sr-only">Buscar</span>${ico('busca')}<input class="input" type="search" data-filtro="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
     <select class="select" data-filtro="setor" aria-label="Setor"><option value="">Todos os setores</option>${setores.map(s => `<option value="${s}" ${f.setor === s ? 'selected' : ''}>${esc(nomeFiltro(s))}</option>`).join('')}</select>
     <select class="select" data-filtro="conf" aria-label="Confiança"><option value="">Qualquer confiança</option>${[['alta', 'Confiança alta'], ['media', 'Confiança média'], ['baixa', 'Confiança baixa'], ['vazia', 'Sem estimativa']].map(([v, t]) => `<option value="${v}" ${f.conf === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
     <select class="select" data-filtro="ordem" aria-label="Ordenar">${ORDENS_EMP.map(([v, t]) => `<option value="${v}" ${f.ordem === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
@@ -7696,7 +7685,7 @@ function telaLista(L) {
     
   </div></section>
   <div class="barra-ferr" role="search">
-    <label class="busca"><span class="sr sr-only">Buscar</span>${ico('busca')}<input class="input" type="search" data-lote-f="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
+    <label class="busca search"><span class="sr sr-only">Buscar</span>${ico('busca')}<input class="input" type="search" data-lote-f="q" value="${esc(f.q)}" placeholder="Buscar por nome, CNPJ ou cidade"></label>
     <select class="select" data-lote-f="setor" aria-label="Setor"><option value="">Todos os setores</option>${setores.map(s => `<option value="${esc(s)}" ${f.setor === s ? 'selected' : ''}>${esc(s === '@publico' ? 'Setor público' : nomeFiltro(s))}</option>`).join('')}</select>
     <select class="select" data-lote-f="conf" aria-label="Confiança"><option value="">Qualquer confiança</option>${[['alta', 'Confiança alta'], ['media', 'Confiança média'], ['baixa', 'Confiança baixa'], ['vazia', 'Sem estimativa']].map(([v, t]) => `<option value="${v}" ${f.conf === v ? 'selected' : ''}>${t}</option>`).join('')}</select>
     <select class="select" data-lote-f="ordem" aria-label="Ordenar">${ORDENS_LOTE.map(([v, t]) => `<option value="${v}" ${f.ordem === v ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
@@ -9030,8 +9019,8 @@ const glLetra = g => { const c = norm(g.t).charAt(0).toUpperCase(); return /[A-Z
 const glOrdem = () => [...GLOSSARIO].sort((a, b) => a.t.localeCompare(b.t, 'pt-BR', { sensitivity: 'base', numeric: true }));
 const glBusca = g => norm([g.t, g.n, ...(g.a || []), g.d, g.u, glNomeCat(g.c)].filter(Boolean).join(' '));
 function glItem(g) {
-  return `<article class="gl-item" id="gl-${g.id}" data-cat="${g.c}" data-l="${glLetra(g)}" data-q="${esc(glBusca(g))}" data-termo-proprio="${g.id}">
-    <div class="gl-cab" data-sem-termos><h3>${esc(g.t)}</h3>${g.n ? `<span class="gl-nome">${esc(g.n)}</span>` : ''}<span class="selo gl-cat badge">${esc(glNomeCat(g.c))}</span></div>
+  return `<article class="gl-item glossary-item" id="gl-${g.id}" data-cat="${g.c}" data-l="${glLetra(g)}" data-q="${esc(glBusca(g))}" data-termo-proprio="${g.id}">
+    <div class="gl-cab glossary-head" data-sem-termos><h3>${esc(g.t)}</h3>${g.n ? `<span class="gl-nome glossary-aka">${esc(g.n)}</span>` : ''}<span class="selo gl-cat badge">${esc(glNomeCat(g.c))}</span></div>
     <p class="gl-def">${esc(g.d)}</p>
     ${g.u ? `<p class="gl-linha"><b>Utilidade</b>${esc(g.u)}</p>` : ''}
     ${g.s ? `<p class="gl-linha"><b>${esc(g.sl || 'Site oficial')}</b><a href="${esc(g.s)}" target="_blank" rel="noopener">${esc(glHost(g.s))}</a></p>` : ''}
@@ -9043,12 +9032,12 @@ function telaGlossario() {
   for (const g of glOrdem()) { const l = glLetra(g); if (!grupos.has(l)) grupos.set(l, []); grupos.get(l).push(g); }
   return `<div class="cab page-title-row"><div class="cab-txt"><h1>Glossário</h1><p class="sub page-description">Siglas e termos usados na ferramenta. No texto, os termos sublinhados abrem a definição.</p></div></div>
   <div class="barra-ferr" role="search">
-    <label class="busca"><span class="sr sr-only">Buscar termo</span>${ico('busca')}<input class="input" type="search" id="gl-busca" data-gl-busca value="${esc(f.q)}" placeholder="Buscar termo" autocomplete="off"></label>
+    <label class="busca search"><span class="sr sr-only">Buscar termo</span>${ico('busca')}<input class="input" type="search" id="gl-busca" data-gl-busca value="${esc(f.q)}" placeholder="Buscar termo" autocomplete="off"></label>
     <select class="select" id="gl-cat" data-gl-cat aria-label="Categoria"><option value="">Todas as categorias</option>${GL_CATS.map(([id, nome]) => `<option value="${id}"${id === f.cat ? ' selected' : ''}>${esc(nome)}</option>`).join('')}</select>
   </div>
-  <nav class="gl-letras" aria-label="Filtrar por letra"><button type="button" class="gl-lt gl-todas" data-acao="gl-letra" data-l="" aria-pressed="${!f.letra}">Todas</button>${[...new Set([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', ...grupos.keys()])].map(l => `<button type="button" class="gl-lt" data-acao="gl-letra" data-l="${l}" aria-pressed="${f.letra === l}">${l}</button>`).join('')}</nav>
+  <nav class="gl-letras letter-index" aria-label="Filtrar por letra"><button type="button" class="gl-lt gl-todas" data-acao="gl-letra" data-l="" aria-pressed="${!f.letra}">Todas</button>${[...new Set([...'ABCDEFGHIJKLMNOPQRSTUVWXYZ', ...grupos.keys()])].map(l => `<button type="button" class="gl-lt" data-acao="gl-letra" data-l="${l}" aria-pressed="${f.letra === l}">${l}</button>`).join('')}</nav>
   <p class="text-secondary gl-conta" id="gl-conta" role="status"></p>
-  <div id="gl-lista">${[...grupos].map(([l, itens]) => `<section class="gl-grupo" aria-label="${l}"><h2 class="gl-letra" data-sem-termos>${l}</h2>${itens.map(glItem).join('')}</section>`).join('')}</div>
+  <div id="gl-lista">${[...grupos].map(([l, itens]) => `<section class="gl-grupo glossary-group" aria-label="${l}"><h2 class="gl-letra glossary-letter" data-sem-termos>${l}</h2>${itens.map(glItem).join('')}</section>`).join('')}</div>
   <p class="vazio-busca" id="gl-vazio" hidden>Nenhum termo encontrado.</p>`;
 }
 // mostra só os termos que combinam com a busca, a categoria e a letra; as letras sem termo nessa busca ficam apagadas
@@ -9114,7 +9103,7 @@ function glAcha(txt) {
 }
 function glSpan(g, txt) {
   const s = document.createElement('span');
-  s.className = 'gl-link'; s.dataset.acao = 'glossario-termo'; s.dataset.gl = g.id; s.tabIndex = 0;
+  s.className = 'gl-link term'; s.dataset.acao = 'glossario-termo'; s.dataset.gl = g.id; s.tabIndex = 0;
   s.setAttribute('role', 'button'); s.setAttribute('aria-haspopup', 'dialog'); s.setAttribute('aria-expanded', 'false');
   s.textContent = txt; return s;
 }
