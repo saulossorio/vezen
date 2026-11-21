@@ -25,9 +25,9 @@ Está publicado no GitHub Pages: https://saulossorio.github.io/vezen/. O site é
 
 | Bloco | O que tem |
 |---|---|
-| `<script id="tema">` | Aplica o tema claro ou escuro antes de a página aparecer |
-| `<style id="fontes">` | A fonte Public Sans embutida, a mesma do Laika, para funcionar sem internet |
-| `<style id="estilo">` | Todo o CSS. Começa pelos tokens de cor e tamanho no `:root` (identidade do Canis e do Laika), com o tema escuro em `:root[data-tema="escuro"]`. Depois vêm base, casca, controles e cada tela |
+| `<style id="grin">` e `<script id="grin-js">` | O design system Grin 2.19, copiado de `dist/grin.inline.css` e `dist/grin.js` da release v2.19, com as fontes Geist e Geist Mono embutidas e a licença OFL no comentário acima. Não edite: para mudar de versão, substitua os dois blocos inteiros e o comentário |
+| `<script id="tema">` | Aplica o tema claro ou escuro antes de a página aparecer (`data-tema` para o Vezen e `data-theme` para o Grin) |
+| `<style id="estilo">` | O CSS próprio do Vezen, só com tokens do Grin. Começa pelos poucos tokens do Vezen no `:root`. Depois vêm base, casca, controles e cada tela. A tabela de equivalências está em `docs/migracao-grin.md` |
 | Símbolos SVG e casca | Ícones (`<symbol id="i-...">`), barra lateral, topo do celular, `<main id="app">`, diálogo e aviso rápido |
 | `<script id="parquet">` | Leitor de arquivos Parquet |
 | `<script id="motor">` | O cálculo, sem tela. Contém `CONFIG` e `PAIS` (parâmetros fixos do Método Vezen, fontes e endereços da BrasilAPI) e os parâmetros do Método CR em `calibracaoBase`, numa linha só e na versão pública (`calibracaoPublica`). Também traz `MUNICIPIOS` (lista do IBGE), as funções de cálculo e de calibração (`calibrar`, `calibrarRegistros`, `fatoresCalibrados`) e `rodarTestes`. No fim, `module.exports` expõe tudo isso para os testes no Node |
@@ -91,11 +91,12 @@ Para achar algo, busque pelo nome: `calcular`, `receitaEmpresa`, `calibrarBase`,
 
 ## Desenho da interface
 
-- **Identidade.** É a do Canis e do Laika (4Network): fonte Public Sans com texto corrido de 16px (token `--texto`; tamanho menor só para texto secundário, como rótulos, notas e legendas), verde `#8dc63f` nos botões principais, neutros levemente esverdeados, barra lateral clara.
-- **Cores.** Use só os tokens do `:root` (`--tinta`, `--cinza`, `--linha`, `--marca`, `--acento`...), nunca uma cor fixa no HTML gerado. Os dois temas, claro e escuro, precisam funcionar.
+- **Design system.** O Vezen usa o Grin 2.19 (https://saulossorio.github.io/grin/): fontes Geist e Geist Mono, verde `#8dc63f` como marca, tokens semânticos e componentes com o markup e os atributos ARIA da documentação do Grin. Componente novo: procure primeiro o equivalente no Grin. O que é só do Vezen (régua, caminhos, fórmulas, tour) fica no `<style id="estilo">` com tokens do Grin. Detalhes e decisões em `docs/migracao-grin.md`.
+- **Cores.** Use só os tokens semânticos do Grin (`--foreground`, `--muted-foreground`, `--border`, `--primary`, `--brand-fg`, `--crit-fg`, `--chart-1`...), nunca uma cor fixa no CSS ou no HTML gerado. Os quatro temas precisam funcionar: claro e escuro, cada um com e sem alto contraste.
+- **Classes antigas.** Várias classes do Vezen ficam ao lado das do Grin porque o JavaScript ou os testes as procuram (`lat-nova`, `sem-dado`, `modo-op`, `gl-item`...). Não as remova sem mudar o código e o teste juntos.
 - **Gráficos.** As cores dos gráficos foram validadas para daltonismo: verde para médias de mercado, azul para dados reais da empresa, sempre com legenda ou rótulo. Todo gráfico traz “Ver dados em tabela”.
-- **Celular.** Toda tela precisa funcionar sem rolagem lateral em 375 px de largura. Tabelas largas ficam dentro de `.tab-wrap`; a lista de empresas vira cartões.
-- **Movimento.** Nada de animação disparada pela rolagem. Movimento só como resposta a uma ação e sempre curto (até uns 200 ms): janelinhas e menus entram e saem, diálogos entram e saem, a tela troca com uma entrada leve, e as mudanças de estado (cor do campo, marcas das tecnologias, categorias, o valor do cartão) acontecem aos poucos. Quem pede menos animação (`prefers-reduced-motion`) recebe tudo na hora: o CSS desliga as transições e o JS usa `reduzMov()`. As janelinhas saem do DOM 150 ms depois de fechar (sem o id e inertes, para nunca haver dois `#pop`) e o diálogo, 110 ms depois; o teste `tela-transicoes` confere.
+- **Celular.** Toda tela precisa funcionar sem rolagem lateral em 375 px de largura. Tabelas largas ficam dentro de `.table-wrap`; a lista de empresas vira cartões.
+- **Movimento.** Nada de animação disparada pela rolagem. Movimento só como resposta a uma ação, com as durações e curvas do Grin (`--dur-fast`, `--dur`, `--ease`): janelinhas e menus entram e saem, diálogos entram e saem, a tela troca com uma entrada leve, e as mudanças de estado (cor do campo, marcas das tecnologias, categorias, o valor do cartão) acontecem aos poucos. Quem pede menos animação (`prefers-reduced-motion`) recebe tudo na hora: o CSS do Grin desliga as transições e o JS usa `reduzMov()`. As janelinhas saem do DOM 150 ms depois de fechar (sem o id e inertes, para nunca haver dois `#pop`) e o diálogo, 110 ms depois; o teste `tela-transicoes` confere.
 - **Teclado.** Tudo precisa funcionar pelo teclado, com o foco visível. Os menus abrem com Enter, andam com as setas e fecham com Esc.
 
 ## Testes

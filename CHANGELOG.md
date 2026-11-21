@@ -2,6 +2,17 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.0.0] - 2026-11-21
+
+### Alterado
+- **Design system Grin 2.19.** A interface inteira passa a usar o Grin, copiado da release v2.19 e embutido no `index.html`: fontes Geist e Geist Mono no lugar da Public Sans, tokens semânticos de cor nos temas claro e escuro, com alto contraste, e os componentes do Grin (barra lateral, botões, campos, tabelas, menus, popovers, diálogo, selos, avisos, cartões, abas, etapas, glossário e tour).
+- Fórmulas da tela Métodos em Geist Mono, com as letras em itálico na cor da marca.
+- Abas Dados e Resultado no formato das abas do Grin, sem ficar presas no topo.
+- Tabela de equivalências entre as classes antigas e as do Grin, e as decisões da migração, em `docs/migracao-grin.md`.
+
+### Não mudou
+- Cálculos, parâmetros, dados salvos no navegador, importação e exportação de arquivos e textos das telas.
+
 ## [3.9.3] - 2026-11-20
 
 ### Alterado
