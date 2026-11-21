@@ -3275,6 +3275,7 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .indice-lado b { margin-bottom: 6px; padding-left: 14px; font-weight: var(--weight-semibold); color: var(--foreground); }
 .indice-lado button { text-align: left; background: none; border: 0; border-left: 2px solid var(--border); padding: 6px 12px; color: var(--muted-foreground); cursor: pointer; font: inherit; transition: color var(--dur-fast), border-color var(--dur) var(--ease); }
 .indice-lado button:hover { color: var(--foreground); border-left-color: var(--border-strong); }
+.indice-lado button[aria-current="true"] { color: var(--brand-fg); border-left-color: var(--primary); font-weight: var(--weight-medium); } /* seção em leitura, como o .toc do Grin */
 .res-sec { scroll-margin-top: 72px; }
 .hero-res { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px 28px; align-items: start; }
 /* os números ficam embaixo da régua, na coluna do valor, para a coluna não ficar vazia ao lado do painel de confiança e métodos */
@@ -3336,12 +3337,14 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .leg .k-faixa { background: var(--chart-band); } .leg .k-f { width: 3px; height: 14px; background: var(--chart-1); }
 .leg .k-sem { background: var(--chart-1); } .leg .k-eq { background: var(--chart-band); border: 1px solid var(--chart-1); }
 .leg .k-eq.fora { background: repeating-linear-gradient(45deg, var(--border) 0 3px, transparent 3px 6px); border-color: var(--border-strong); }
-.eq { display: flex; flex-wrap: wrap; align-items: stretch; gap: 6px; }
-.termo { display: flex; flex-direction: column; justify-content: space-between; gap: 4px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--muted); border: 1px solid var(--border); min-width: 92px; }
+.eq { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 6px; } /* a conta numa linha: os rótulos longos quebram dentro do termo */
+@media (max-width: 640px) { .eq { flex-wrap: wrap; } }
+.termo { display: flex; flex-direction: column; justify-content: space-between; gap: 4px; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--muted); border: 1px solid var(--border); min-width: 0; flex: 0 1 auto; }
+.termo b { white-space: nowrap; }
 .termo b { font-size: var(--text-base); }
 .termo small { color: var(--muted-foreground); font-size: var(--text-xs); line-height: 1.3; }
 .termo.res { background: var(--brand-bg); border-color: var(--brand-border); }
-.op { display: flex; align-items: center; color: var(--muted-foreground); font-weight: var(--weight-semibold); padding: 0 2px; }
+.op { flex: none; display: flex; align-items: center; color: var(--muted-foreground); font-weight: var(--weight-semibold); padding: 0 2px; }
 /* etapas da conta: .breakdown do Grin (número de cada passo, valor à direita e o total) */
 .etapas .et-txt b { display: block; font-weight: var(--weight-semibold); }
 .etapas .et-txt span { color: var(--muted-foreground); font-size: var(--text-sm); }
@@ -3765,7 +3768,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.2.1';
+const VERSAO_APP = '4.2.2';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5558,6 +5561,7 @@ function render(rolarTopo = false) {
   // trocar de tela entra com uma transição curta; redesenhar a mesma tela não repete
   if (rolarTopo && !reduzMov()) { app.classList.remove('entra'); void app.offsetWidth; app.classList.add('entra'); }
   if (t.depois) t.depois(UI.rota);
+  marcarIndice(); // índice do resultado, se a tela tiver um
   const tit = typeof t.titulo === 'function' ? t.titulo(UI.rota) : t.titulo;
   document.title = tit ? tit + ' | Vezen' : 'Vezen';
   $('#topo-tit').textContent = tit || 'Vezen';
@@ -6649,7 +6653,8 @@ const botaoEditarPers = m => m === 'propria' ? `<button type="button" class="lin
 function seletorModo(m, suf = '', d = null) {
   return `<div class="modos" role="radiogroup" aria-label="Método">${MODOS.map(v => {
     // o Personalizado sem dados pode ser escolhido: a análise pede os dados dele primeiro
-    const ok = modoDisponivel(v), livre = ok || v === 'propria', r = ok && d ? calcModo(d, v) : null;
+    // no resultado não há formulário para preencher: sem dados, o Personalizado fica desabilitado
+    const ok = modoDisponivel(v), livre = ok || (v === 'propria' && suf !== '-res'), r = ok && d ? calcModo(d, v) : null;
     return `<label class="modo-op${livre ? '' : ' off'}"><input type="radio" name="modo${suf}" value="${v}" data-modo${m === v ? ' checked' : ''}${livre ? '' : ' disabled'}><span><b>${nomeModo(v)}</b><small>${descModo(v, d)}</small></span><span class="mo-val">${r && !r.vazio ? fmtRS(r.F) : ok ? '' : '—'}</span></label>`;
   }).join('')}</div>`;
 }
@@ -7261,6 +7266,22 @@ function heroResultado(r, d) {
       <div class="res-ano"><label for="f-anoRef-res">Ano de referência</label>${seletorAno(d, '-res')}</div>
       <div style="margin-top:12px">${seletorModo(modoDe(d), '-res', d)}</div></div></div></section>`;
 }
+/* índice do resultado: marca a seção que está no topo da tela, como o .toc do Grin */
+let indiceFixo = 0; // depois de um clique no índice, a rolagem suave não troca a marca até terminar
+function marcarIndice(fixo) {
+  const nav = document.querySelector('.indice-lado'); if (!nav) return;
+  const bs = [...nav.querySelectorAll('button[data-alvo]')];
+  let atual = fixo;
+  if (fixo) indiceFixo = Date.now();
+  else if (Date.now() - indiceFixo < 900) return;
+  else {
+    atual = bs[0] && bs[0].dataset.alvo;
+    for (const b of bs) { const el = document.getElementById(b.dataset.alvo); if (el && el.getBoundingClientRect().top <= 120) atual = b.dataset.alvo; }
+    if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4 && bs.length) atual = bs[bs.length - 1].dataset.alvo; // no fim da página, a última
+  }
+  bs.forEach(b => b.setAttribute('aria-current', String(b.dataset.alvo === atual)));
+}
+window.addEventListener('scroll', () => marcarIndice(), { passive: true });
 function secaoRes(id, icone, tit, sub, corpo, extra = '') {
   return `<section class="painel card res-sec" id="${id}" aria-labelledby="${id}-t"><div class="painel-cab"><div><h2 id="${id}-t">${ico(icone)}${tit}</h2>${sub ? `<p>${sub}</p>` : ''}</div>${extra}</div>${corpo}</section>`;
 }
@@ -7436,7 +7457,7 @@ function abrirResumo() {
 acoes({
   'prompt-ia': () => abrirPromptIA(),
   'resumo': () => abrirResumo(),
-  'rolar': b => { const el = document.getElementById(b.dataset.alvo); if (el) { el.scrollIntoView({ block: 'start', behavior: reduzMov() ? 'auto' : 'smooth' }); const f = el.querySelector('h2') || el; f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); } }
+  'rolar': b => { const el = document.getElementById(b.dataset.alvo); if (el) { marcarIndice(b.dataset.alvo); el.scrollIntoView({ block: 'start', behavior: reduzMov() ? 'auto' : 'smooth' }); const f = el.querySelector('h2') || el; f.setAttribute('tabindex', '-1'); f.focus({ preventScroll: true }); } }
 });
 </script>
 <script id="ui-empresas">

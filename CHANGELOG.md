@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.2.2] - 2026-11-21
+
+### Alterado
+- Resultado detalhado: o índice "Nesta página" marca a seção que está no topo da tela, como o índice do Grin, e acompanha a rolagem e os cliques.
+- Contas dos caminhos numa linha só. Os rótulos longos quebram dentro do próprio termo. No celular a conta continua quebrando em várias linhas.
+- Resultado detalhado: o Método Personalizado sem dados fica desabilitado e não pode ser clicado, porque ali não há formulário para preencher os dados. Na análise ele continua clicável e abre os campos dele.
+
 ## [4.2.1] - 2026-11-21
 
 ### Alterado
