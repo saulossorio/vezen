@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.4] - 2026-11-24
+
+### Alterado
+- Grin 2.38. Listas vazia: "Analisar uma lista" fica só no estado vazio, sem repetir no cabeçalho.
+- A escolha do método (Empresas vazia e Nova análise) deixa de usar `.empty-state`: é uma tela de escolha com `.action-card`. Em Nova análise, os cards passam a usar a largura da página, alinhados ao título, como em Empresas, e o título vira "Escolha o método".
+
 ## [4.3.3] - 2026-11-24
 
 ### Alterado

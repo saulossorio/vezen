@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.37, copiado de https://github.com/saulossorio/grin/releases/tag/v2.37 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.38, copiado de https://github.com/saulossorio/grin/releases/tag/v2.38 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.37 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.38 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1916,11 +1916,11 @@ a.tab { text-decoration: none; }
 .page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.37 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.38 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.37';
+Grin.version = '2.38';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2941,10 +2941,11 @@ li { margin: 3px 0; }
 .app-main > .app-footer { flex: none; width: calc(100% - 64px); max-width: var(--size-content); margin: 0 auto; padding-bottom: 20px; }
 /* tela inicial (Empresas sem empresas): padrão Tela inicial do Grin, com o mesmo cabeçalho e as mesmas margens das outras telas */
 .start-screen .cab { margin-bottom: 0; }
-.start-screen .vazio.inicio { padding: 8px 0 0; text-align: left; align-items: stretch; }
-.start-screen .vazio.inicio h2 { font-size: var(--text-lg); margin-bottom: 12px; }
-.start-screen .comecos { max-width: none; }
-.start-screen .vazio .vazio-modelo { margin: 16px 0 0; }
+/* escolha do método (Empresas vazia e Nova análise): tela de escolha com .action-card, não estado vazio (Grin › Estado vazio) */
+.escolha-metodo { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; }
+.escolha-metodo h2 { font-size: var(--text-lg); margin-bottom: 12px; }
+.escolha-metodo .comecos { max-width: none; margin: 0; }
+.escolha-metodo .vazio-modelo { margin: 16px 0 0; color: var(--muted-foreground); font-size: var(--text-base); }
 @media (max-width: 760px) {
   #app { padding: 20px 16px 64px; }
   .aviso-armaz { padding-inline: 16px; }
@@ -3013,8 +3014,6 @@ details > summary { cursor: pointer; }
 .vazio h2 { font-size: var(--text-lg); }
 .vazio p { margin: 0 auto; }
 .vazio .acoes { justify-content: center; margin-top: 8px; }
-.vazio.inicio { border: 0; background: none; padding: 64px 0 24px; }
-.vazio.inicio h2 { font-size: var(--text-2xl); margin-bottom: 16px; }
 .comecos { grid-template-columns: repeat(4, minmax(0, 1fr)); width: 100%; max-width: 960px; margin: 0 auto; }
 .comeco { align-items: center; text-align: center; }
 .comeco b { font-size: var(--text-base); }
@@ -3123,7 +3122,6 @@ details.secao-form > .sf-desc { margin-top: 0; }
 .nota-modelo summary { cursor: pointer; color: var(--link); font-weight: var(--weight-semibold); width: fit-content; }
 .nota-modelo ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted-foreground); }
 .nota-modelo li { margin: 4px 0; }
-.vazio .vazio-modelo { margin: 18px auto 0; max-width: 560px; color: var(--muted-foreground); font-size: var(--text-base); }
 .grade-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 20px; }
 .grade-campos .largo { grid-column: 1 / -1; }
 @container ws (max-width: 560px) { .grade-campos { grid-template-columns: minmax(0, 1fr); } }
@@ -3763,7 +3761,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.3';
+const VERSAO_APP = '4.3.4';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -6974,7 +6972,7 @@ TELAS.analise = {
   render(r) {
     const emp = UI.atual, d = emp.dados, res = r.aba === 'resultado', id = encodeURIComponent(emp.id);
     if (d.modo === '') return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">Nova análise</h1></div><div class="acoes"><a class="btn" href="#/empresas">${ico('voltar')}Voltar</a></div></header>
-    <div class="vazio empty-state inicio"><h2>Método</h2>${cartoesMetodo()}</div>`;
+    <div class="escolha-metodo"><h2>Escolha o método</h2>${cartoesMetodo()}</div>`;
     return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">${esc(d.nome.trim() || 'Nova análise')}</h1><div class="ws-meta" id="ws-meta">${metaEmpresa(d)}</div></div><div class="acoes" id="ws-acoes">${acoesAnalise()}</div></header>
     <nav class="abas tabs" aria-label="Partes da análise"><a class="tab" href="#/analise/${id}"${res ? '' : ' aria-current="page"'}>${ico('analise')}Dados</a><a class="tab" href="#/analise/${id}/resultado"${res ? ' aria-current="page"' : ''}>${ico('detalhe')}Resultado</a></nav>
     ${res ? corpoResultado(emp) : `<div class="ws-corpo"><div class="grade-ws"><form class="form-ws" id="form" autocomplete="off" onsubmit="return false" novalidate>${formAnalise()}</form><aside class="resumo-lado" aria-label="Estimativa"><div class="cartao-res" id="painel"></div><p class="sr sr-only" id="anuncio" aria-live="polite"></p></aside></div></div>`}`;
@@ -7492,7 +7490,7 @@ function telaEmpresas() {
   const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Empresas</h1><p class="sub page-description">${n ? plural(n, 'empresa analisada', 'empresas analisadas') + '. ' : ''}Os dados ficam só neste navegador.</p></div>
     <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn primary" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
   // sem empresas: tela inicial do Grin (.start-screen), com o cabeçalho das outras telas; com empresas, a lista
-  if (!n) return `<div class="start-screen-body">${cab}<div class="vazio empty-state inicio"><h2>Nova análise: escolha o método</h2>${cartoesMetodo('nova-modo')}
+  if (!n) return `<div class="start-screen-body">${cab}<div class="escolha-metodo"><h2>Nova análise: escolha o método</h2>${cartoesMetodo('nova-modo')}
     <p class="vazio-modelo"><button type="button" class="link-btn link" data-acao="modelo">Ver empresa modelo</button></p></div></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">
@@ -7732,7 +7730,7 @@ function criarLista() {
 
 /* ---------- listas salvas ---------- */
 function telaListas() {
-  const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Listas</h1><p class="sub page-description">Planilhas de empresas estimadas de uma vez. Cada empresa pode virar uma análise completa.</p></div><div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a></div></div>`;
+  const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Listas</h1><p class="sub page-description">Planilhas de empresas estimadas de uma vez. Cada empresa pode virar uma análise completa.</p></div>${S.listas.length ? `<div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a></div>` : ''}</div>`;
   if (!S.listas.length) return cab + `<div class="vazio empty-state"><span class="empty-state-icon">${ico('tabela')}</span><h2>Nenhuma lista ainda</h2><p>Use uma planilha do CRM, do Excel ou um CSV com várias empresas. A ferramenta estima todas de uma vez, com a faixa provável e a confiança de cada uma.</p>
     <ol class="passos-vazio"><li><b>1. Escolher o arquivo</b>Uma linha por empresa, com nome e algum dado de porte.</li><li><b>2. Conferir as colunas</b>A ferramenta sugere o que cada coluna é; você confirma.</li><li><b>3. Ver as estimativas</b>Filtre, ordene, baixe em CSV ou abra uma empresa para detalhar.</li></ol>
     <div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a><button type="button" class="btn" data-acao="modelo-lista">${ico('baixar')}Baixar planilha modelo</button></div></div>`;
@@ -9576,7 +9574,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.37</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.38</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 

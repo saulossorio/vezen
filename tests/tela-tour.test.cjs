@@ -73,7 +73,7 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
   const ctx = await b.newContext({ viewport: { width: 1360, height: 900 } }), p = await ctx.newPage();
   await p.goto(URL); await p.waitForTimeout(500);
   check('sem tour automático para navegador automatizado', await p.locator('#tour').count() === 0);
-  check('a tela vazia de Empresas não repete o tour ao lado da empresa modelo', await p.locator('.vazio [data-acao="tour"]').count() === 0 && await p.locator('.vazio [data-acao="modelo"]').count() === 1);
+  check('a tela vazia de Empresas não repete o tour ao lado da empresa modelo', await p.locator('.escolha-metodo [data-acao="tour"]').count() === 0 && await p.locator('.escolha-metodo [data-acao="modelo"]').count() === 1);
   await p.click('#lat-pe [data-acao="tour"]'); await p.waitForTimeout(400);
   check('o tour abre pela barra lateral', await p.locator('#tour.visivel').count() === 1);
   await ctx.close();
