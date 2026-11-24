@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.7] - 2026-11-24
+
+### Alterado
+- Grin 2.41, a mesma versão do Laika.
+
 ## [4.3.6] - 2026-11-24
 
 ### Alterado
