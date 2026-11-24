@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.39, copiado de https://github.com/saulossorio/grin/releases/tag/v2.39 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.40, copiado de https://github.com/saulossorio/grin/releases/tag/v2.40 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.39 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.40 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -961,6 +961,7 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 .field-hint { font-size: var(--text-sm); color: var(--muted-foreground); line-height: var(--leading-ui); }
 .field-message { display: flex; gap: 6px; align-items: flex-start; font-size: var(--text-sm); line-height: var(--leading-ui); color: var(--crit-fg); animation: grin-rise var(--dur) var(--ease); }
 .field-message.warn { color: var(--warn-fg); }
+.field-message.info { color: var(--info-fg); } /* a suggestion, not a problem: the field keeps its normal border */
 .field-message svg { width: 16px; height: 16px; margin-top: 2px; }
 .field-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); gap: var(--space-5); }
 
@@ -1320,6 +1321,8 @@ a.card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md);
 
 /* More cell and row states */
 .table td.cell-derived { color: var(--muted-foreground); font-style: italic; }
+/* Info: a suggestion about the value (not a problem), so no background: only a dotted underline */
+.table td.cell-info { text-decoration: underline dotted var(--info-fg); text-underline-offset: 3px; }
 .table td.cell-diff { background: var(--warn-bg); box-shadow: inset 3px 0 0 var(--warn-solid); }
 .table td.cell-link a { font-weight: var(--weight-medium); text-decoration: none; }
 .table td.cell-link a:hover { text-decoration: underline; }
@@ -1922,11 +1925,11 @@ a.tab { text-decoration: none; }
 .page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.39 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.40 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.39';
+Grin.version = '2.40';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2922,7 +2925,6 @@ small { font-size: var(--text-sm); }
 ul, ol { margin: 0 0 10px; padding-left: 20px; }
 li { margin: 3px 0; }
 /* tabelas: .table do Grin; nas de leitura (.compact) o texto quebra a linha em vez de alargar a tabela */
-.table td { color: var(--foreground); }
 .table.compact td { white-space: normal; padding-block: 8px; }
 .table .numeric { white-space: nowrap; }
 /* ícones do Vezen: desenho de 24 px com traço 2, como os do Grin */
@@ -2960,7 +2962,6 @@ li { margin: 3px 0; }
 
 /* ===================== CONTROLES: botão, campo, input-group, checkbox e segmented do Grin ===================== */
 /* ação destrutiva secundária (ao lado da principal): texto vermelho sobre o botão padrão */
-.btn.perigo, .btn.perigo svg { color: var(--crit-fg); }
 .acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .checkbox:has(.dica), .checkbox.conf { align-items: flex-start; }
 .checkbox:has(.dica) input { margin-top: 1px; }
@@ -3080,7 +3081,8 @@ textarea.prompt { min-height: 260px; font-size: var(--text-sm); }
 .barra-ferr { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
 .barra-ferr .busca { flex: 1 1 260px; max-width: 380px; }
 .barra-ferr select { width: auto; min-width: 150px; }
-.barra-sel { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; padding: 8px 12px; border-radius: var(--radius-lg); background: var(--row-selected); border: 1px solid var(--brand-border); margin-bottom: 12px; font-size: var(--text-sm); }
+/* barra de ações em massa do Grin: flutua no pé da lista enquanto há empresas marcadas (Grin › Tabela) */
+#app .bulk-bar { position: sticky; bottom: 24px; z-index: 12; margin: 16px auto 0; }
 .emp-nome { font-weight: var(--weight-semibold); color: var(--foreground); text-decoration: none; }
 .emp-nome:hover { text-decoration: underline; }
 .emp-sub { font-size: var(--text-xs); color: var(--muted-foreground); margin-top: 1px; }
@@ -3767,7 +3769,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.5';
+const VERSAO_APP = '4.3.6';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -6023,7 +6025,7 @@ async function confirmarSaida() {
   if (!UI.atual || !UI.sujo) return true;
   const nome = UI.atual.dados.nome.trim();
   const resp = await perguntar(`<h2>Salvar as alterações${nome ? ' de ' + esc(nome) : ''}?</h2><p>A análise aberta tem alterações que ainda não foram salvas.</p>`,
-    [['Cancelar', null], ['Descartar alterações', 'descartar', 'perigo'], ['Salvar', 'salvar', 'primary']]);
+    [['Cancelar', null], ['Descartar alterações', 'descartar', 'danger'], ['Salvar', 'salvar', 'primary']]);
   if (resp === 'salvar') return salvarEmpresa();
   if (resp === 'descartar') { UI.sujo = false; return true; }
   return false;
@@ -6326,7 +6328,7 @@ function campoReceita(d, R) {
     seletorPeriodo('id="f-fatMeses" data-simples="fatMeses" aria-label="Período"', d.fatMeses), botaoOrigem('campo:faturamento', f.o, temValor(f)), '<span aria-hidden="true"></span>');
   const ls = outras.map((x, i) => linha(`<input class="input" type="text" inputmode="numeric" data-rec="${i}" data-parte="ano" aria-label="Ano" value="${esc(x.ano)}" maxlength="4" autocomplete="off">`,
     `<input class="input" type="text" inputmode="decimal" data-rec="${i}" data-parte="v" aria-label="Receita de ${esc(x.ano || 'outro ano')}" value="${esc(fmtIn(x.v))}" autocomplete="off">`,
-    seletorPeriodo(`data-rec="${i}" data-parte="meses" aria-label="Período"`, x.meses), botaoOrigem('rec:' + i, x.o, temValor(x)), btnIco('lixo', 'Remover este ano', `data-acao="del-rec" data-i="${i}"`, 'peq perigo')));
+    seletorPeriodo(`data-rec="${i}" data-parte="meses" aria-label="Período"`, x.meses), botaoOrigem('rec:' + i, x.o, temValor(x)), btnIco('lixo', 'Remover este ano', `data-acao="del-rec" data-i="${i}"`, 'peq')));
   // viaCVM guarda a fonte oficial da receita: a DRE na CVM ou, com f: 'ifdata', o balanço no IF.data
   const via = d.viaCVM, viaIf = via && via.f === 'ifdata';
   const cvm = !via ? '' : viaIf ? `<span class="dica dica-cvm">${ico('doc')}Balanço de ${esc(via.ano)} no IF.data do Banco Central${via.c ? ', do conglomerado' : ''}: intermediação financeira mais tarifas e serviços. <a href="${esc(PAIS.linkIfdata)}" target="_blank" rel="noopener">Abrir o IF.data</a></span>`
@@ -6569,7 +6571,7 @@ function formAnalise() {
   // gasto de TI real: uma linha por ano, como a receita; a primeira aparece sempre, com o ano de referência sugerido
   const rl = reais.length ? reais : [{ ano: '', v: '', o: '', meses: '12' }];
   const gasto = `<div class="campo field largo"><div class="campo-rot"><span class="rot">Gasto de TI real</span>${botaoAjuda('gastosReais', 'Gasto real')}</div>
-      <div class="rec-anos reais"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span><span>Período</span></div>${rl.map((x, i) => `<div class="rec-linha"><input class="input" type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano || (reais.length ? '' : anoDe(d)))}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off"><div class="entrada input-group com-pre"><span class="pre input-addon">R$</span><input class="input" type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || anoDe(d))}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}" autocomplete="off"></div>${seletorPeriodo(`data-real="${i}" data-parte="meses" aria-label="Período"`, x.meses)}<span class="rec-o">${botaoOrigem('real:' + i, x.o, temValor(x))}</span>${rl.length > 1 ? btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq perigo') : '<span aria-hidden="true"></span>'}</div>`).join('')}</div>
+      <div class="rec-anos reais"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span><span>Período</span></div>${rl.map((x, i) => `<div class="rec-linha"><input class="input" type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano || (reais.length ? '' : anoDe(d)))}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off"><div class="entrada input-group com-pre"><span class="pre input-addon">R$</span><input class="input" type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || anoDe(d))}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}" autocomplete="off"></div>${seletorPeriodo(`data-real="${i}" data-parte="meses" aria-label="Período"`, x.meses)}<span class="rec-o">${botaoOrigem('real:' + i, x.o, temValor(x))}</span>${rl.length > 1 ? btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq') : '<span aria-hidden="true"></span>'}</div>`).join('')}</div>
       <div class="reais-acoes"><button type="button" class="btn xs" data-acao="add-real">${ico('mais')}Adicionar ano</button>${botaoSemDado('gastosReais', d)}</div><p class="valid" id="v-reais"></p></div>`
     + (!temGastoReal(d) ? '' : `<div class="campo field largo"><label class="checkbox"><input type="checkbox" id="f-usarCalib" data-usar-calib ${emp.foraCalibracao ? '' : 'checked'}><span>Usar esta empresa no Método Personalizado<span class="dica">O gasto real entra nos percentuais do método. Vale depois de salvar.</span></span></label></div>`);
   // só registro: não muda a conta
@@ -7462,12 +7464,12 @@ function empresasFiltradas() {
 }
 function listaEmpresasHtml() {
   const L = empresasFiltradas(), n = UI.sel.size, todas = L.length && L.every(x => UI.sel.has(x.e.id));
-  const barraSel = n ? `<div class="barra-sel" role="region" aria-label="Empresas selecionadas"><b>${plural(n, 'selecionada', 'selecionadas')}</b>
+  const barraSel = n ? `<div class="bulk-bar" role="toolbar" aria-label="Ações para as empresas marcadas"><span class="bulk-bar-count">${plural(n, 'selecionada', 'selecionadas')}</span><span class="divider-v"></span>
     <button type="button" class="btn xs" data-acao="comparar" ${n < 2 || n > 4 ? 'disabled' : ''} data-tooltip="Compare de 2 a 4 empresas">${ico('colunas')}Comparar</button>
     <button type="button" class="btn xs" data-acao="exp-xlsx-sel">${ico('baixar')}Baixar Excel</button>
-    <button type="button" class="btn xs perigo" data-acao="excluir-sel">${ico('lixo')}Excluir</button>
+    <button type="button" class="btn xs danger" data-acao="excluir-sel">${ico('lixo')}Excluir</button>
     <button type="button" class="link-btn link" data-acao="limpar-sel">Limpar seleção</button></div>` : '';
-  if (!L.length) return barraSel + `<div class="nota alert neutral">${ico('busca')}<p>Nenhuma empresa com esses filtros. <button type="button" class="link-btn link" data-acao="limpar-filtros">Limpar filtros</button></p></div>`;
+  if (!L.length) return `<div class="nota alert neutral">${ico('busca')}<p>Nenhuma empresa com esses filtros. <button type="button" class="link-btn link" data-acao="limpar-filtros">Limpar filtros</button></p></div>` + barraSel;
   const linhas = L.map(({ e, r }) => {
     const d = e.dados, ur = ultimoReal(d), aberta = UI.atual && UI.atual.id === e.id && UI.sujo;
     return `<tr>
@@ -7481,8 +7483,8 @@ function listaEmpresasHtml() {
       <td>${dataBR(e.alteradoEm)}</td>
       <td class="acoes-cel">${btnIco('mais-v', 'Ações de ' + (d.nome || 'empresa'), `data-acao="menu-emp" data-id="${e.id}" aria-haspopup="menu" aria-expanded="false"`, 'peq fant')}</td></tr>`;
   }).join('');
-  return barraSel + `<div class="table-wrap"><table class="table lista-emp"><thead><tr><th><input type="checkbox" data-sel-todas ${todas ? 'checked' : ''} aria-label="Selecionar todas"></th><th>Empresa</th><th>Setor e lugar</th><th class="n numeric">Investimento em TI</th><th>Confiança</th><th>Tipo</th><th class="n numeric">Gasto real</th><th>Atualizada</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div>
-    <p class="paginas"><span>${plural(L.length, 'empresa', 'empresas')}${L.length < S.empresas.length ? ' de ' + nf(S.empresas.length, 0) : ''}</span><span>A régua mostra a faixa provável em volta do valor central: quanto mais estreita, mais precisa.</span></p>`;
+  return `<div class="table-wrap"><table class="table lista-emp"><thead><tr><th><input type="checkbox" data-sel-todas ${todas ? 'checked' : ''} aria-label="Selecionar todas"></th><th>Empresa</th><th>Setor e lugar</th><th class="n numeric">Investimento em TI</th><th>Confiança</th><th>Tipo</th><th class="n numeric">Gasto real</th><th>Atualizada</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div>
+    <p class="paginas"><span>${plural(L.length, 'empresa', 'empresas')}${L.length < S.empresas.length ? ' de ' + nf(S.empresas.length, 0) : ''}</span><span>A régua mostra a faixa provável em volta do valor central: quanto mais estreita, mais precisa.</span></p>` + barraSel;
 }
 function lembreteBackup() {
   if (!S.empresas.length) return '';
@@ -7742,7 +7744,7 @@ function telaListas() {
     <div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a><button type="button" class="btn" data-acao="modelo-lista">${ico('baixar')}Baixar planilha modelo</button></div></div>`;
   const linhas = S.listas.map(L => {
     const rs = calcularLista(L), ok = rs.filter(x => !x.r.vazio), soma = ok.reduce((a, x) => a + x.r.F, 0);
-    return `<tr><td><a class="emp-nome" href="#/listas/${encodeURIComponent(L.id)}">${esc(L.nome)}</a><div class="emp-sub">${esc(L.arquivo)}</div></td><td class="n numeric">${nf(L.linhas.length, 0)}</td><td class="n numeric">${nf(ok.length, 0)}</td><td class="n numeric">${ok.length ? fmtRS(soma) : '—'}</td><td><span class="chip-modo badge ${clsModo(L.modo)}">${nomeModo(L.modo)}</span></td><td>${dataBR(L.criadoEm)}</td><td class="acoes-cel">${btnIco('lixo', 'Excluir lista', `data-acao="excluir-lista" data-id="${L.id}"`, 'peq fant perigo')}</td></tr>`;
+    return `<tr><td><a class="emp-nome" href="#/listas/${encodeURIComponent(L.id)}">${esc(L.nome)}</a><div class="emp-sub">${esc(L.arquivo)}</div></td><td class="n numeric">${nf(L.linhas.length, 0)}</td><td class="n numeric">${nf(ok.length, 0)}</td><td class="n numeric">${ok.length ? fmtRS(soma) : '—'}</td><td><span class="chip-modo badge ${clsModo(L.modo)}">${nomeModo(L.modo)}</span></td><td>${dataBR(L.criadoEm)}</td><td class="acoes-cel">${btnIco('lixo', 'Excluir lista', `data-acao="excluir-lista" data-id="${L.id}"`, 'peq fant')}</td></tr>`;
   }).join('');
   return cab + `<div class="table-wrap"><table class="table lista-emp"><thead><tr><th>Lista</th><th class="n numeric">Empresas</th><th class="n numeric">Com estimativa</th><th class="n numeric">Investimento em TI somado</th><th>Tipo</th><th>Importada</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div>`;
 }
@@ -7763,8 +7765,8 @@ function filtrarLote(rs) {
 function tabelaLoteHtml(L, rs) {
   const F = filtrarLote(rs), f = UI.loteVer, pags = Math.max(1, Math.ceil(F.length / POR_PAGINA)), pag = Math.min(f.pag, pags - 1), vis = F.slice(pag * POR_PAGINA, (pag + 1) * POR_PAGINA);
   const sel = UI.loteSel || new Set(), nSel = [...sel].filter(i => rs[i] && !rs[i].r.vazio).length;
-  const barra = sel.size ? `<div class="barra-sel"><b>${plural(sel.size, 'selecionada', 'selecionadas')}</b><button type="button" class="btn xs primary" data-acao="salvar-linhas" ${nSel ? '' : 'disabled'}>${ico('salvar')}Salvar ${nSel ? plural(nSel, 'empresa', 'empresas') : ''} em Empresas</button><button type="button" class="link-btn link" data-acao="limpar-sel-lote">Limpar seleção</button></div>` : '';
-  if (!F.length) return barra + `<div class="nota alert neutral">${ico('busca')}<p>Nenhuma empresa com esses filtros.</p></div>`;
+  const barra = sel.size ? `<div class="bulk-bar" role="toolbar" aria-label="Ações para as empresas marcadas"><span class="bulk-bar-count">${plural(sel.size, 'selecionada', 'selecionadas')}</span><span class="divider-v"></span><button type="button" class="btn xs primary" data-acao="salvar-linhas" ${nSel ? '' : 'disabled'}>${ico('salvar')}Salvar ${nSel ? plural(nSel, 'empresa', 'empresas') : ''} em Empresas</button><button type="button" class="link-btn link" data-acao="limpar-sel-lote">Limpar seleção</button></div>` : '';
+  if (!F.length) return `<div class="nota alert neutral">${ico('busca')}<p>Nenhuma empresa com esses filtros.</p></div>` + barra;
   const linhas = vis.map(({ i, x, r }) => {
     const rec = r.receita && r.receita.usada, est = rec && r.receita.modo !== 'informada';
     return `<tr><td><input type="checkbox" data-sel-lote="${i}" ${sel.has(i) ? 'checked' : ''} aria-label="Selecionar ${esc(x.n)}"></td>
@@ -7776,8 +7778,8 @@ function tabelaLoteHtml(L, rs) {
       <td class="acoes-cel">${r.vazio ? '' : `<button type="button" class="btn xs" data-acao="abrir-linha" data-i="${i}">Abrir</button>`}</td></tr>`;
   }).join('');
   const todas = vis.length && vis.every(o => sel.has(o.i));
-  return barra + `<div class="table-wrap"><table class="table lote-tab lista-emp"><thead><tr><th><input type="checkbox" data-sel-lote-todas ${todas ? 'checked' : ''} aria-label="Selecionar as empresas desta página"></th><th>Empresa</th><th>Setor e lugar</th><th class="n numeric">Receita líquida</th><th class="n numeric">Funcionários</th><th class="n numeric">Investimento em TI</th><th class="n numeric">Conservadora</th><th>Confiança</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div>
-  <div class="paginas"><span>${F.length === rs.length ? plural(F.length, 'empresa', 'empresas') : `${nf(F.length, 0)} de ${plural(rs.length, 'empresa', 'empresas')}`}${pags > 1 ? `, página ${pag + 1} de ${pags}` : ''}</span>${pags > 1 ? `<span class="acoes"><button type="button" class="btn xs" data-acao="pag-lote" data-p="${pag - 1}" ${pag ? '' : 'disabled'}>${ico('voltar')}Anterior</button><button type="button" class="btn xs" data-acao="pag-lote" data-p="${pag + 1}" ${pag < pags - 1 ? '' : 'disabled'}>Próxima${ico('seta')}</button></span>` : ''}</div>`;
+  return `<div class="table-wrap"><table class="table lote-tab lista-emp"><thead><tr><th><input type="checkbox" data-sel-lote-todas ${todas ? 'checked' : ''} aria-label="Selecionar as empresas desta página"></th><th>Empresa</th><th>Setor e lugar</th><th class="n numeric">Receita líquida</th><th class="n numeric">Funcionários</th><th class="n numeric">Investimento em TI</th><th class="n numeric">Conservadora</th><th>Confiança</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div>
+  <div class="paginas"><span>${F.length === rs.length ? plural(F.length, 'empresa', 'empresas') : `${nf(F.length, 0)} de ${plural(rs.length, 'empresa', 'empresas')}`}${pags > 1 ? `, página ${pag + 1} de ${pags}` : ''}</span>${pags > 1 ? `<span class="acoes"><button type="button" class="btn xs" data-acao="pag-lote" data-p="${pag - 1}" ${pag ? '' : 'disabled'}>${ico('voltar')}Anterior</button><button type="button" class="btn xs" data-acao="pag-lote" data-p="${pag + 1}" ${pag < pags - 1 ? '' : 'disabled'}>Próxima${ico('seta')}</button></span>` : ''}</div>` + barra;
 }
 function telaLista(L) {
   const rs = calcularLista(L), ok = rs.filter(x => !x.r.vazio), soma = ok.reduce((a, x) => a + x.r.F, 0), conf = { alta: 0, media: 0, baixa: 0 };
@@ -7999,7 +8001,7 @@ function tabelaMinhas(cm) {
     const div = !l ? '—' : l.semReceita ? '<small class="text-secondary">sem receita do ano</small>' : fmtPct(l.r, 2) + (fora ? `<label class="checkbox conf"><input type="checkbox" data-minha-conf="${x.id}"${x.confirmado ? ' checked' : ''}> Valor certo</label>` : l.suspeita ? ' <small class="text-secondary">fora do padrão</small>' : '');
     h += `<tr><td>${esc(x.nome || '(sem nome)')}</td><td>${esc(nomeFiltro(x.setor))}</td><td>${esc(lugarTxt({ municipio: x.cidade, uf: x.uf }) || '—')}</td><td class="n numeric">${valorAno(x.receita, ultAno(x.receita))}</td><td class="n numeric">${x.func ? nf(x.func, 0) : '—'}</td><td class="n numeric">${x.funcTI ? nf(x.funcTI, 0) : '—'}</td>
     <td class="n numeric">${valorAno(x.gastoTI, ultAno(x.gastoTI))}</td><td class="n numeric">${div}</td><td>${x.origem === 'manual' ? 'digitada' : esc(x.arquivo || 'planilha')}</td>
-    <td class="acoes-cel">${x.origem === 'manual' ? btnIco('editar', 'Editar', `data-minha-edit="${x.id}"`, 'xs') : ''}${btnIco('lixo', 'Remover', `data-minha-del="${x.id}"`, 'peq perigo')}</td></tr>`;
+    <td class="acoes-cel">${x.origem === 'manual' ? btnIco('editar', 'Editar', `data-minha-edit="${x.id}"`, 'xs') : ''}${btnIco('lixo', 'Remover', `data-minha-del="${x.id}"`, 'peq')}</td></tr>`;
   }
   h += '</tbody></table></div>';
   const arqs = {}; for (const x of L) if (x.origem !== 'manual') arqs[x.arquivo || 'planilha'] = (arqs[x.arquivo || 'planilha'] || 0) + 1;
@@ -8583,7 +8585,7 @@ function formDireta(fixo = false) {
   const opsL = [['', 'Todos os setores'], ...setoresDiretos().map(l => [l, nomeLinha(l)])], opsU = [['', 'Todos os estados'], ...PAIS.ufs.map(u => [u, u])];
   return `<div class="cal-form" role="group" aria-labelledby="dir-tit"><h3 id="dir-tit">Percentual da receita gasto com TI</h3><p class="text-secondary">Por setor e estado. A linha mais específica vale primeiro; “Todos” cobre o que não tiver linha própria.</p>
     <div class="dir-linhas"><div class="dir-linha dir-cab" aria-hidden="true"><span>Setor</span><span>Estado</span><span>Percentual</span><span></span></div>
-    ${f.linhas.map((x, i) => `<div class="dir-linha">${sel(i, 'l', opsL, x.l)}${sel(i, 'uf', opsU, x.uf)}<div class="entrada input-group com-suf"><input class="input" data-dirl="${i}" data-parte="p" inputmode="decimal" autocomplete="off" aria-label="Percentual" placeholder="1,5" value="${esc(x.p)}"><span class="suf input-addon">%</span></div>${f.linhas.length > 1 ? btnIco('lixo', 'Remover esta linha', `data-acao="dir-del" data-i="${i}"`, 'peq perigo') : '<span></span>'}${err[i] ? `<div class="valid">${esc(err[i])}</div>` : ''}</div>`).join('')}</div>
+    ${f.linhas.map((x, i) => `<div class="dir-linha">${sel(i, 'l', opsL, x.l)}${sel(i, 'uf', opsU, x.uf)}<div class="entrada input-group com-suf"><input class="input" data-dirl="${i}" data-parte="p" inputmode="decimal" autocomplete="off" aria-label="Percentual" placeholder="1,5" value="${esc(x.p)}"><span class="suf input-addon">%</span></div>${f.linhas.length > 1 ? btnIco('lixo', 'Remover esta linha', `data-acao="dir-del" data-i="${i}"`, 'peq') : '<span></span>'}${err[i] ? `<div class="valid">${esc(err[i])}</div>` : ''}</div>`).join('')}</div>
     <button type="button" class="link-btn link dir-add" data-acao="dir-add">${ico('mais')}Adicionar linha</button>
     <div class="acoes dir-acoes"><button type="button" class="btn primary" data-acao="dir-salvar">${ico('check')}${fixo ? 'Salvar percentuais' : 'Usar estes percentuais'}</button>${S.calibracao.direta ? `<button type="button" class="btn" data-acao="dir-desligar">${ico('lixo')}Remover percentuais</button>` : ''}${fixo ? '' : '<button type="button" class="btn" data-acao="dir-cancelar">Cancelar</button>'}</div></div>`;
 }
@@ -9580,7 +9582,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.39</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.40</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 

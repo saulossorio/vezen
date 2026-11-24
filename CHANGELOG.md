@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.6] - 2026-11-24
+
+### Alterado
+- Grin 2.40. A barra de empresas marcadas (Empresas e lista) é a `.bulk-bar` do Grin, no pé da lista, e não empurra mais a tabela. Excluir usa `.btn.xs.danger`.
+- "Descartar alterações" usa `.btn.danger` do Grin. Sai a classe própria `.perigo`; os botões de remover das tabelas ficam com o estilo normal.
+- O texto das células das tabelas volta à cor do Grin.
+
 ## [4.3.5] - 2026-11-24
 
 ### Alterado

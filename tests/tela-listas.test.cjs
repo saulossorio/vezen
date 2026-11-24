@@ -67,7 +67,7 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   check('CSV da lista', rcsv.length === 16 && /Investimento em TI, valor central \(R\$\).*Estimativa conservadora \(R\$\).*Índice de confiança/.test(rcsv[0]) && rcsv.some(l => l.includes('faltam dados de porte')), rcsv[0]);
   // salvar duas em Empresas
   await p.check('#lote-tab tbody tr:nth-child(1) input[data-sel-lote]'); await p.check('#lote-tab tbody tr:nth-child(2) input[data-sel-lote]'); await p.waitForTimeout(150);
-  check('barra de seleção', /2 selecionadas/.test(await txt(p, '.barra-sel')));
+  check('barra de seleção', /2 selecionadas/.test(await txt(p, '.bulk-bar')));
   await p.click('[data-acao=salvar-linhas]'); await p.waitForTimeout(300);
   check('salvas em Empresas', (await p.evaluate(() => S.empresas.length)) === 2 && (await txt(p, '#nav')).includes('Empresas2'));
   // abrir uma linha como análise
@@ -96,8 +96,8 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   check('busca sem resultado oferece limpar', /Nenhuma empresa com esses filtros/.test(await txt(p, '#emp-lista')));
   await p.click('[data-acao=limpar-filtros]'); await p.waitForTimeout(150);
   await p.check('[data-sel-todas]'); await p.waitForTimeout(150);
-  check('selecionar todas', /2 selecionadas/.test(await txt(p, '.barra-sel')));
-  await p.click('.barra-sel [data-acao=comparar]'); await p.waitForTimeout(300);
+  check('selecionar todas', /2 selecionadas/.test(await txt(p, '.bulk-bar')));
+  await p.click('.bulk-bar [data-acao=comparar]'); await p.waitForTimeout(300);
   check('comparação de duas', (await p.evaluate(() => location.hash)) === '#/empresas/comparar' && await p.locator('.comp-tab thead th').count() === 3);
   await p.goBack(); await p.waitForTimeout(300);
   await p.click('.lista-emp tbody tr:first-child [data-acao=menu-emp]'); await p.waitForTimeout(100);
