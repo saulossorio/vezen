@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.3] - 2026-11-24
+
+### Alterado
+- Estados vazios (Listas, Comparar e Resultado sem dados) com o ícone do `.empty-state` do Grin, como no Laika.
+
 ## [4.3.2] - 2026-11-24
 
 ### Alterado

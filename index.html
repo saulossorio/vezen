@@ -3763,7 +3763,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.2';
+const VERSAO_APP = '4.3.3';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -7265,7 +7265,7 @@ function secaoRes(id, icone, tit, sub, corpo, extra = '') {
 }
 function corpoResultado(emp) {
   const d = emp.dados, r = calc(d), id = encodeURIComponent(emp.id);
-  if (r.vazio) return `<div class="vazio empty-state"><h2>${esc(r.msgVazio)}</h2><p>Volte aos dados e preencha a receita, os funcionários, a equipe de TI ou um gasto real.</p><div class="acoes"><a class="btn primary" href="#/analise/${id}">${ico('voltar')}Voltar aos dados</a></div></div>`;
+  if (r.vazio) return `<div class="vazio empty-state"><span class="empty-state-icon">${ico('calc')}</span><h2>${esc(r.msgVazio)}</h2><p>Volte aos dados e preencha a receita, os funcionários, a equipe de TI ou um gasto real.</p><div class="acoes"><a class="btn primary" href="#/analise/${id}">${ico('voltar')}Voltar aos dados</a></div></div>`;
   const pmd = proximosDados(d, r), W = larguraGraf(), temRec = r.receita && (r.receita.usada || r.receita.estimativa);
   const secoes = [
     ['res-estimativa', 'Estimativa', heroResultado(r, d)],
@@ -7508,7 +7508,7 @@ function atualizarListaEmpresas() { const el = $('#emp-lista'); if (el) el.inner
 function telaComparar() {
   const emps = S.empresas.filter(e => UI.sel.has(e.id)).slice(0, 4);
   const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Comparação</h1><p class="sub page-description">Valor central e faixa provável de cada empresa, no mesmo eixo.</p></div><div class="acoes"><a class="btn" href="#/empresas">${ico('voltar')}Voltar às empresas</a></div></div>`;
-  if (emps.length < 2) return cab + `<div class="vazio empty-state"><h2>Escolha de 2 a 4 empresas</h2><p>Marque as empresas na lista e clique em Comparar.</p><div class="acoes"><a class="btn primary" href="#/empresas">Ir para as empresas</a></div></div>`;
+  if (emps.length < 2) return cab + `<div class="vazio empty-state"><span class="empty-state-icon">${ico('colunas')}</span><h2>Escolha de 2 a 4 empresas</h2><p>Marque as empresas na lista e clique em Comparar.</p><div class="acoes"><a class="btn primary" href="#/empresas">Ir para as empresas</a></div></div>`;
   const rs = emps.map(e => ({ e, r: calc(e.dados) }));
   const linhas = [['Setor', x => esc(nomeSetor(x.e.dados))], ['Lugar', x => esc(lugarTxt(x.e.dados) || '—')], ['Valor central', x => x.r.vazio ? '—' : '<b>' + fmtRS(x.r.F) + '</b>'],
     ['Faixa provável', x => x.r.vazio ? '—' : fmtRS(x.r.p10) + ' a ' + fmtRS(x.r.p90)], ['Confiança', x => x.r.vazio ? '—' : chipConf(x.r)], ['Método', x => nomeModo(x.r.modoCalc)],
@@ -7733,7 +7733,7 @@ function criarLista() {
 /* ---------- listas salvas ---------- */
 function telaListas() {
   const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Listas</h1><p class="sub page-description">Planilhas de empresas estimadas de uma vez. Cada empresa pode virar uma análise completa.</p></div><div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a></div></div>`;
-  if (!S.listas.length) return cab + `<div class="vazio empty-state"><h2>Nenhuma lista ainda</h2><p>Use uma planilha do CRM, do Excel ou um CSV com várias empresas. A ferramenta estima todas de uma vez, com a faixa provável e a confiança de cada uma.</p>
+  if (!S.listas.length) return cab + `<div class="vazio empty-state"><span class="empty-state-icon">${ico('tabela')}</span><h2>Nenhuma lista ainda</h2><p>Use uma planilha do CRM, do Excel ou um CSV com várias empresas. A ferramenta estima todas de uma vez, com a faixa provável e a confiança de cada uma.</p>
     <ol class="passos-vazio"><li><b>1. Escolher o arquivo</b>Uma linha por empresa, com nome e algum dado de porte.</li><li><b>2. Conferir as colunas</b>A ferramenta sugere o que cada coluna é; você confirma.</li><li><b>3. Ver as estimativas</b>Filtre, ordene, baixe em CSV ou abra uma empresa para detalhar.</li></ol>
     <div class="acoes"><a class="btn primary" href="#/listas/nova">${ico('subir')}Analisar uma lista</a><button type="button" class="btn" data-acao="modelo-lista">${ico('baixar')}Baixar planilha modelo</button></div></div>`;
   const linhas = S.listas.map(L => {
