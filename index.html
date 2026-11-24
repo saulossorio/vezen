@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.32, copiado de https://github.com/saulossorio/grin/releases/tag/v2.32 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.35, copiado de https://github.com/saulossorio/grin/releases/tag/v2.35 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.32 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.35 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1841,7 +1841,8 @@ a.tab { text-decoration: none; }
 .breadcrumb svg { width: 16px; height: 16px; color: var(--border-strong); }
 .breadcrumb [aria-current="page"] { color: var(--foreground); }
 .page-header { display: flex; flex-direction: column; gap: 20px; padding: 32px 32px 0; }
-.page-title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
+/* Actions line up with the top of the title, so they stay in the same place whatever the description length */
+.page-title-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px 24px; flex-wrap: wrap; }
 .page-title-row > :first-child { flex: 1 1 320px; min-width: 0; }
 .page-title { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
 .page-title h1 { font-size: var(--text-3xl); }
@@ -1915,11 +1916,11 @@ a.tab { text-decoration: none; }
 .page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.32 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.35 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.32';
+Grin.version = '2.35';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2902,7 +2903,6 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 <style id="estilo">
 /* ===================== TOKENS: os do Grin; aqui só o que é do Vezen ===================== */
 :root {
-  --control-h: 40px; /* campos, listas e botões com 40px (entre o compacto e o confortável do Grin) */
   --topo-fixo: 0px; /* altura de uma barra fixa no topo; o Grin não tem, então fica 0 */
   /* nomes antigos usados pelos testes de tela; apontam para os tokens do Grin */
   --crit: var(--crit-fg); --crit-f: var(--crit-bg); --aviso: var(--warn-fg); --ok: var(--ok-fg); --cinza: var(--muted-foreground);
@@ -2942,7 +2942,6 @@ li { margin: 3px 0; }
 /* tela inicial (Empresas sem empresas): padrão Tela inicial do Grin, com o mesmo cabeçalho e as mesmas margens das outras telas */
 .start-screen .cab { margin-bottom: 0; }
 .start-screen .vazio.inicio { padding: 8px 0 0; text-align: left; align-items: stretch; }
-.start-screen .cab { align-items: flex-start; }
 .start-screen .vazio.inicio h2 { font-size: var(--text-lg); margin-bottom: 12px; }
 .start-screen .comecos { max-width: none; }
 .start-screen .vazio .vazio-modelo { margin: 16px 0 0; }
@@ -3070,10 +3069,6 @@ fieldset.bloqueado { border: 0; padding: 0; margin: 0; min-width: 0; display: gr
 #dlg-corpo { max-height: calc(100vh - 160px); padding-top: 24px; }
 #dlg-corpo > * { margin: 0; }
 #dlg-corpo h2 { color: var(--foreground); font-size: var(--text-xl); }
-/* aviso rápido: a aparência do .toast do Grin, num elemento só que entra e sai */
-#toast.toast { position: fixed; right: 24px; bottom: 24px; z-index: 99; max-width: min(420px, calc(100vw - 32px)); opacity: 0; transform: translateY(8px); pointer-events: none; animation: none; transition: opacity var(--dur) var(--ease), transform var(--dur) var(--ease); }
-#toast.toast.show { opacity: 1; transform: none; }
-@media (max-width: 520px) { #toast.toast { left: 16px; right: 16px; bottom: 16px; } }
 .passos { padding-left: 20px; color: var(--muted-foreground); }
 textarea.prompt { min-height: 260px; font-size: var(--text-sm); }
 
@@ -3597,7 +3592,8 @@ tr.fora td { opacity: .55; }
 #f-nome:invalid { background: var(--crit-bg); border-color: var(--crit-fg); }
 .campo:has(#f-nome:invalid) .campo-rot label { color: var(--crit-fg); }
 .met-ok { display: inline-flex; gap: 8px; align-items: center; font-weight: var(--weight-semibold); }
-.met-ok.ok, .ok { color: var(--ok-fg); } .met-ok.falha, .falha { color: var(--crit-fg); }
+/* só nos elementos do Vezen: um .ok solto pintaria de verde o texto dos componentes do Grin que usam o tom ok (toast, badge) */
+.met-ok.ok, .teste-cab .ok, td.ok, .estado.ok { color: var(--ok-fg); } .met-ok.falha, .teste-cab .falha, td.falha { color: var(--crit-fg); }
 .teste-cab { display: flex; justify-content: space-between; gap: 10px; align-items: center; margin-bottom: 12px; flex-wrap: wrap; }
 tr.r-falha td { background: var(--crit-bg); }
 
@@ -3739,7 +3735,6 @@ details[open]::details-content { block-size: auto; }
 <input type="file" id="arq-base" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
 <input type="file" id="arq-lista" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
 <dialog id="dlg" class="dialog"><div id="dlg-corpo" class="dialog-body"></div><div id="dlg-acoes" class="dialog-footer"></div></dialog>
-<div id="toast" class="toast" role="status" aria-live="polite"></div>
 <div class="popover appearance" id="aparencia" data-appearance></div>
 <script id="parquet">
 /* Leitor de Parquet embutido, para ler a base de empresas sem internet.
@@ -3769,7 +3764,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.0';
+const VERSAO_APP = '4.3.1';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5605,10 +5600,8 @@ function fecharDlg() {
 }
 $('#dlg').addEventListener('cancel', e => { e.preventDefault(); fecharDlg(); });
 function avisar(titulo, texto) { return perguntar(`<h2>${esc(titulo)}</h2><p>${texto}</p>`, [['Fechar', null, 'primary']]); }
-function toast(msg) {
-  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
-  clearTimeout(toast.timer); toast.timer = setTimeout(() => t.classList.remove('show'), 2800);
-}
+// aviso rápido do Grin: 'ok' confirma o que aconteceu, 'warn' diz o que não deu certo, 'info' avisa o que está acontecendo
+function toast(msg, tipo = 'ok') { Grin.toast(msg, { type: tipo }); }
 
 /* ---------- menus e janelinhas presas a um botão ---------- */
 let popAtual = null;
@@ -6009,7 +6002,7 @@ function salvarEmpresa() {
   UI.sujo = false;
   salvar(); atualizarCabecalho(); atualizarSemDado();
   const n = pendentes(emp.dados).length + (emp.dados.nome.trim() ? 0 : 1);
-  toast(!persistente ? 'Salva só nesta sessão: o navegador não permite gravar' : n ? `Empresa salva. ${n === 1 ? 'Falta 1 campo' : 'Faltam ' + n + ' campos'}` : 'Empresa salva');
+  toast(!persistente ? 'Salva só nesta sessão: o navegador não permite gravar' : n ? `Empresa salva. ${n === 1 ? 'Falta 1 campo' : 'Faltam ' + n + ' campos'}` : 'Empresa salva', persistente ? 'ok' : 'warn');
   return true;
 }
 // antes de trocar de análise: salvar, descartar ou cancelar
@@ -6371,7 +6364,7 @@ function dicaTaxa(d) {
 // a PTAX vem do Banco Central pela BrasilAPI; em dia sem cotação, a API devolve o último dia útil anterior
 async function buscarPTAX() {
   const alvo = UI.atual, d = alvo.dados, m = d.globalMoeda || 'USD', a = +d.globalAno || ANO - 1;
-  if (m === 'BRL' || m === 'outra') return toast('Para esta moeda, digite a taxa.');
+  if (m === 'BRL' || m === 'outra') return toast('Para esta moeda, digite a taxa.', 'warn');
   const hoje = new Date(), dt = a >= hoje.getFullYear() ? hoje : new Date(a, 11, 31, 12);
   const iso = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
   const dica = $('#dica-taxa'); if (dica) dica.textContent = 'Buscando no Banco Central…';
@@ -6384,7 +6377,7 @@ async function buscarPTAX() {
     if (UI.atual !== alvo) return;
     const dia = String(c.data_hora_cotacao || iso).slice(0, 10);
     d.globalTaxa = +c.cotacao_venda; d.globalTaxaFonte = 'PTAX de ' + dataBR(dia + 'T12:00') + ' do Banco Central, via BrasilAPI';
-    marcarAlterado(); rerenderAnalise(); toast('Câmbio: R$ ' + nf(d.globalTaxa, 4));
+    marcarAlterado(); rerenderAnalise(); toast('Câmbio: R$ ' + nf(d.globalTaxa, 4), 'info');
   } catch (e) {
     const el = $('#dica-taxa'); if (el) el.innerHTML = 'Não foi possível buscar agora. Digite a taxa ou consulte o <a href="https://www.bcb.gov.br/estabilidadefinanceira/historicocotacoes" target="_blank" rel="noopener">Banco Central</a>.';
   } finally { clearTimeout(t); }
@@ -6885,7 +6878,7 @@ async function consultarCNPJ() {
   if (UI.atual !== alvo) return;
   if (e && e.r) { const a = aplicarReceitaCVM(e); toast(`Receita de ${a} preenchida com a DRE publicada na CVM.`); }
   else if (f && f.r) { const a = aplicarReceitaIF(f); toast(`Receita de ${a} preenchida com o balanço no IF.data do Banco Central.`); }
-  else if (e === null) toast('A DRE na CVM não pôde ser consultada agora.');
+  else if (e === null) toast('A DRE na CVM não pôde ser consultada agora.', 'warn');
   marcarAlterado(); if (UI.rota.tela === 'analise') rerenderAnalise();
 }
 // DRE na CVM: só companhias abertas publicam. Devolve a empresa, {} se o CNPJ não está lá, ou null se o arquivo não carregou.
@@ -6965,7 +6958,7 @@ TELAS.analise = {
   async entrar(r) {
     if (UI.atual && UI.atual.id === r.id) return true;
     const emp = S.empresas.find(x => x.id === r.id);
-    if (!emp) { history.replaceState(null, '', UI.atual ? `#/analise/${UI.atual.id}` : '#/empresas'); if (!UI.atual) toast('Essa análise não está mais aberta.'); return true; }
+    if (!emp) { history.replaceState(null, '', UI.atual ? `#/analise/${UI.atual.id}` : '#/empresas'); if (!UI.atual) toast('Essa análise não está mais aberta.', 'warn'); return true; }
     if (!(await confirmarSaida())) return false;
     abrirRascunho(emp); return true;
   },
@@ -7020,7 +7013,7 @@ acoes({
   'usar-sug': () => { const d = UI.atual.dados, s = UI.sugestao; if (s.natureza) { d.natureza = s.natureza; if (s.tipoPublico != null) d.tipoPublico = s.tipoPublico; } if (s.setor) d.setor = s.setor; UI.sugestao = null; marcarAlterado(); rerenderAnalise(); },
   'ignorar-sug': () => { UI.sugestao = null; rerenderAnalise(); },
   'usar-grupo': b => { const d = UI.atual.dados; d.extras = d.extras || {}; d.extras.grupo = b.dataset.nome; marcarAlterado(); rerenderAnalise(); },
-  'digital-alta': () => { UI.atual.dados.digital = 'alta'; marcarAlterado(); rerenderAnalise(); toast('Intensidade digital: alta'); },
+  'digital-alta': () => { UI.atual.dados.digital = 'alta'; marcarAlterado(); rerenderAnalise(); toast('Intensidade digital: alta', 'info'); },
   'add-real': () => adicionarAno(),
   'add-rec': () => adicionarReceita(),
   'del-rec': b => { UI.atual.dados.receitasAnos.splice(+b.dataset.i, 1); marcarAlterado(); rerenderAnalise(); },
@@ -7419,7 +7412,7 @@ function textoResumo(d, r) {
 function abrirResumo() {
   if (!UI.atual) return;
   const d = UI.atual.dados, r = calc(d);
-  if (r.vazio) return toast('Preencha um dado de porte para gerar o resumo.');
+  if (r.vazio) return toast('Preencha um dado de porte para gerar o resumo.', 'warn');
   const dlg = dialogoTexto('Resumo para copiar', '<p>No formato do resumo do time: receita líquida, estimativas Conservadora e Geral, e as fontes, cálculos e limitações. Cole no CRM, num e-mail ou numa proposta.</p>',
     'txt-resumo', textoResumo(d, r), 'Copiar resumo', `<div style="margin:0 0 12px">${seletorSalarios(r.resumo.comSalarios, '-dlg')}</div>`, 'Salários de outras áreas, custos de RH e despesas administrativas nunca entram. A opção acima decide se as estimativas incluem os salários da equipe de TI; a escolha fica salva na análise.');
   let mudou = false;
@@ -7569,7 +7562,7 @@ function exportarCSV(ids) {
 // Excel: uma aba com as empresas e outra com os dados informados, a origem e o motivo de cada campo vazio
 function exportarExcel(ids) {
   const t = tabelaEmpresas(ids);
-  if (!t.linhas.length) return toast('Não há empresas para baixar');
+  if (!t.linhas.length) return toast('Não há empresas para baixar', 'warn');
   return baixarExcel('vezen-empresas-' + dataArq() + '.xlsx', [{ nome: 'Empresas', colunas: t.colunas, linhas: t.linhas }, abaDadosMotivos(ids)]);
 }
 // o menu de exportar: Excel para ler e compartilhar, e o arquivo técnico para restaurar o Vezen
@@ -7681,7 +7674,7 @@ function telaLoteArquivo() {
   <div class="info-caixa alert">${ico('info')}<p>O arquivo é lido só neste navegador: nada é enviado pela internet. Precisa de pelo menos o nome e um dado de porte (receita ou funcionários); setor, estado, cidade, equipe de TI e gasto de TI real deixam a estimativa melhor. <button type="button" class="link-btn link" data-acao="modelo-lista">Baixar uma planilha modelo</button>.</p></div>`;
 }
 async function lerArquivoLista(f) {
-  toast('Lendo ' + f.name + '…');
+  toast('Lendo ' + f.name + '…', 'info');
   try {
     const tab = await lerTabela(new Uint8Array(await f.arrayBuffer()), f.name);
     if (!tab.linhas.length) throw new Error('A tabela não tem linhas de dados.');
@@ -7723,7 +7716,7 @@ function criarLista() {
   if (total > MAX_LINHAS_LISTAS) return avisar('Listas grandes demais', `As listas guardam até ${nf(MAX_LINHAS_LISTAS, 0)} empresas neste navegador; com esta seriam ${nf(total, 0)}. Exclua uma lista antiga ou use um arquivo menor.`);
   const L = { id: uid(), nome: (B.nomeLista || B.nome).trim() || B.nome, arquivo: B.nome, criadoEm: new Date().toISOString(), modo: B.modo, origem: B.origem, linhas: B.linhas };
   S.listas.unshift(L); UI.lote = null; UI.loteVer = { q: '', setor: '', conf: '', ordem: 'F', pag: 0 }; UI.loteSel = new Set();
-  salvar(); if (!persistente) toast('A lista ficou só nesta sessão: o navegador não permite gravar mais dados.');
+  salvar(); if (!persistente) toast('A lista ficou só nesta sessão: o navegador não permite gravar mais dados.', 'warn');
   navegar('#/listas/' + L.id);
 }
 
@@ -7850,7 +7843,7 @@ function prepararSoltar() {
 TELAS.listas = {
   titulo: r => r.id === 'nova' ? 'Analisar uma lista' : r.id ? ((listaPorId(r.id) || {}).nome || 'Lista') : 'Listas',
   entrar(r) {
-    if (r.id && r.id !== 'nova' && !listaPorId(r.id)) { history.replaceState(null, '', '#/listas'); toast('Essa lista não existe mais.'); }
+    if (r.id && r.id !== 'nova' && !listaPorId(r.id)) { history.replaceState(null, '', '#/listas'); toast('Essa lista não existe mais.', 'warn'); }
     else if (r.id && r.id !== 'nova' && UI.rota.id !== r.id) { UI.loteVer = { q: '', setor: '', conf: '', ordem: 'F', pag: 0 }; UI.loteSel = new Set(); }
     return true;
   },
@@ -7956,7 +7949,7 @@ function recalcularBaseNova() {
   } catch (e) { B.cal = null; B.erro = e.message || String(e); }
 }
 async function lerBaseNova(f) {
-  toast('Lendo ' + f.name + '…');
+  toast('Lendo ' + f.name + '…', 'info');
   try {
     const tab = await lerTabela(new Uint8Array(await f.arrayBuffer()), f.name);
     if (!tab.linhas.length) throw new Error('A tabela não tem linhas de dados.');
@@ -8067,7 +8060,7 @@ function salvarMinha() {
   const x = { id: f.id || uid(), nome: v.nome.trim(), cnpj: '', setor: v.setor, uf: v.uf || null, cidade: cidOf || '', natureza: 'privada', receita: { [ano]: rec }, gastoTI: gt > 0 ? { [ano]: gt } : {}, receitaTI: {},
     func: fu > 0 ? Math.round(fu) : null, funcTI: fti > 0 ? Math.round(fti) : null, naoDivulga: false, checaRedondo: false, ignorarND: false, origem: 'manual', criadoEm: antigo ? antigo.criadoEm : new Date().toISOString() };
   if (antigo) S.calibracao.minhas[S.calibracao.minhas.indexOf(antigo)] = x;
-  else { if (S.calibracao.minhas.length >= MAX_MINHAS) { toast(`A lista já tem ${nf(MAX_MINHAS, 0)} empresas, o máximo.`); return; } S.calibracao.minhas.push(x); }
+  else { if (S.calibracao.minhas.length >= MAX_MINHAS) { toast(`A lista já tem ${nf(MAX_MINHAS, 0)} empresas, o máximo.`, 'warn'); return; } S.calibracao.minhas.push(x); }
   UI.formMinha = null; salvar(); render(); irParaMinha();
   toast(antigo ? 'Empresa alterada na minha calibração.' : 'Empresa adicionada na minha calibração.');
 }
@@ -9573,7 +9566,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.32</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.35</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 

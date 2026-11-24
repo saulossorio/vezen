@@ -1,6 +1,6 @@
 # Migração para o Grin
 
-O Vezen usa o Grin 2.32, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.32. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
+O Vezen usa o Grin 2.35, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.35. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
 
 ## Como o Grin entra no arquivo
 
@@ -8,8 +8,8 @@ O Vezen é um único `index.html` que funciona sem internet. Por isso o Grin ent
 
 | Bloco | Origem |
 |---|---|
-| `<style id="grin">` | `dist/grin.inline.css` da v2.32, com Geist e Geist Mono embutidas |
-| `<script id="grin-js" defer>` | `dist/grin.js` da v2.32 |
+| `<style id="grin">` | `dist/grin.inline.css` da v2.35, com Geist e Geist Mono embutidas |
+| `<script id="grin-js" defer>` | `dist/grin.js` da v2.35 |
 | Comentário antes dos dois blocos | Versão, link da release e o texto da licença SIL Open Font License 1.1 das fontes |
 
 Para atualizar, leia o CHANGELOG do Grin entre as versões, substitua os dois blocos e o número da versão no comentário e confira as telas.
@@ -138,7 +138,7 @@ Estas partes não têm equivalente no Grin. Ficam no `<style id="estilo">`, rees
 | Decisão | Motivo |
 |---|---|
 | Classes do Grin acrescentadas ao lado das antigas, sem trocar os nomes que o JavaScript usa | A tarefa só muda a aparência. Trocar nomes que o JavaScript e os testes procuram mudaria código de comportamento. |
-| Altura dos controles fixada em 40 px (`--control-h`) | O teste `tela-analise` confere campos, listas e seletores com 40 px. O Grin tem 44 px (confortável) e 36 px (compacto). |
+| Altura dos controles do Grin (`--control-h`, desde a 4.3.1) | 44 px no modo confortável e 36 px no compacto, pelo painel Aparência. Antes o Vezen fixava 40 px. O teste `tela-analise` confere que campos, listas e seletores têm todos a altura do token. |
 | A casca usa `.app` e o `sidebar.js` do Grin (desde a 4.3.0) | O Grin 2.28 passou a aceitar barras desenhadas por script. Saíram `.casca`, `vezen.lateral`, `data-lateral`, a barra do topo no celular e o menu próprio. A escolha de recolher fica em `grin-sidebar`. |
 | Barra recolhida com 72 px, a do Grin (desde a 4.3.0) | Antes o Vezen tinha 64 px próprios. |
 | Recolher a barra e abrir o drawer do celular com a animação do Grin (desde a 4.3.0) | Os testes esperam 500 ms antes de medir a barra. |

@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.1] - 2026-11-24
+
+### Alterado
+- Grin 2.35. As ações do cabeçalho ficam alinhadas pelo topo com o título em todas as telas. Antes, em Listas e nas outras telas, ficavam embaixo, e só em Empresas ficavam em cima.
+- Campos, listas e botões com a altura do Grin: 44 px no modo confortável e 36 px no compacto, pelo painel Aparência. Antes o Vezen fixava 40 px.
+- Avisos rápidos com o toast do Grin, com ícone e botão de fechar, como no Laika. Os avisos de problema usam o tom de atenção.
+- Correção: uma regra `.ok` do Vezen pintava de verde o texto dos componentes do Grin com o tom ok, como o toast. Agora vale só para os elementos do Vezen.
+
 ## [4.3.0] - 2026-11-24
 
 ### Alterado

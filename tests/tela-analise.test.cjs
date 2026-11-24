@@ -29,7 +29,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Nova análise abre direto no formulário, com os dois resultados no cartão', await p.locator('#sec-objetivo').count() === 0 && await p.locator('#painel .cr-saida').count() === 2 && (await motor(() => UI.atual.dados.fatEstimar)) === true);
   ok('Foco no nome da empresa', await p.evaluate(() => document.activeElement && document.activeElement.id === 'f-nome'));
   ok('Sem a caixa antiga de estimar a receita', await p.locator('[data-chk=fatEstimar]').count() === 0);
-  ok('Alturas iguais: campos, listas e seletores com 40px', await p.evaluate(() => [...document.querySelectorAll('#form input[type=text], #form select, #form .seg')].filter(e => e.offsetParent).every(e => Math.round(e.getBoundingClientRect().height) === 40)));
+  ok('Alturas iguais: campos, listas e seletores com a altura de controle do Grin (--control-h)', await p.evaluate(() => { const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--control-h')); return h > 0 && [...document.querySelectorAll('#form input[type=text], #form select, #form .seg')].filter(e => e.offsetParent).every(e => Math.round(e.getBoundingClientRect().height) === h); }));
   ok('Ano da receita vem preenchido com o último ano fechado', (await p.inputValue('#f-fatAno')) === String(new Date().getFullYear() - 1));
   ok('Nova análise fica fora do Método Personalizado até a pessoa marcar', await p.locator('#f-usarCalib').count() === 0 && (await motor(() => UI.atual.foraCalibracao)) === true);
   await p.fill('#f-nome', 'Varejo Teste'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'varejo'); await p.selectOption('#f-uf', 'RS');
@@ -293,7 +293,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Nome vazio fica vermelho no próprio campo', await p.locator('#f-nome').evaluate(e => getComputedStyle(e).borderTopColor) === await tok('--crit'));
   const nAntes = await motor(() => S.empresas.length);
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
-  ok('Salvar sem nome e sem dados salva, e o aviso diz quantos campos faltam', (await motor(() => S.empresas.length)) === nAntes + 1 && /^Empresa salva\. Faltam \d+ campos$/.test(await txt('#toast')), await txt('#toast'));
+  ok('Salvar sem nome e sem dados salva, e o aviso diz quantos campos faltam', (await motor(() => S.empresas.length)) === nAntes + 1 && /^Empresa salva\. Faltam \d+ campos$/.test(await txt('.toasts .toast:last-child .toast-text')), await txt('.toasts .toast:last-child .toast-text'));
   await ir('#/empresas');
   ok('Na lista, a empresa sem nome aparece como “(sem nome)”', (await txt('.lista-emp')).includes('(sem nome)'));
   await p.evaluate(() => { S.empresas = S.empresas.filter(e => e.dados.nome); salvar(); });
@@ -331,7 +331,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   // salvar e copiar o resumo nunca são bloqueados: o campo que falta continua vermelho, o aviso diz quantos faltam e o resumo os lista
   const faltam = await pend();
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
-  ok('Salvar com campo faltando salva, e o aviso diz quantos faltam', (await motor(() => !!empresaSalva())) && (await txt('#toast')).includes(`Empresa salva. Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0, await txt('#toast'));
+  ok('Salvar com campo faltando salva, e o aviso diz quantos faltam', (await motor(() => !!empresaSalva())) && (await txt('.toasts .toast:last-child .toast-text')).includes(`Empresa salva. Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0, await txt('.toasts .toast:last-child .toast-text'));
   ok('Depois de salvar, os campos que faltam continuam em vermelho', await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === faltam.length);
   const focoNoPendente = () => p.evaluate(() => { const a = document.activeElement; return a.tagName === 'INPUT' && !!a.closest('.campo').querySelector('.sem-dado[data-estado="pendente"]'); });
   await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
