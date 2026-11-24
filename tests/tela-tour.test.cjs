@@ -59,7 +59,7 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     check(`${nomeTela}: o tour não salva o exercício`, await p.evaluate(() => S.empresas.length) === 0);
     await p.reload(); await p.waitForTimeout(1000);
     check(`${nomeTela}: depois de visto, não abre sozinho`, await p.locator('#tour').count() === 0);
-    if (nomeTela === 'celular') { await p.click('[data-acao="menu"]'); await p.waitForTimeout(300); }
+    if (nomeTela === 'celular') { await p.click('.sidebar-menu-button'); await p.waitForTimeout(500); }
     await p.click('#lat-pe [data-acao="tour"]'); await p.waitForTimeout(400);
     check(`${nomeTela}: a barra lateral reabre o tour`, await p.locator('#tour.visivel').count() === 1 && await esperaTit(titulos[0]));
     await p.click('[data-t="proximo"]'); await esperaTit(titulos[1]); await p.waitForTimeout(400);

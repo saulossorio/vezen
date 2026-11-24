@@ -2,6 +2,21 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.0] - 2026-11-24
+
+### Alterado
+- Grin 2.32.
+- Barra lateral do Grin: o `sidebar.js` recolhe, expande e abre o drawer no celular, e guarda a escolha. Saíram a casca própria, a barra do topo no celular e o menu próprio. No celular, a barra vira drawer a partir de 760 px, como no Grin (antes 960 px). Recolhida, a barra tem 72 px, a largura do Grin.
+- "Nova análise" usa `.sidebar-action`, a ação principal da barra lateral do Grin.
+- O botão de tema é o do Grin (`data-theme-toggle`).
+- As dicas usam o tooltip do Grin (`data-tooltip`).
+- Ícones: os de interface vêm do Grin. Antes o Vezen tinha 79 desenhos próprios, alguns diferentes dos do Grin e do Laika, como a lua do tema escuro. Os próprios que ficaram (setor, governo, nuvem, servidor e outros conceitos do Vezen) são desenhos do Lucide, o mesmo estilo do Grin.
+- O Tour guiado usa o ícone de mapa, como no Grin.
+- Logo em `.app-logo-mark`, com o espaço de 16 px do Grin embaixo (antes 12 px). A assinatura tem 20 px de espaço em cima e embaixo, como no Laika.
+
+### Removido
+- Com a barra recolhida, a análise aberta não aparece mais como ícone. O Grin esconde os subitens na barra recolhida.
+
 ## [4.2.3] - 2026-11-21
 
 ### Alterado

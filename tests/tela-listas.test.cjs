@@ -135,19 +135,19 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
   check('rota antiga de parâmetros cai em Métodos', (await p.evaluate(() => UI.rota.tela + '/' + UI.rota.id)) === 'metodos/met-fontes');
 
   // 5. tema escuro, guardado
-  await p.click('[data-acao=tema]'); await p.waitForTimeout(150);
+  await p.click('[data-theme-toggle]'); await p.waitForTimeout(150);
   check('tema escuro', await p.evaluate(() => document.documentElement.dataset.tema) === 'escuro');
   await p.reload(); await p.waitForTimeout(300);
   check('tema escuro continua depois de recarregar', await p.evaluate(() => document.documentElement.dataset.tema) === 'escuro');
-  await p.click('[data-acao=tema]');
+  await p.click('[data-theme-toggle]');
 
   // 6. celular: menu lateral
   await p.setViewportSize({ width: 375, height: 800 }); await p.waitForTimeout(200);
   check('celular: barra lateral escondida', !(await p.locator('#lateral').isVisible()) || (await p.locator('#lateral').boundingBox()).x < 0);
-  await p.click('.topo-movel [data-acao=menu]'); await p.waitForTimeout(300);
+  await p.click('.sidebar-menu-button'); await p.waitForTimeout(500); // espera a animação do drawer do Grin
   check('celular: menu abre', (await p.locator('#lateral').boundingBox()).x >= 0);
   await p.click('#nav a[href="#/listas"]'); await p.waitForTimeout(400);
-  check('celular: navegar fecha o menu', !(await p.evaluate(() => document.getElementById('casca').classList.contains('menu-aberto'))) && (await p.evaluate(() => location.hash)) === '#/listas');
+  check('celular: navegar fecha o menu', !(await p.evaluate(() => document.getElementById('lateral').classList.contains('open'))) && (await p.evaluate(() => location.hash)) === '#/listas');
   for (const h of ['#/listas', '#/empresas', '#/empresas/comparar']) { await ir(h); check('celular sem rolagem lateral: ' + h, await p.evaluate(() => document.documentElement.scrollWidth) <= 375, String(await p.evaluate(() => document.documentElement.scrollWidth))); }
 
   console.log('OK (' + ok.length + '):\n  ' + ok.join('\n  '));

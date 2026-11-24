@@ -1,6 +1,6 @@
 # Migração para o Grin
 
-O Vezen usa o Grin 2.27, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.27. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
+O Vezen usa o Grin 2.32, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.32. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
 
 ## Como o Grin entra no arquivo
 
@@ -8,8 +8,8 @@ O Vezen é um único `index.html` que funciona sem internet. Por isso o Grin ent
 
 | Bloco | Origem |
 |---|---|
-| `<style id="grin">` | `dist/grin.inline.css` da v2.27, com Geist e Geist Mono embutidas |
-| `<script id="grin-js" defer>` | `dist/grin.js` da v2.27 |
+| `<style id="grin">` | `dist/grin.inline.css` da v2.32, com Geist e Geist Mono embutidas |
+| `<script id="grin-js" defer>` | `dist/grin.js` da v2.32 |
 | Comentário antes dos dois blocos | Versão, link da release e o texto da licença SIL Open Font License 1.1 das fontes |
 
 Para atualizar, leia o CHANGELOG do Grin entre as versões, substitua os dois blocos e o número da versão no comentário e confira as telas.
@@ -70,7 +70,7 @@ Cores escritas direto que saíram: `#fff` do botão de perigo, os verdes de hove
 
 | Parte do Vezen | Classes antigas | Grin |
 |---|---|---|
-| Casca | `.app` | `.casca` própria (ver Decisões) |
+| Casca | `.app` | `.app` do Grin desde a 4.3.0 |
 | Barra lateral | `.lateral`, `.lat-marca`, `.lat-item`, `.lat-sub`, `.lat-n`, `.lat-sep`, `.lat-pe`, `.lat-ver`, `.ponto` | `.sidebar`, `.app-logo`, `.nav-item`, `.nav-sub`, `.nav-count`, `.nav-divider`, `.sidebar-footer`, `.nav-item.small`, `.tag`, `.dot.warn` |
 | Nova análise | `.lat-nova` | `.btn.primary` |
 | Topo do celular | `.topo-movel` | `.topbar` |
@@ -87,7 +87,7 @@ Cores escritas direto que saíram: `#fff` do botão de perigo, os verdes de hove
 | Tabelas | `table`, `.tab-wrap`, `.tab-rola`, `td.n` | `.table`, `.table.compact`, `.table-wrap`, `.table-wrap.scroll`, `.numeric` |
 | Menus | `.menu-pop`, `.mi`, `hr` | `.menu`, `.menu-item`, `.menu-item.danger`, `.menu-separator` |
 | Ajuda e termos | `.pop-ajuda`, `.pop-termo`, `h4` | `.popover.open`, `.popover-title` |
-| Dica flutuante | `.tip` | `.tooltip` |
+| Dica flutuante | `.tip` e `data-tip` | `.tooltip` e `data-tooltip` do Grin desde a 4.3.0 |
 | Diálogo | `#dlg`, `.largo`, `#dlg-corpo`, `#dlg-acoes` | `.dialog`, `.dialog.wide`, `.dialog-body`, `.dialog-footer` |
 | Aviso rápido | `.toast` próprio | aparência do `.toast` |
 | Selos | `.selo`, `.selo.cnpj`, `.oficial`, `.agregador`, `.aprox`, `.pend` | `.badge`, `.badge.info`, `.ok`, `.brand`, `.warn` |
@@ -139,15 +139,15 @@ Estas partes não têm equivalente no Grin. Ficam no `<style id="estilo">`, rees
 |---|---|
 | Classes do Grin acrescentadas ao lado das antigas, sem trocar os nomes que o JavaScript usa | A tarefa só muda a aparência. Trocar nomes que o JavaScript e os testes procuram mudaria código de comportamento. |
 | Altura dos controles fixada em 40 px (`--control-h`) | O teste `tela-analise` confere campos, listas e seletores com 40 px. O Grin tem 44 px (confortável) e 36 px (compacto). |
-| A casca usa `.casca`, não `.app` | O `sidebar.js` do Grin assume `.app > .sidebar` e liga o próprio recolher, com outra chave no navegador e recolhendo sozinho abaixo de 1100 px. O Vezen mantém `vezen.lateral`, `data-lateral` e o menu do celular, que os testes conferem. |
-| Barra recolhida com 64 px | O Grin usa 72 px; o teste do Vezen confere no máximo 64 px. |
-| Recolher a barra e abrir o menu do celular com `--dur` (220 ms), não `--dur-slow` | Os testes esperam 250 e 300 ms antes de medir a barra. |
+| A casca usa `.app` e o `sidebar.js` do Grin (desde a 4.3.0) | O Grin 2.28 passou a aceitar barras desenhadas por script. Saíram `.casca`, `vezen.lateral`, `data-lateral`, a barra do topo no celular e o menu próprio. A escolha de recolher fica em `grin-sidebar`. |
+| Barra recolhida com 72 px, a do Grin (desde a 4.3.0) | Antes o Vezen tinha 64 px próprios. |
+| Recolher a barra e abrir o drawer do celular com a animação do Grin (desde a 4.3.0) | Os testes esperam 500 ms antes de medir a barra. |
 | Janelinhas com a transição do Vezen (`.visivel`) e sem a animação de entrada do `.menu` | O Vezen tira a janelinha do DOM 150 ms depois de fechar e o teste de transições mede a saída. A transição usa `--dur-fast` (140 ms), que cabe nesse tempo. |
 | Diálogo entra pela animação do `.dialog` e sai pela classe `saindo` | O JavaScript espera 110 ms pela saída antes de fechar. |
 | `@keyframes surgir` continua com esse nome, com os valores do `grin-rise` | O teste de transições lê o nome da animação da troca de tela. |
 | Cinco nomes antigos continuam como apelido (`--crit`, `--crit-f`, `--aviso`, `--ok`, `--cinza`) | O teste `tela-analise` lê esses tokens para comparar as cores dos campos. Eles apontam para os tokens do Grin. |
 | O tema continua em `vezen.tema` e `data-tema`; o script de tema marca também `data-theme` | A chave do navegador e o atributo são lidos pelo JavaScript e pelos testes. O alto contraste segue o sistema operacional (`prefers-contrast`), como no Grin sem atributo. |
-| Ícones continuam no sprite do Vezen (`<symbol id="i-...">`), com traço 2 | Têm o mesmo desenho dos ícones do Grin (estilo Lucide). Trocar pelos do Grin exigiria mudar a função `ico()` e os nomes em todas as telas. |
+| Ícones do Grin no sprite do Vezen (desde a 4.3.0) | `ICO_GRIN` põe no sprite os desenhos de `Grin.ICONS` com os nomes do Vezen, e `ico()` não mudou. Ficam próprios só os conceitos que o Grin não tem (setor, governo, nuvem, servidor e outros), desenhados do Lucide. |
 | As abas Dados e Resultado deixaram de ficar presas no topo | O `.tabs` do Grin tem largura do conteúdo; preso no topo, flutuava sobre o formulário sem uma faixa de fundo. |
 | Na lista de empresas, a coluna Setor e lugar quebra a linha | As células do `.table` não quebram linha; a tabela passava da largura de 1200 px. |
 | Nas tabelas de leitura (`.table.compact`) o texto quebra a linha | São tabelas com frases (parâmetros, fontes, testes). |
@@ -174,4 +174,4 @@ Todas as propostas abaixo entraram no Grin 2.20. Os dois ajustes que o Vezen faz
 
 ## Partes obrigatórias do Grin
 
-Desde a versão 4.1.0 o Vezen tem as partes que o Grin exige em toda ferramenta. O logo leva a versão na `.tag`. O botão de recolher é o `.sidebar-toggle`, redondo na borda, embora o comportamento continue sendo o do Vezen (`vezen.lateral`, `data-lateral`). O botão de tema mostra sol e lua, e o painel Aparência (`data-appearance`) fica logo abaixo dele. A assinatura `.app-footer` aparece só em Empresas, Métodos e Glossário (`TELAS_ASSINATURA`), no fim do conteúdo, e nunca fica fixa. O tema escolhido no painel Aparência passa pelo Grin, e o Vezen acompanha pelo evento `grin:theme`, guardando a escolha em `vezen.tema`.
+Desde a versão 4.1.0 o Vezen tem as partes que o Grin exige em toda ferramenta. O logo leva a versão na `.tag`. O botão de recolher e o drawer do celular são os do `sidebar.js` do Grin (desde a 4.3.0). O botão de tema é o `data-theme-toggle` do Grin e mostra sol e lua, e o painel Aparência (`data-appearance`) fica logo abaixo dele. A assinatura `.app-footer` aparece só em Empresas, Métodos e Glossário (`TELAS_ASSINATURA`), no fim do conteúdo, e nunca fica fixa. O tema escolhido no painel Aparência passa pelo Grin, e o Vezen acompanha pelo evento `grin:theme`, guardando a escolha em `vezen.tema`.

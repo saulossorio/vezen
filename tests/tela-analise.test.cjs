@@ -228,20 +228,20 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/testes');
   ok('Tela de testes: 6 casos passaram', await p.locator('.teste-cab .ok').count() === 6);
 
-  // barra lateral recolhida: só ícones, com o nome ao passar o mouse; fica recolhida ao recarregar
-  await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
-  ok('Barra lateral recolhida', await p.evaluate(() => document.documentElement.dataset.lateral === 'recolhida' && document.querySelector('.lateral').getBoundingClientRect().width <= 72)); // largura recolhida do Grin (--size-sidebar-collapsed)
-  ok('Recolhida: itens com o nome na dica e para leitores de tela', await p.evaluate(() => [...document.querySelectorAll('#nav .lat-item')].every(a => a.dataset.tip && a.textContent.trim())));
+  // barra lateral recolhida (sidebar.js do Grin): só ícones, com o nome no tooltip; fica recolhida ao recarregar
+  await p.click('.sidebar-toggle'); await p.waitForTimeout(500); // espera a animação de largura do Grin
+  ok('Barra lateral recolhida', await p.evaluate(() => document.querySelector('#lateral').classList.contains('collapsed') && document.querySelector('#lateral').getBoundingClientRect().width <= 72)); // largura recolhida do Grin (--size-sidebar-collapsed)
+  ok('Recolhida: itens com o nome na dica e para leitores de tela', await p.evaluate(() => [...document.querySelectorAll('#nav .lat-item')].every(a => a.dataset.tooltip && a.textContent.trim())));
   await p.reload(); await p.waitForTimeout(300);
-  ok('Recolhida continua ao recarregar', await p.evaluate(() => document.documentElement.dataset.lateral === 'recolhida'));
-  await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
-  ok('Expandir de novo', await p.evaluate(() => !document.documentElement.dataset.lateral && document.querySelector('.lateral').getBoundingClientRect().width > 200 && localStorage.getItem('vezen.lateral') === 'aberta'));
+  ok('Recolhida continua ao recarregar', await p.evaluate(() => document.querySelector('#lateral').classList.contains('collapsed')));
+  await p.click('.sidebar-toggle'); await p.waitForTimeout(250);
+  ok('Expandir de novo', await p.evaluate(() => !document.querySelector('#lateral').classList.contains('collapsed') && document.querySelector('#lateral').getBoundingClientRect().width > 200 && localStorage.getItem('grin-sidebar') === 'expanded'));
   // nova análise pela barra lateral, de qualquer tela; recolhida, vira só o ícone
   await p.click('#nav .lat-nova'); await p.waitForTimeout(300); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(150);
   ok('Barra lateral: Nova análise abre uma análise nova a partir de qualquer tela', (await p.evaluate(() => location.hash)).startsWith('#/analise/') && await p.evaluate(() => document.activeElement && document.activeElement.id === 'f-nome') && await p.locator('#nav .lat-nova').isVisible());
-  await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
-  ok('Recolhida: Nova análise vira só o ícone, com o nome na dica e para leitores de tela', await p.evaluate(() => { const b = document.querySelector('#nav .lat-nova'); return b.dataset.tip === 'Nova análise' && b.textContent.trim() === 'Nova análise' && b.getBoundingClientRect().width <= 48; }));
-  await p.click('[data-acao=recolher]'); await p.waitForTimeout(250);
+  await p.click('.sidebar-toggle'); await p.waitForTimeout(250);
+  ok('Recolhida: Nova análise vira só o ícone, com o nome na dica e para leitores de tela', await p.evaluate(() => { const b = document.querySelector('#nav .lat-nova'); return b.dataset.tooltip === 'Nova análise' && b.textContent.trim() === 'Nova análise' && b.getBoundingClientRect().width <= 48; }));
+  await p.click('.sidebar-toggle'); await p.waitForTimeout(250);
   // área estreita: o cartão fica preso embaixo da tela, com os valores à vista sem rolar
   await ir('#/analise/' + await p.evaluate(() => S.empresas[0].id));
   await p.setViewportSize({ width: 1000, height: 760 }); await p.waitForTimeout(250);
