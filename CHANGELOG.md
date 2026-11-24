@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.2] - 2026-11-24
+
+### Alterado
+- Grin 2.37.
+- Diálogos pela regra do modal do Grin: cabeçalho com o título e o botão Fechar, como no Laika. Antes o título ficava dentro do texto e não havia Fechar. O foco começa no primeiro campo ou em Cancelar.
+
 ## [4.3.1] - 2026-11-24
 
 ### Alterado

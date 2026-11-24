@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.35, copiado de https://github.com/saulossorio/grin/releases/tag/v2.35 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.37, copiado de https://github.com/saulossorio/grin/releases/tag/v2.37 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.35 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.37 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1916,11 +1916,11 @@ a.tab { text-decoration: none; }
 .page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.35 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.37 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.35';
+Grin.version = '2.37';
 
 // ---------- scripts/utils.js ----------
 {
@@ -3065,10 +3065,9 @@ fieldset.bloqueado { border: 0; padding: 0; margin: 0; min-width: 0; display: gr
 .pop-ajuda .lista-orig li { align-items: flex-start; justify-content: flex-start; }
 .pop-ajuda .lista-orig b { display: block; }
 .pop-ajuda .lista-orig span { color: var(--muted-foreground); }
-/* diálogo: .dialog do Grin, com o título dentro do corpo */
-#dlg-corpo { max-height: calc(100vh - 160px); padding-top: 24px; }
+/* diálogo: .dialog do Grin, com cabeçalho (título e Fechar), corpo e botões */
+#dlg-corpo { max-height: calc(100vh - 160px); }
 #dlg-corpo > * { margin: 0; }
-#dlg-corpo h2 { color: var(--foreground); font-size: var(--text-xl); }
 .passos { padding-left: 20px; color: var(--muted-foreground); }
 textarea.prompt { min-height: 260px; font-size: var(--text-sm); }
 
@@ -3734,7 +3733,7 @@ details[open]::details-content { block-size: auto; }
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
 <input type="file" id="arq-base" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
 <input type="file" id="arq-lista" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
-<dialog id="dlg" class="dialog"><div id="dlg-corpo" class="dialog-body"></div><div id="dlg-acoes" class="dialog-footer"></div></dialog>
+<dialog id="dlg" class="dialog" aria-labelledby="dlg-tit"><div class="dialog-header" id="dlg-cab"><h2 id="dlg-tit"></h2><button type="button" class="btn icon ghost xs" data-acao="dlg-fechar" aria-label="Fechar"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div><div id="dlg-corpo" class="dialog-body"></div><div id="dlg-acoes" class="dialog-footer"></div></dialog>
 <div class="popover appearance" id="aparencia" data-appearance></div>
 <script id="parquet">
 /* Leitor de Parquet embutido, para ler a base de empresas sem internet.
@@ -3764,7 +3763,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.1';
+const VERSAO_APP = '4.3.2';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5578,17 +5577,27 @@ const ACOES = {};
 const acoes = mapa => Object.assign(ACOES, mapa);
 
 /* ---------- diálogo, aviso rápido e dica flutuante ---------- */
+// o primeiro <h2> do conteúdo vira o título no cabeçalho do diálogo, como no .dialog do Grin
+function corpoDlg(html) {
+  $('#dlg-corpo').innerHTML = html;
+  const h = $('#dlg-corpo > h2:first-child');
+  $('#dlg-tit').innerHTML = h ? h.innerHTML : ''; if (h) h.remove();
+}
+// foco inicial (Grin): o primeiro campo, se houver; senão o primeiro botão (Cancelar). Nunca o Fechar do cabeçalho
+function focoDlg() { ($('#dlg-corpo').querySelector('input:not([type=hidden]), select, textarea') || $('#dlg-acoes .btn'))?.focus(); }
 function perguntar(html, botoes, largo) {
   return new Promise(res => {
-    const dlg = $('#dlg'); dlg.classList.toggle('wide', !!largo); $('#dlg-corpo').innerHTML = html;
+    const dlg = $('#dlg'); dlg.classList.toggle('wide', !!largo); corpoDlg(html);
     const ac = $('#dlg-acoes'); ac.innerHTML = '';
     botoes.forEach(([rot, val, cls]) => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + (cls || ''); b.textContent = rot; b.onclick = async () => { await fecharDlg(); res(val); }; ac.appendChild(b); });
     // o evento close do diálogo anterior chega depois; só conta como cancelar se este diálogo já fechou
     dlg.onclose = () => { if (!dlg.open) res(null); };
     dlg.showModal();
+    focoDlg();
   });
 }
 // o diálogo sai com uma transição curta; quem espera por ele só continua depois de fechado
+acoes({ 'dlg-fechar': () => fecharDlg() });
 function fecharDlg() {
   const dlg = $('#dlg');
   return new Promise(res => {
@@ -7316,7 +7325,7 @@ Responda em português, só com o que segue, sem texto antes ou depois:
 }
 function dialogoTexto(titulo, intro, idTexto, texto, rotCopiar, extra = '', nota = '') {
   const dlg = $('#dlg'); dlg.classList.add('wide');
-  $('#dlg-corpo').innerHTML = `<h2>${titulo}</h2>${intro}${extra}<label for="${idTexto}" class="sr sr-only">${titulo}</label><textarea id="${idTexto}" class="textarea prompt" spellcheck="false">${esc(texto)}</textarea>${nota ? `<p style="font-size:.86rem;margin-top:10px">${nota}</p>` : ''}`;
+  corpoDlg(`<h2>${titulo}</h2>${intro}${extra}<label for="${idTexto}" class="sr sr-only">${titulo}</label><textarea id="${idTexto}" class="textarea prompt" spellcheck="false">${esc(texto)}</textarea>${nota ? `<p class="text-secondary" style="margin-top:10px">${nota}</p>` : ''}`);
   const ac = $('#dlg-acoes'); ac.innerHTML = '';
   const fechar = document.createElement('button'); fechar.className = 'btn'; fechar.type = 'button'; fechar.textContent = 'Fechar'; fechar.onclick = () => fecharDlg();
   const copiarB = document.createElement('button'); copiarB.className = 'btn primary'; copiarB.type = 'button'; copiarB.innerHTML = ico('copiar') + rotCopiar;
@@ -7324,6 +7333,7 @@ function dialogoTexto(titulo, intro, idTexto, texto, rotCopiar, extra = '', nota
   ac.append(fechar, copiarB);
   dlg.onclose = null;
   dlg.showModal();
+  focoDlg();
   return dlg;
 }
 function abrirPromptIA() {
@@ -9566,7 +9576,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.35</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.37</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 
