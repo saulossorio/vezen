@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.9] - 2026-11-24
+
+### Alterado
+- Campo que entra na conta e está vazio, sem motivo, fica âmbar com borda tracejada, como o `data-state="missing"` do Grin, em vez de vermelho. O dado que falta não é erro: salvar e copiar o resumo continuam liberados. O mesmo vale para o quadro do resumo e para o aviso "Faltam N campos" no topo. Vermelho fica só para erro, como o nome vazio.
+
 ## [4.3.8] - 2026-11-24
 
 ### Alterado

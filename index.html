@@ -2963,7 +2963,6 @@ li { margin: 3px 0; }
 }
 
 /* ===================== CONTROLES: botão, campo, input-group, checkbox e segmented do Grin ===================== */
-/* ação destrutiva secundária (ao lado da principal): texto vermelho sobre o botão padrão */
 .acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .checkbox:has(.dica), .checkbox.conf { align-items: flex-start; }
 .checkbox:has(.dica) input { margin-top: 1px; }
@@ -3156,14 +3155,15 @@ details.secao-form[open] > summary .chev { transform: rotate(180deg); }
 .origem .chev { width: 12px; height: 12px; opacity: .7; }
 .origem:hover { border-color: var(--border-strong); }
 .origem.o-vazio { color: var(--muted-foreground); background: none; border-style: dashed; border-color: var(--border-strong); font-weight: var(--weight-medium); }
-/* motivos: as cores seguem o sentido. Âmbar é dado que falta e foi explicado; verde é não se aplica; vermelho é o próprio campo que falta */
+/* motivos: âmbar é dado que falta (explicado ou não); verde é não se aplica. O campo vazio sem motivo segue o data-state="missing" do Grin: borda tracejada e fundo âmbar */
 .sdc-nao-encontrado, .sdc-nao-divulga { color: var(--warn-fg); }
 .sdc-nao-se-aplica { color: var(--ok-fg); }
-.campo:has(.sem-dado[data-estado="pendente"]) .input-group, .campo:has(.sem-dado[data-estado="pendente"]) .input-group .input { background: var(--crit-bg); border-color: var(--crit-fg); }
-.campo:has(.sem-dado[data-estado="pendente"]) .campo-rot label { color: var(--crit-fg); }
-.campo:has(.sem-dado[data-campo="gastosReais"][data-estado="pendente"]) .reais { background: var(--crit-bg); border: 1px solid var(--crit-fg); border-radius: var(--radius-lg); padding: 10px; }
-.dado.pendente { background: var(--crit-bg); border-color: var(--crit-border); }
-.dado.pendente b { color: var(--crit-fg); }
+.campo:has(.sem-dado[data-estado="pendente"]) .input-group { border-style: dashed; border-color: var(--warn-solid); background: var(--warn-bg); }
+.campo:has(.sem-dado[data-estado="pendente"]) .input-group .input { background: transparent; }
+.campo:has(.sem-dado[data-estado="pendente"]) .campo-rot label::after { content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: var(--radius-pill); background: var(--warn-solid); vertical-align: middle; }
+.campo:has(.sem-dado[data-campo="gastosReais"][data-estado="pendente"]) .reais { background: var(--warn-bg); border: 1px dashed var(--warn-solid); border-radius: var(--radius-lg); padding: 10px; }
+.dado.pendente { background: var(--warn-bg); border-style: dashed; border-color: var(--warn-solid); }
+.dado.pendente b { color: var(--warn-fg); }
 .chip-falta { border: 0; background: none; padding: 0; font: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .reais-acoes { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .campo .dica { margin-top: 0; }
@@ -3771,7 +3771,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.8';
+const VERSAO_APP = '4.3.9';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -6224,7 +6224,7 @@ function estadoSemDado(d, c) {
 }
 const pendentes = d => Object.keys(CAMPOS_SEM_DADO).filter(c => estadoSemDado(d, c) === 'pendente');
 const textoSemDado = (d, c) => { const s = SEM_DADO[(d.semDado || {})[c]]; return s ? s.rot.toLowerCase() : ''; };
-// as cores seguem o sentido: o campo que falta fica vermelho, âmbar é dado que falta e foi explicado, verde é não se aplica
+// as cores seguem o sentido: âmbar é dado que falta (explicado ou não), verde é não se aplica
 const chipSemDado = (d, c) => { const e = estadoSemDado(d, c), s = SEM_DADO[e]; return s ? `<span class="o-chip sdc-${e}">${ico(s.ico)}${s.rot}</span>` : ''; };
 // botão abaixo do campo vazio, no lugar do botão de origem (que só aparece com valor)
 function botaoSemDado(c, d) {
@@ -6269,7 +6269,7 @@ function revisarPendencias() {
   if (UI.rota.aba === 'resultado') { navegar(`#/analise/${UI.atual.id}`); setTimeout(ir, 60); } else ir();
 }
 // no topo da análise, sempre à vista enquanto faltar algo
-const chipFaltam = d => { const n = pendentes(d).length; return n ? `<button type="button" class="estado erro chip-falta" data-acao="revisar"><i aria-hidden="true"></i>${n === 1 ? 'Falta 1 campo' : 'Faltam ' + n + ' campos'}</button>` : ''; };
+const chipFaltam = d => { const n = pendentes(d).length; return n ? `<button type="button" class="estado pend chip-falta" data-acao="revisar"><i aria-hidden="true"></i>${n === 1 ? 'Falta 1 campo' : 'Faltam ' + n + ' campos'}</button>` : ''; };
 // a busca do CNPJ só acontece quando a pessoa pede: lupa para buscar, setas para atualizar o que já veio da Receita
 function botaoCNPJ(d) {
   const ja = !!(d.cnpjInfo && Object.keys(d.cnpjInfo).length), rot = ja ? 'Atualizar com os dados da Receita Federal e a DRE da CVM' : 'Buscar os dados deste CNPJ na Receita Federal e a DRE na CVM';

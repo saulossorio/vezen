@@ -8,7 +8,7 @@ const URL = 'file://' + path.join(__dirname, '..', 'index.html');
 const ok = [], falhas = [];
 const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (info ? ' — ' + info : '')); };
 const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
-// campo vazio sem motivo fica em vermelho: nos testes que não são do marcador, todos os pendentes recebem um motivo
+// campo vazio sem motivo fica em âmbar: nos testes que não são do marcador, todos os pendentes recebem um motivo
 const explicar = p => p.evaluate(() => { const d = UI.atual.dados; d.semDado = d.semDado || {}; for (const c of pendentes(d)) d.semDado[c] = CAMPOS_SEM_DADO[c].ops[0]; atualizarSemDado(); atualizarCabecalho(); });
 const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(espera); };
 (async () => {

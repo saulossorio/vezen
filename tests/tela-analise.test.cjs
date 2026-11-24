@@ -20,7 +20,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   const orig = async (c, o) => { await p.click(`[data-acao=origem][data-alvo="campo:${c}"]`); await p.click(`#pop [data-o=${o}]`); };
   const motor = expr => p.evaluate(expr);
   const txt = async s => ((await p.textContent(s)) || '').replace(/\s+/g, ' ').trim();
-  // campo vazio sem motivo fica em vermelho: nos testes que não são do marcador, todos os pendentes recebem um motivo
+  // campo vazio sem motivo fica em âmbar: nos testes que não são do marcador, todos os pendentes recebem um motivo
   const explicar = () => p.evaluate(() => { const d = UI.atual.dados; d.semDado = d.semDado || {}; for (const c of pendentes(d)) d.semDado[c] = CAMPOS_SEM_DADO[c].ops[0]; atualizarSemDado(); atualizarCabecalho(); });
   const salvarOk = async (espera = 200) => { await explicar(); await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(espera); };
 
@@ -284,7 +284,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/empresas'); await p.click('[data-acao=menu-empresas]'); await p.click('#pop [data-acao=modelo]'); await p.waitForTimeout(400);
   ok('Empresa modelo salva: abrir de novo leva à mesma análise, sem duplicar', (await p.evaluate(() => location.hash)) === '#/analise/' + idModelo && (await p.evaluate(() => S.empresas.filter(e => e.dados.modelo).length)) === 1);
 
-  // campo sem valor: ou tem valor, ou tem um motivo explícito; senão falta informar, e o campo fica em vermelho
+  // campo sem valor: ou tem valor, ou tem um motivo explícito; senão falta informar, e o campo fica em âmbar
   const pend = () => motor(() => pendentes(UI.atual.dados));
   const tok = t => p.evaluate(t => { const e = document.createElement('i'); e.style.color = `var(${t})`; document.body.appendChild(e); const c = getComputedStyle(e).color; e.remove(); return c; }, t);
   ok('Empresa modelo completa: nada faltando, motivo só no que os documentos não trazem', (await motor(() => { const d = UI.atual.dados; return pendentes(d).join() + '|' + Object.keys(d.semDado).sort().join(); })) === '|contratos,profTI,usuarios' && await p.locator('.chip-falta').count() === 0);
@@ -300,10 +300,11 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/empresas'); await p.click('#nav .lat-nova >> nth=0'); await p.click('[data-acao=escolher-modo][data-v=base]'); await p.waitForTimeout(200);
   await p.fill('#f-nome', 'Teste Sem Dado'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'industria'); await p.fill('#f-funcionarios', '500'); await p.waitForTimeout(300);
   const vis = async c => await p.locator(`.sem-dado[data-campo=${c}]`).count() === 1 && await p.locator(`.sem-dado[data-campo=${c}]`).isVisible();
-  const campoCor = (c, prop) => p.locator(`#f-${c}`).evaluate((e, k) => getComputedStyle(e)[k], prop);
+  const campoCor = (c, prop) => p.locator(`#f-${c}`).evaluate((e, k) => getComputedStyle(e.closest('.input-group') || e)[k], prop);
+  const faltaCor = async c => await campoCor(c, 'borderTopStyle') === 'dashed' && await campoCor(c, 'borderTopColor') === await tok('--warn-solid') && await campoCor(c, 'backgroundColor') === await tok('--warn-bg');
   ok('Campos vazios que entram na conta têm o botão “Sem dado?” desde o início', (await Promise.all(['faturamento', 'usuarios', 'profTI', 'gastosReais'].map(vis))).every(Boolean) && (await txt('.sem-dado[data-campo=usuarios]')) === 'Sem dado?');
-  ok('O próprio campo que falta muda de cor (fundo e borda vermelhos) e o botão fica neutro', await campoCor('usuarios', 'borderTopColor') === await tok('--crit') && await campoCor('usuarios', 'backgroundColor') === await tok('--crit-f') && await p.locator('.sem-dado[data-campo=usuarios]').evaluate(e => getComputedStyle(e).color) === await tok('--cinza'));
-  ok('Campo com valor segue com a cor normal', await campoCor('funcionarios', 'borderTopColor') !== await tok('--crit') && await campoCor('funcionarios', 'backgroundColor') !== await tok('--crit-f'));
+  ok('O próprio campo que falta fica âmbar com borda tracejada, como o data-state="missing" do Grin, e o botão fica neutro', await faltaCor('usuarios') && await p.locator('.sem-dado[data-campo=usuarios]').evaluate(e => getComputedStyle(e).color) === await tok('--cinza'));
+  ok('Campo com valor segue com a cor normal', !(await faltaCor('funcionarios')) && await campoCor('funcionarios', 'borderTopStyle') === 'solid');
   const faltam0 = await pend();
   ok('O topo da análise diz quantos campos faltam', (await txt('.chip-falta')) === 'Faltam ' + faltam0.length + ' campos', await txt('#ws-meta'));
   ok('Campo com valor mostra a origem, não o motivo', !(await vis('funcionarios')) && await p.locator('.origem[data-alvo="campo:funcionarios"]').isVisible());
@@ -327,20 +328,20 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Digitar um valor tira o motivo e mostra a origem', (await motor(() => UI.atual.dados.semDado.profTI)) === undefined && await p.locator('.origem[data-alvo="campo:profTI"]').isVisible() && !(await vis('profTI')));
   ok('Com equipe de TI, o salário passa a pedir o motivo', await vis('salarioTI'));
   await p.fill('#f-profTI', ''); await p.waitForTimeout(200);
-  ok('Apagar o valor volta a faltar informar, sem o motivo antigo, e o campo volta a ficar vermelho', (await txt('.sem-dado[data-campo=profTI]')) === 'Sem dado?' && await campoCor('profTI', 'borderTopColor') === await tok('--crit') && !(await vis('salarioTI')));
-  // salvar e copiar o resumo nunca são bloqueados: o campo que falta continua vermelho, o aviso diz quantos faltam e o resumo os lista
+  ok('Apagar o valor volta a faltar informar, sem o motivo antigo, e o campo volta a ficar âmbar', (await txt('.sem-dado[data-campo=profTI]')) === 'Sem dado?' && await faltaCor('profTI') && !(await vis('salarioTI')));
+  // salvar e copiar o resumo nunca são bloqueados: o campo que falta continua em âmbar, o aviso diz quantos faltam e o resumo os lista
   const faltam = await pend();
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
   ok('Salvar com campo faltando salva, e o aviso diz quantos faltam', (await motor(() => !!empresaSalva())) && (await txt('.toasts .toast:last-child .toast-text')).includes(`Empresa salva. Faltam ${faltam.length} campos`) && await p.locator('#dlg[open]').count() === 0, await txt('.toasts .toast:last-child .toast-text'));
-  ok('Depois de salvar, os campos que faltam continuam em vermelho', await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === faltam.length);
+  ok('Depois de salvar, os campos que faltam continuam em âmbar', await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === faltam.length);
   const focoNoPendente = () => p.evaluate(() => { const a = document.activeElement; return a.tagName === 'INPUT' && !!a.closest('.campo').querySelector('.sem-dado[data-estado="pendente"]'); });
   await p.click('#painel [data-acao=resumo]'); await p.locator('#dlg[open]').waitFor();
   ok('Copiar o resumo com campo faltando abre e lista o que falta', /Dados ainda não informados: /.test(await p.inputValue('#txt-resumo')));
   await p.click('#dlg button:has-text("Fechar")');
   await p.click('.chip-falta'); await p.waitForTimeout(300);
-  ok('O aviso no topo leva ao primeiro campo que falta, que já está em vermelho', await focoNoPendente() && await p.evaluate(() => getComputedStyle(document.activeElement).borderTopColor) === await tok('--crit'));
+  ok('O aviso no topo leva ao primeiro campo que falta, que já está em âmbar', await focoNoPendente() && await p.evaluate(() => getComputedStyle(document.activeElement.closest('.input-group') || document.activeElement).borderTopStyle) === 'dashed');
   for (const c of faltam) { await p.click(`.sem-dado[data-campo=${c}]`); await p.click(c === 'profTI' ? '#pop [data-s=nao-se-aplica]' : '#pop [data-s]:first-of-type'); await p.waitForTimeout(100); }
-  ok('Tudo explicado: nada falta, nenhum campo em vermelho e o aviso do topo some', (await pend()).length === 0 && await p.locator('.chip-falta').count() === 0 && await p.locator('.sem-dado[data-estado="pendente"]').count() === 0 && await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === 0);
+  ok('Tudo explicado: nada falta, nenhum campo em âmbar e o aviso do topo some', (await pend()).length === 0 && await p.locator('.chip-falta').count() === 0 && await p.locator('.sem-dado[data-estado="pendente"]').count() === 0 && await p.locator('.campo:has(.sem-dado[data-estado="pendente"])').count() === 0);
   await p.click('#ws-acoes [data-acao=salvar]'); await p.waitForTimeout(300);
   ok('Sem nada faltando, salva direto', await p.locator('#dlg[open]').count() === 0 && (await txt('#ws-meta')).includes('Salva em'));
   ok('Os motivos ficam salvos com a empresa', await p.evaluate(() => { const e = JSON.parse(localStorage.getItem('estimador-ti.v1')).empresas.find(x => x.dados.nome === 'Teste Sem Dado'); return e.dados.semDado.faturamento === 'nao-divulga'; }));
