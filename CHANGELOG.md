@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.10] - 2026-11-24
+
+### Alterado
+- Grin 2.43. O tour guiado passa a ser o `startTour` do Grin, que ganhou os passos que esperam a pessoa agir (clique no alvo ou tarefa feita), os cliques segurados fora do recorte e a folha no celular. O Vezen guarda só os passos e a lembrança de que o tour foi visto; o código e o CSS próprios do tour saíram.
+- Indicadores da lista seguem o `.stat` do Grin, sem tamanhos próprios. O valor fica numa linha e diminui com a largura do card.
+
 ## [4.3.9] - 2026-11-24
 
 ### Alterado

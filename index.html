@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.42, copiado de https://github.com/saulossorio/grin/releases/tag/v2.42 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.43, copiado de https://github.com/saulossorio/grin/releases/tag/v2.43 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.42 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.43 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1185,12 +1185,15 @@ a.card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md);
 /* Four stats never break 3 + 1: one row of four, or two rows of two when the screen is narrower than the reference */
 .stat-grid:has(> :nth-child(4):last-child) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1100px) { .stat-grid:has(> :nth-child(4):last-child) { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-.stat { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-sm); }
+.stat { display: flex; flex-direction: column; gap: 14px; min-width: 0; container-type: inline-size; padding: 20px; border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--surface); box-shadow: var(--shadow-sm); }
 .stat-label { display: flex; align-items: center; gap: 12px; font-size: var(--text-base); color: var(--muted-foreground); font-weight: var(--weight-medium); }
+/* without an icon the label is running text: inline terms and links stay in the line */
+.stat-label:not(:has(> .stat-icon)) { display: block; }
 .stat-icon { display: inline-grid; place-items: center; width: 40px; height: 40px; flex-shrink: 0; border-radius: var(--radius-md); background: var(--brand-bg); color: var(--brand-fg); }
 .stat-icon svg { width: 20px; height: 20px; }
 .stat-icon.crit { background: var(--crit-bg); color: var(--crit-fg); } .stat-icon.warn { background: var(--warn-bg); color: var(--warn-fg); } .stat-icon.info { background: var(--info-bg); color: var(--info-fg); }
-.stat-value { font-size: var(--text-4xl); font-weight: var(--weight-semibold); letter-spacing: var(--tracking-display); line-height: 1.1; font-variant-numeric: tabular-nums; }
+/* the value stays on one line and shrinks with the card, down to text-xl */
+.stat-value { font-size: clamp(var(--text-xl), 14cqi, var(--text-4xl)); white-space: nowrap; font-weight: var(--weight-semibold); letter-spacing: var(--tracking-display); line-height: 1.1; font-variant-numeric: tabular-nums; }
 .stat-delta { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; font-size: var(--text-base); color: var(--muted-foreground); }
 .stat-delta > svg { width: 16px; height: 16px; }
 
@@ -1207,7 +1210,7 @@ a.card:hover { border-color: var(--border-strong); box-shadow: var(--shadow-md);
   .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
   .stat { gap: 10px; padding: 16px; }
   .stat-label { flex-direction: column; align-items: flex-start; gap: 10px; }
-  .stat-value { font-size: var(--text-3xl); }
+  .stat-value { font-size: clamp(var(--text-xl), 14cqi, var(--text-3xl)); }
   .stat-delta { font-size: var(--text-sm); }
 }
 
@@ -1630,16 +1633,40 @@ a.tab { text-decoration: none; }
    the point shown; the cut-out and the card slide from one step to the next. Created by tour.js. */
 .tour { position: fixed; inset: 0; z-index: 120; pointer-events: none; opacity: 0; transition: opacity var(--dur) var(--ease); }
 .tour.show { opacity: 1; }
-.tour-spot { position: fixed; border-radius: var(--radius-md); box-shadow: 0 0 0 3px var(--primary), 0 0 0 200vmax var(--overlay); transition: top var(--dur-slow) var(--ease), left var(--dur-slow) var(--ease), width var(--dur-slow) var(--ease), height var(--dur-slow) var(--ease); }
+/* strips around the cut-out hold the clicks; the cut-out lets them through while the step waits for an action */
+.tour-block { position: fixed; pointer-events: auto; }
+.tour-spot { position: fixed; pointer-events: none; border-radius: var(--radius-md); box-shadow: 0 0 0 3px var(--primary), 0 0 0 200vmax var(--overlay); transition: top var(--dur-slow) var(--ease), left var(--dur-slow) var(--ease), width var(--dur-slow) var(--ease), height var(--dur-slow) var(--ease); }
 .tour-spot.none { box-shadow: 0 0 0 200vmax var(--overlay); }
+.tour-spot.pulse { animation: tour-pulse 1.6s var(--ease-in-out) infinite; }
+@keyframes tour-pulse { 0%, 100% { box-shadow: 0 0 0 3px var(--primary), 0 0 0 200vmax var(--overlay); } 50% { box-shadow: 0 0 0 7px var(--highlight), 0 0 0 200vmax var(--overlay); } }
 .tour-card { position: fixed; display: flex; flex-direction: column; gap: 10px; width: min(360px, calc(100vw - 32px)); padding: 18px 20px 16px; border: 1px solid var(--border); border-radius: var(--radius-xl); background: var(--popover); color: var(--foreground); box-shadow: var(--shadow-lg); pointer-events: auto; transition: top var(--dur-slow) var(--ease), left var(--dur-slow) var(--ease), opacity var(--dur-fast), transform var(--dur-fast) var(--ease); }
+.tour-card.sheet { width: auto; }
 .tour-card.swap { opacity: 0; transform: translateY(6px); }
+.tour-card.nudge { animation: tour-nudge var(--dur-slow) var(--ease); }
+@keyframes tour-nudge { 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } 100% { transform: none; } }
 .tour-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -6px -8px 0 0; }
 .tour-count { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--brand-fg); font-variant-numeric: tabular-nums; }
 .tour-card h2 { font-size: var(--text-lg); outline: none; }
 .tour-card p { margin: 0; color: var(--muted-foreground); line-height: var(--leading-body); }
+/* what the person does on the screen */
+.tour-card .tour-action { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid var(--brand-border); border-radius: var(--radius-sm); background: var(--brand-bg); color: var(--foreground); font-size: var(--text-sm); font-weight: var(--weight-semibold); }
+.tour-action[hidden] { display: none; }
+.tour-action svg { flex: none; color: var(--brand-fg); }
+/* the answer to each attempt: info (how to go on), ok (task done), crit (the point is not on the screen) */
+.tour-msg { display: grid; grid-template-rows: 0fr; margin-top: -10px; opacity: 0; transition: grid-template-rows var(--dur) var(--ease), opacity var(--dur) var(--ease), margin var(--dur) var(--ease); }
+.tour-msg > div { overflow: hidden; }
+.tour-msg.show { grid-template-rows: 1fr; margin-top: 0; opacity: 1; }
+.tour-card .tour-msg p { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border: 1px solid var(--info-border); border-radius: var(--radius-sm); background: var(--info-bg); color: var(--foreground); font-size: var(--text-sm); }
+.tour-msg svg { flex: none; margin-top: 2px; color: var(--info-fg); }
+.tour-card .tour-msg.ok p { border-color: var(--ok-border); background: var(--ok-bg); } .tour-msg.ok svg { color: var(--ok-fg); }
+.tour-card .tour-msg.crit p { border-color: var(--crit-border); background: var(--crit-bg); } .tour-msg.crit svg { color: var(--crit-fg); }
 .tour-actions { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
 .tour-actions .spacer { flex: 1 1 auto; }
+.tour-actions .link { color: var(--muted-foreground); font-size: var(--text-sm); }
+.tour-actions .btn[hidden] { display: none; }
+.tour-actions .btn.waiting { opacity: .5; }
+/* menus the person opens during the tour stay above the veil */
+body.tour-open .menu, body.tour-open .popover { z-index: 125; }
 
 /* ---------- components/combobox/combobox.css ---------- */
 /* Grin combobox (also: autocomplete, select with search, multiselect, tag input).
@@ -1927,11 +1954,11 @@ a.tab { text-decoration: none; }
 .page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.42 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.43 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.42';
+Grin.version = '2.43';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2828,81 +2855,207 @@ document.querySelectorAll('.toc').forEach((toc) => {
 
 // ---------- components/tour/tour.js ----------
 {
-// Grin tour. startTour([{ target: '#selector' | null, title: 'Text', text: 'Text' }, …], { onEnd })
-// Each step lights up its target (null = no target, the card goes to the center) and shows a card with
-// "Passo n de N", a progress bar, Voltar / Próximo / Concluir. Arrow keys move, Esc leaves. Focus goes to the card title.
+// Grin tour. startTour(steps, { onEnd }) → { end, go, target }
+// Each step: { title, text, target, action, click, done }.
+//   target: selector, function returning an element, or a list of them in order of preference; none = card in the center.
+//   action: what the person does on the screen ("Clique em Empresas"). With it, the step can wait:
+//   click: true waits for a click on the target, which goes on to the page; done: () => true when the task is done.
+// A first step without target is the presentation: it is not counted and offers Começar and Agora não.
+// The tour never changes the screen by itself. Outside the cut-out, clicks are held: the card shakes and says what to do.
+// A target in the sidebar opens the sidebar drawer on a phone. On a narrow screen the card is a sheet at the bottom or top.
+// The cut-out follows the page while the person works. Arrow keys move, Esc leaves, Tab stays in the card.
 const { icon } = Grin;
 function startTour(steps, { onEnd } = {}) {
-  let i = 0;
+  const intro = !steps[0]?.target && steps.length > 1;
+  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const drawer = () => matchMedia('(max-width: 760px)').matches; // the sidebar becomes a drawer, as in sidebar.js
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const visible = (el) => !!el && el.isConnected && el.getClientRects().length > 0 && el.getBoundingClientRect().width > 0;
+  const list = (s) => (s.target == null ? [] : [].concat(s.target));
+  const resolve = (t) => (typeof t === 'function' ? t() : document.querySelector(t));
+  const find = (s) => { for (const t of list(s)) { const el = resolve(t); if (visible(el)) return el; } return null; };
+  const inSidebar = (s) => list(s).some((t) => resolve(t)?.closest?.('.sidebar'));
+  const sidebarOpen = () => document.body.classList.contains('sidebar-open');
+  const toggleSidebar = (open) => { if (sidebarOpen() !== open) document.querySelector('.sidebar-menu-button')?.click(); };
+
   const root = document.createElement('div');
   root.className = 'tour';
-  root.innerHTML = `<div class="tour-spot"></div><section class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title">
-    <div class="tour-top"><span class="tour-count"></span><button type="button" class="btn icon xs ghost" data-tour="end" aria-label="Sair do tour">${icon('x', 16)}</button></div>
-    <div class="progress sm" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progresso do tour"><i></i></div>
-    <h2 id="tour-title" tabindex="-1"></h2><p></p>
-    <div class="tour-actions"><button type="button" class="btn xs" data-tour="prev">${icon('arrow-left', 16)}Voltar</button><span class="spacer"></span><button type="button" class="btn xs primary" data-tour="next"></button></div>
-  </section>`;
+  root.innerHTML = `${['top', 'right', 'bottom', 'left', 'hole'].map((k) => `<div class="tour-block" data-side="${k}"></div>`).join('')}<div class="tour-spot none"></div>
+    <section class="tour-card" role="dialog" aria-modal="true" aria-labelledby="tour-title" aria-describedby="tour-text">
+      <div class="tour-top"><span class="tour-count"></span><button type="button" class="btn icon xs ghost" data-tour="end" aria-label="Sair do tour">${icon('x', 16)}</button></div>
+      <div class="progress sm" aria-hidden="true"><i></i></div>
+      <h2 id="tour-title" tabindex="-1"></h2><p id="tour-text"></p>
+      <p class="tour-action" hidden></p>
+      <div class="tour-msg" aria-live="polite"><div><p></p></div></div>
+      <div class="tour-actions"><button type="button" class="link" data-tour="skip"></button><span class="spacer"></span>
+        <button type="button" class="btn xs" data-tour="prev">${icon('arrow-left', 16)}Voltar</button><button type="button" class="btn xs" data-tour="retry" hidden>Tentar de novo</button><button type="button" class="btn xs primary" data-tour="next"></button></div>
+    </section>`;
   document.body.append(root);
-  const spot = root.querySelector('.tour-spot'), card = root.querySelector('.tour-card');
-  const before = document.activeElement;
+  document.body.classList.add('tour-open');
+  const $ = (s) => root.querySelector(s);
+  const spot = $('.tour-spot'), card = $('.tour-card'), before = document.activeElement;
+  const T = { i: 0, seq: 0, el: null, side: null, done: false, menu: false, timer: 0, msgTimer: 0, frame: 0 };
+  const live = (seq) => T.seq === seq && root.isConnected;
+  const waiting = () => { const s = steps[T.i]; return !!(s.click || s.done) && !!T.el && !T.done; };
 
-  function position() {
-    const s = steps[i], el = s.target ? document.querySelector(s.target) : null;
-    const c = card.getBoundingClientRect();
-    if (!el) {
-      spot.classList.add('none');
-      Object.assign(spot.style, { top: '50%', left: '50%', width: '0px', height: '0px' });
-      Object.assign(card.style, { top: `${(innerHeight - c.height) / 2}px`, left: `${(innerWidth - c.width) / 2}px` });
-      return;
+  async function findLater(s, seq) {
+    for (let t = 0; t < 3000; t += 80) { if (!live(seq)) return null; const el = find(s); if (el) return el; await wait(80); }
+    return null;
+  }
+  // waits for scrolling and transitions to stop before cutting the target out
+  async function settle(el, seq) {
+    let last = '', same = 0;
+    for (let t = 0; t < 900 && same < 3; t += 16) {
+      if (!live(seq)) return;
+      await new Promise((r) => requestAnimationFrame(r));
+      const r = el.getBoundingClientRect(), k = [r.top, r.left, r.width, r.height].map(Math.round).join();
+      same = k === last ? same + 1 : 0; last = k;
     }
-    spot.classList.remove('none');
-    const r = el.getBoundingClientRect(), pad = 6;
-    Object.assign(spot.style, { top: `${r.top - pad}px`, left: `${r.left - pad}px`, width: `${r.width + pad * 2}px`, height: `${r.height + pad * 2}px` });
-    let top = r.bottom + 16;
-    if (top + c.height > innerHeight - 16) top = Math.max(16, r.top - c.height - 16);
-    const left = Math.min(Math.max(16, r.left), innerWidth - c.width - 16);
-    Object.assign(card.style, { top: `${top}px`, left: `${left}px` });
   }
-  function show() {
-    const s = steps[i];
-    const el = s.target ? document.querySelector(s.target) : null;
-    el?.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
-    card.classList.add('swap');
-    setTimeout(() => {
-      card.querySelector('.tour-count').textContent = `Passo ${i + 1} de ${steps.length}`;
-      const pct = Math.round(((i + 1) / steps.length) * 100);
-      card.querySelector('.progress').setAttribute('aria-valuenow', pct);
-      card.querySelector('.progress i').style.width = `${pct}%`;
-      card.querySelector('h2').textContent = s.title;
-      card.querySelector('p').textContent = s.text;
-      card.querySelector('[data-tour="prev"]').hidden = i === 0;
-      card.querySelector('[data-tour="next"]').innerHTML = i === steps.length - 1 ? `${icon('check', 16)}Concluir` : `Próximo${icon('arrow-right', 16)}`;
-      position();
+  function message(text, tone = 'info') {
+    const m = $('.tour-msg'); clearTimeout(T.msgTimer);
+    if (!text) { m.classList.remove('show'); return; }
+    m.className = `tour-msg show ${tone}`;
+    m.querySelector('p').innerHTML = icon(tone === 'crit' ? 'alert-triangle' : tone === 'ok' ? 'check' : 'info', 16);
+    m.querySelector('p').append(Object.assign(document.createElement('span'), { textContent: text }));
+    if (tone === 'info') T.msgTimer = setTimeout(() => m.classList.remove('show'), 3200);
+  }
+  function nudge() {
+    card.classList.remove('nudge'); void card.offsetWidth; card.classList.add('nudge');
+    const a = steps[T.i].action || '';
+    message(waiting() ? `Para continuar, faça o que o quadro pede na área destacada: ${a.charAt(0).toLowerCase() + a.slice(1)}.`
+      : 'Durante o tour, use Próximo e Voltar para navegar. Para explorar a tela livremente, pule o tour.');
+  }
+
+  function place() {
+    const s = steps[T.i], vw = document.documentElement.clientWidth, vh = innerHeight, m = 16, pad = 8;
+    if (T.el && !T.el.isConnected) T.el = find(s); // the page may have been redrawn
+    const r = T.el ? T.el.getBoundingClientRect() : null;
+    const f = r ? { x: r.left - pad, y: r.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad } : { x: vw / 2, y: vh / 2, w: 0, h: 0 };
+    if (r) { const x2 = Math.min(vw - 4, f.x + f.w), y2 = Math.min(vh - 4, f.y + f.h); f.x = Math.max(4, f.x); f.y = Math.max(4, f.y); f.w = Math.max(0, x2 - f.x); f.h = Math.max(0, y2 - f.y); }
+    spot.classList.toggle('none', !r);
+    Object.assign(spot.style, { left: `${f.x}px`, top: `${f.y}px`, width: `${f.w}px`, height: `${f.h}px` });
+    // four strips around the cut-out hold the clicks; the cut-out itself lets clicks through only while the step waits for an action
+    const px = (k, x, y, w, h) => Object.assign($(`[data-side="${k}"]`).style, { left: `${x}px`, top: `${y}px`, width: `${Math.max(0, w)}px`, height: `${Math.max(0, h)}px` });
+    px('top', 0, 0, vw, f.y); px('bottom', 0, f.y + f.h, vw, vh - f.y - f.h); px('left', 0, f.y, f.x, f.h); px('right', f.x + f.w, f.y, vw - f.x - f.w, f.h);
+    if ((s.click || s.done) && r) px('hole', 0, 0, 0, 0); else px('hole', f.x, f.y, f.w, f.h);
+    // card: below, above, right or left of the target, where it fits; on a narrow screen, a sheet at the bottom or top
+    const sheet = vw < 600; card.classList.toggle('sheet', sheet);
+    if (sheet) { card.style.left = `${m}px`; card.style.right = `${m}px`; } else card.style.right = 'auto';
+    const cw = card.offsetWidth, ch = card.offsetHeight, clamp = (v, a, b) => Math.min(Math.max(v, a), Math.max(a, b));
+    let x, y;
+    if (sheet) { if (!T.side) T.side = r && f.y + f.h / 2 > vh / 2 ? 'top' : 'bottom'; x = m; y = T.side === 'top' ? m : vh - ch - m; } // the side stays fixed for the step
+    else if (!r) { x = (vw - cw) / 2; y = (vh - ch) / 2; }
+    else if (vh - (f.y + f.h) >= ch + 2 * m) { x = clamp(f.x + f.w / 2 - cw / 2, m, vw - cw - m); y = f.y + f.h + 14; }
+    else if (f.y >= ch + 2 * m) { x = clamp(f.x + f.w / 2 - cw / 2, m, vw - cw - m); y = f.y - ch - 14; }
+    else if (vw - (f.x + f.w) >= cw + 2 * m) { x = f.x + f.w + 14; y = clamp(f.y + f.h / 2 - ch / 2, m, vh - ch - m); }
+    else if (f.x >= cw + 2 * m) { x = f.x - cw - 14; y = clamp(f.y + f.h / 2 - ch / 2, m, vh - ch - m); }
+    else { x = vw - cw - m; y = vh - ch - m; }
+    card.style.left = `${x}px`; card.style.top = `${y}px`;
+  }
+  function replace() { cancelAnimationFrame(T.frame); T.frame = requestAnimationFrame(place); }
+  // the sheet covers part of a phone screen: scroll so the target sits in the space left
+  async function clear(el, seq) {
+    if (!card.classList.contains('sheet')) return false;
+    const r = el.getBoundingClientRect(), top = parseFloat(card.style.top) || 0, m = 16;
+    const d = T.side === 'top' ? Math.min(0, r.top - (top + card.offsetHeight + m)) : Math.max(0, r.bottom - (top - m));
+    if (Math.abs(d) < 2) return false;
+    scrollBy({ top: d, behavior: reduce() ? 'auto' : 'smooth' });
+    await settle(el, seq);
+    return live(seq);
+  }
+
+  async function show(i) {
+    if (i < 0 || i >= steps.length || !root.isConnected) return;
+    const s = steps[i], seq = ++T.seq;
+    T.i = i; T.el = null; T.side = null; clearInterval(T.timer);
+    card.classList.add('swap'); message('');
+    if (drawer()) { const want = inSidebar(s); if (want || T.menu) { toggleSidebar(want); T.menu = want; } }
+    const el = s.target ? await findLater(s, seq) : null;
+    if (!live(seq)) return;
+    if (el) { el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: reduce() ? 'auto' : 'smooth' }); await settle(el, seq); if (!live(seq)) return; }
+    T.el = el; T.done = !!(s.done && s.done());
+    const n = steps.length - (intro ? 1 : 0), k = i + (intro ? 0 : 1), last = i === steps.length - 1, failed = !!s.target && !el;
+    $('.tour-count').textContent = intro && i === 0 ? 'Tour guiado' : `Passo ${k} de ${n}`;
+    $('.progress i').style.width = `${(intro ? i / (steps.length - 1) : k / n) * 100}%`;
+    $('#tour-title').textContent = s.title; $('#tour-text').textContent = s.text || '';
+    const ac = $('.tour-action'); ac.hidden = !(s.action && el); ac.innerHTML = s.action ? icon('pointer', 16) : ''; if (s.action) ac.append(s.action);
+    // Voltar only when the previous step is on the screen now: the tour does not undo what the person navigated
+    $('[data-tour="prev"]').hidden = i === 0 || (!!steps[i - 1].target && !find(steps[i - 1]));
+    $('[data-tour="retry"]').hidden = !failed;
+    const next = $('[data-tour="next"]');
+    next.innerHTML = intro && i === 0 ? `Começar${icon('arrow-right', 16)}` : last ? `${icon('check', 16)}Concluir` : `Próximo${icon('arrow-right', 16)}`;
+    next.classList.toggle('waiting', waiting());
+    $('[data-tour="skip"]').textContent = intro && i === 0 ? 'Agora não' : 'Pular tour';
+    if (failed) message('Não foi possível mostrar esta parte agora. Clique em Tentar de novo ou siga para o próximo passo.', 'crit');
+    spot.classList.toggle('pulse', waiting());
+    place();
+    if (el && await clear(el, seq)) place();
+    if (!live(seq)) return;
+    // the screen changes while the person works: the cut-out follows it, and a task is checked until it is done
+    T.timer = setInterval(() => {
+      if (!live(seq)) return;
+      replace();
+      if (s.done && !T.done && s.done()) finish(seq);
+    }, 250);
+    requestAnimationFrame(() => {
+      if (!live(seq)) return;
       card.classList.remove('swap');
-      card.querySelector('h2').focus();
-    }, 120);
+      // in a task, the cursor goes to the first empty field of the highlighted area
+      const fields = s.done && el && !T.done ? [...el.querySelectorAll('input:not([type="hidden"]), select, textarea')] : [];
+      (fields.find((x) => !x.value) || fields[0] || $('#tour-title')).focus({ preventScroll: true });
+    });
   }
+  function finish(seq) {
+    T.done = true;
+    spot.classList.remove('pulse'); $('[data-tour="next"]').classList.remove('waiting');
+    message('Isso mesmo. Seguindo para o próximo passo…', 'ok');
+    setTimeout(() => { if (live(seq)) show(T.i + 1); }, reduce() ? 600 : 1100);
+  }
+  function next() { if (T.i >= steps.length - 1) return end(); if (waiting()) return nudge(); show(T.i + 1); }
+
   function end() {
-    removeEventListener('keydown', keys); removeEventListener('resize', position); removeEventListener('scroll', position, true);
-    root.classList.remove('show');
-    setTimeout(() => root.remove(), 220);
-    before?.focus?.();
+    if (!root.isConnected || root.classList.contains('leaving')) return;
+    T.seq++; clearInterval(T.timer); clearTimeout(T.msgTimer);
+    document.removeEventListener('click', onClick, true); document.removeEventListener('keydown', keys, true);
+    removeEventListener('resize', replace); removeEventListener('scroll', replace, true);
+    if (T.menu) toggleSidebar(false);
+    root.classList.add('leaving'); root.classList.remove('show'); document.body.classList.remove('tour-open');
+    setTimeout(() => root.remove(), reduce() ? 0 : 220);
+    (before?.isConnected ? before : document.body).focus?.({ preventScroll: true });
     onEnd?.();
   }
-  function go(d) { const n = i + d; if (n < 0) return; if (n >= steps.length) { end(); return; } i = n; show(); }
+  // on a click step, the click on the target goes on to the page and moves the tour forward
+  function onClick(e) {
+    const s = steps[T.i];
+    if (!s.click || !T.el || !T.el.contains(e.target)) return;
+    const seq = T.seq; setTimeout(() => { if (live(seq)) show(T.i + 1); }, 0);
+  }
   function keys(e) {
-    if (e.key === 'Escape') end();
-    else if (e.key === 'ArrowRight') go(1);
-    else if (e.key === 'ArrowLeft') go(-1);
+    if (document.querySelector('dialog[open]:modal, .dialog[open]')) return; // a dialog the person opened keeps its keys
+    const s = steps[T.i], field = /INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+    // a menu the person opened closes with Esc before the tour does
+    if (e.key === 'Escape' && document.querySelector('[aria-haspopup][aria-expanded="true"], [data-popover][aria-expanded="true"]')) return;
+    if (T.el?.contains(e.target) && s.done && e.key !== 'Escape') return; // in a task, the keyboard belongs to the person inside the target
+    if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return end(); }
+    if (e.key === 'ArrowRight' && !field) { e.preventDefault(); return next(); }
+    if (e.key === 'ArrowLeft' && !field && T.i > 0 && !$('[data-tour="prev"]').hidden) { e.preventDefault(); return show(T.i - 1); }
+    if (e.key === 'Tab') {
+      const fs = [...card.querySelectorAll('button:not([hidden])')].filter((x) => x.offsetParent !== null);
+      const at = fs.indexOf(document.activeElement);
+      if (!card.contains(e.target) || (e.shiftKey && at <= 0) || (!e.shiftKey && at === fs.length - 1)) { e.preventDefault(); fs[e.shiftKey ? fs.length - 1 : 0]?.focus(); }
+    }
   }
   root.addEventListener('click', (e) => {
-    const b = e.target.closest?.('[data-tour]'); if (!b) return;
-    ({ end, prev: () => go(-1), next: () => go(1) })[b.dataset.tour]();
+    const b = e.target.closest?.('[data-tour]');
+    if (b) { e.stopPropagation(); ({ end, skip: end, prev: () => show(T.i - 1), next, retry: () => show(T.i) })[b.dataset.tour](); return; }
+    if (e.target.classList.contains('tour-block')) { e.stopPropagation(); nudge(); }
   });
-  addEventListener('keydown', keys); addEventListener('resize', position); addEventListener('scroll', position, true);
+  document.addEventListener('click', onClick, true); document.addEventListener('keydown', keys, true);
+  addEventListener('resize', replace); addEventListener('scroll', replace, true);
   root.getBoundingClientRect(); // commit the hidden state so the fade-in runs
-  root.classList.add('show'); show();
-  return { end };
+  root.classList.add('show'); show(0);
+  return { end, go: (i) => show(i), target: () => T.el };
 }
 Object.assign(Grin, { startTour });
 }
@@ -3031,10 +3184,6 @@ details > summary { cursor: pointer; }
 @media (max-width: 900px) { .comecos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 560px) { .comecos { grid-template-columns: 1fr; } }
 .kpis { margin-bottom: 16px; }
-.kpi { gap: 6px; padding: 16px 20px; }
-.kpi .stat-label { display: block; font-size: var(--text-sm); } /* o rótulo tem termos do glossário no meio do texto: fica em linha */
-.kpi .stat-value { font-size: var(--text-2xl); }
-.kpi > span { color: var(--muted-foreground); font-size: var(--text-sm); }
 .pers-inline { max-width: 900px; margin: 18px auto 0; text-align: left; }
 .pers-inline > h3 { margin: 0 0 4px; }
 #sec-pers.pers-inline { max-width: none; margin: 0; }
@@ -3657,44 +3806,6 @@ dialog#dlg.saindo::backdrop { opacity: 0; transition: opacity var(--dur-fast) va
 details { interpolate-size: allow-keywords; }
 details::details-content { block-size: 0; overflow: hidden; transition: block-size var(--dur) var(--ease), content-visibility var(--dur) allow-discrete; }
 details[open]::details-content { block-size: auto; }
-
-/* ===================== TOUR GUIADO: .tour, .tour-spot, .tour-card e .progress do Grin =====================
-   O que é do Vezen: faixas que seguram o clique fora do recorte, o recorte que pulsa quando espera um clique,
-   o cartão que balança ao clicar fora, a ação pedida e a mensagem de cada tentativa. */
-.tour.visivel { opacity: 1; }
-.tour-bloq, .tour-cartao { pointer-events: auto; }
-.tour-bloq { position: fixed; background: transparent; }
-.tour-luz { pointer-events: none; }
-.tour-luz.sem-alvo { box-shadow: 0 0 0 200vmax var(--overlay); }
-.tour-luz.clique { animation: tour-pulso 1.6s var(--ease-in-out) infinite; }
-@keyframes tour-pulso { 0%, 100% { box-shadow: 0 0 0 3px var(--primary), 0 0 0 200vmax var(--overlay); } 50% { box-shadow: 0 0 0 7px var(--highlight), 0 0 0 200vmax var(--overlay); } }
-.tour-cartao { gap: 0; }
-.tour-cartao.troca { opacity: 0; transform: translateY(6px); }
-.tour-cartao.chama { animation: tour-chama var(--dur-slow) var(--ease); }
-@keyframes tour-chama { 20% { transform: translateX(-6px); } 45% { transform: translateX(5px); } 70% { transform: translateX(-3px); } 100% { transform: none; } }
-.tour-cartao.folha { width: auto; }
-.tour-topo { margin-bottom: 8px; }
-.tour-barra { margin-bottom: 14px; }
-.tour-cartao h2 { margin: 0 0 6px; }
-.tour-acao { display: flex; align-items: center; gap: 8px; margin-top: 12px !important; padding: 8px 10px; border-radius: var(--radius-sm); background: var(--brand-bg); border: 1px solid var(--brand-border); color: var(--foreground) !important; font-weight: var(--weight-semibold); font-size: var(--text-sm) !important; }
-.tour-acao .ico { width: 16px; height: 16px; color: var(--brand-fg); flex: none; }
-.tour-msg { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows var(--dur) var(--ease), opacity var(--dur) var(--ease), margin var(--dur) var(--ease); margin-top: 0; }
-.tour-msg > div { overflow: hidden; }
-.tour-msg.visivel { grid-template-rows: 1fr; opacity: 1; margin-top: 12px; }
-/* a mensagem tem a aparência do .alert do Grin, nos tons info, crit e ok */
-.tour-msg p { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: var(--radius-sm); border: 1px solid; color: var(--foreground) !important; font-size: var(--text-sm) !important; }
-.tour-msg .ico { width: 16px; height: 16px; flex: none; margin-top: 2px; }
-.tour-msg.dica p { background: var(--info-bg); border-color: var(--info-border); } .tour-msg.dica .ico { color: var(--info-fg); }
-.tour-msg.erro p { background: var(--crit-bg); border-color: var(--crit-border); } .tour-msg.erro .ico { color: var(--crit-fg); }
-.tour-msg.ok p { background: var(--ok-bg); border-color: var(--ok-border); } .tour-msg.ok .ico { color: var(--ok-fg); }
-/* menus abertos pela pessoa durante o tour (origem, sem dado) ficam acima do véu */
-.com-tour .menu-pop { z-index: 125; }
-.tour-pe { justify-content: space-between; margin-top: 16px; }
-.tour-pe > span { display: flex; gap: 8px; }
-.tour-pe .btn.espera { opacity: .5; }
-.tour-pe .link { color: var(--muted-foreground); font-size: var(--text-sm); }
-.tour-pe .btn[hidden] { display: none; }
-@media (max-width: 600px) { .tour-pe .btn { padding: 0 12px; } }
 </style>
 </head>
 <body>
@@ -3771,7 +3882,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.9';
+const VERSAO_APP = '4.3.10';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5575,10 +5686,6 @@ function renderNav() {
     <button type="button" class="lat-item nav-item small" data-theme-toggle>${ico(escuro ? 'sol' : 'lua')}<span class="rot label">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>
     <button type="button" class="lat-item nav-item small" data-popover="aparencia" aria-expanded="false">${ico('ajustes')}<span class="rot label">Aparência</span></button>`;
 }
-// celular: o drawer é do sidebar.js do Grin; o tour o abre e fecha pelo botão de menu dele
-const drawerAberto = () => !!document.querySelector('.sidebar.open');
-function abrirMenuLateral() { if (!drawerAberto()) document.querySelector('.sidebar-menu-button')?.click(); }
-function fecharMenuLateral() { if (drawerAberto()) document.querySelector('.sidebar-menu-button')?.click(); }
 
 /* ---------- ações dos botões: cada tela registra as suas pelo nome usado em data-acao ---------- */
 const ACOES = {};
@@ -7791,10 +7898,10 @@ function telaLista(L) {
   return `<div class="cab page-title-row"><div class="cab-txt"><h1>${esc(L.nome)}</h1><p class="sub page-description">${esc(L.arquivo)}, importada em ${dataBR(L.criadoEm)}. ${plural(L.linhas.length, 'empresa', 'empresas')}.</p></div>
     <div class="acoes"><button type="button" class="btn" data-acao="xlsx-lista">${ico('baixar')}Baixar Excel</button>${btnIco('mais-v', 'Mais opções', 'data-acao="menu-lista" aria-haspopup="menu" aria-expanded="false"')}</div></div>
   <div class="kpis stat-grid">
-    <div class="kpi stat"><small class="stat-label">Com estimativa</small><b class="stat-value">${nf(ok.length, 0)}</b><span>de ${plural(L.linhas.length, 'empresa', 'empresas')}</span></div>
-    <div class="kpi stat"><small class="stat-label">Investimento em TI somado</small><b class="stat-value">${ok.length ? fmtRS(soma) : '—'}</b><span>valor central de cada uma</span></div>
-    <div class="kpi stat"><small class="stat-label">Mediana por empresa</small><b class="stat-value">${ok.length ? fmtRS(mediana(ok.map(x => x.r.F))) : '—'}</b><span>metade fica acima, metade abaixo</span></div>
-    <div class="kpi stat"><small class="stat-label">Confiança</small><b class="stat-value">${nf(conf.alta, 0)} / ${nf(conf.media, 0)} / ${nf(conf.baixa, 0)}</b><span>alta, média e baixa</span></div>
+    <div class="kpi stat"><span class="stat-label">Com estimativa</span><span class="stat-value">${nf(ok.length, 0)}</span><span class="stat-delta">de ${plural(L.linhas.length, 'empresa', 'empresas')}</span></div>
+    <div class="kpi stat"><span class="stat-label">Investimento em TI somado</span><span class="stat-value">${ok.length ? fmtRS(soma) : '—'}</span><span class="stat-delta">valor central de cada uma</span></div>
+    <div class="kpi stat"><span class="stat-label">Mediana por empresa</span><span class="stat-value">${ok.length ? fmtRS(mediana(ok.map(x => x.r.F))) : '—'}</span><span class="stat-delta">metade fica acima, metade abaixo</span></div>
+    <div class="kpi stat"><span class="stat-label">Confiança</span><span class="stat-value">${nf(conf.alta, 0)} / ${nf(conf.media, 0)} / ${nf(conf.baixa, 0)}</span><span class="stat-delta">alta, média e baixa</span></div>
   </div>
   <section class="painel card" style="margin-bottom:16px"><div class="opcoes-lote">
     <div class="campo field"><div class="campo-rot"><label for="lr-modo">Método</label></div>${seletorModoLista(L.modo, 'lr-modo')}</div>
@@ -9278,8 +9385,8 @@ glObs.observe(document.body, { childList: true, subtree: true });
 "use strict";
 /* ===================== TOUR GUIADO: o caminho básico, passo a passo; dá para pular e refazer ===================== */
 // Cada passo: titulo, texto (o porquê), alvo (seletores em ordem de preferência; sem alvo, o cartão fica no meio da tela),
-// acao (o que a pessoa faz), clique (o passo espera um clique no alvo), tarefa (o passo espera a função dar true),
-// lateral (alvo na barra lateral). O tour nunca troca de tela sozinho: quem navega e preenche é a pessoa.
+// acao (o que a pessoa faz), clique (o passo espera um clique no alvo), tarefa (o passo espera a função dar true).
+// O tour nunca troca de tela sozinho: quem navega e preenche é a pessoa. Alvo na barra lateral abre a gaveta no celular.
 // Ao mudar a interface, confira os alvos: o teste tela-tour percorre o tour inteiro, no computador e no celular.
 const TOUR_CHAVE = 'vezen.tour';
 const naAnalise = () => UI.rota.tela === 'analise' && !!UI.atual;
@@ -9289,8 +9396,8 @@ const pertoDe = (v, alvo) => v !== '' && v != null && Math.abs(+v - alvo) <= alv
 const TOUR = [
   { titulo: 'Vezen', texto: 'Ferramenta para estimar dados financeiros de empresas no Brasil, como receita e investimento em TI. O tour monta a análise do Banco do Brasil.' },
   { titulo: 'Empresas', texto: 'Lista das análises salvas.',
-    acao: 'Clique em Empresas', alvo: ['#nav a[href="#/empresas"]'], lateral: true, clique: true },
-  { titulo: 'Nova análise', texto: 'Cada empresa é uma análise.', acao: 'Clique em Nova análise', alvo: ['#nav .lat-nova'], lateral: true, clique: true },
+    acao: 'Clique em Empresas', alvo: ['#nav a[href="#/empresas"]'], clique: true },
+  { titulo: 'Nova análise', texto: 'Cada empresa é uma análise.', acao: 'Clique em Nova análise', alvo: ['#nav .lat-nova'], clique: true },
   { titulo: 'Método', texto: 'O método define o cálculo e os campos do formulário. O tour usa o Vezen.',
     acao: 'Clique em Vezen', alvo: ['#app .comeco[data-v="base"]'], tarefa: () => { const d = dadosTour(); return !!d && d.modo === 'base'; } },
   { titulo: 'Nome da empresa', texto: 'Identifica a análise na lista.',
@@ -9316,207 +9423,21 @@ const TOUR = [
   { titulo: 'Salvar', texto: 'A análise fica salva só neste navegador. O tour não precisa ser salvo.', alvo: ['#ws-acoes [data-acao="salvar"]'] },
   { titulo: 'Como o valor foi calculado', texto: 'A aba Resultado mostra o cálculo em detalhe.', acao: 'Clique em Resultado', alvo: ['#app .abas a[href$="/resultado"]'], clique: true },
   { titulo: 'Resultado detalhado', texto: 'Cada seção explica uma parte do cálculo.', alvo: ['#app .indice-lado', '#app .res-corpo > section'] },
-  { titulo: 'Listas', texto: 'Várias empresas de uma vez, a partir de uma planilha.', alvo: ['#nav a[href="#/listas"]'], lateral: true },
-  { titulo: 'Métodos e glossário', texto: 'Fórmulas, fontes e siglas.', alvo: ['#nav a[href="#/metodos"]'], lateral: true },
-  { titulo: 'Fim do tour', texto: 'O tour pode ser repetido a partir deste menu.', alvo: ['#lat-pe [data-acao="tour"]'], lateral: true }
+  { titulo: 'Listas', texto: 'Várias empresas de uma vez, a partir de uma planilha.', alvo: ['#nav a[href="#/listas"]'] },
+  { titulo: 'Métodos e glossário', texto: 'Fórmulas, fontes e siglas.', alvo: ['#nav a[href="#/metodos"]'] },
+  { titulo: 'Fim do tour', texto: 'O tour pode ser repetido a partir deste menu.', alvo: ['#lat-pe [data-acao="tour"]'] }
 ];
-const visivelTour = el => !!el && el.isConnected && el.getClientRects().length > 0 && el.getBoundingClientRect().width > 0;
 const campoDoTour = sel => { const i = $(sel); return i ? i.closest('.campo') || i : null; };
-const menuMovel = () => matchMedia('(max-width: 760px)').matches; // a barra vira drawer no celular, como no sidebar.js do Grin
-const esperar = ms => new Promise(r => setTimeout(r, ms));
 let T = null;
-
-function acharAlvo(p) {
-  for (const a of p.alvo || []) { const el = typeof a === 'function' ? a() : $(a); if (visivelTour(el)) return el; }
-  return null;
-}
-async function esperarAlvo(p, seq, ms = 3000) {
-  for (let t = 0; t < ms; t += 80) { if (!T || T.seq !== seq) return null; const el = acharAlvo(p); if (el) return el; await esperar(80); }
-  return null;
-}
-// espera a rolagem e as transições pararem antes de recortar o alvo
-async function esperarParado(el, seq) {
-  let ult = '', iguais = 0;
-  for (let t = 0; t < 900 && iguais < 3; t += 16) {
-    if (!T || T.seq !== seq) return;
-    await new Promise(r => requestAnimationFrame(r));
-    const r = el.getBoundingClientRect(), k = [r.top, r.left, r.width, r.height].map(Math.round).join();
-    iguais = k === ult ? iguais + 1 : 0; ult = k;
-  }
-}
-
-function montarTour() {
-  const raiz = document.createElement('div'); raiz.className = 'tour'; raiz.id = 'tour';
-  raiz.innerHTML = `${['c', 'd', 'b', 'e', 'furo'].map(l => `<div class="tour-bloq" data-l="${l}"></div>`).join('')}<div class="tour-luz tour-spot sem-alvo"></div>
-    <section class="tour-cartao tour-card" role="dialog" aria-labelledby="tour-tit" aria-describedby="tour-txt">
-      <div class="tour-topo tour-top"><span class="tour-passo tour-count" id="tour-passo"></span><button type="button" class="btn ghost icon xs" data-t="fechar" aria-label="Fechar o tour" data-tooltip="Fechar o tour">${ico('x')}</button></div>
-      <div class="tour-barra progress sm" aria-hidden="true"><i></i></div>
-      <h2 id="tour-tit" tabindex="-1"></h2><p id="tour-txt"></p>
-      <p class="tour-acao" hidden></p>
-      <div class="tour-msg" aria-live="polite"><div><p></p></div></div>
-      <div class="tour-pe tour-actions"><button type="button" class="link-btn link" data-t="pular">Pular tour</button>
-        <span><button type="button" class="btn" data-t="voltar">Voltar</button><button type="button" class="btn" data-t="repetir" hidden>Tentar de novo</button><button type="button" class="btn primary" data-t="proximo">Próximo</button></span></div>
-    </section>`;
-  document.body.appendChild(raiz);
-  raiz.addEventListener('click', e => {
-    const b = e.target.closest('[data-t]');
-    if (b) { e.stopPropagation(); return ({ fechar: fecharTour, pular: fecharTour, voltar: () => passoTour(T.i - 1), proximo: avancarTour, repetir: () => passoTour(T.i) })[b.dataset.t](); }
-    if (e.target.classList.contains('tour-bloq')) { e.stopPropagation(); chamarAtencao(); }
-  });
-  return raiz;
-}
+// o tour é o do Grin (startTour): aqui ficam os passos, os menus que a tela fecha antes e a lembrança de que já foi visto
 function abrirTour(i = 0) {
-  if (T) return passoTour(i);
+  if (T) return T.go(i);
   fecharPop(); Grin.hideTip();
-  T = { i: 0, seq: 0, el: null, raiz: montarTour(), foco: document.activeElement, menu: false };
-  document.body.classList.add('com-tour');
-  document.addEventListener('click', cliqueNoAlvo, true);
-  document.addEventListener('keydown', teclaTour, true);
-  window.addEventListener('resize', reposicionarTour); window.addEventListener('scroll', reposicionarTour, { passive: true });
-  requestAnimationFrame(() => T && T.raiz.classList.add('visivel'));
-  passoTour(i);
-}
-function fecharTour() {
-  if (!T) return;
-  const t = T; T = null; t.seq++; clearInterval(t.tm); document.body.classList.remove('com-tour');
-  try { localStorage.setItem(TOUR_CHAVE, 'visto'); } catch (e) { /* sem armazenamento: o tour só não lembra que já foi visto */ }
-  document.removeEventListener('click', cliqueNoAlvo, true); document.removeEventListener('keydown', teclaTour, true);
-  window.removeEventListener('resize', reposicionarTour); window.removeEventListener('scroll', reposicionarTour);
-  if (t.menu) fecharMenuLateral();
-  t.raiz.classList.remove('visivel');
-  setTimeout(() => t.raiz.remove(), reduzMov() ? 0 : 230);
-  const f = t.foco && t.foco.isConnected ? t.foco : $('#app'); if (f) f.focus({ preventScroll: true });
-}
-// passo de clique ou de tarefa: o Próximo só vale depois de feito (ou se a parte não apareceu)
-const esperaAcao = () => { const p = TOUR[T.i]; return !!(p.clique || p.tarefa) && !!T.el && !T.feito; };
-function avancarTour() { if (T.i >= TOUR.length - 1) return fecharTour(); if (esperaAcao()) return chamarAtencao(); passoTour(T.i + 1); }
-
-async function passoTour(i) {
-  if (!T || i < 0 || i >= TOUR.length) return;
-  const p = TOUR[i], seq = ++T.seq, c = $('.tour-cartao', T.raiz);
-  T.i = i; T.el = null; T.lado = null; clearInterval(T.tm);
-  c.classList.add('troca'); mensagemTour('');
-  // a barra lateral do celular abre só nos passos que mostram algo nela
-  if (menuMovel()) { if (p.lateral) { abrirMenuLateral(); T.menu = true; } else if (T.menu) { fecharMenuLateral(); T.menu = false; } }
-  const el = p.alvo ? await esperarAlvo(p, seq) : null;
-  if (!T || T.seq !== seq) return;
-  if (el) { el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: reduzMov() ? 'auto' : 'smooth' }); await esperarParado(el, seq); if (!T || T.seq !== seq) return; }
-  T.el = el; T.feito = !!(p.tarefa && p.tarefa());
-  const ultimo = i === TOUR.length - 1, falhou = !!p.alvo && !el;
-  $('#tour-passo').textContent = i ? `Passo ${i} de ${TOUR.length - 1}` : 'Tour guiado';
-  $('.tour-barra i', T.raiz).style.width = (i / (TOUR.length - 1) * 100) + '%';
-  $('#tour-tit').textContent = p.titulo; $('#tour-txt').textContent = p.texto.replace('{n}', TOUR.length - 1);
-  const ac = $('.tour-acao', T.raiz); ac.hidden = !(p.acao && el); ac.innerHTML = p.acao ? `${ico('seta')}${esc(p.acao)}` : '';
-  // voltar só quando o passo anterior está na tela de agora: o tour não desfaz o que a pessoa navegou
-  $('[data-t="voltar"]', T.raiz).hidden = i === 0 || (!!TOUR[i - 1].alvo && !acharAlvo(TOUR[i - 1]));
-  $('[data-t="repetir"]', T.raiz).hidden = !falhou;
-  $('[data-t="proximo"]', T.raiz).textContent = i === 0 ? 'Começar' : ultimo ? 'Concluir' : 'Próximo';
-  $('[data-t="proximo"]', T.raiz).classList.toggle('espera', esperaAcao());
-  $('[data-t="pular"]', T.raiz).textContent = i === 0 ? 'Agora não' : 'Pular tour';
-  if (falhou) mensagemTour('Não foi possível mostrar esta parte agora. Clique em Tentar de novo ou, se preferir, siga para o próximo passo.', 'erro');
-  $('.tour-luz', T.raiz).classList.toggle('clique', !!((p.clique || p.tarefa) && el && !T.feito));
-  posicionarTour();
-  if (el && await liberarAlvo(el, seq)) posicionarTour();
-  if (!T || T.seq !== seq) return;
-  // a tela muda enquanto a pessoa mexe: o recorte acompanha; na tarefa, conferir quando ficou feita
-  T.tm = setInterval(() => {
-    if (!T || T.seq !== seq) return;
-    reposicionarTour();
-    if (p.tarefa && !T.feito && p.tarefa()) concluirTarefa(seq);
-  }, 250);
-  requestAnimationFrame(() => {
-    if (!T || T.seq !== seq) return; c.classList.remove('troca');
-    // na tarefa, o cursor já vai para o primeiro campo vazio da área destacada
-    const cs = p.tarefa && el && !T.feito ? $$('input:not([type="hidden"]), select', el) : [], campo = cs.find(x => !x.value) || cs[0];
-    (campo || $('#tour-tit')).focus({ preventScroll: true });
+  const n = TOUR.length - 1;
+  T = Grin.startTour(TOUR.map(p => ({ title: p.titulo, text: p.texto.replace('{n}', n), target: p.alvo, action: p.acao, click: p.clique, done: p.tarefa })), {
+    onEnd: () => { T = null; try { localStorage.setItem(TOUR_CHAVE, 'visto'); } catch (e) { /* sem armazenamento: o tour só não lembra que já foi visto */ } }
   });
-}
-// no celular a folha cobre parte da tela: rola a página para o alvo ficar no espaço que sobra
-async function liberarAlvo(el, seq) {
-  const c = $('.tour-cartao', T.raiz);
-  if (!c.classList.contains('folha')) return false;
-  // a posição de destino da folha, não a da animação em curso
-  const r = el.getBoundingClientRect(), topo = parseFloat(c.style.top) || 0, m = 16;
-  const d = T.lado === 'cima' ? Math.min(0, r.top - (topo + c.offsetHeight + m)) : Math.max(0, r.bottom - (topo - m));
-  if (Math.abs(d) < 2) return false;
-  window.scrollBy({ top: d, behavior: reduzMov() ? 'auto' : 'smooth' });
-  await esperarParado(el, seq);
-  return !!T && T.seq === seq;
-}
-function concluirTarefa(seq) {
-  T.feito = true;
-  $('.tour-luz', T.raiz).classList.remove('clique'); $('[data-t="proximo"]', T.raiz).classList.remove('espera');
-  mensagemTour('Isso mesmo! Seguindo para o próximo passo…', 'ok');
-  setTimeout(() => { if (T && T.seq === seq) passoTour(T.i + 1); }, reduzMov() ? 600 : 1100);
-}
-function mensagemTour(txt, tipo = 'dica') {
-  if (!T) return;
-  const m = $('.tour-msg', T.raiz); clearTimeout(T.tmMsg);
-  if (!txt) return m.classList.remove('visivel');
-  m.className = 'tour-msg visivel ' + tipo; $('p', m).innerHTML = ico(tipo === 'erro' ? 'alerta' : tipo === 'ok' ? 'check' : 'info') + `<span>${esc(txt)}</span>`;
-  if (tipo === 'dica') T.tmMsg = setTimeout(() => m.classList.remove('visivel'), 3200);
-}
-// clique fora do recorte: o cartão balança e diz o que fazer
-function chamarAtencao() {
-  const c = $('.tour-cartao', T.raiz), p = TOUR[T.i];
-  c.classList.remove('chama'); void c.offsetWidth; c.classList.add('chama');
-  mensagemTour(esperaAcao() ? `Para continuar, faça o que o quadro pede na área destacada: ${p.acao.charAt(0).toLowerCase() + p.acao.slice(1)}.`
-    : 'Durante o tour, use os botões Próximo e Voltar para navegar. Se quiser explorar a tela livremente, é só pular o tour.');
-}
-// nos passos de clique, o clique no alvo segue para a ação da própria tela e avança o tour
-function cliqueNoAlvo(e) {
-  if (!T || !T.el || !TOUR[T.i].clique || !T.el.contains(e.target)) return;
-  const seq = T.seq; setTimeout(() => { if (T && T.seq === seq) passoTour(T.i + 1); }, 0);
-}
-function teclaTour(e) {
-  if (!T || $('#dlg').open) return;
-  // menu aberto pela pessoa (origem, sem dado): o Esc fecha o menu, não o tour
-  if (e.key === 'Escape' && popAtual) return;
-  // na tarefa, o teclado é da pessoa dentro da área destacada
-  if (T.el && T.el.contains(e.target) && TOUR[T.i].tarefa && e.key !== 'Escape') return;
-  if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); return fecharTour(); }
-  const c = $('.tour-cartao', T.raiz), dentro = c.contains(e.target);
-  if (e.key === 'ArrowRight' && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) { e.preventDefault(); return avancarTour(); }
-  if (e.key === 'ArrowLeft' && T.i > 0 && !/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) { e.preventDefault(); return passoTour(T.i - 1); }
-  // o foco fica no cartão: Tab circula entre os botões dele
-  if (e.key === 'Tab') {
-    const fs = $$('button:not([hidden]), [tabindex="-1"]#tour-tit', c).filter(x => x.offsetParent !== null || x.id === 'tour-tit');
-    if (!fs.length) return;
-    const i = fs.indexOf(document.activeElement);
-    if (!dentro || (e.shiftKey && i <= 0) || (!e.shiftKey && i === fs.length - 1)) { e.preventDefault(); fs[e.shiftKey ? fs.length - 1 : 0].focus(); }
-  }
-}
-let tmTour = 0;
-function reposicionarTour() { if (!T) return; cancelAnimationFrame(tmTour); tmTour = requestAnimationFrame(posicionarTour); }
-function posicionarTour() {
-  if (!T) return;
-  const p = TOUR[T.i], vw = document.documentElement.clientWidth, vh = window.innerHeight, m = 16, folga = 8;
-  // a tela pode ter sido redesenhada: o alvo é procurado de novo
-  if (T.el && !T.el.isConnected) T.el = acharAlvo(p);
-  const r = T.el ? T.el.getBoundingClientRect() : null;
-  let f = r ? { x: r.left - folga, y: r.top - folga, w: r.width + 2 * folga, h: r.height + 2 * folga } : { x: vw / 2, y: vh / 2, w: 0, h: 0 };
-  if (r) { const x2 = Math.min(vw - 4, f.x + f.w), y2 = Math.min(vh - 4, f.y + f.h); f.x = Math.max(4, f.x); f.y = Math.max(4, f.y); f.w = Math.max(0, x2 - f.x); f.h = Math.max(0, y2 - f.y); }
-  const luz = $('.tour-luz', T.raiz); luz.classList.toggle('sem-alvo', !r);
-  Object.assign(luz.style, { left: f.x + 'px', top: f.y + 'px', width: f.w + 'px', height: f.h + 'px' });
-  // quatro faixas em volta do recorte seguram os cliques; o recorte só deixa clicar nos passos de clique
-  const bl = l => $(`.tour-bloq[data-l="${l}"]`, T.raiz), px = (el, x, y, w, h) => Object.assign(el.style, { left: x + 'px', top: y + 'px', width: Math.max(0, w) + 'px', height: Math.max(0, h) + 'px' });
-  px(bl('c'), 0, 0, vw, f.y); px(bl('b'), 0, f.y + f.h, vw, vh - f.y - f.h); px(bl('e'), 0, f.y, f.x, f.h); px(bl('d'), f.x + f.w, f.y, vw - f.x - f.w, f.h);
-  if ((p.clique || p.tarefa) && r) px(bl('furo'), 0, 0, 0, 0); else px(bl('furo'), f.x, f.y, f.w, f.h);
-  // cartão: embaixo, em cima, à direita ou à esquerda do alvo, onde couber; no celular, uma folha presa embaixo ou em cima
-  const c = $('.tour-cartao', T.raiz), estreito = vw < 600; c.classList.toggle('folha', estreito);
-  if (estreito) { c.style.left = m + 'px'; c.style.right = m + 'px'; }
-  else c.style.right = 'auto';
-  const cw = c.offsetWidth, ch = c.offsetHeight, lim = (v, a, b) => Math.min(Math.max(v, a), Math.max(a, b));
-  let x, y;
-  // o lado da folha fica fixo no passo, para não pular enquanto a tela rola
-  if (estreito) { if (!T.lado) T.lado = r && f.y + f.h / 2 > vh / 2 ? 'cima' : 'baixo'; x = m; y = T.lado === 'cima' ? m : vh - ch - m; }
-  else if (!r) { x = (vw - cw) / 2; y = (vh - ch) / 2; }
-  else if (vh - (f.y + f.h) >= ch + 2 * m) { x = lim(f.x + f.w / 2 - cw / 2, m, vw - cw - m); y = f.y + f.h + 14; }
-  else if (f.y >= ch + 2 * m) { x = lim(f.x + f.w / 2 - cw / 2, m, vw - cw - m); y = f.y - ch - 14; }
-  else if (vw - (f.x + f.w) >= cw + 2 * m) { x = f.x + f.w + 14; y = lim(f.y + f.h / 2 - ch / 2, m, vh - ch - m); }
-  else if (f.x >= cw + 2 * m) { x = f.x - cw - 14; y = lim(f.y + f.h / 2 - ch / 2, m, vh - ch - m); }
-  else { x = vw - cw - m; y = vh - ch - m; }
-  c.style.left = x + 'px'; c.style.top = y + 'px';
+  if (i) T.go(i);
 }
 // primeira visita: o tour abre sozinho uma vez (os testes automatizados o abrem só quando pedem)
 function tourInicial() {
@@ -9584,7 +9505,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.42</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.43</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 

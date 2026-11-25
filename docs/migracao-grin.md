@@ -1,6 +1,6 @@
 # Migração para o Grin
 
-O Vezen usa o Grin 2.42, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.42. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
+O Vezen usa o Grin 2.43, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.43. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
 
 ## Como o Grin entra no arquivo
 
@@ -8,8 +8,8 @@ O Vezen é um único `index.html` que funciona sem internet. Por isso o Grin ent
 
 | Bloco | Origem |
 |---|---|
-| `<style id="grin">` | `dist/grin.inline.css` da v2.42, com Geist e Geist Mono embutidas |
-| `<script id="grin-js" defer>` | `dist/grin.js` da v2.42 |
+| `<style id="grin">` | `dist/grin.inline.css` da v2.43, com Geist e Geist Mono embutidas |
+| `<script id="grin-js" defer>` | `dist/grin.js` da v2.43 |
 | Comentário antes dos dois blocos | Versão, link da release e o texto da licença SIL Open Font License 1.1 das fontes |
 
 Para atualizar, leia o CHANGELOG do Grin entre as versões, substitua os dois blocos e o número da versão no comentário e confira as telas.
@@ -105,7 +105,7 @@ Cores escritas direto que saíram: `#fff` do botão de perigo, os verdes de hove
 | Dados e Resultado | `.abas` | `.tabs`, `.tab` |
 | Busca | `.busca` | `.search` |
 | Glossário | `.gl-letras`, `.gl-grupo`, `.gl-letra`, `.gl-item`, `.gl-cab`, `.gl-nome`, `.gl-link` | `.letter-index`, `.glossary-group`, `.glossary-letter`, `.glossary-item`, `.glossary-head`, `.glossary-aka`, `.term` |
-| Tour | `.tour-luz`, `.tour-cartao`, `.tour-topo`, `.tour-passo`, `.tour-barra`, `.tour-pe` | `.tour-spot`, `.tour-card`, `.tour-top`, `.tour-count`, `.progress.sm`, `.tour-actions` |
+| Tour | Tour próprio (`.tour-luz`, `.tour-cartao`, `.tour-bloq`, `.tour-msg`…) | `startTour` do Grin (desde a 2.43, com passos que esperam clique ou tarefa) |
 | Variação do valor | `.delta` | `.delta` |
 | Texto secundário e leitor de tela | `.mudo`, `.sr` | `.text-secondary`, `.sr-only` |
 
@@ -129,7 +129,6 @@ Estas partes não têm equivalente no Grin. Ficam no `<style id="estilo">`, rees
 | Origem do dado e sem dado (`.origem`, `.sem-dado`, `.sdc-*`) | Botão em forma de selo que abre um menu; o campo que falta fica vermelho no próprio campo |
 | Tecnologias (`.tec-*`, `.tag-tec`) | Busca em camadas por categoria; aparência da lista e das marcas do `.combobox` |
 | Nota da empresa modelo (`.nota-modelo`) | Forma do `.alert` no tom da marca, que o `.alert` não tem |
-| Recorte e mensagens do tour (`.tour-bloq`, `.tour-msg`, `.tour-acao`) | O tour do Vezen é um exercício com tarefas, cliques segurados fora do recorte e mensagens por tentativa |
 | Índices laterais (`.indice-lado`, `.doc-ind`) | Aparência do `.toc`; os itens são botões que rolam até a seção |
 | Receita por ano e gasto real (`.rec-*`, `.reais`) | Linhas de ano, valor, período e origem em grade própria |
 
