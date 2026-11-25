@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.19] - 2026-11-25
+
+### Alterado
+- Grin 2.49, a mesma versão do Laika. A tela inicial continua sem preencher o espaço livre.
+
 ## [4.3.18] - 2026-11-25
 
 ### Alterado
