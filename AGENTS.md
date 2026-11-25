@@ -25,7 +25,7 @@ Está publicado no GitHub Pages: https://saulossorio.github.io/vezen/. O site é
 
 | Bloco | O que tem |
 |---|---|
-| `<style id="grin">` e `<script id="grin-js">` | O design system Grin 2.43, copiado de `dist/grin.inline.css` e `dist/grin.js` da release v2.43, com as fontes Geist e Geist Mono embutidas e a licença OFL no comentário acima. Não edite: para mudar de versão, substitua os dois blocos inteiros e o comentário |
+| `<style id="grin">` e `<script id="grin-js">` | O design system Grin 2.44, copiado de `dist/grin.inline.css` e `dist/grin.js` da release v2.44, com as fontes Geist e Geist Mono embutidas e a licença OFL no comentário acima. Não edite: para mudar de versão, substitua os dois blocos inteiros e o comentário |
 | `<script id="tema">` | Aplica o tema claro ou escuro antes de a página aparecer (`data-tema` para o Vezen e `data-theme` para o Grin) |
 | `<style id="estilo">` | O CSS próprio do Vezen, só com tokens do Grin. Começa pelos poucos tokens do Vezen no `:root`. Depois vêm base, casca, controles e cada tela. A tabela de equivalências está em `docs/migracao-grin.md` |
 | Símbolos SVG e casca | Ícones próprios (`<symbol id="i-...">`, só os conceitos que o Grin não tem; os outros entram por `ICO_GRIN`, no bloco `ui-base`), a casca `.app` do Grin com a barra lateral (`.sidebar`, conteúdo desenhado em `#nav` e `#lat-pe`), `<main id="app">`, diálogo e aviso rápido |
@@ -93,7 +93,7 @@ Para achar algo, busque pelo nome: `calcular`, `receitaEmpresa`, `calibrarBase`,
 
 ## Desenho da interface
 
-- **Design system.** O Vezen usa o Grin 2.43 (https://saulossorio.github.io/grin/): fontes Geist e Geist Mono, verde `#8dc63f` como marca, tokens semânticos e componentes com o markup e os atributos ARIA da documentação do Grin. Componente novo: procure primeiro o equivalente no Grin. O que é só do Vezen (régua, caminhos, fórmulas) fica no `<style id="estilo">` com tokens do Grin. Detalhes e decisões em `docs/migracao-grin.md`.
+- **Design system.** O Vezen usa o Grin 2.44 (https://saulossorio.github.io/grin/): fontes Geist e Geist Mono, verde `#8dc63f` como marca, tokens semânticos e componentes com o markup e os atributos ARIA da documentação do Grin. Componente novo: procure primeiro o equivalente no Grin. O que é só do Vezen (régua, caminhos, fórmulas) fica no `<style id="estilo">` com tokens do Grin. Detalhes e decisões em `docs/migracao-grin.md`.
 - **Cores.** Use só os tokens semânticos do Grin (`--foreground`, `--muted-foreground`, `--border`, `--primary`, `--brand-fg`, `--crit-fg`, `--chart-1`...), nunca uma cor fixa no CSS ou no HTML gerado. Os quatro temas precisam funcionar: claro e escuro, cada um com e sem alto contraste.
 - **Classes antigas.** Várias classes do Vezen ficam ao lado das do Grin porque o JavaScript ou os testes as procuram (`lat-nova`, `sem-dado`, `modo-op`, `gl-item`...). Não as remova sem mudar o código e o teste juntos.
 - **Gráficos.** As cores dos gráficos foram validadas para daltonismo: verde para médias de mercado, azul para dados reais da empresa, sempre com legenda ou rótulo. Todo gráfico traz “Ver dados em tabela”.

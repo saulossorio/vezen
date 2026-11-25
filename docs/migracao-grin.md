@@ -1,6 +1,6 @@
 # Migração para o Grin
 
-O Vezen usa o Grin 2.43, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.43. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
+O Vezen usa o Grin 2.44, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.44. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
 
 ## Como o Grin entra no arquivo
 
@@ -8,8 +8,8 @@ O Vezen é um único `index.html` que funciona sem internet. Por isso o Grin ent
 
 | Bloco | Origem |
 |---|---|
-| `<style id="grin">` | `dist/grin.inline.css` da v2.43, com Geist e Geist Mono embutidas |
-| `<script id="grin-js" defer>` | `dist/grin.js` da v2.43 |
+| `<style id="grin">` | `dist/grin.inline.css` da v2.44, com Geist e Geist Mono embutidas |
+| `<script id="grin-js" defer>` | `dist/grin.js` da v2.44 |
 | Comentário antes dos dois blocos | Versão, link da release e o texto da licença SIL Open Font License 1.1 das fontes |
 
 Para atualizar, leia o CHANGELOG do Grin entre as versões, substitua os dois blocos e o número da versão no comentário e confira as telas.
@@ -105,7 +105,7 @@ Cores escritas direto que saíram: `#fff` do botão de perigo, os verdes de hove
 | Dados e Resultado | `.abas` | `.tabs`, `.tab` |
 | Busca | `.busca` | `.search` |
 | Glossário | `.gl-letras`, `.gl-grupo`, `.gl-letra`, `.gl-item`, `.gl-cab`, `.gl-nome`, `.gl-link` | `.letter-index`, `.glossary-group`, `.glossary-letter`, `.glossary-item`, `.glossary-head`, `.glossary-aka`, `.term` |
-| Tour | Tour próprio (`.tour-luz`, `.tour-cartao`, `.tour-bloq`, `.tour-msg`…) | `startTour` do Grin (desde a 2.43, com passos que esperam clique ou tarefa) |
+| Tour | Tour próprio (`.tour-luz`, `.tour-cartao`, `.tour-bloq`, `.tour-msg`…) | `startTour` do Grin (desde a 2.44, com passos que esperam clique ou tarefa) |
 | Variação do valor | `.delta` | `.delta` |
 | Texto secundário e leitor de tela | `.mudo`, `.sr` | `.text-secondary`, `.sr-only` |
 
