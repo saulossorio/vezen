@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.18] - 2026-11-25
+
+### Alterado
+- Empresas: saiu a frase "Os dados ficam só neste navegador." do cabeçalho; com empresas salvas, fica só a contagem.
+
 ## [4.3.17] - 2026-11-25
 
 ### Alterado

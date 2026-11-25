@@ -3908,7 +3908,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.17';
+const VERSAO_APP = '4.3.18';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -7650,7 +7650,7 @@ function lembreteBackup() {
 }
 function telaEmpresas() {
   const n = S.empresas.length;
-  const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Empresas</h1><p class="sub page-description">${n ? plural(n, 'empresa analisada', 'empresas analisadas') + '. ' : ''}Os dados ficam só neste navegador.</p></div>
+  const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Empresas</h1>${n ? `<p class="sub page-description">${plural(n, 'empresa analisada', 'empresas analisadas')}.</p>` : ''}</div>
     <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn primary" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
   // sem empresas: tela inicial do Grin (.start-screen), com o cabeçalho das outras telas; com empresas, a lista
   if (!n) return `<div class="start-screen-body">${cab}<div class="escolha-metodo"><h2>Nova análise: escolha o método</h2>${cartoesMetodo('nova-modo')}
