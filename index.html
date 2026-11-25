@@ -3908,7 +3908,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.14';
+const VERSAO_APP = '4.3.15';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -6248,7 +6248,7 @@ window.addEventListener('beforeunload', e => { if (UI.sujo) { e.preventDefault()
 // ajuda de cada campo: o que é e como entra na conta (os links de onde encontrar vêm junto)
 // cada ajuda diz o que o campo é e o que informar; como o número entra na conta fica na Metodologia (link no fim da ajuda)
 const AJUDA = {
-  cnpj: 'CNPJ da matriz no Brasil. A lupa dentro do campo busca nome, estado, município, porte e sócios na Receita Federal (pela BrasilAPI), só quando você clica.',
+  cnpj: 'CNPJ da matriz. Com ele completo, a lupa fica verde. O clique busca nome, estado, município e enquadramento na Receita Federal e, em companhias abertas e bancos, a receita na CVM ou no Banco Central. Nada é preenchido sem o clique.',
   uf: 'Estado onde fica a sede da empresa no Brasil.',
   natureza: 'O tipo da empresa: privada de médio ou grande porte, pequena, listada na bolsa, startup, subsidiária de multinacional, setor público ou terceiro setor.',
   setor: 'Área em que a empresa atua, pela atividade principal (o CNPJ mostra o código).',
@@ -6403,11 +6403,16 @@ function revisarPendencias() {
 }
 // no topo da análise, sempre à vista enquanto faltar algo
 const chipFaltam = d => { const n = pendentes(d).length; return n ? `<button type="button" class="estado pend chip-falta" data-acao="revisar"><i aria-hidden="true"></i>${n === 1 ? 'Falta 1 campo' : 'Faltam ' + n + ' campos'}</button>` : ''; };
-// a busca do CNPJ só acontece quando a pessoa pede: lupa para buscar, setas para atualizar o que já veio da Receita
+// a busca do CNPJ só acontece quando a pessoa pede. O botão fica discreto até haver um CNPJ completo e ainda não buscado;
+// aí vira o botão principal, com texto, chamando para o clique (Grin 2.45, ação dentro do campo)
+const cnpjPronto = d => { const c = cnpjDigitos(d.cnpj); return c.length === 14 && cnpjValido(c) && d.cnpjBuscado !== c; };
 function botaoCNPJ(d) {
   const ja = !!(d.cnpjInfo && Object.keys(d.cnpjInfo).length), rot = ja ? 'Atualizar com os dados da Receita Federal e a DRE da CVM' : 'Buscar os dados deste CNPJ na Receita Federal e a DRE na CVM';
+  if (cnpjPronto(d)) return `<button type="button" class="acao-dentro btn primary icon xs" data-acao="buscar-cnpj" aria-label="${rot}" data-tooltip="${rot}">${ico('busca')}</button>`;
   return `<button type="button" class="acao-dentro btn ghost icon xs" data-acao="buscar-cnpj" aria-label="${rot}" data-tooltip="${rot}">${ico(ja ? 'atualizar' : 'busca')}</button>`;
 }
+const juntarE = xs => xs.length > 1 ? xs.slice(0, -1).join(', ') + ' e ' + xs[xs.length - 1] : xs[0] || '';
+const msgCNPJ = (t, tom) => `<span class="field-message ${tom}">${ico(tom === 'info' ? 'check' : 'alerta')}<span>${t}</span></span>`;
 function seloCNPJ(d, c) { return d.viaCNPJ && d.viaCNPJ[c] ? '<span class="selo cnpj badge info">via CNPJ</span>' : ''; }
 const temValor = f => !!f && f.v !== '' && f.v != null && !Number.isNaN(f.v);
 // campo numérico com origem do dado
@@ -6930,6 +6935,8 @@ function setCampo(el) {
     emp.foraCalibracao = !el.checked;
   } else if (el.hasAttribute('data-cnpj')) {
     el.value = cnpjMascara(el.value); d.cnpj = el.value; UI.cnpjMsg = '';
+    const b = $('[data-acao=buscar-cnpj]'), n = b && document.createRange().createContextualFragment(botaoCNPJ(d)).firstElementChild;
+    if (b && n.outerHTML !== b.outerHTML) b.replaceWith(n);
   } else return false;
   return true;
 }
@@ -7014,21 +7021,32 @@ async function consultarCNPJ() {
   const b = $('[data-acao=buscar-cnpj]'); if (b) { b.disabled = true; b.setAttribute('aria-busy', 'true'); }
   const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 8000);
   UI.cnpjMsg = 'Consultando a Receita Federal, a CVM e o Banco Central…'; atualizarPainel();
-  const cvm = receitaCVM(c), ifd = receitaIF(c);
+  const cvm = receitaCVM(c), ifd = receitaIF(c), partes = [];
+  let tom = 'info', preenchidos = null, respondeu = false;
   try {
     const resp = await fetch(PAIS.apiCnpj.replace('{cnpj}', c), { signal: ctl.signal });
+    if (resp.status === 404) { respondeu = true; throw new Error('404'); }
     if (!resp.ok) throw new Error('http');
     const j = await resp.json();
-    if (UI.atual === alvo) aplicarCNPJ(j);
-    UI.cnpjMsg = '';
+    respondeu = true;
+    if (UI.atual === alvo) preenchidos = aplicarCNPJ(j);
   } catch (err) {
-    UI.cnpjMsg = `Não foi possível consultar agora; preencha à mão. <a href="${esc(PAIS.linkConsultaCnpj)}" target="_blank" rel="noopener">Consulta CNPJ da Receita</a>`;
+    tom = 'warn';
+    partes.push(err.message === '404' ? 'A Receita Federal não encontrou este CNPJ. Confira os números.'
+      : `Não foi possível consultar a Receita Federal agora. Tente de novo ou preencha à mão (<a href="${esc(PAIS.linkConsultaCnpj)}" target="_blank" rel="noopener">Consulta CNPJ da Receita</a>).`);
   } finally { clearTimeout(t); }
   const e = await cvm, f = await ifd;
   if (UI.atual !== alvo) return;
-  if (e && e.r) { const a = aplicarReceitaCVM(e); toast(`Receita de ${a} preenchida com a DRE publicada na CVM.`); }
-  else if (f && f.r) { const a = aplicarReceitaIF(f); toast(`Receita de ${a} preenchida com o balanço no IF.data do Banco Central.`); }
-  else if (e === null) toast('A DRE na CVM não pôde ser consultada agora.', 'warn');
+  if (respondeu) d.cnpjBuscado = c; // sem resposta, o botão continua verde para tentar de novo
+  if (preenchidos) {
+    if (preenchidos.length) partes.push('Preenchido pela Receita Federal: ' + juntarE(preenchidos) + '. Confira e corrija se precisar.');
+    else { tom = 'warn'; partes.push('A Receita Federal respondeu, mas sem nome, endereço nem porte para este CNPJ.'); }
+  }
+  if (e && e.r) partes.push(`Receita de ${aplicarReceitaCVM(e)} preenchida com a DRE publicada na CVM.`);
+  else if (f && f.r) partes.push(`Receita de ${aplicarReceitaIF(f)} preenchida com o balanço no IF.data do Banco Central.`);
+  else if (e === null) { tom = 'warn'; partes.push('A DRE na CVM não pôde ser consultada agora; a receita fica para você preencher.'); }
+  else if (preenchidos) partes.push('A empresa não publica DRE na CVM nem balanço no IF.data; a receita fica para você preencher.');
+  UI.cnpjMsg = msgCNPJ(partes.join(' '), tom);
   marcarAlterado(); if (UI.rota.tela === 'analise') rerenderAnalise();
 }
 // DRE na CVM: só companhias abertas publicam. Devolve a empresa, {} se o CNPJ não está lá, ou null se o arquivo não carregou.
@@ -7068,9 +7086,10 @@ const aplicarReceitaIF = e => aplicarReceitaOficial(e.r, true, () => ({ f: 'ifda
 function aplicarCNPJ(j) {
   const d = UI.atual.dados, via = d.viaCNPJ = d.viaCNPJ || {};
   const nome = j.nome_fantasia || j.razao_social;
-  if (nome) { d.nome = String(nome); via.nome = true; }
-  if (j.uf && PAIS.ufs.includes(String(j.uf).toUpperCase())) { d.uf = String(j.uf).toUpperCase(); via.uf = true; }
-  if (j.municipio) { d.municipio = municipioOficial(d.uf, j.municipio) || String(j.municipio); via.municipio = true; }
+  const feitos = [];
+  if (nome) { d.nome = String(nome); via.nome = true; feitos.push('nome'); }
+  if (j.uf && PAIS.ufs.includes(String(j.uf).toUpperCase())) { d.uf = String(j.uf).toUpperCase(); via.uf = true; feitos.push('estado'); }
+  if (j.municipio) { d.municipio = municipioOficial(d.uf, j.municipio) || String(j.municipio); via.municipio = true; feitos.push('município'); }
   // enquadramento
   const porte = norm(j.porte);
   let enq = '';
@@ -7078,7 +7097,7 @@ function aplicarCNPJ(j) {
   else if (porte.includes('micro empresa') || porte === 'me') enq = 'ME';
   else if (porte.includes('pequeno porte') || porte === 'epp') enq = 'EPP';
   else if (!porte && j.opcao_pelo_simples === true) enq = 'Simples';
-  if (enq) { d.enquadramento = enq; via.enquadramento = true; }
+  if (enq) { d.enquadramento = enq; via.enquadramento = true; feitos.push('enquadramento'); }
   const sociosPJ = (Array.isArray(j.qsa) ? j.qsa : []).filter(s => +s.identificador_de_socio === 1 || +s.identificador_de_socio === 3).map(s => String(s.nome_socio || '').trim()).filter(Boolean).slice(0, 3);
   d.cnpjInfo = { inicio: j.data_inicio_atividade || '', capital: j.capital_social || '', sociosPJ };
   // sugestões de natureza e setor
@@ -7100,6 +7119,7 @@ function aplicarCNPJ(j) {
   if (sug.natureza === d.natureza && (sug.tipoPublico ?? d.tipoPublico) === d.tipoPublico) { delete sug.natureza; delete sug.tipoPublico; }
   if (sug.setor === d.setor) delete sug.setor;
   UI.sugestao = (sug.natureza || sug.setor) ? sug : null;
+  return feitos;
 }
 
 /* ---------- tela ---------- */
@@ -9428,6 +9448,8 @@ const TOUR = [
     acao: 'Clique em Vezen', alvo: ['#app .comeco[data-v="base"]'], tarefa: () => { const d = dadosTour(); return !!d && d.modo === 'base'; } },
   { titulo: 'Nome da empresa', texto: 'Identifica a análise na lista.',
     acao: 'Digite Banco do Brasil', alvo: [() => campoDoTour('#f-nome')], tarefa: () => { const d = dadosTour(); return !!d && normTxt(d.nome || '') === 'banco do brasil'; } },
+  { titulo: 'Preenchimento pelo CNPJ', texto: 'Com o CNPJ completo, o botão da lupa, dentro do campo, fica verde. Ele preenche nome, estado, município e enquadramento pela Receita Federal e, em companhias abertas e bancos, a receita pela CVM ou pelo Banco Central. Esses campos ganham o selo via CNPJ. Nada é preenchido sem o clique. O tour segue sem a busca.',
+    alvo: [() => campoDoTour('#f-cnpj')] },
   { titulo: 'Natureza', texto: 'Muda o formulário e o cálculo. O Banco do Brasil é uma estatal.',
     acao: 'Escolha Setor público ou estatal', alvo: [() => campoDoTour('#f-natureza')], tarefa: () => { const d = dadosTour(); return !!d && d.natureza === 'publico'; } },
   { titulo: 'Tipo de órgão', texto: 'Órgãos da administração usam a despesa; estatais, a receita.',

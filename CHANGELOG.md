@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.15] - 2026-11-25
+
+### Alterado
+- CNPJ: os campos só são preenchidos quando a pessoa clica na lupa. A lupa fica discreta até o CNPJ estar completo e válido; aí fica verde (botão primário só com ícone, o nome no tooltip), sem cobrir o número.
+- A busca diz o que preencheu, e avisa quando a Receita não achou o CNPJ, quando não houve conexão ou quando só parte dos dados veio. O tour ganhou o passo "Preenchimento pelo CNPJ", com os campos que podem ser preenchidos.
+
 ## [4.3.14] - 2026-11-25
 
 ### Alterado
