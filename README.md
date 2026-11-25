@@ -56,6 +56,7 @@ O CR1 mede só investimento (CAPEX); o Método Vezen mede o gasto total de TI ou
 | `index.html` | O Vezen inteiro: estilos, motor de cálculo (`<script id="motor">`) e a interface em blocos, um por tela (`ui-base`, `ui-analise`, `ui-listas`, `ui-metodos`...) |
 | `tests/` | Testes do motor e da tela, com dados fictícios. Veja [tests/README.md](tests/README.md) |
 | `tools/gerar-calibracao.cjs` | Gera uma versão do Método CR (os parâmetros embutidos) a partir de uma planilha de empresas |
+| `tools/atualizar-grin.cjs` | Troca o Grin embutido no `index.html` por outra versão publicada |
 | `AGENTS.md` | Instruções para agentes de IA que forem mudar o código. O `CLAUDE.md` aponta para ele |
 | `CHANGELOG.md` | Histórico de versões |
 

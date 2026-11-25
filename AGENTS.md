@@ -25,7 +25,7 @@ Está publicado no GitHub Pages: https://saulossorio.github.io/vezen/. O site é
 
 | Bloco | O que tem |
 |---|---|
-| `<style id="grin">` e `<script id="grin-js">` | O design system Grin 2.51, copiado de `dist/grin.inline.css` e `dist/grin.js` da release v2.51, com as fontes Geist e Geist Mono embutidas e a licença OFL no comentário acima. Não edite: para mudar de versão, substitua os dois blocos inteiros e o comentário |
+| `<style id="grin">` e `<script id="grin-js">` | O design system Grin 2.51, copiado de `dist/grin.inline.css` e `dist/grin.js` da release v2.51, com as fontes Geist e Geist Mono embutidas e a licença OFL no comentário acima. Não edite: para mudar de versão, rode `node tools/atualizar-grin.cjs X.Y` (veja “Grin”, abaixo) |
 | `<script id="tema">` | Aplica o tema claro ou escuro antes de a página aparecer (`data-tema` para o Vezen e `data-theme` para o Grin) |
 | `<style id="estilo">` | O CSS próprio do Vezen, só com tokens do Grin. Começa pelos poucos tokens do Vezen no `:root`. Depois vêm base, casca, controles e cada tela. A tabela de equivalências está em `docs/migracao-grin.md` |
 | Símbolos SVG e casca | Ícones próprios (`<symbol id="i-...">`, só os conceitos que o Grin não tem; os outros entram por `ICO_GRIN`, no bloco `ui-base`), a casca `.app` do Grin com a barra lateral (`.sidebar`, conteúdo desenhado em `#nav` e `#lat-pe`), `<main id="app">`, diálogo e aviso rápido |
@@ -103,6 +103,15 @@ Para achar algo, busque pelo nome: `calcular`, `receitaEmpresa`, `calibrarBase`,
 - **Movimento.** Nada de animação disparada pela rolagem. Movimento só como resposta a uma ação, com as durações e curvas do Grin (`--dur-fast`, `--dur`, `--ease`): janelinhas e menus entram e saem, diálogos entram e saem, a tela troca com uma entrada leve, e as mudanças de estado (cor do campo, marcas das tecnologias, categorias, o valor do cartão) acontecem aos poucos. Quem pede menos animação (`prefers-reduced-motion`) recebe tudo na hora: o CSS do Grin desliga as transições e o JS usa `reduzMov()`. As janelinhas saem do DOM 150 ms depois de fechar (sem o id e inertes, para nunca haver dois `#pop`) e o diálogo, 110 ms depois; o teste `tela-transicoes` confere.
 - **Teclado.** Tudo precisa funcionar pelo teclado, com o foco visível. Os menus abrem com Enter, andam com as setas e fecham com Esc.
 
+## Grin
+
+O Grin (https://saulossorio.github.io/grin/, repositório `saulossorio/grin`) é a fonte da verdade do desenho, para o Vezen e para o Laika.
+
+- **Primeiro no Grin.** Uma necessidade que serve a qualquer ferramenta (um componente, um estado, uma regra de layout) é decidida e publicada no Grin, numa versão nova, e só depois aplicada aqui. Não resolva no `<style id="estilo">` o que é genérico.
+- **Mesma versão.** O Vezen e o Laika usam sempre a mesma versão do Grin. Ao atualizar um, atualize o outro no mesmo dia.
+- **Pergunte antes.** Antes de mudar algo além do que foi pedido, confira o que o Grin diz (`docs/patterns.html`, `docs/components.html` e o CSS do componente) e diga ao dono do produto, em uma frase, o que a regra permite. Se o pedido vai contra uma regra do Grin, ou precisa de uma regra que o Grin não tem, pergunte antes de mudar.
+- **Atualizar.** `node tools/atualizar-grin.cjs X.Y` baixa `dist/grin.inline.css` e `dist/grin.js` da tag `vX.Y` (ou `node tools/atualizar-grin.cjs X.Y ../grin`, de uma cópia local do repositório), troca os dois blocos inteiros, atualiza a versão no `index.html`, aqui e em `docs/migracao-grin.md` e confere as duas fontes embutidas. Depois, suba a versão do Vezen e registre no `CHANGELOG.md` ("Grin X.Y, a mesma versão do Laika"), como em toda mudança.
+
 ## Testes
 
 ```sh
@@ -129,14 +138,14 @@ npm run test:tela   # tela: abre o Chrome sem janela (precisa de npm install)
 
 ## Ao terminar uma mudança
 
-1. Rode `npm test` e `npm run test:tela`.
-2. Registre a mudança no `CHANGELOG.md`, no formato Keep a Changelog e em português.
-3. Faça commit e push só quando o dono do produto pedir, porque um push na `main` publica a mudança no site. A mensagem de commit vai em português e diz o que mudou e por quê.
-4. Depois do push, abra https://saulossorio.github.io/vezen/ e confira que a mudança apareceu e que a página abre sem erro.
+1. Rode `npm test` e `npm run test:tela`. Confira a tela também no navegador, em 1366, 925 e 375 px de largura: o dono do produto costuma usar uma janela de uns 925 px.
+2. Toda mudança ganha uma versão: suba `VERSAO_APP` no `index.html` e `version` no `package.json` (os dois iguais) e registre a mudança no `CHANGELOG.md`, no formato Keep a Changelog e em português. Se mudar algo que um documento descreve (README, este arquivo, `docs/migracao-grin.md`, o tour), atualize o documento no mesmo commit.
+3. O dono do produto pediu que toda mudança vá ao ar: faça commit e push na `main`. A mensagem de commit vai em português e diz o que mudou e por quê. Nunca use `--no-verify`.
+4. Depois do push, espere o GitHub Pages e abra https://saulossorio.github.io/vezen/: confira que a versão nova está lá e que a página abre sem erro. Só então diga “publicado como X.Y.Z”.
 
 ## Falando com o dono do produto
 
-O dono do produto escreve em espanhol. Responda em espanhol, curto: a conclusão e, se precisar, uma pergunta. Não use siglas, códigos internos nem nomes de função. Antes de decidir algo que muda o resultado das estimativas, pergunte.
+O dono do produto escreve em espanhol. Responda em espanhol, curto: a conclusão e, se precisar, uma pergunta. Não use siglas, códigos internos nem nomes de função. Faça uma pergunta de cada vez. Antes de decidir algo que muda o resultado das estimativas, ou o desenho além do que foi pedido, pergunte (veja “Grin”).
 
 ## Pendências conhecidas
 

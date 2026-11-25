@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.22] - 2026-11-25
+
+### Adicionado
+- `tools/atualizar-grin.cjs`: troca o Grin embutido por outra versão publicada, atualiza a versão nos documentos e confere as fontes.
+- `AGENTS.md`: seção “Grin” (o Grin decide primeiro, Vezen e Laika na mesma versão, perguntar antes de ir além do pedido, como atualizar) e, ao terminar uma mudança, versão nova, documentos junto, push e conferência no site antes de dizer “publicado”, com a tela conferida em 1366, 925 e 375 px.
+
 ## [4.3.21] - 2026-11-25
 
 ### Alterado
