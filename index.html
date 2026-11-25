@@ -3908,7 +3908,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.16';
+const VERSAO_APP = '4.3.17';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -9446,22 +9446,20 @@ const TOUR = [
   { titulo: 'Nova análise', texto: 'Cada empresa é uma análise.', acao: 'Clique em Nova análise', alvo: ['#nav .lat-nova'], clique: true },
   { titulo: 'Método', texto: 'O método define o cálculo e os campos do formulário. O tour usa o Vezen.',
     acao: 'Clique em Vezen', alvo: ['#app .comeco[data-v="base"]'], tarefa: () => { const d = dadosTour(); return !!d && d.modo === 'base'; } },
-  { titulo: 'Nome da empresa', texto: 'Identifica a análise na lista.',
-    acao: 'Digite Banco do Brasil', alvo: [() => campoDoTour('#f-nome')], tarefa: () => { const d = dadosTour(); return !!d && normTxt(d.nome || '') === 'banco do brasil'; } },
-  { titulo: 'Preenchimento pelo CNPJ', texto: 'Com o CNPJ completo, o botão da lupa, dentro do campo, fica verde. Ele preenche nome, estado, município e enquadramento pela Receita Federal e, em companhias abertas e bancos, a receita pela CVM ou pelo Banco Central. Esses campos ganham o selo via CNPJ. Nada é preenchido sem o clique. O tour segue sem a busca.',
+  { titulo: 'CNPJ', texto: 'Com o CNPJ, a busca preenche vários campos de uma vez.',
+    acao: 'Digite 00.000.000/0001-91', alvo: [() => campoDoTour('#f-cnpj')], tarefa: () => { const d = dadosTour(); return !!d && cnpjDigitos(d.cnpj || '') === '00000000000191'; } },
+  { titulo: 'Buscar pelo CNPJ', texto: 'Com o CNPJ completo, a lupa fica verde. Nada é preenchido sem o clique.',
+    acao: 'Clique na lupa verde', alvo: [() => campoDoTour('#f-cnpj')], tarefa: () => !!dadosTour() && buscaCnpjTerminou() },
+  { titulo: 'O que veio do CNPJ', texto: 'Nome, estado e município vêm da Receita Federal; a receita, da DRE na CVM ou do balanço no Banco Central. Esses campos ganham o selo via CNPJ. Abaixo do CNPJ fica o que foi preenchido ou por que a busca falhou; o que faltar se preenche à mão.',
     alvo: [() => campoDoTour('#f-cnpj')] },
-  { titulo: 'Natureza', texto: 'Muda o formulário e o cálculo. O Banco do Brasil é uma estatal.',
-    acao: 'Escolha Setor público ou estatal', alvo: [() => campoDoTour('#f-natureza')], tarefa: () => { const d = dadosTour(); return !!d && d.natureza === 'publico'; } },
-  { titulo: 'Tipo de órgão', texto: 'Órgãos da administração usam a despesa; estatais, a receita.',
-    acao: 'Escolha Estatal', alvo: [() => campoDoTour('#f-tipoPublico')], tarefa: () => { const d = dadosTour(); return !!d && d.tipoPublico === 'estatal'; } },
-  { titulo: 'Setor', texto: 'Define a base de comparação.',
-    acao: 'Escolha Banco, financeira, cooperativa de crédito', alvo: [() => campoDoTour('#f-setor')], tarefa: () => { const d = dadosTour(); return !!d && d.setor === 'banco'; } },
-  { titulo: 'Receita', texto: 'Base da maioria dos cálculos. O valor pode ser abreviado: 73,9 bi.',
-    acao: 'Digite 73,9 bi no valor; o ano já vem como 2025', alvo: ['#app .campo-rec'], tarefa: () => { const d = dadosTour(); return !!d && pertoDe((d.faturamento || {}).v, 73.9e9) && ['', '2025'].includes(String(d.fatAno || '')); } },
-  { titulo: 'Origem do dado', texto: 'Dado de fonte confiável pesa mais no resultado. A receita do Banco do Brasil vem da DRE.',
-    acao: 'Clique em Marcar origem do dado e escolha DRE', alvo: [() => $('#app .origem[data-alvo="campo:faturamento"]')], tarefa: () => { const d = dadosTour(); return !!d && (d.faturamento || {}).o === 'oficial'; } },
-  { titulo: 'Funcionários', texto: 'Outro caminho de cálculo, independente da receita.',
+  { titulo: 'Natureza e setor', texto: 'Mudam o formulário e o cálculo. A busca pelo CNPJ só sugere: quem decide é você. O Banco do Brasil é uma estatal do setor bancário.',
+    acao: 'Clique em Usar sugestão. Sem sugestão, escolha Setor público, Estatal e Banco', alvo: ['#app .sugestao', () => campoDoTour('#f-natureza')], tarefa: () => { const d = dadosTour(); return !!d && d.natureza === 'publico' && d.tipoPublico === 'estatal' && d.setor === 'banco'; } },
+  { titulo: 'Receita', texto: 'Base da maioria dos cálculos. Veio da CVM, já com a origem Oficial. À mão, o valor pode ser abreviado: 73,9 bi.',
+    acao: 'Confira a receita; se a busca não a trouxe, digite 73,9 bi', alvo: ['#app .campo-rec'], tarefa: () => { const d = dadosTour(); return !!d && +((d.faturamento || {}).v) > 0; } },
+  { titulo: 'Funcionários', texto: 'Outro caminho de cálculo, independente da receita. Não vem do CNPJ.',
     acao: 'Digite 85206', alvo: [() => campoDoTour('#f-funcionarios')], tarefa: () => { const d = dadosTour(); return !!d && pertoDe((d.funcionarios || {}).v, 85206); } },
+  { titulo: 'Origem do dado', texto: 'Dado de fonte confiável pesa mais no resultado. O número de funcionários do Banco do Brasil está no relatório anual.',
+    acao: 'Clique em Marcar origem do dado e escolha Oficial', alvo: [() => $('#app .origem[data-alvo="campo:funcionarios"]')], tarefa: () => { const d = dadosTour(); return !!d && (d.funcionarios || {}).o === 'oficial'; } },
   { titulo: 'Dado não encontrado', texto: 'Sem o dado, registra-se o motivo e o campo deixa de ser pedido.',
     acao: 'Clique em Sem dado? e escolha Não encontrado', alvo: [() => campoDoTour('#f-profTI')], tarefa: () => { const d = dadosTour(); return !!d && !!(d.semDado || {}).profTI; } },
   { titulo: 'Gasto de TI real', texto: 'Gasto publicado pela empresa: o dado de maior peso.',
@@ -9475,6 +9473,8 @@ const TOUR = [
   { titulo: 'Métodos e glossário', texto: 'Fórmulas, fontes e siglas.', alvo: ['#nav a[href="#/metodos"]'] },
   { titulo: 'Fim do tour', texto: 'O tour pode ser repetido a partir deste menu.', alvo: ['#lat-pe [data-acao="tour"]'] }
 ];
+// a busca pelo CNPJ terminou, com ou sem dados: a mensagem abaixo do campo já não é a de espera
+const buscaCnpjTerminou = () => !!UI.cnpjMsg && !UI.cnpjMsg.startsWith('Consultando');
 const campoDoTour = sel => { const i = $(sel); return i ? i.closest('.campo') || i : null; };
 let T = null;
 // o tour é o do Grin (startTour): aqui ficam os passos, os menus que a tela fecha antes e a lembrança de que já foi visto

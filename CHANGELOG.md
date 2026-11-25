@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.17] - 2026-11-25
+
+### Alterado
+- Tour: ensina a busca pelo CNPJ em vez de pedir para digitar o que ela preenche. A pessoa digita o CNPJ do Banco do Brasil, clica na lupa verde, vê o que veio (nome, estado, município e receita, com o selo via CNPJ), usa a sugestão de natureza e setor e confere a receita. Funcionários continua à mão, e a origem do dado é ensinada nele. Se a busca falha, os passos pedem o preenchimento à mão.
+
 ## [4.3.16] - 2026-11-25
 
 ### Alterado

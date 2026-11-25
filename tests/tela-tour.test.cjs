@@ -14,7 +14,8 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     await ctx.addInitScript(() => Object.defineProperty(navigator, 'webdriver', { get: () => false }));
     const p = await ctx.newPage();
     p.on('pageerror', e => erros.push(nomeTela + ': ' + e.message)); p.on('console', m => { if (m.type() === 'error') erros.push(nomeTela + ': ' + m.text()); });
-    await p.route('**/brasilapi.com.br/**', r => r.abort());
+    // a Receita responde como para o Banco do Brasil; a receita vem da CVM ou do IF.data quando eles carregam, senão a pessoa digita
+    await p.route('**/brasilapi.com.br/**', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ razao_social: 'BANCO DO BRASIL SA', uf: 'DF', municipio: 'BRASILIA', porte: 'DEMAIS', codigo_natureza_juridica: 2038, cnae_fiscal: 6422100 }) }));
     await p.goto(URL); await p.waitForTimeout(1000);
     const tit = () => p.textContent('#tour-title').catch(() => '');
     const esperaTit = async t => { for (let i = 0; i < 60; i++) { if ((await tit()) === t) return true; await p.waitForTimeout(100); } return false; };
@@ -26,14 +27,16 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     // o que a pessoa faz em cada passo de clique ou de tarefa, sempre com clique de verdade (o véu não pode tapar)
     const FAZER = {
       'Método': async () => p.click('#app .comeco[data-v="base"]'),
-      'Nome da empresa': async () => p.fill('#f-nome', 'Banco do Brasil'),
-      'Natureza': async () => p.selectOption('#f-natureza', 'publico'),
-      'Tipo de órgão': async () => p.selectOption('#f-tipoPublico', 'estatal'),
-      'Setor': async () => p.selectOption('#f-setor', 'banco'),
-      'Receita': async () => { await p.fill('#f-faturamento', '73,9 bi'); await p.press('#f-faturamento', 'Tab');
+      'CNPJ': async () => p.fill('#f-cnpj', '00000000000191'),
+      'Buscar pelo CNPJ': async () => { await p.click('#app [data-acao="buscar-cnpj"]');
+        for (let k = 0; k < 50 && !(await p.evaluate(() => buscaCnpjTerminou())); k++) await p.waitForTimeout(100);
+        check(`${nomeTela}: o CNPJ preenche o nome`, (await p.inputValue('#f-nome')) === 'BANCO DO BRASIL SA'); },
+      'Natureza e setor': async () => p.click('#app [data-acao="usar-sug"]'),
+      'Receita': async () => { if (await p.evaluate(() => +((UI.atual.dados.faturamento || {}).v) > 0)) return;
+        await p.fill('#f-faturamento', '73,9 bi'); await p.press('#f-faturamento', 'Tab');
         check(`${nomeTela}: valor abreviado vira o número inteiro`, (await p.inputValue('#f-faturamento')) === '73.900.000.000'); },
-      'Origem do dado': async () => { await p.click('#app .origem[data-alvo="campo:faturamento"]'); await p.click('#pop [data-o="oficial"]'); },
       'Funcionários': async () => { await p.fill('#f-funcionarios', '85206'); await p.press('#f-funcionarios', 'Tab'); },
+      'Origem do dado': async () => { await p.click('#app .origem[data-alvo="campo:funcionarios"]'); await p.click('#pop [data-o="oficial"]'); },
       'Dado não encontrado': async () => { await p.click('#app .sem-dado[data-campo="profTI"]'); await p.click('#pop [data-s="nao-encontrado"]'); },
       'Gasto de TI real': async () => { await p.fill('#app [data-real="0"][data-parte="v"]', '6.800.000.000'); await p.press('#app [data-real="0"][data-parte="v"]', 'Tab'); }
     };
@@ -45,7 +48,8 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
         check(`${nomeTela}: Próximo espera a tarefa ser feita`, (await tit()) === atual && await p.locator('.tour-msg.show').count() === 1);
       }
       const age = FAZER[atual] || (clique[i - 1] && (async () => { const r = await p.evaluate(() => { const b = T.target().getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }); await p.mouse.click(r[0], r[1]); }));
-      if (age) { // feita a ação, o cartão fica no passo, diz que está feito e espera Próximo
+      const jaFeito = await p.evaluate(k => !!(TOUR[k].tarefa && TOUR[k].tarefa()), i - 1); // a busca pelo CNPJ pode já ter feito a tarefa
+      if (age && !jaFeito) { // feita a ação, o cartão fica no passo, diz que está feito e espera Próximo
         await age();
         let feito = false; for (let k = 0; k < 30 && !feito; k++) { await p.waitForTimeout(100); feito = /^Feito\./.test(await p.textContent('.tour-msg.ok.show').catch(() => '')); }
         check(`${nomeTela}: ${atual} feito, o tour espera Próximo`, feito && (await tit()) === atual);
