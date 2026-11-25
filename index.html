@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.46, copiado de https://github.com/saulossorio/grin/releases/tag/v2.46 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.47, copiado de https://github.com/saulossorio/grin/releases/tag/v2.47 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.46 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.47 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1396,6 +1396,17 @@ a.tab { text-decoration: none; }
 /* Multiple choice: <label class="menu-item"><input type="checkbox"><span class="menu-label">…</span></label> */
 .menu-item > input[type="checkbox"] { flex: none; }
 
+/* Column settings in a menu: a handle to drag, the checkbox that shows the column and a pin that fixes it on the left.
+   The item being dragged fades, and a line marks where it will land. */
+.menu-item.sortable { gap: 6px; }
+.menu-item .drag-handle { flex: none; display: inline-grid; place-items: center; width: 20px; color: var(--muted-foreground); cursor: grab; }
+.menu-item .drag-handle svg { width: 16px; height: 16px; }
+.menu-item.sortable > .btn { margin-left: auto; }
+.menu-item.sortable > .btn[aria-pressed="false"] { color: var(--muted-foreground); }
+.menu-item.dragging { opacity: .45; }
+.menu-item.drop-before { box-shadow: inset 0 2px 0 var(--primary); }
+.menu-item.drop-after { box-shadow: inset 0 -2px 0 var(--primary); }
+
 /* ---------- components/dialog/dialog.css ---------- */
 /* Grin dialog: short decisions and destructive confirmations. Native <dialog> traps focus and closes with Esc.
    Rises and scales in over a blurred veil. */
@@ -1967,11 +1978,11 @@ body.tour-open .menu, body.tour-open .popover { z-index: 125; }
 .start-screen-body > .dropzone { flex: 1 1 auto; justify-content: center; min-height: 280px; }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.46 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.47 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.46';
+Grin.version = '2.47';
 
 // ---------- scripts/utils.js ----------
 {
@@ -1988,6 +1999,8 @@ const ICONS = {
   'layout-grid': '<rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/>',
   table: '<path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/>',
   columns: '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/>',
+  'grip-vertical': '<circle cx="9" cy="12" r="1"/><circle cx="9" cy="5" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="19" r="1"/>',
+  pin: '<path d="M12 17v5"/><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>',
   monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
   play: '<polygon points="6 3 20 12 6 21 6 3"/>',
   book: '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>',
@@ -3895,7 +3908,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.13';
+const VERSAO_APP = '4.3.14';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -9518,7 +9531,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.46</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.47</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 
