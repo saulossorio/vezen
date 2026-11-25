@@ -1,5 +1,5 @@
 // Tour guiado: abre sozinho na primeira visita, faz o exercício inteiro como a pessoa faria, sem perder nem tapar nenhum alvo (computador e celular),
-// segura cliques fora do recorte, avança pelo clique no alvo, pode ser pulado e reaberto pela barra lateral.
+// segura cliques fora do recorte, espera Próximo depois de cada ação feita, pode ser pulado e reaberto pela barra lateral.
 const { chromium } = require('playwright-core');
 const path = require('path');
 const URL = 'file://' + path.join(__dirname, '..', 'index.html');
@@ -44,9 +44,13 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
         await p.click('[data-tour="next"]'); await p.waitForTimeout(300);
         check(`${nomeTela}: Próximo espera a tarefa ser feita`, (await tit()) === atual && await p.locator('.tour-msg.show').count() === 1);
       }
-      if (FAZER[atual]) await FAZER[atual]();
-      else if (clique[i - 1]) { const r = await p.evaluate(() => { const b = T.target().getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }); await p.mouse.click(r[0], r[1]); }
-      else await p.click('[data-tour="next"]');
+      const age = FAZER[atual] || (clique[i - 1] && (async () => { const r = await p.evaluate(() => { const b = T.target().getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }); await p.mouse.click(r[0], r[1]); }));
+      if (age) { // feita a ação, o cartão fica no passo, diz que está feito e espera Próximo
+        await age();
+        let feito = false; for (let k = 0; k < 30 && !feito; k++) { await p.waitForTimeout(100); feito = /^Feito\./.test(await p.textContent('.tour-msg.ok.show').catch(() => '')); }
+        check(`${nomeTela}: ${atual} feito, o tour espera Próximo`, feito && (await tit()) === atual);
+      }
+      await p.click('[data-tour="next"]');
       const chegou = await esperaTit(titulos[i]);
       await p.waitForTimeout(450);
       const est = await p.evaluate(() => { const l = document.querySelector('.tour-spot').getBoundingClientRect(), c = document.querySelector('.tour-card').getBoundingClientRect();

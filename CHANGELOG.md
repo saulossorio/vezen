@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.16] - 2026-11-25
+
+### Alterado
+- Grin 2.48. No tour, feita a ação do passo, o cartão não avança sozinho: mostra "Feito. Clique em Próximo para continuar." e libera Próximo.
+
 ## [4.3.15] - 2026-11-25
 
 ### Alterado
