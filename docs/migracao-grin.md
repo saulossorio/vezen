@@ -1,6 +1,6 @@
 # Migração para o Grin
 
-O Vezen usa o Grin 2.49, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.49. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
+O Vezen usa o Grin 2.50, copiado da release https://github.com/saulossorio/grin/releases/tag/v2.50. Este documento registra o que havia antes, a classe do Grin que substitui cada parte, o que continua próprio do Vezen e as decisões tomadas na migração.
 
 ## Como o Grin entra no arquivo
 
@@ -8,8 +8,8 @@ O Vezen é um único `index.html` que funciona sem internet. Por isso o Grin ent
 
 | Bloco | Origem |
 |---|---|
-| `<style id="grin">` | `dist/grin.inline.css` da v2.49, com Geist e Geist Mono embutidas |
-| `<script id="grin-js" defer>` | `dist/grin.js` da v2.49 |
+| `<style id="grin">` | `dist/grin.inline.css` da v2.50, com Geist e Geist Mono embutidas |
+| `<script id="grin-js" defer>` | `dist/grin.js` da v2.50 |
 | Comentário antes dos dois blocos | Versão, link da release e o texto da licença SIL Open Font License 1.1 das fontes |
 
 Para atualizar, leia o CHANGELOG do Grin entre as versões, substitua os dois blocos e o número da versão no comentário e confira as telas.
@@ -105,7 +105,7 @@ Cores escritas direto que saíram: `#fff` do botão de perigo, os verdes de hove
 | Dados e Resultado | `.abas` | `.tabs`, `.tab` |
 | Busca | `.busca` | `.search` |
 | Glossário | `.gl-letras`, `.gl-grupo`, `.gl-letra`, `.gl-item`, `.gl-cab`, `.gl-nome`, `.gl-link` | `.letter-index`, `.glossary-group`, `.glossary-letter`, `.glossary-item`, `.glossary-head`, `.glossary-aka`, `.term` |
-| Tour | Tour próprio (`.tour-luz`, `.tour-cartao`, `.tour-bloq`, `.tour-msg`…) | `startTour` do Grin (desde a 2.47, com passos que esperam clique ou tarefa) |
+| Tour | Tour próprio (`.tour-luz`, `.tour-cartao`, `.tour-bloq`, `.tour-msg`…) | `startTour` do Grin (desde a 2.43; passos que esperam clique ou tarefa e, desde a 2.48, o Próximo depois da ação) |
 | Variação do valor | `.delta` | `.delta` |
 | Texto secundário e leitor de tela | `.mudo`, `.sr` | `.text-secondary`, `.sr-only` |
 
@@ -126,7 +126,7 @@ Estas partes não têm equivalente no Grin. Ficam no `<style id="estilo">`, rees
 | Legenda das letras (`.letras`) | Aparência do `.symbols`, com uma linha entre os itens |
 | Cartão do resultado (`.cartao-res`, `.cr-*`, `.resumo-lado`) | Aparência do `.aside-panel`; vira barra presa embaixo na área estreita, por consulta de contêiner |
 | Escolha do método no cartão (`.modo-op`) | Aparência do `.choice`, com o valor à direita |
-| Origem do dado e sem dado (`.origem`, `.sem-dado`, `.sdc-*`) | Botão em forma de selo que abre um menu; o campo que falta fica vermelho no próprio campo |
+| Origem do dado e sem dado (`.origem`, `.sem-dado`, `.sdc-*`) | Botão em forma de selo que abre um menu; o campo que falta fica tracejado e âmbar no próprio campo, como o `[data-state="missing"]` do Grin |
 | Tecnologias (`.tec-*`, `.tag-tec`) | Busca em camadas por categoria; aparência da lista e das marcas do `.combobox` |
 | Nota da empresa modelo (`.nota-modelo`) | Forma do `.alert` no tom da marca, que o `.alert` não tem |
 | Índices laterais (`.indice-lado`, `.doc-ind`) | Aparência do `.toc`; os itens são botões que rolam até a seção |
@@ -150,7 +150,7 @@ Estas partes não têm equivalente no Grin. Ficam no `<style id="estilo">`, rees
 | As abas Dados e Resultado deixaram de ficar presas no topo | O `.tabs` do Grin tem largura do conteúdo; preso no topo, flutuava sobre o formulário sem uma faixa de fundo. |
 | Na lista de empresas, a coluna Setor e lugar quebra a linha | As células do `.table` não quebram linha; a tabela passava da largura de 1200 px. |
 | Nas tabelas de leitura (`.table.compact`) o texto quebra a linha | São tabelas com frases (parâmetros, fontes, testes). |
-| Rótulo dos indicadores da lista em linha, não em flex | O rótulo tem termos do glossário no meio do texto; em flex, cada termo ia para uma coluna. |
+| Rótulo dos indicadores da lista em linha, não em flex | O rótulo tem termos do glossário no meio do texto; em flex, cada termo ia para uma coluna. Desde a 4.3.10 é o próprio Grin que faz isso (`.stat-label` sem ícone fica em bloco, e o valor encolhe pela largura do cartão); o Vezen não tem mais ajuste. |
 | Na tela de 1200 px, o cartão do resultado fica ao lado do formulário | Com a barra lateral e as margens do Grin, a área de conteúdo passou de 876 para 888 px, acima do limite de 879 px em que o cartão vai para baixo. |
 | Versão 4.0.0 | A interface inteira mudou de design system; cálculos, dados salvos e arquivos exportados não mudaram. |
 

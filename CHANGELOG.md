@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.20] - 2026-11-25
+
+### Alterado
+- Grin 2.50, a mesma versão do Laika. No celular, o cartão do tour não cobre mais um alvo no pé da tela.
+- Documentação: README, `AGENTS.md` e `docs/migracao-grin.md` descrevem a busca pelo CNPJ (só no clique, lupa verde, mensagens), o tour que ensina a busca e espera o Próximo, o campo que falta em âmbar tracejado, os indicadores sem ajuste próprio e a tela inicial sem preencher o espaço livre.
+
 ## [4.3.19] - 2026-11-25
 
 ### Alterado
