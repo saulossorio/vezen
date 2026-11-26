@@ -1,4 +1,4 @@
-// Testes de tela do ajuste por cidade: campo Município com a lista do IBGE, Método Personalizado com cidades (planilha e formulário), valores, detalhe, resumo,
+// Testes de tela do ajuste por cidade: campo Município com a lista do IBGE, Personalizado com cidades (planilha e formulário), valores, detalhe, resumo,
 // a versão provisória do CR1 sem cidades e a consulta de CNPJ.
 const { chromium } = require('playwright-core');
 const path = require('path'), os = require('os');
@@ -28,7 +28,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   await p.goto(URL);
   const ir = async h => { await p.evaluate(x => { location.hash = x; }, h); await p.waitForTimeout(300); };
 
-  // 1. Método Personalizado com cidades: a planilha fictícia tem empresas de São Paulo e de Campinas
+  // 1. Personalizado com cidades: a planilha fictícia tem empresas de São Paulo e de Campinas
   await ir('#/metodos');
   const [fc] = await Promise.all([p.waitForEvent('filechooser'), p.click('[data-acao=minha-importar]')]);
   await fc.setFiles(path.join(D, 'cidades.csv')); await p.waitForTimeout(800);
@@ -81,7 +81,7 @@ const mi = s => { const m = /R\$ ([\d.,]+) mi/.exec(s); return m ? +m[1].replace
   const res = await p.inputValue('#txt-resumo');
   await p.keyboard.press('Escape'); await p.waitForTimeout(150);
   check('resumo: cidade no título', /Ind[uú]stria[^\n]*, São Paulo\/SP\. Vezen,/.test(res), res.split('\n')[1]);
-  check('resumo: método, percentual e ajuste local', /Método: Método Personalizado, com as empresas informadas por você \(\d+ importadas\): receita por funcionário medida de \d+ empresas; percentual de TI sobre a receita medido de \d+ empresas: [\d,]+% neste setor, com ajuste local × [\d,]+ \(São Paulo × [\d,]+; mesmo setor em São Paulo × [\d,]+\)/.test(res), (res.match(/Método:.{0,400}/) || [''])[0]);
+  check('resumo: método, percentual e ajuste local', /Método: Personalizado, com as empresas informadas por você \(\d+ importadas\): receita por funcionário medida de \d+ empresas; percentual de TI sobre a receita medido de \d+ empresas: [\d,]+% neste setor, com ajuste local × [\d,]+ \(São Paulo × [\d,]+; mesmo setor em São Paulo × [\d,]+\)/.test(res), (res.match(/Método:.{0,400}/) || [''])[0]);
 
   // 4. o CR1 é por segmento e estado, sem cidade: sem ajuste por lugar; o mínimo de 5 empresas vale no Personalizado
   await ir('#/metodos');

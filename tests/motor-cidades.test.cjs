@@ -93,7 +93,7 @@ ok('Embutida: sem CNPJ, e-mail ou linhas de empresa', !/\d{14}|[a-z0-9._-]+@[a-z
   ok('CR1: receita que falta é estimada pelos funcionários', !est.vazio && perto(est.F, est.receita.usada.v * 0.05, 1));
 }
 
-// 6b. Método FGV: a conta da calculadora da PDCA TI, receita × Índice G do setor (gasto total)
+// 6b. FGV: a conta da calculadora da PDCA TI, receita × Índice G do setor (gasto total)
 {
   const F = M.PAIS.metodoFGV, Pf = M.parametrosCalibrados(P, F), ff = M.fatoresCalibrados(F, P), run = dd => M.calcular(dd, Pf, { ano: 2025, calib: ff });
   const G = F.ti.tabela, base = { nome: 'X', natureza: 'privada', setor: 'banco', faturamento: { v: 1e9, o: 'oficial' }, fatAno: '2025', fatMeses: '12', gastoDeclarado: { v: 6e7, o: 'oficial' } };

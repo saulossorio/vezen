@@ -2,6 +2,14 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.6.0] - 2026-11-26
+
+### Alterado
+- **Nomes sem "Método":** Vezen BR, Vezen MX, CR1, FGV e Personalizado, em todas as telas, na documentação e no glossário.
+- **Personalizado no Brasil e no México.** O cartão mostra os dois países. As contas são proporções (gasto de TI ÷ receita), sem moeda: na análise, o campo País, no topo do formulário, define a moeda e a lista de estados e cidades. Os formulários de empresas e de percentuais oferecem os estados dos dois países, e a leitura de planilhas reconhece os estados mexicanos.
+- **Como aumentar a confiança** não sugere mais o gasto de TI da empresa: é justamente o que a análise quer estimar. As sugestões ficam entre receita, funcionários, profissionais de TI e, nas listadas, adições. O caso de aceitação C deixa de esperar o gasto de TI nas sugestões.
+- Avisos que mandam usar o Vezen dizem o do país da análise (Vezen BR ou Vezen MX).
+
 ## [4.5.0] - 2026-11-26
 
 ### Alterado

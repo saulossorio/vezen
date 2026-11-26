@@ -1,4 +1,4 @@
-// Nível do Método Vezen: confere o % da receita e o gasto por usuário contra os balanços de dois bancos grandes (os únicos gastos de TI oficiais usados),
+// Nível do Vezen BR: confere o % da receita e o gasto por usuário contra os balanços de dois bancos grandes (os únicos gastos de TI oficiais usados),
 // a coerência entre o caminho pela receita e o caminho por usuários em cada setor, e a conferência com o tamanho do mercado brasileiro de TI.
 const fs = require('fs'), path = require('path'), arq = process.argv[2] || path.join(__dirname, '..', 'index.html');
 const html = fs.readFileSync(arq, 'utf8');

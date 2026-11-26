@@ -31,7 +31,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   ok('Sem a caixa antiga de estimar a receita', await p.locator('[data-chk=fatEstimar]').count() === 0);
   ok('Alturas iguais: campos, listas e seletores com a altura de controle do Grin (--control-h)', await p.evaluate(() => { const h = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--control-h')); return h > 0 && [...document.querySelectorAll('#form input[type=text], #form select, #form .seg')].filter(e => e.offsetParent).every(e => Math.round(e.getBoundingClientRect().height) === h); }));
   ok('Ano da receita vem preenchido com o último ano fechado', (await p.inputValue('#f-fatAno')) === String(new Date().getFullYear() - 1));
-  ok('Nova análise fica fora do Método Personalizado até a pessoa marcar', await p.locator('#f-usarCalib').count() === 0 && (await motor(() => UI.atual.foraCalibracao)) === true);
+  ok('Nova análise fica fora do Personalizado até a pessoa marcar', await p.locator('#f-usarCalib').count() === 0 && (await motor(() => UI.atual.foraCalibracao)) === true);
   await p.fill('#f-nome', 'Varejo Teste'); await p.selectOption('#f-natureza', 'privada'); await p.selectOption('#f-setor', 'varejo'); await p.selectOption('#f-uf', 'RS');
   ok('Origem só aparece quando o campo tem valor', await p.locator('[data-alvo="campo:faturamento"]').isHidden());
   await p.fill('#f-faturamento', '500.000.000');
@@ -218,7 +218,7 @@ const cnpjCom = base12 => { const d = base12.split('').map(Number); const dv = n
   await ir('#/metodos');
   ok('Metodologia: seção da receita', (await p.textContent('#met-receita')).includes('Estimativa, quando falta o valor') && (await p.textContent('#met-receita')).includes('usado como está'));
   ok('Metodologia: seção das estimativas', (await p.textContent('#met-estimativas')).includes('percentil 25'));
-  ok('Metodologia: testes 134 de 134', (await p.textContent('#met-testes')).includes('134 de 134'));
+  ok('Metodologia: testes 131 de 131', (await p.textContent('#met-testes')).includes('131 de 131'));
   ok('Métodos: parâmetros por setor em tabela de só leitura, sem campos de edição', await p.locator('#met-setores tbody tr').count() >= 10 && await p.locator('#met-setores input, #met-fontes input').count() === 0);
   await ir('#/empresas');
   await p.click('[data-acao=menu-empresas]');
