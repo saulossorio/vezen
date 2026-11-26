@@ -24,7 +24,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   // 1. a tela Métodos: um item só no menu, documentação por método e a área de entrada do Personalizado
   check('menu: Métodos no lugar de Calibração, Parâmetros e Metodologia', /Métodos/.test(await txt(p, '#nav')) && !/Calibração|Parâmetros|Metodologia/.test(await txt(p, '#nav')) && await p.locator('#nav a[href="#/metodos"]').count() === 1);
   await ir(p, '#/metodos');
-  check('24 seções em 6 grupos, com uma só de entrada de dados', await p.locator('section.met-sec').count() === 24 && (await p.$$eval('.doc-ind .ind-grupo', g => g.map(x => x.textContent).join('|'))) === 'Visão geral|Método Vezen|Método CR1|Método FGV|Método Personalizado|Outros países' && await p.locator('section.met-entrada').count() === 1 && (await txt(p, '#pers-dados-t')).includes('entrada de dados'));
+  check('30 seções em 6 grupos, com uma só de entrada de dados', await p.locator('section.met-sec').count() === 30 && (await p.$$eval('.doc-ind .ind-grupo', g => g.map(x => x.textContent).join('|'))) === 'Visão geral|Método Vezen|Método CR1|Método FGV|Método Personalizado|Método Vezen México' && await p.locator('section.met-entrada').count() === 1 && (await txt(p, '#pers-dados-t')).includes('entrada de dados'));
   check('cartões dos quatro métodos', /Disponível|análise/.test(await cartao(p, 'Método Vezen')) && /Disponível/.test(await cartao(p, 'Método CR1')) && /Disponível/.test(await cartao(p, 'Método FGV')) && /Sem dados ainda/.test(await cartao(p, 'Método Personalizado')), await cartao(p, 'Método Personalizado'));
   const cr1 = await txt(p, '#cr1-parametros');
   check('CR1: versão, data, segmentos e a tabela por estado', /Versão CR1, de \d\d\/\d\d\/\d{4}: 14 segmentos, % de investimento em TI \(CAPEX\)/.test(cr1) && await p.locator('#cr1-parametros table.tab-cr1 tbody tr').count() === 14 && await p.locator('#cr1-parametros th:text-is("CE")').count() === 1, cr1.slice(0, 160));
@@ -49,14 +49,16 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   const v1 = await txt(p, '#cr-valor');
   // só os campos que entram na conta: nos métodos por percentual somem usuários, unidades e a seção da equipe; com gasto de TI do ano, também no Vezen
   const campos = () => p.evaluate(() => ['f-funcionarios', 'f-usuarios', 'sec-ti'].filter(id => document.getElementById(id)).join());
-  check('CR1: formulário com segmento, estado, receita e funcionários', await campos() === 'f-funcionarios' && await p.locator('#f-segCR').count() === 1 && await p.locator('#f-setor, #f-municipio').count() === 0 && await p.inputValue('#f-segCR') === 'servicos' && await p.evaluate(() => !pendentes(UI.atual.dados).some(c => SO_VEZEN.includes(c))), await campos());
+  check('CR1: formulário com o segmento da lista única, estado, receita e funcionários', await campos() === 'f-funcionarios' && await p.locator('#f-setor').count() === 1 && await p.locator('#f-segCR, #f-segFGV, #f-municipio').count() === 0 && await p.inputValue('#f-setor') === 'servicos' && await p.evaluate(() => !pendentes(UI.atual.dados).some(c => SO_VEZEN.includes(c))), await campos());
   check('Vezen: todos os campos, e eles somem com gasto de TI do ano', await p.evaluate(() => { const d = JSON.parse(JSON.stringify(UI.atual.dados)); d.modo = 'base'; const antes = SO_VEZEN.filter(c => entraNaConta(d, c)).length; d.gastoDeclarado = { v: 1e6, o: 'oficial' }; return antes === SO_VEZEN.length && !SO_VEZEN.some(c => entraNaConta(d, c)) && entraNaConta(d, 'funcionarios'); }));
   check('CR1 muda o valor e usa só o caminho do percentual', v0 !== v1 && await p.evaluate(() => document.querySelector('#painel input[data-modo]:checked').value === 'padrao' && calc(UI.atual.dados).ests.map(e => e.cod).join() === 'EP'), `${v0} → ${v1}`);
   check('CR1: receita informada × percentual do segmento no estado, rótulo CAPEX', await p.evaluate(() => { const r = calc(UI.atual.dados); return Math.abs(r.F / (r.receita.usada.v * 0.03) - 1) < 1e-9 && r.receita.modo === 'informada'; }) && /Investimento em TI \(CAPEX\)/.test(await txt(p, '#painel .cr-rot >> nth=1')));
   check('confiança do CR1: percentuais do estudo', /Aproximada: percentuais do estudo/.test(await txt(p, '#painel .cr-conf')), await txt(p, '#painel .cr-conf'));
-  await p.selectOption('#f-segCR', 'ti'); await p.waitForTimeout(500);
-  check('CR1: o segmento escolhido muda o percentual (Tecnologia da informação, SP 3%)', await p.evaluate(() => UI.atual.dados.segCR === 'ti' && calc(UI.atual.dados).segCR === 'ti'));
-  await p.selectOption('#f-segCR', 'servicos'); await p.waitForTimeout(300);
+  await p.selectOption('#f-setor', 'tecnologia'); await p.waitForTimeout(500);
+  check('CR1: o segmento da análise dá o segmento do estudo (Tecnologia, telecom e mídia → Tecnologia da informação)', await p.evaluate(() => UI.atual.dados.setor === 'tecnologia' && calc(UI.atual.dados).segCR === 'ti'));
+  await p.selectOption('#f-setor', 'agro'); await p.waitForTimeout(400);
+  check('CR1: Agronegócio usa o segmento Agronegócio do estudo', await p.evaluate(() => calc(UI.atual.dados).segCR === 'agro'));
+  await p.selectOption('#f-setor', 'servicos'); await p.waitForTimeout(300);
   check('CR1: órgão público informa a despesa empenhada total', await p.evaluate(() => rotulos({ natureza: 'publico', modo: 'padrao' }).fat === 'Despesa empenhada total' && rotulos({ natureza: 'publico', modo: 'base' }).fat === 'Orçamento total'));
   // Método Vezen: gasto total ou só investimento (CAPEX)
   check('o seletor de CAPEX só aparece no Método Vezen', await p.locator('#f-escopo').count() === 0);
@@ -66,7 +68,7 @@ const salvarAnalise = async (p, espera = 300) => { await explicar(p); await p.cl
   await p.selectOption('#f-escopo', ''); await p.waitForTimeout(500);
   check('Vezen volta ao gasto total', await p.evaluate(() => !calc(UI.atual.dados).capex) && !/CAPEX/.test(await txt(p, '#painel .cr-rot >> nth=1')));
   await p.click('#painel label.modo-op:has(input[data-modo][value=fgv])'); await p.waitForTimeout(700);
-  check('FGV: campo Setor (FGV), sem estado; receita × Índice G de Serviços (14,5%), gasto total', await p.locator('#f-segFGV').count() === 1 && await p.inputValue('#f-segFGV') === 'servicos' && await p.locator('#f-uf, #f-segCR, #f-setor').count() === 0
+  check('FGV: o mesmo campo Segmento, sem estado; receita × Índice G de Serviços (14,5%), gasto total', await p.locator('#f-setor').count() === 1 && await p.inputValue('#f-setor') === 'servicos' && await p.locator('#f-uf, #f-segCR, #f-segFGV').count() === 0
     && await p.evaluate(() => { const r = calc(UI.atual.dados); return r.modoCalc === 'fgv' && !r.capex && Math.abs(r.F / (r.receita.usada.v * 0.145) - 1) < 1e-9; }) && !/CAPEX/.test(await txt(p, '#painel .cr-rot >> nth=1')));
   await p.click('#painel label.modo-op:has(input[data-modo][value=padrao])'); await p.waitForTimeout(700);
   // gasto real de 2024 (antes do ano de referência) para a análise entrar no Personalizado depois

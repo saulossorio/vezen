@@ -144,7 +144,7 @@ const PERMITIDAS = new Set([
     // texto de todos os trechos da tela, separados, para uma sigla não grudar na vizinha; os links já inseridos não mudam o texto
     corpo += '\n' + await p.evaluate(() => { const w = document.createTreeWalker(document.getElementById('app'), NodeFilter.SHOW_TEXT), s = []; for (let n = w.nextNode(); n; n = w.nextNode()) s.push(n.nodeValue); return s.join(' | '); });
   }
-  corpo += '\n' + await motor(() => [...Object.keys(AJUDA).map(k => textoAjuda(k, dadosVazios())), ...ORIGENS.map(o => o[1] + ' ' + o[2]), ...TECNOLOGIAS.flatMap(g => [g.g, ...g.itens.map(i => i[1] + ' ' + (i[2] || ''))]), ...PAIS.parametros.links.map(l => l.nome), ...SECOES_METODOS.flatMap(g => g[1].map(s => s[2]))].join('\n'));
+  corpo += '\n' + await motor(() => [...Object.keys(AJUDA).map(k => textoAjuda(k, dadosVazios())), ...origens().map(o => o[1] + ' ' + o[2]), ...TECNOLOGIAS.flatMap(g => [g.g, ...g.itens.map(i => i[1] + ' ' + (i[2] || ''))]), ...PAIS.parametros.links.map(l => l.nome), ...SECOES_METODOS.flatMap(g => g[1].map(s => s[2]))].join('\n'));
   const sobra = await p.evaluate(txt => {
     const formas = GLOSSARIO.flatMap(g => [g.t, ...(g.a || [])]).sort((a, c) => c.length - a.length);
     const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');

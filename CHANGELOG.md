@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.5.0] - 2026-11-26
+
+### Alterado
+- **O país vem do método.** Saiu o campo País da análise. Na escolha do método, cada cartão mostra o país em que o método vale, e um filtro mostra os métodos de um país. Argentina, Chile, Colômbia, Estados Unidos e Peru aparecem no filtro como "em breve", desabilitados.
+- **Método Vezen México**, um método próprio, revisto do começo: termos do México (estado de resultados, ingresos, RFC, devengado), sem faturamento bruto, sem enquadramento e sem a opção só CAPEX (a parte de investimento não tem fonte mexicana). Porte pelas quatro faixas de pessoas do Censo Económico (receita por pessoa de 0,23 a 1,03 da das unidades com 51 ou mais), sem as faixas da pesquisa da FGV; parte de investimento de 20% (entre 13% e 32% das referências), com incerteza maior; fontes próprias. Resumo, pedido à IA e origem do dado com os documentos do México.
+- Métodos: o grupo "Método Vezen México" explica o método inteiro sem depender do Método Vezen do Brasil (fórmula completa, receita, caminhos, ajustes, incerteza e confiança, parâmetros por setor, fontes, câmbio e limites). A Visão geral mostra os cinco métodos com o país.
+- **Segmentos numa lista só.** A análise, o pedido à IA e os métodos usam a mesma lista de segmentos; cada um aponta a linha do Método Vezen, o segmento do estudo do CR1 e o setor da FGV. Saíram os campos de segmento próprios do CR1 e do FGV. Novos segmentos: Agronegócio, Óleo, gás e mineração, Energia, água e saneamento e Construção (no Método Vezen, a linha da indústria). No órgão público, o segmento é Administração pública, Justiça e segurança pública ou PRODs. Análises salvas passam o segmento antigo para a lista nova.
+- Glossário: BIVA e IMMEX.
+
 ## [4.4.0] - 2026-11-26
 
 ### Adicionado

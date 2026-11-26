@@ -26,8 +26,14 @@ ok('Valores do México em MX$', M.comPais('MX', () => M.fmtRS(bbva.F)).startsWit
 ok('O país volta ao Brasil depois da conta', M.fmtRS(1).startsWith('R$'));
 // receita pelos funcionários: indústria com 1.000 pessoas, 2023 → 2025 a 5% ao ano
 const ind = calcMX({ nome: 'Indústria MX', natureza: 'privada', setor: 'industria', uf: 'NL', funcionarios: { v: 1000, o: 'oficial' } });
-const esperado = 1000 * 2810000 * 1.133 * Math.pow(1.05, 2);
+const esperado = 1000 * 2810000 * 1.03 * Math.pow(1.05, 2); // faixa de 251 ou mais pessoas do Censo
 ok('Receita pelos funcionários com o Censo Económico, levada de 2023 ao ano de referência', ind.receita.usada && Math.abs(ind.receita.usada.v / esperado - 1) < 0.02, M.comPais('MX', () => M.fmtRS(ind.receita.usada.v)));
+// porte pelas faixas de pessoas do Censo: 8 pessoas caem em até 10 (0,23 da receita por pessoa das unidades com 51 ou mais)
+const micro = calcMX({ nome: 'Micro MX', natureza: 'privada', setor: 'industria', uf: 'NL', funcionarios: { v: 8, o: 'oficial' } });
+ok('Porte do México pelas faixas de pessoas do Censo Económico', Math.abs(micro.receita.usada.v / (8 * 2810000 * 0.23 * Math.pow(1.05, 2)) - 1) < 0.02);
+ok('Sem ajuste de porte no % de TI no México', MX.parametros.porte.every(b => b.f1 === 1 && b.f2 === 1));
+ok('Parte de investimento do México entre as referências (13% a 32%)', MX.parametros.equipe.sCapex > 0.13 && MX.parametros.equipe.sCapex < 0.32);
+ok('Fontes do México próprias, sem as da FGV como fonte do nível', !/FGV 36ª/.test(MX.fontes.nivel.fonte) && !MX.fontes['regional.mediaNacional'].fonte.includes('Brasscom'));
 // órgão público: etapa devengada
 ok('Etapas do orçamento com os nomes do México', M.comPais('MX', () => M.CONFIG.paises.MX.etapas[0][1]) === 'Devengada');
 // câmbio: FIX de 2024

@@ -43,7 +43,9 @@ O CR1 mede só investimento (CAPEX); o Método Vezen mede o gasto total de TI ou
 
 ## Outros países
 
-Cada análise escolhe o país no campo **País**. Além do Brasil, há o **México**: só o Método Vezen, em pesos, com o RFC no lugar do CNPJ (sem busca, porque o RFC não tem consulta pública) e parâmetros mexicanos (Censos Económicos do INEGI, FIX do Banco de México e o nível do gasto de TI do Brasil ajustado pelo tamanho do mercado mexicano). Tudo está explicado em **Métodos**, Outros países, México.
+Cada método vale num país, e a escolha do método mostra o país de cada um, com um filtro por país. No Brasil há quatro métodos; no **México**, o **Método Vezen México**: em pesos, com o RFC no lugar do CNPJ (sem busca, porque o RFC não tem consulta pública), termos e parâmetros mexicanos (Censos Económicos do INEGI, FIX do Banco de México, nível do gasto de TI ajustado ao mercado mexicano). Ele está explicado inteiro em **Métodos**, Método Vezen México. Argentina, Chile, Colômbia, Estados Unidos e Peru aparecem como "em breve".
+
+Os segmentos são uma lista só, a mesma na análise, no pedido à IA e em todos os métodos.
 
 ## Privacidade
 
