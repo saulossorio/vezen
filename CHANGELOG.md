@@ -2,6 +2,12 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.23] - 2026-11-25
+
+### Alterado
+- Grin 2.53, a mesma versão do Laika. O tour começa com a janela de boas-vindas do Grin, com o logo: o que o Vezen faz e a oferta do tour com o Banco do Brasil.
+- `tools/atualizar-grin.cjs` avisa quando um documento não cita a versão nova.
+
 ## [4.3.22] - 2026-11-25
 
 ### Adicionado

@@ -50,6 +50,7 @@ function trocar(s, abre, novo) {
     const p = path.join(RAIZ, d), t = fs.readFileSync(p, 'utf8');
     const n = t.replace(new RegExp(`(Grin |release v|tag/v|da v)${esc}\\b`, 'g'), `$1${nova}`);
     if (n !== t) fs.writeFileSync(p, n);
+    if (!n.includes(`Grin ${nova}`)) console.warn(`Atenção: ${d} não cita “Grin ${nova}”. Confira a versão citada nele.`);
   }
   console.log(`Grin ${atual} → ${nova} em index.html e ${DOCS.join(', ')}. Agora: versão do Vezen, CHANGELOG, testes e tela.`);
 })().catch(e => { console.error(e.message); process.exit(1); });

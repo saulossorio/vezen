@@ -21,7 +21,7 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     const esperaTit = async t => { for (let i = 0; i < 60; i++) { if ((await tit()) === t) return true; await p.waitForTimeout(100); } return false; };
     const titulos = await p.evaluate(() => TOUR.map(x => x.titulo)), clique = await p.evaluate(() => TOUR.map(x => !!x.clique));
     check(`${nomeTela}: primeira visita abre o tour`, await p.locator('.tour.show').count() === 1 && await esperaTit(titulos[0]));
-    check(`${nomeTela}: o primeiro passo oferece Começar e Agora não`, (await p.textContent('[data-tour="next"]')) === 'Começar' && (await p.textContent('[data-tour="skip"]')) === 'Agora não');
+    check(`${nomeTela}: o primeiro passo oferece Começar e Agora não`, (await p.textContent('[data-tour="next"]')) === 'Começar o tour' && (await p.textContent('[data-tour="skip"]')) === 'Agora não');
     await p.mouse.click(5, viewport.height - 5); await p.waitForTimeout(250);
     check(`${nomeTela}: clique fora do cartão é segurado e explicado`, await p.locator('.tour-msg.show').count() === 1 && await p.evaluate(() => location.hash) === '#/empresas');
     // o que a pessoa faz em cada passo de clique ou de tarefa, sempre com clique de verdade (o véu não pode tapar)

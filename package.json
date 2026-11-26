@@ -1,6 +1,6 @@
 {
   "name": "vezen",
-  "version": "4.3.22",
+  "version": "4.3.23",
   "private": true,
   "description": "Estimativa do investimento em TI de empresas brasileiras, num único arquivo HTML.",
   "scripts": {
