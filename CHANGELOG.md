@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.6.1] - 2026-11-26
+
+### Corrigido
+- **México sem termos do Brasil.** O campo de câmbio da receita global não mostra mais "Buscar PTAX" no México (a busca é só do Banco Central do Brasil e traria reais por dólar); a dica diz "o FIX da tabela". A ajuda do setor não cita o CNPJ, a da despesa de TI do setor público fala de Cuenta Pública, Transparencia Presupuestaria e das etapas mexicanas (devengada, comprometida, aprovada), e "Onde a TI é gerida" oferece "No México".
+- **"Como entra na conta"** na ajuda dos campos leva, no México, à seção do Vezen MX em Métodos, e não à do Vezen BR.
+- README e instruções para agentes: cinco métodos, e o México com o Vezen MX e o Personalizado.
+
 ## [4.6.0] - 2026-11-26
 
 ### Alterado

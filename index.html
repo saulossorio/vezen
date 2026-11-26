@@ -3949,7 +3949,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.6.0';
+const VERSAO_APP = '4.6.1';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -4304,7 +4304,7 @@ CONFIG.paises.MX = (BR => {
       { id: 'terceiro', nome: 'Sem fins lucrativos (asociación civil, fundação)' }, { id: 'naosei', nome: 'Sem informação' }],
     filtrosSetor: BR.filtrosSetor, setoresPublicos: [], cnae: null, ufs: UFS.map(u => u[0]), nomesUf: Object.fromEntries(UFS),
     etapas: [['liquidado', 'Devengada'], ['pago', 'Paga'], ['empenhado', 'Comprometida'], ['dotacao', 'Aprovada']],
-    apiCnpj: null, apiCambio: null, semEnquadramento: true, metodos: ['base'],
+    apiCnpj: null, apiCambio: null, semEnquadramento: true,
     cambio: {
       fonte: 'Banco de México: FIX do último dia útil de dezembro, publicado no DOF',
       moedas: [['USD', 'Dólar americano (US$)']],
@@ -6456,7 +6456,7 @@ const AJUDA = {
   cnpj: d => paisDe(d) === 'MX' ? 'RFC da empresa: 12 caracteres na pessoa moral, 13 na pessoa física. A ferramenta confere o formato e a data; não há consulta pública do RFC, então nome, estado e setor são digitados.' : 'CNPJ da matriz. Com ele completo, a lupa fica verde. O clique busca nome, estado, município e enquadramento na Receita Federal e, em companhias abertas e bancos, a receita na CVM ou no Banco Central. Nada é preenchido sem o clique.',
   uf: () => 'Estado onde fica a sede da empresa ' + PAIS.noPais + '.',
   natureza: 'O tipo da empresa: privada de médio ou grande porte, pequena, listada na bolsa, startup, subsidiária de multinacional, setor público ou terceiro setor.',
-  setor: 'Área em que a empresa atua, pela atividade principal (o CNPJ mostra o código).',
+  setor: d => 'Área em que a empresa atua, pela atividade principal' + (paisDe(d) === 'MX' ? '.' : ' (o CNPJ mostra o código).'),
   faturamento: () => 'Quanto a empresa vendeu ' + PAIS.noPais + ' no período informado. ' + (PAIS.moeda === 'BRL' ? 'Prefira a receita líquida, sem os impostos sobre vendas; se só achar o faturamento bruto, marque “Faturamento bruto”.' : 'No México, a receita dos balanços já vem sem IVA.') + ' Informe o ano e o período (12, 9, 6 ou 3 meses): o valor é levado a 12 meses.',
   funcionarios: () => 'Número de funcionários da empresa ' + PAIS.noPais + '.',
   usuarios: 'Pessoas que usam computador no trabalho. Quase nunca é público: se não achar, a ferramenta supõe um valor pelo setor, que aparece em cinza no campo.',
@@ -6467,9 +6467,9 @@ const AJUDA = {
   gastosReais: 'Quanto a empresa gastou de fato com TI em cada ano, quando publica ou declara (relatório anual, balanço, portal da transparência). Informe o ano e o valor; dá para adicionar vários anos.',
   gastoDeclarado: 'Quanto a empresa diz que gastou com TI no ano de referência. Quando informado, vira o resultado.',
   adicoes: 'Quanto a empresa adicionou no ano em software (intangível) e em equipamentos de informática (imobilizado), nas notas do balanço.',
-  contratos: 'Órgão público: despesa de TI do ano no portal da transparência, com a etapa. Prefira a liquidada; dotação e empenho baixam a confiança. Estatal: contratos de TI do ano.',
+  contratos: d => paisDe(d) === 'MX' ? 'Setor público: despesa de TI do ano na Cuenta Pública ou na Transparencia Presupuestaria, com a etapa. Prefira a devengada; aprovada e comprometida baixam a confiança. Paraestatal: contratos de TI do ano.' : 'Órgão público: despesa de TI do ano no portal da transparência, com a etapa. Prefira a liquidada; dotação e empenho baixam a confiança. Estatal: contratos de TI do ano.',
   enquadramento: 'Porte legal da empresa: MEI, ME (microempresa), EPP (pequeno porte) ou Simples, sem saber qual.',
-  tiMatriz: 'Onde ficam o orçamento e a gestão de TI de uma subsidiária: no Brasil ou na matriz, no exterior.',
+  tiMatriz: () => 'Onde ficam o orçamento e a gestão de TI de uma subsidiária: ' + PAIS.noPais + ' ou na matriz, no exterior.',
   globalRec: 'Receita total do grupo no mundo, na moeda em que o grupo publica.',
   globalPart: () => 'Parte da receita do grupo que vem ' + PAIS.doPais + ', se a empresa divulgar (relatório anual, apresentação a investidores).',
   globalFunc: 'Total de funcionários do grupo no mundo.',
@@ -6487,7 +6487,9 @@ function abrirAjuda(btn) {
   const d = UI.atual ? UI.atual.dados : dadosVazios(), k = btn.dataset.chave, ls = linksCampo(k, d);
   const corpo = k === 'origens' ? `<p>${esc(textoAjuda(k, d))}</p><ul class="lista-orig">${origens().map(([v, t, desc]) => `<li><span class="o-chip o-${v}">${ico(ICO_ORIGEM[v])}</span><div><b>${t}</b><span>${desc}</span></div></li>`).join('')}</ul>` : `<p>${esc(textoAjuda(k, d))}</p>`;
   const links = ls.length ? `<b class="text-sm">Onde encontrar</b><ul>${ls.map(l => `<li><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.nome)}</a><span class="selo badge ${l.selo === 'Oficial' ? 'oficial ok' : 'agregador brand'}">${esc(SELO_TXT[l.selo] || l.selo)}</span></li>`).join('')}</ul><p class="pop-nota">Fontes oficiais primeiro. Os links abrem em outra aba.</p>` : '';
-  const met = AJUDA_MET[k] ? `<p class="pop-nota"><a href="#/metodos/${AJUDA_MET[k]}" target="_blank" rel="noopener">Como entra na conta</a></p>` : '';
+  // no México, a seção equivalente do Vezen MX; sem equivalente, sem link
+  const secMX = AJUDA_MET[k] && AJUDA_MET[k].replace(/^met-/, 'mx-'), sec = paisDe(d) === 'MX' ? (CORPO_METODOS[secMX] ? secMX : '') : AJUDA_MET[k];
+  const met = sec ? `<p class="pop-nota"><a href="#/metodos/${sec}" target="_blank" rel="noopener">Como entra na conta</a></p>` : '';
   abrirPop(btn, `<h4 class="popover-title">${esc(btn.dataset.rot)}<button type="button" class="btn ghost icon xs" data-acao="pop-fechar" aria-label="Fechar">${ico('x')}</button></h4>${corpo}${links}${met}`, { cls: 'pop-ajuda', papel: 'dialog', rotulo: btn.dataset.rot });
 }
 // origem do dado: um botão pequeno abaixo do campo, que só aparece quando há valor
@@ -6709,7 +6711,7 @@ function blocoGlobal(d) {
     <div class="campo field largo"><div class="campo-rot"><label for="f-globalRec">Receita global, na moeda original</label>${botaoAjuda('globalRec', 'Receita global')}</div><input class="input" type="text" inputmode="decimal" id="f-globalRec" data-campo="globalRec" data-parte="v" value="${esc(fmtIn(g.v))}" autocomplete="off"><div class="campo-pe">${botaoOrigem('campo:globalRec', g.o, temValor(g))}</div><p class="valid" id="v-globalRec"></p></div>
     <div class="campo field"><div class="campo-rot"><label for="f-globalMoeda">Moeda</label></div><select class="select" id="f-globalMoeda" data-simples="globalMoeda" data-rerender>${moedas.map(([v, t]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></div>
     <div class="campo field"><div class="campo-rot"><label for="f-globalAno">Ano da receita global</label></div><input class="input" type="text" inputmode="numeric" id="f-globalAno" data-simples="globalAno" value="${esc(d.globalAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></div>
-    ${m === PAIS.moeda ? '' : `<div class="campo field largo"><div class="campo-rot"><label for="f-globalTaxa">Câmbio: ${PAIS.moeda === 'BRL' ? 'reais' : 'pesos'} por 1 ${m === 'outra' ? 'unidade da moeda' : m}</label></div><div class="linha-dupla" style="margin-top:0"><input class="input" type="text" inputmode="decimal" id="f-globalTaxa" data-simples-num="globalTaxa" value="${esc(fmtIn(d.globalTaxa))}" autocomplete="off" style="flex:1 1 160px;width:auto">${m === 'outra' ? '' : `<button type="button" class="btn xs" data-acao="buscar-ptax">${ico('busca')}Buscar PTAX</button>`}</div><div class="campo-pe"><span class="dica" id="dica-taxa">${dicaTaxa(d)}</span></div></div>`}
+    ${m === PAIS.moeda ? '' : `<div class="campo field largo"><div class="campo-rot"><label for="f-globalTaxa">Câmbio: ${PAIS.moeda === 'BRL' ? 'reais' : 'pesos'} por 1 ${m === 'outra' ? 'unidade da moeda' : m}</label></div><div class="linha-dupla" style="margin-top:0"><input class="input" type="text" inputmode="decimal" id="f-globalTaxa" data-simples-num="globalTaxa" value="${esc(fmtIn(d.globalTaxa))}" autocomplete="off" style="flex:1 1 160px;width:auto">${m === 'outra' || !PAIS.apiCambio ? '' : `<button type="button" class="btn xs" data-acao="buscar-ptax">${ico('busca')}Buscar PTAX</button>`}</div><div class="campo-pe"><span class="dica" id="dica-taxa">${dicaTaxa(d)}</span></div></div>`}
     ${campoNum(d, 'globalPart', 'Participação ' + PAIS.doPais + ' na receita do grupo', { un: '%' })}
     ${campoNum(d, 'globalFunc', 'Funcionários no mundo', { un: 'pessoas' })}
     </div></div>`;
@@ -6717,9 +6719,9 @@ function blocoGlobal(d) {
 function dicaTaxa(d) {
   const m = d.globalMoeda || 'USD', a = +d.globalAno || ANO - 1;
   if (m === PAIS.moeda) return '';
-  if (valorPos({ v: d.globalTaxa })) return d.globalTaxaFonte && d.globalTaxaFonte !== 'manual' ? esc(d.globalTaxaFonte) + '. Apague o valor para usar a tabela.' : 'Taxa digitada por você.' + (m === 'outra' ? '' : ' Apague o valor para usar a PTAX da tabela.');
+  const mx = PAIS.moeda === 'MXN';
+  if (valorPos({ v: d.globalTaxa })) return d.globalTaxaFonte && d.globalTaxaFonte !== 'manual' ? esc(d.globalTaxaFonte) + '. Apague o valor para usar a tabela.' : 'Taxa digitada por você.' + (m === 'outra' ? '' : ` Apague o valor para usar ${mx ? 'o FIX' : 'a PTAX'} da tabela.`);
   const t = m !== 'outra' && taxaPTAX(m, a);
-  const mx = PAIS.moeda === 'MXN', nt = mx ? 'FIX' : 'PTAX';
   return t ? `Usando ${mx ? 'o FIX' : 'a PTAX'} de ${dataBR(t.data + 'T12:00')}: ${PAIS.simbolo} ${nf(t.v, 4)} (${mx ? 'Banco de México' : 'Banco Central'}, último dia útil de ${a}). Para outra taxa, digite aqui.`
     : m === 'outra' ? 'Digite a taxa de câmbio do último dia útil de dezembro do ano da receita.' : (mx ? `A ferramenta não tem o FIX de ${a}. Digite a taxa.` : `A ferramenta não tem a PTAX de ${m} para ${a}. Clique em Buscar PTAX ou digite a taxa.`);
 }
@@ -6895,7 +6897,7 @@ function formAnalise() {
   UI.chaveForm = chaveForm(d);
   // campos que dependem da natureza e mudam a conta
   const porNatureza = ((n === 'pequena' || d.enquadramento) && !PAIS.semEnquadramento ? campoSelect(d, 'enquadramento', 'Enquadramento', [['', n === 'pequena' ? 'Selecione' : 'Nenhum'], ['MEI', 'MEI'], ['ME', 'ME'], ['EPP', 'EPP'], ['Simples', 'Simples, sem saber ME ou EPP']], { rerender: true, ajuda: true }) : '')
-    + (n === 'subsidiaria' && entraNaConta(d, 'tiMatriz') ? campoSelect(d, 'tiMatriz', 'Onde a TI é gerida', [['', 'Sem informação'], ['brasil', 'No Brasil'], ['matriz', 'Na matriz']], { rerender: true, ajuda: true }) : '')
+    + (n === 'subsidiaria' && entraNaConta(d, 'tiMatriz') ? campoSelect(d, 'tiMatriz', 'Onde a TI é gerida', [['', 'Sem informação'], ['brasil', 'N' + PAIS.noPais.slice(1)], ['matriz', 'Na matriz']], { rerender: true, ajuda: true }) : '')
     + (n === 'publico' ? campoSelect(d, 'tipoPublico', 'Tipo de órgão', [['', 'Órgão público (administração direta, autarquia, fundação pública)'], ['estatal', 'Estatal (empresa pública ou sociedade de economia mista)']], { rerender: true, largo: true }) : '');
   const mx = paisDe(d) === 'MX';
   const variosPaises = paisesDe(modoPedido(d)).length > 1;

@@ -26,9 +26,9 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 
 **Empresa modelo:** um exemplo pronto (Banco do Brasil, com dados oficiais), no menu de **Empresas**.
 
-**Métodos** explica como cada um dos quatro métodos calcula, com os parâmetros em uso (só leitura no Vezen, no CR e no FGV) e, no fim, os dados do Personalizado, a única parte que recebe dados seus. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
+**Métodos** explica como cada um dos cinco métodos calcula, com os parâmetros em uso (só leitura no Vezen, no CR e no FGV) e, no fim, os dados do Personalizado, a única parte que recebe dados seus. **Glossário** explica as siglas e os termos da ferramenta (FGV, Brasscom, CNPJ, MEI, receita líquida...), com o significado, a utilidade e o site oficial, e filtro por letra, como num dicionário; no texto, o que aparece sublinhado abre a definição. O tema escuro fica no fim da barra lateral, e o botão ao lado do nome recolhe a barra, deixando só os ícones.
 
-## Os quatro métodos
+## Os métodos
 
 Toda análise chega a dois números do ano de referência (por padrão, o último ano fechado): a receita líquida e o investimento anual em TI, cada um com a origem à vista. A receita aceita um valor por ano, como o gasto real; a conta usa o do ano de referência. O método escolhido na análise decide como a estimativa é feita:
 
@@ -43,7 +43,7 @@ O CR1 mede só investimento (CAPEX); o Vezen BR mede o gasto total de TI ou, se 
 
 ## Outros países
 
-Cada método vale num país, e a escolha do método mostra o país de cada um, com um filtro por país. No Brasil há quatro métodos; no **México**, o **Vezen MX**: em pesos, com o RFC no lugar do CNPJ (sem busca, porque o RFC não tem consulta pública), termos e parâmetros mexicanos (Censos Económicos do INEGI, FIX do Banco de México, nível do gasto de TI ajustado ao mercado mexicano). Ele está explicado inteiro em **Métodos**, Vezen MX. Argentina, Chile, Colômbia, Estados Unidos e Peru aparecem como "em breve".
+Cada método vale num país, e a escolha do método mostra o país de cada um, com um filtro por país. No Brasil há quatro métodos (Vezen BR, CR1, FGV e Personalizado); no **México**, o **Vezen MX** e o Personalizado. O Vezen MX: em pesos, com o RFC no lugar do CNPJ (sem busca, porque o RFC não tem consulta pública), termos e parâmetros mexicanos (Censos Económicos do INEGI, FIX do Banco de México, nível do gasto de TI ajustado ao mercado mexicano). Ele está explicado inteiro em **Métodos**, Vezen MX. Argentina, Chile, Colômbia, Estados Unidos e Peru aparecem como "em breve".
 
 Os segmentos são uma lista só, a mesma na análise, no pedido à IA e em todos os métodos.
 

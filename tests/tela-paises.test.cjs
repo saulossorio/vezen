@@ -53,6 +53,11 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
     check('cartão em MX$' + suf, /MX\$ [\d.,]+ (mi|bi)/.test(cartao) && !/R\$ [\d.,]+ (mi|bi)/.test(cartao));
     check('no México, o Vezen MX e o Personalizado no cartão, sem só CAPEX' + suf, await p.evaluate(() => modoDe(UI.atual.dados)) === 'mx' && (await p.$$eval('#painel input[data-modo]', is => is.map(i => i.value).join())) === 'propria,mx' && await p.locator('#f-escopo').count() === 0);
     check('termos do México: segmento, estado de resultados, sem faturamento bruto' + suf, (await txt(p, 'label[for=f-setor]')) === 'Segmento' && await p.locator('input[name=fatTipo]').count() === 0 && await p.evaluate(() => rotOrigem('oficial', true) === 'Estado de resultados'));
+    const ajudaMX = await p.evaluate(() => { const d = UI.atual.dados; return { setor: textoAjuda('setor', d), contratos: textoAjuda('contratos', d), tiMatriz: textoAjuda('tiMatriz', d), global: blocoGlobal(d) + dicaTaxa(Object.assign({}, d, { globalTaxa: 20, globalTaxaFonte: 'manual' })) }; });
+    check('ajuda e câmbio do México sem termos do Brasil' + suf, !/CNPJ|Brasil|PTAX|liquidada|empenho/.test(Object.values(ajudaMX).join(' ')) && /devengada/.test(ajudaMX.contratos) && /FIX/.test(ajudaMX.global), JSON.stringify(ajudaMX).match(/CNPJ|Brasil|PTAX|liquidada|empenho/g));
+    await p.click('button[data-acao=ajuda][data-chave=faturamento]'); await p.waitForTimeout(300);
+    check('ajuda leva à seção do Vezen MX' + suf, await p.getAttribute('#pop a[href^="#/metodos/"]', 'href') === '#/metodos/mx-receita');
+    await p.keyboard.press('Escape'); await p.waitForTimeout(200);
     const prompt = await p.evaluate(() => textoPromptIA(UI.atual.dados));
     check('pedido à IA do México: RFC, estado de resultados, pesos, segmentos da lista' + suf, /RFC/.test(prompt) && /estado de resultados/.test(prompt) && /pesos/.test(prompt) && /Agronegócio/.test(prompt) && !/CNPJ|CVM|DRE|Brasil|reais/.test(prompt), (prompt.match(/CNPJ|CVM|DRE|Brasil|reais/g) || []).join());
     await p.evaluate(() => { const d = UI.atual.dados; d.semDado = d.semDado || {}; for (const c of pendentes(d)) d.semDado[c] = CAMPOS_SEM_DADO[c].ops[0]; });
