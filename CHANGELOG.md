@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.3.24] - 2026-11-25
+
+### Corrigido
+- Grin 2.54, a mesma versão do Laika. No tour, quando a ação abre algo por cima do alvo, o destaque some em vez de atravessar o que abriu.
+
 ## [4.3.23] - 2026-11-25
 
 ### Alterado

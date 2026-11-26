@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.53, copiado de https://github.com/saulossorio/grin/releases/tag/v2.53 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.54, copiado de https://github.com/saulossorio/grin/releases/tag/v2.54 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.53 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.54 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1998,11 +1998,11 @@ body.tour-open .menu, body.tour-open .popover { z-index: 125; }
 .page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.53 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.54 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.53';
+Grin.version = '2.54';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2980,7 +2980,9 @@ function startTour(steps, { onEnd } = {}) {
   function place() {
     const s = steps[T.i], vw = document.documentElement.clientWidth, vh = innerHeight, m = 16, pad = 8;
     if (T.el && !T.el.isConnected) T.el = find(s); // the page may have been redrawn
-    const r = T.el ? T.el.getBoundingClientRect() : null;
+    let r = T.el ? T.el.getBoundingClientRect() : null;
+    // something the person opened (a drawer, a dialog) now covers the target: the cut-out goes away instead of showing a strip through it
+    if (r && covered(T.el, r)) r = null;
     const f = r ? { x: r.left - pad, y: r.top - pad, w: r.width + 2 * pad, h: r.height + 2 * pad } : { x: vw / 2, y: vh / 2, w: 0, h: 0 };
     if (r) { const x2 = Math.min(vw - 4, f.x + f.w), y2 = Math.min(vh - 4, f.y + f.h); f.x = Math.max(4, f.x); f.y = Math.max(4, f.y); f.w = Math.max(0, x2 - f.x); f.h = Math.max(0, y2 - f.y); }
     spot.classList.toggle('none', !r);
@@ -3003,6 +3005,11 @@ function startTour(steps, { onEnd } = {}) {
     else if (f.x >= cw + 2 * m) { x = f.x - cw - 14; y = clamp(f.y + f.h / 2 - ch / 2, m, vh - ch - m); }
     else { x = vw - cw - m; y = vh - ch - m; }
     card.style.left = `${x}px`; card.style.top = `${y}px`;
+  }
+  function covered(el, r) {
+    const x = Math.min(Math.max(r.left + r.width / 2, 1), innerWidth - 1), y = Math.min(Math.max(r.top + r.height / 2, 1), innerHeight - 1);
+    const top = document.elementsFromPoint(x, y).find((n) => !root.contains(n));
+    return !!top && top !== el && !el.contains(top) && !top.contains(el);
   }
   function replace() { cancelAnimationFrame(T.frame); T.frame = requestAnimationFrame(place); }
   // the sheet covers part of a phone screen: scroll so the target sits in the space left
@@ -3938,7 +3945,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.23';
+const VERSAO_APP = '4.3.24';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -9586,7 +9593,7 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.53</a></span>`;
+$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.54</a></span>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 
