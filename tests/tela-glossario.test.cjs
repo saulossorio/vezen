@@ -10,7 +10,7 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
 const PERMITIDAS = new Set([
   'AC', 'AL', 'AM', 'AP', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA', 'MG', 'MS', 'MT', 'PA', 'PB', 'PE', 'PI', 'PR', 'RJ', 'RN', 'RO', 'RR', 'RS', 'SC', 'SE', 'SP', 'TO',
   'SAP', 'AWS', 'TOTVS', 'VTEX', 'ADP', 'MV', 'EUA', 'USD', 'HTML', 'ID', 'OK', 'TV',
-  'N0', 'IUF', 'TIUF', 'BR'
+  'N0', 'IUF', 'TIUF', 'BR', 'MX', 'BBVA'
 ]);
 (async () => {
   const b = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' });

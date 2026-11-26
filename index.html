@@ -3945,13 +3945,15 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.3.24';
+const VERSAO_APP = '4.4.0';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
 const ETAPAS_DESPESA = [['liquidado', 'Liquidada'], ['pago', 'Paga'], ['empenhado', 'Empenhada'], ['dotacao', 'Dotação']];
+// cada país dá às etapas o nome do seu orçamento (no México, a devengada equivale à liquidada)
+const etapasDespesa = () => PAIS.etapas || ETAPAS_DESPESA;
 const etapaDespesa = d => ETAPAS_DESPESA.some(x => x[0] === d.contratosEtapa) ? d.contratosEtapa : 'liquidado';
-const nomeEtapa = d => ETAPAS_DESPESA.find(x => x[0] === etapaDespesa(d))[1].toLowerCase();
+const nomeEtapa = d => etapasDespesa().find(x => x[0] === etapaDespesa(d))[1].toLowerCase();
 
 const nfCache = {};
 function nf(x, dec) {
@@ -3959,13 +3961,14 @@ function nf(x, dec) {
   if (!nfCache[k]) nfCache[k] = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   return nfCache[k].format(x);
 }
+// valor na moeda do país em uso (R$ no Brasil, MX$ no México)
 function fmtRS(v) {
   if (v == null || !isFinite(v)) return '—';
-  const a = Math.abs(v);
-  if (a >= 1e9) return 'R$ ' + nf(v / 1e9, 2) + ' bi';
-  if (a >= 1e6) return 'R$ ' + nf(v / 1e6, 2) + ' mi';
-  if (a >= 1e5) return 'R$ ' + nf(v / 1e3, 1) + ' mil';
-  return 'R$ ' + nf(v, 0);
+  const a = Math.abs(v), m = PAIS.simbolo + ' ';
+  if (a >= 1e9) return m + nf(v / 1e9, 2) + ' bi';
+  if (a >= 1e6) return m + nf(v / 1e6, 2) + ' mi';
+  if (a >= 1e5) return m + nf(v / 1e3, 1) + ' mil';
+  return m + nf(v, 0);
 }
 function fmtPct(x, dec = 1) { return nf(x * 100, dec) + '%'; }
 function fmtSinal(p) { return (p > 0 ? '+' : p < 0 ? '−' : '') + Math.abs(p) + '%'; }
@@ -3976,7 +3979,7 @@ const CONFIG = {
   paisAtivo: 'BR',
   paises: {
     BR: {
-      nome: 'Brasil', locale: 'pt-BR', moeda: 'BRL', dataParametros: '2026-11-16',
+      nome: 'Brasil', locale: 'pt-BR', moeda: 'BRL', simbolo: 'R$', nomeMoeda: 'Real (R$)', noPais: 'no Brasil', doPais: 'do Brasil', dataParametros: '2026-11-16',
       naturezas: [
         { id: 'listada', nome: 'Listada na bolsa' },
         { id: 'privada', nome: 'Privada média ou grande (Ltda ou S.A. fechada)' },
@@ -4209,8 +4212,82 @@ const CONFIG = {
     }
   }
 };
-const PAIS = CONFIG.paises[CONFIG.paisAtivo];
+// o país em uso: o da análise aberta, ou o Brasil. comPais troca de país só durante uma conta (listas com empresas de vários países)
+let PAIS = CONFIG.paises[CONFIG.paisAtivo];
 const copiar = o => JSON.parse(JSON.stringify(o));
+const paisDe = d => d && d.pais && CONFIG.paises[d.pais] ? d.pais : 'BR';
+function comPais(cod, fn) { const ant = PAIS; PAIS = CONFIG.paises[cod] || CONFIG.paises.BR; try { return fn(); } finally { PAIS = ant; } }
+/* ---------- México: o Método Vezen com parâmetros mexicanos (ver Métodos, México) ---------- */
+// O nível vem do Brasil: o % da receita de cada setor no Brasil × (fator do México ÷ fator do Brasil). Os fatores comparam o gasto de TI
+// de cada país com o PIB (IDC, Black Book do 1º trimestre de 2026, no estudo da ABES 2026; PIB de 2025 do FMI). A receita por funcionário é a
+// dos Censos Económicos 2024 do INEGI (ano 2023), nas unidades com 51 ou mais pessoas. CAPU segue a regra do Brasil: p × receita por funcionário ÷ usuários.
+CONFIG.paises.MX = (BR => {
+  const N = { kPais: 0.50, kBrasil: 0.69, tiPib: 0.0233, tiPibBR: 0.0297, sNivel: 0.28, sCapu: 0.25, anoBase: 2023 };
+  N.rel = Math.round(N.kPais / N.kBrasil * 1000) / 1000;
+  // receita (sem IVA) por pessoa ocupada em 2023, unidades com 51 ou mais pessoas; bancos e seguros: ingresos totales (inclui receitas financeiras)
+  const RPE = { bancos: 5980000, seguros: 5740000, tecnologia: 2280000, servicos: 630000, saude: 600000, educacao: 440000, industria: 2810000, comercio: 3520000, logistica: 840000, outros: 2560000 };
+  const SCIAN = { bancos: '522', seguros: '524', tecnologia: '51 e 5415', servicos: '53, 54 (sem 5415), 56, 71, 72 e 81', saude: '62', educacao: '61', industria: '21, 22, 23 e 31 a 33', comercio: '43 e 46', logistica: '48 e 49', outros: 'todos os setores' };
+  const P = copiar(BR.parametros), r2 = x => Math.round(x * 100) / 100;
+  for (const [k, x] of Object.entries(P.setores)) {
+    if (x.p != null) x.p = Math.round(x.p * N.rel * 1000) / 1000;
+    x.rpe = RPE[k] ?? null;
+    x.capu = x.capu != null && x.p != null && x.rpe ? Math.round(x.p * x.rpe / x.u / 500) * 500 : null;
+    if (x.sE1 != null) x.sE1 = r2(Math.hypot(x.sE1, N.sNivel));
+    if (x.sE2 != null) x.sE2 = r2(Math.hypot(x.sE2, N.sCapu));
+    x.ded = 0; // a receita mexicana já vem sem IVA (Censos Económicos e balanços)
+    x.base = 'Brasil ' + fmtPct(BR.parametros.setores[k].p ?? 0, 1) + ' × ' + nf(N.rel, 3) + (RPE[k] ? '; receita por funcionário: SCIAN ' + SCIAN[k] : '');
+    x.scian = SCIAN[k] || '';
+  }
+  P.nivel = N;
+  P.equipe.fatorCLT = 1.4;
+  P.regional = { mediaNacional: 16500, grupos: [{ ufs: ['CDMX'], salario: 20000, base: 'IMSS: salário base de cotização da Cidade do México ÷ média nacional (1,21)' }] };
+  P.crescimento.gSetor = 0.04;
+  P.receita.g = 0.05; P.receita.anoBase = N.anoBase; P.receita.fonteRpe = 'Censos Económicos 2024';
+  P.links = [
+    { id: 'denue', nome: 'DENUE (INEGI): empresas, atividade e porte', url: 'https://www.inegi.org.mx/app/mapa/denue/', selo: 'Oficial' },
+    { id: 'sat', nome: 'SAT: validação de RFC', url: 'https://wwwmat.sat.gob.mx/aplicacion/79615/valida-en-linea-rfc%C2%B4s-uno-a-uno-o-de-manera-masiva-hasta-5-mil-registros', selo: 'Oficial' },
+    { id: 'bmv', nome: 'BMV: informação financeira das emissoras', url: 'https://www.bmv.com.mx/es/empresas-listadas/informacion-financiera-xbrl', selo: 'Oficial' },
+    { id: 'cnbv', nome: 'CNBV: informação estatística dos bancos', url: 'https://www.cnbv.gob.mx/SECTORES-SUPERVISADOS/BANCA-MULTIPLE/Paginas/Informaci%C3%B3n-Estad%C3%ADstica.aspx', selo: 'Oficial' },
+    { id: 'cnsf', nome: 'CNSF: seguradoras', url: 'https://sio.cnsf.gob.mx/', selo: 'Oficial' },
+    { id: 'tp', nome: 'Transparencia Presupuestaria (Cuenta Pública)', url: 'https://www.transparenciapresupuestaria.gob.mx/Datos-Abiertos', selo: 'Oficial' },
+    { id: 'comprasmx', nome: 'ComprasMX (contratos públicos)', url: 'https://comprasmx.buengobierno.gob.mx/', selo: 'Oficial' },
+    { id: 'linkedin', nome: 'LinkedIn', url: 'https://www.linkedin.com', selo: 'Agregador' },
+    { id: 'apollo', nome: 'Apollo', url: 'https://www.apollo.io', selo: 'Agregador' }
+  ];
+  const UFS = [['AGS', 'Aguascalientes'], ['BC', 'Baja California'], ['BCS', 'Baja California Sur'], ['CAMP', 'Campeche'], ['CHIS', 'Chiapas'], ['CHIH', 'Chihuahua'], ['CDMX', 'Cidade do México'],
+    ['COAH', 'Coahuila'], ['COL', 'Colima'], ['DGO', 'Durango'], ['GTO', 'Guanajuato'], ['GRO', 'Guerrero'], ['HGO', 'Hidalgo'], ['JAL', 'Jalisco'], ['MEX', 'Estado de México'], ['MICH', 'Michoacán'],
+    ['MOR', 'Morelos'], ['NAY', 'Nayarit'], ['NL', 'Nuevo León'], ['OAX', 'Oaxaca'], ['PUE', 'Puebla'], ['QRO', 'Querétaro'], ['QROO', 'Quintana Roo'], ['SLP', 'San Luis Potosí'], ['SIN', 'Sinaloa'],
+    ['SON', 'Sonora'], ['TAB', 'Tabasco'], ['TAMPS', 'Tamaulipas'], ['TLAX', 'Tlaxcala'], ['VER', 'Veracruz'], ['YUC', 'Yucatán'], ['ZAC', 'Zacatecas']];
+  return {
+    nome: 'México', locale: 'es-MX', moeda: 'MXN', simbolo: 'MX$', nomeMoeda: 'Peso mexicano (MX$)', noPais: 'no México', doPais: 'do México', dataParametros: '2026-11-26',
+    naturezas: BR.naturezas.map(n => n.id === 'pequena' ? { id: 'pequena', nome: 'Pequena (micro ou pequena empresa)' } : n),
+    filtrosSetor: BR.filtrosSetor, cnae: null, ufs: UFS.map(u => u[0]), nomesUf: Object.fromEntries(UFS),
+    etapas: [['liquidado', 'Devengada'], ['pago', 'Paga'], ['empenhado', 'Comprometida'], ['dotacao', 'Aprovada']],
+    apiCnpj: null, apiCambio: null, semEnquadramento: true, metodos: ['base'],
+    cambio: {
+      fonte: 'Banco de México: FIX do último dia útil de dezembro, publicado no DOF',
+      moedas: [['USD', 'Dólar americano (US$)']],
+      ptax: { USD: { 2018: [19.6512, '2018-12-31'], 2019: [18.8642, '2019-12-31'], 2020: [19.9087, '2020-12-31'], 2021: [20.4672, '2021-12-31'], 2022: [19.4715, '2022-12-30'], 2023: [16.919, '2023-12-29'], 2024: [20.7862, '2024-12-31'], 2025: [18.0012, '2025-12-31'] } }
+    },
+    ondeEncontrar: { cnpj: ['sat'], uf: ['denue'], faturamento: ['bmv', 'apollo'], funcionarios: ['denue', 'linkedin', 'apollo'], usuarios: [], profTI: ['linkedin', 'apollo'], enquadramento: [],
+      adicoes: ['bmv'], contratos: ['tp', 'comprasmx'], digital: [], tecnologias: ['linkedin'], vagasTI: ['linkedin'], gastosReais: ['bmv', 'tp'], gastoDeclarado: ['bmv', 'tp'], tiMatriz: [], grupo: ['denue'],
+      porSetor: { banco: { faturamento: ['cnbv'] }, seguradora: { faturamento: ['cnsf'] } }, porNatureza: { publico: { faturamento: ['tp'] }, listada: { faturamento: ['bmv'] } } },
+    fontes: Object.assign(copiar(BR.fontes), {
+      'equipe.fatorCLT': { fonte: 'IMSS, INFONAVIT, imposto estadual sobre a folha, aguinaldo e prima vacacional: 1,35 a 1,5 vezes o salário bruto', aprox: true },
+      'equipe.sPessoal': { fonte: 'Do Brasil (FGV 36ª): sem fonte mexicana', aprox: true },
+      'equipe.sPessoalPequena': { fonte: 'Do Brasil (Techaisle 2026): sem fonte mexicana', aprox: true },
+      'equipe.sCapex': { fonte: 'Do Brasil (FGV 36ª): sem fonte mexicana', aprox: true },
+      'equipe.sCapexBancos': { fonte: 'Do Brasil (FEBRABAN 2026): sem fonte mexicana', aprox: true },
+      'regional.mediaNacional': { fonte: 'Indeed México, desenvolvedores de software, 2026 (sem dado oficial de salário de TI em empresas)', aprox: true },
+      'crescimento.gSetor': { fonte: 'Select: gasto de TIC das organizações +3,7% em 2025 e +4,1% em 2026', aprox: true },
+      'receita.g': { fonte: 'INEGI: PIB nominal +5,2% em 2024; cerca de 4,4% em 2025', aprox: true },
+      nivel: { fonte: 'Brasil × 0,50 ÷ 0,69. Fatores: gasto de TI ÷ PIB (IDC Black Book 1T 2026, pela ABES; PIB 2025 do FMI). Receita por funcionário: INEGI, Censos Económicos 2024', aprox: true },
+      porte: { fonte: 'Do Brasil (FGV 36ª): sem fonte mexicana', aprox: true },
+      limites: { fonte: 'Não usado no México: o porte legal de uma empresa não é público', aprox: true }
+    }),
+    parametros: P
+  };
+})(CONFIG.paises.BR);
 
 /* ---------- auxiliares ---------- */
 function valorPos(f) { if (!f || f.v === '' || f.v == null) return null; const x = +f.v; return isFinite(x) && x > 0 ? x : null; }
@@ -4322,9 +4399,9 @@ function receitaEmpresa(d, P, c) {
           { op: '×', rot: 'Ajuste de porte da base: (' + nf(nAj, 0) + ' ÷ ' + nf(R.n0, 0) + ') elevado a ' + nf(R.beta - 1, 2), val: nf(fp, 3) }]
           .concat(dtR ? [{ op: '×', rot: 'Crescimento até ' + ano, val: nf(cr, 3) }] : []);
       } else {
-        const fr = c.banda ? (c.banda.fr ?? 1) : 1, dtR = R.anoRef && ano > R.anoRef ? ano - R.anoRef : 0, cr = Math.pow(1 + R.g, dtR);
+        const fr = c.banda ? (c.banda.fr ?? 1) : 1, aB = R.anoRef || R.anoBase, dtR = aB && ano > aB ? ano - aB : 0, cr = Math.pow(1 + R.g, dtR);
         v = nFunc * L.rpe * fr * cr;
-        partes = [pF, { op: '×', rot: R.anoRef ? 'Receita líquida por funcionário no setor, calibrada (' + R.anoRef + ')' : 'Receita líquida por funcionário no setor, por ano', val: fmtRS(L.rpe) },
+        partes = [pF, { op: '×', rot: R.anoRef ? 'Receita líquida por funcionário no setor, calibrada (' + R.anoRef + ')' : R.anoBase ? 'Receita por funcionário no setor, empresas com 51 ou mais pessoas (' + R.fonteRpe + ', ' + R.anoBase + ')' : 'Receita líquida por funcionário no setor, por ano', val: fmtRS(L.rpe) },
           { op: '×', rot: 'Ajuste de porte', val: nf(fr, 3) }].concat(dtR ? [{ op: '×', rot: 'Crescimento até ' + ano, val: nf(cr, 3) }] : []);
       }
       // ajuste local da calibração (estado, cidade, setor na cidade)
@@ -4334,9 +4411,9 @@ function receitaEmpresa(d, P, c) {
     }
     if (d.natureza === 'subsidiaria' && valorPos(d.globalRec)) {
       const moeda = d.globalMoeda || 'USD', anoG = +d.globalAno || ano - 1, txInf = valorPos({ v: d.globalTaxa });
-      const tab = moeda === 'BRL' || txInf ? null : taxaPTAX(moeda, anoG), tx = moeda === 'BRL' ? 1 : txInf || (tab && tab.v);
+      const local = moeda === PAIS.moeda, tab = local || txInf ? null : taxaPTAX(moeda, anoG), tx = local ? 1 : txInf || (tab && tab.v);
       const G = out.global = { moeda, valor: +d.globalRec.v, ano: anoG, taxa: tx || null, taxaData: tab ? tab.data : null,
-        taxaFonte: moeda === 'BRL' ? 'real' : txInf ? (d.globalTaxaFonte || 'manual') : tab ? 'tabela' : null };
+        taxaFonte: local ? 'real' : txInf ? (d.globalTaxaFonte || 'manual') : tab ? 'tabela' : null };
       if (!tx) out.avisos.push('Sem taxa de câmbio de ' + moeda + ' para ' + anoG + ': informe a taxa para usar a receita global.');
       else {
         G.vBRL = G.valor * tx;
@@ -4352,8 +4429,8 @@ function receitaEmpresa(d, P, c) {
           G.share = share; G.dt = cr.dt; G.fator = cr.f;
           out.caminhos.push({ cod: 'RG', nome: 'Pela receita global do grupo', v: G.vBRL * share * cr.f, origem: d.globalRec.o || 'terceiros',
             s: Math.sqrt(sOrig(d.globalRec.o) ** 2 + sShare * sShare + cr.dt * I.sigmaG ** 2),
-            partes: [{ rot: 'Receita global em reais', val: fmtRS(G.vBRL) },
-              { op: '×', rot: G.shareFonte === 'informada' ? 'Participação do Brasil informada' : 'Participação do Brasil pelos funcionários', val: fmtPct(share, 2) }]
+            partes: [{ rot: 'Receita global em ' + (PAIS.moeda === 'BRL' ? 'reais' : 'moeda local'), val: fmtRS(G.vBRL) },
+              { op: '×', rot: G.shareFonte === 'informada' ? 'Participação ' + PAIS.doPais + ' informada' : 'Participação ' + PAIS.doPais + ' pelos funcionários', val: fmtPct(share, 2) }]
               .concat(cr.dt ? [{ op: '×', rot: 'Crescimento até ' + ano, val: nf(cr.f, 3) }] : []) });
         } else out.avisos.push('Para usar a receita global, informe a participação do Brasil ou os funcionários no mundo.');
       }
@@ -5384,7 +5461,7 @@ function rodarTestes(P) {
     return { id: t.id, titulo: t.titulo, itens, ok: itens.every(i => i.ok) };
   });
 }
-if (typeof module !== 'undefined') module.exports = { CONFIG, PAIS, calcular, proximoMelhorDado, calibrar, rodarTestes, fmtRS, zNormal, receitaEmpresa, taxaPTAX, juntarLog,
+if (typeof module !== 'undefined') module.exports = { CONFIG, PAIS, comPais, paisDe, calcular, proximoMelhorDado, calibrar, rodarTestes, fmtRS, zNormal, receitaEmpresa, taxaPTAX, juntarLog,
   lerTabela, mapaAutomatico, registrosBase, setoresDaBase, calibrarBase, calibrarRegistros, parametrosCalibrados, fatoresCalibrados, numeroTexto, gruposColunas, PAPEIS_BASE,
   MUNICIPIOS, municipiosUF, municipioOficial, chaveCidade, ajustesLocais, fatorLocal, receitasInformadas, receitaDoAno, crescimentoReceita, calibracaoPublica };
 </script>
@@ -5521,7 +5598,7 @@ function salvar(alterou = true) {
 }
 function dadosVazios() {
   const f = () => ({ v: '', o: '' });
-  return { nome: '', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', anoRef: String(ANO - 1), faturamento: f(), fatAno: String(ANO - 1), fatMeses: '12', fatTipo: 'liquida', fatEstimar: true, receitasAnos: [], funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
+  return { nome: '', pais: 'BR', cnpj: '', uf: '', municipio: '', natureza: '', setor: '', anoRef: String(ANO - 1), faturamento: f(), fatAno: String(ANO - 1), fatMeses: '12', fatTipo: 'liquida', fatEstimar: true, receitasAnos: [], funcionarios: f(), usuarios: f(), profTI: f(), salarioTI: f(),
     enquadramento: '', tipoPublico: '', adicoes: f(), contratos: f(), contratosEtapa: 'liquidado', tiMatriz: '', digital: '', tecnologias: [], tecOutras: '', vagasTI: '',
     gastosReais: [], gastoDeclarado: f(), gManual: '', extras: {}, viaCNPJ: {}, cnpjInfo: {},
     globalRec: f(), globalMoeda: 'USD', globalAno: String(ANO - 1), globalTaxa: '', globalTaxaFonte: '', globalFunc: f(), globalPart: f(), salariosTI: 'com', modo: 'base', semDado: {} };
@@ -5558,7 +5635,7 @@ const versaoCR = () => { const c = calPadrao(), m = c && /^CR[\d.]+/.exec(c.rotu
 // minha calibração: refeita com as empresas da pessoa (digitadas, importadas e análises salvas com gasto real) sempre que algo é salvo
 let cacheMinha = null;
 const regsMinhas = (lista = S.calibracao.minhas) => lista.map(x => Object.assign({ receita: {}, gastoTI: {}, receitaTI: {}, chaveSetor: nomeFiltro(x.setor) }, x));
-const calibrarMinhas = lista => calibrarRegistros(regsMinhas(lista), P(), { ano: ANO, id: 'minha', nome: 'Minhas empresas', formato: 'Empresas informadas por você', extras: S.empresas, detalhe: true });
+const calibrarMinhas = lista => calibrarRegistros(regsMinhas(lista), P(), { ano: ANO, id: 'minha', nome: 'Minhas empresas', formato: 'Empresas informadas por você', extras: S.empresas.filter(e => paisDe(e.dados) === 'BR'), detalhe: true });
 function calMinha() {
   if (!cacheMinha) {
     // uma linha com problema (backup editado à mão, por exemplo) não pode travar a ferramenta: a minha calibração fica sem efeito e avisa
@@ -5576,7 +5653,8 @@ const calDoModo = m => m === 'padrao' ? calPadrao() : m === 'fgv' ? PAIS.metodoF
 const modoDisponivel = m => m === 'base' || usavel(calDoModo(m));
 // o antigo tipo “Calibrada” é o CR; sem o método escolhido disponível, vale o Método Vezen
 const modoPedido = d => d && d.modo === 'calibrada' ? 'padrao' : d && MODOS.includes(d.modo) ? d.modo : 'base';
-const modoDe = d => { const m = modoPedido(d); return modoDisponivel(m) ? m : 'base'; };
+const metodosPais = () => PAIS.metodos || MODOS;
+const modoDe = d => { const m = modoPedido(d); return paisDe(d) === 'BR' && modoDisponivel(m) ? m : 'base'; };
 // ano de referência da análise: por padrão, o último ano fechado
 const anoDe = d => { const a = Math.round(+(d && d.anoRef)); return a >= 2000 && a <= ANO ? a : ANO - 1; };
 function contexto(modo, d) {
@@ -5606,7 +5684,8 @@ function soCapex(r, Pm) {
   r.ests.forEach(e => { e.v *= k; e.formula += ' × ' + nf(k, 2); if (e.partes) e.partes.push({ op: '×', rot: 'Parte de investimento (CAPEX) no gasto de TI', val: fmtPct(k, 0) }); });
   r.projecao.forEach(p => { for (const c of ['base', 'cons', 'acel', 'lo', 'hi']) p[c] *= k; });
 }
-function calc(d) {
+function calc(d) { return comPais(paisDe(d), () => calcPais(d)); }
+function calcPais(d) {
   const r = calcModo(d, modoDe(d)), m = modoPedido(d);
   if (m !== r.modoCalc && !r.vazio) r.avisos.push(m === 'propria' ? 'O Método Personalizado ainda não tem dados suficientes: esta estimativa usa o Método Vezen. Informe empresas ou percentuais em Métodos.' : 'O ' + nomeModo('padrao') + ' não está disponível: esta estimativa usa o Método Vezen.');
   return r;
@@ -5632,7 +5711,7 @@ function nomeSetor(d) {
 const nomeLinha = l => (P().setores[l] || {}).nome || l;
 const nomeFiltro = f => f === '@publico' ? 'Setor público (fica de fora)' : f === 'naosei' ? 'Outros ou sem informação' : (PAIS.filtrosSetor.find(x => x.id === f) || { nome: f }).nome;
 const opsSetor = (sel, publico = true) => [...PAIS.filtrosSetor.filter(s => s.id !== 'naosei').map(s => s.id), 'naosei', ...(publico ? ['@publico'] : [])].map(v => `<option value="${v}"${v === sel ? ' selected' : ''}>${esc(nomeFiltro(v))}</option>`).join('');
-const lugarTxt = d => [d.municipio, d.uf].filter(Boolean).join('/');
+const lugarTxt = d => [d.municipio, d.uf].filter(Boolean).join('/') + (paisDe(d) === 'BR' ? '' : (d.municipio || d.uf ? ', ' : '') + CONFIG.paises[paisDe(d)].nome);
 const opcoesMunicipios = uf => municipiosUF(uf).map(n => `<option value="${esc(n)}"></option>`).join('');
 function avisoMunicipio(d) {
   if (!String(d.municipio || '').trim()) return '';
@@ -5709,7 +5788,10 @@ async function aoMudarRota() {
   } finally { mudandoRota = false; }
 }
 const TELAS_ASSINATURA = ['empresas', 'metodos', 'glossario']; // tela inicial e documentação; nunca nas telas de trabalho
+// o país da tela: o da análise aberta; nas outras telas, o Brasil (cada empresa de outro país é calculada com comPais)
+function paisDaTela() { PAIS = CONFIG.paises[UI.rota.tela === 'analise' && UI.atual ? paisDe(UI.atual.dados) : 'BR']; }
 function render(rolarTopo = false) {
+  paisDaTela();
   const t = TELAS[UI.rota.tela], app = $('#app');
   $('#assinatura').hidden = !TELAS_ASSINATURA.includes(UI.rota.tela);
   app.classList.toggle('start-screen', UI.rota.tela === 'empresas' && !S.empresas.length);
@@ -5954,7 +6036,7 @@ function eixoCaminhos(lo, hi, X) {
   let tk = [];
   for (let k = Math.floor(Math.log10(lo)); k <= Math.ceil(Math.log10(hi)); k++) for (const m of (Math.log10(hi / lo) < 2 ? [1, 2, 5] : [1])) { const v = m * Math.pow(10, k); if (v >= lo && v <= hi) tk.push(v); }
   let ult = -99; tk = tk.filter(v => { const x = X(v); if (x - ult < 16 || x < 4 || x > 96) return false; ult = x; return true; });
-  return tk.map(v => `<span style="left:${X(v)}%">R$ ${rsCurto(v)}</span>`).join('');
+  return tk.map(v => `<span style="left:${X(v)}%">${PAIS.simbolo} ${rsCurto(v)}</span>`).join('');
 }
 function escalaCaminhos(itens, faixa) {
   const vals = [faixa.p10, faixa.p90]; itens.forEach(c => vals.push(...limitesCaminho(c)));
@@ -6157,7 +6239,7 @@ function estadoAtual() {
 }
 function chipEstado() { const e = estadoAtual(); return `<span class="estado ${e.cls}"><i aria-hidden="true"></i>${esc(e.txt)}</span>`; }
 function metaEmpresa(d) {
-  const partes = [d.modelo ? 'Empresa modelo' : '', d.setor || d.natureza ? esc(nomeSetor(d)) : '', esc(lugarTxt(d)), d.cnpj ? 'CNPJ ' + esc(d.cnpj) : ''].filter(Boolean).map(x => `<span>${x}</span>`);
+  const partes = [d.modelo ? 'Empresa modelo' : '', d.setor || d.natureza ? esc(nomeSetor(d)) : '', esc(lugarTxt(d)), d.cnpj ? (paisDe(d) === 'MX' ? 'RFC ' : 'CNPJ ') + esc(d.cnpj) : ''].filter(Boolean).map(x => `<span>${x}</span>`);
   return partes.join('') + chipEstado() + chipFaltam(d);
 }
 function acoesAnalise() {
@@ -6285,12 +6367,13 @@ window.addEventListener('beforeunload', e => { if (UI.sujo) { e.preventDefault()
 // ajuda de cada campo: o que é e como entra na conta (os links de onde encontrar vêm junto)
 // cada ajuda diz o que o campo é e o que informar; como o número entra na conta fica na Metodologia (link no fim da ajuda)
 const AJUDA = {
-  cnpj: 'CNPJ da matriz. Com ele completo, a lupa fica verde. O clique busca nome, estado, município e enquadramento na Receita Federal e, em companhias abertas e bancos, a receita na CVM ou no Banco Central. Nada é preenchido sem o clique.',
-  uf: 'Estado onde fica a sede da empresa no Brasil.',
+  pais: 'País da empresa. Cada país tem os seus parâmetros, a sua moeda e as suas fontes. Fora do Brasil vale só o Método Vezen. Ao trocar o país, estado, CNPJ e enquadramento são apagados.',
+  cnpj: d => paisDe(d) === 'MX' ? 'RFC da empresa: 12 caracteres na pessoa moral, 13 na pessoa física. A ferramenta confere o formato e a data; não há consulta pública do RFC, então nome, estado e setor são digitados.' : 'CNPJ da matriz. Com ele completo, a lupa fica verde. O clique busca nome, estado, município e enquadramento na Receita Federal e, em companhias abertas e bancos, a receita na CVM ou no Banco Central. Nada é preenchido sem o clique.',
+  uf: () => 'Estado onde fica a sede da empresa ' + PAIS.noPais + '.',
   natureza: 'O tipo da empresa: privada de médio ou grande porte, pequena, listada na bolsa, startup, subsidiária de multinacional, setor público ou terceiro setor.',
   setor: 'Área em que a empresa atua, pela atividade principal (o CNPJ mostra o código).',
-  faturamento: 'Quanto a empresa vendeu no Brasil no período informado. Prefira a receita líquida, sem os impostos sobre vendas; se só achar o faturamento bruto, marque “Faturamento bruto”. Informe o ano e o período (12, 9, 6 ou 3 meses): o valor é levado a 12 meses.',
-  funcionarios: 'Número de funcionários da empresa no Brasil.',
+  faturamento: () => 'Quanto a empresa vendeu ' + PAIS.noPais + ' no período informado. ' + (PAIS.moeda === 'BRL' ? 'Prefira a receita líquida, sem os impostos sobre vendas; se só achar o faturamento bruto, marque “Faturamento bruto”.' : 'No México, a receita dos balanços já vem sem IVA.') + ' Informe o ano e o período (12, 9, 6 ou 3 meses): o valor é levado a 12 meses.',
+  funcionarios: () => 'Número de funcionários da empresa ' + PAIS.noPais + '.',
   usuarios: 'Pessoas que usam computador no trabalho. Quase nunca é público: se não achar, a ferramenta supõe um valor pelo setor, que aparece em cinza no campo.',
   profTI: 'Pessoas da equipe interna de TI, contando quem desenvolve sistemas.',
   salarioTI: 'Salário médio mensal da equipe de TI. Se não souber, a ferramenta usa a média do estado.',
@@ -6303,7 +6386,7 @@ const AJUDA = {
   enquadramento: 'Porte legal da empresa: MEI, ME (microempresa), EPP (pequeno porte) ou Simples, sem saber qual.',
   tiMatriz: 'Onde ficam o orçamento e a gestão de TI de uma subsidiária: no Brasil ou na matriz, no exterior.',
   globalRec: 'Receita total do grupo no mundo, na moeda em que o grupo publica.',
-  globalPart: 'Parte da receita do grupo que vem do Brasil, se a empresa divulgar (relatório anual, apresentação a investidores).',
+  globalPart: () => 'Parte da receita do grupo que vem ' + PAIS.doPais + ', se a empresa divulgar (relatório anual, apresentação a investidores).',
   globalFunc: 'Total de funcionários do grupo no mundo.',
   grupo: 'Nome da controladora ou do conjunto de empresas com o mesmo dono. Só registro.',
   tecnologias: 'Sistemas e serviços de tecnologia que a empresa usa. Busque pelo nome ou por um exemplo (SAP, Salesforce, AWS) e marque os que encontrar. Fica salvo, mas não muda o valor.',
@@ -6459,7 +6542,7 @@ function campoNum(d, c, rot, opt = {}) {
     ${opt.antes ? `<div class="linha-dupla">${opt.antes}</div>` : ''}<div class="entrada input-group${cls}">${opt.pre ? `<span class="pre input-addon">${opt.pre}</span>` : ''}<input class="input" type="text" inputmode="decimal" id="f-${c}" data-campo="${c}" data-parte="v" value="${esc(fmtIn(f.v))}" ${opt.ph ? `placeholder="${esc(opt.ph)}"` : ''} autocomplete="off">${opt.un ? `<span class="suf input-addon">${opt.un}</span>` : ''}</div>
     <div class="campo-pe">${botaoOrigem('campo:' + c, f.o, temValor(f))}${CAMPOS_SEM_DADO[c] ? botaoSemDado(c, d) : ''}${opt.dica ? `<span class="dica">${opt.dica}</span>` : ''}</div><p class="valid" id="v-${c}"></p></div>`;
 }
-const seletorEtapa = d => `<span class="seg segmented" role="radiogroup" aria-label="Etapa da despesa">${ETAPAS_DESPESA.map(([v, t]) => `<label class="seg-op"><input type="radio" name="contratosEtapa" value="${v}" data-simples="contratosEtapa" ${etapaDespesa(d) === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>`;
+const seletorEtapa = d => `<span class="seg segmented" role="radiogroup" aria-label="Etapa da despesa">${etapasDespesa().map(([v, t]) => `<label class="seg-op"><input type="radio" name="contratosEtapa" value="${v}" data-simples="contratosEtapa" ${etapaDespesa(d) === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>`;
 function campoTexto(d, c, rot, opt = {}) {
   return `<div class="campo field${opt.largo ? ' largo' : ''}"><div class="campo-rot"><label for="f-${c}">${esc(rot)}</label>${seloCNPJ(d, c)}${opt.ajuda ? botaoAjuda(c, rot) : ''}</div><input class="input" type="text" id="f-${c}" data-simples="${c}" value="${esc(d[c])}" ${opt.extra || ''} autocomplete="off">${opt.pe ? `<div class="campo-pe">${opt.pe}</div>` : ''}${opt.dica ? `<div class="campo-pe"><span class="dica">${opt.dica}</span></div>` : ''}<p class="valid" id="v-${c}">${opt.valid || ''}</p></div>`;
 }
@@ -6499,7 +6582,7 @@ function campoReceita(d, R) {
   const f = d.faturamento || { v: '', o: '' }, L = P().setores[linhaDe(d)], tipo = d.fatTipo === 'bruta' ? 'bruta' : 'liquida', outras = d.receitasAnos || [], per = !R.orgao;
   const seg = R.tipo && (L.ded || 0) > 0 ? `<span class="seg segmented" role="radiogroup" aria-label="O valor informado é">${[['liquida', 'Receita líquida'], ['bruta', 'Faturamento bruto']].map(([v, t]) => `<label class="seg-op"><input type="radio" name="fatTipo" value="${v}" data-simples="fatTipo" ${tipo === v ? 'checked' : ''}><span>${t}</span></label>`).join('')}</span>` : '';
   // a origem fica numa linha própria, embaixo do valor, como nos outros campos
-  const linha = (ano, valor, periodo, origem, del) => `<div class="rec-linha">${ano}<div class="entrada input-group com-pre"><span class="pre input-addon">R$</span>${valor}</div>${per ? periodo : ''}<span class="rec-o">${origem}</span>${del}</div>`;
+  const linha = (ano, valor, periodo, origem, del) => `<div class="rec-linha">${ano}<div class="entrada input-group com-pre"><span class="pre input-addon">${PAIS.simbolo}</span>${valor}</div>${per ? periodo : ''}<span class="rec-o">${origem}</span>${del}</div>`;
   const l0 = linha(`<input class="input" type="text" inputmode="numeric" id="f-fatAno" data-simples="fatAno" aria-label="Ano" value="${esc(d.fatAno)}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off">`,
     `<input class="input" type="text" inputmode="decimal" id="f-faturamento" data-campo="faturamento" data-parte="v" value="${esc(fmtIn(f.v))}" autocomplete="off">`,
     seletorPeriodo('id="f-fatMeses" data-simples="fatMeses" aria-label="Período"', d.fatMeses), botaoOrigem('campo:faturamento', f.o, temValor(f)), '<span aria-hidden="true"></span>');
@@ -6534,29 +6617,30 @@ function dicaReceita(d, R, r) {
 // receita global do grupo: só para subsidiárias, como referência a mais na estimativa da receita brasileira
 function blocoGlobal(d) {
   const m = d.globalMoeda || 'USD', g = d.globalRec || { v: '', o: '' };
-  const moedas = [['BRL', 'Real (R$)'], ...PAIS.cambio.moedas, ['outra', 'Outra moeda']];
+  const moedas = [[PAIS.moeda, PAIS.nomeMoeda], ...PAIS.cambio.moedas, ['outra', 'Outra moeda']];
   return `<div class="rec-global"><h4>${ico('globo')}Receita global do grupo <span class="selo badge">opcional</span></h4>
     <div class="grade-campos">
     <div class="campo field largo"><div class="campo-rot"><label for="f-globalRec">Receita global, na moeda original</label>${botaoAjuda('globalRec', 'Receita global')}</div><input class="input" type="text" inputmode="decimal" id="f-globalRec" data-campo="globalRec" data-parte="v" value="${esc(fmtIn(g.v))}" autocomplete="off"><div class="campo-pe">${botaoOrigem('campo:globalRec', g.o, temValor(g))}</div><p class="valid" id="v-globalRec"></p></div>
     <div class="campo field"><div class="campo-rot"><label for="f-globalMoeda">Moeda</label></div><select class="select" id="f-globalMoeda" data-simples="globalMoeda" data-rerender>${moedas.map(([v, t]) => `<option value="${v}" ${m === v ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select></div>
     <div class="campo field"><div class="campo-rot"><label for="f-globalAno">Ano da receita global</label></div><input class="input" type="text" inputmode="numeric" id="f-globalAno" data-simples="globalAno" value="${esc(d.globalAno)}" placeholder="${ANO - 1}" maxlength="4" autocomplete="off"></div>
-    ${m === 'BRL' ? '' : `<div class="campo field largo"><div class="campo-rot"><label for="f-globalTaxa">Câmbio: reais por 1 ${m === 'outra' ? 'unidade da moeda' : m}</label></div><div class="linha-dupla" style="margin-top:0"><input class="input" type="text" inputmode="decimal" id="f-globalTaxa" data-simples-num="globalTaxa" value="${esc(fmtIn(d.globalTaxa))}" autocomplete="off" style="flex:1 1 160px;width:auto">${m === 'outra' ? '' : `<button type="button" class="btn xs" data-acao="buscar-ptax">${ico('busca')}Buscar PTAX</button>`}</div><div class="campo-pe"><span class="dica" id="dica-taxa">${dicaTaxa(d)}</span></div></div>`}
-    ${campoNum(d, 'globalPart', 'Participação do Brasil na receita do grupo', { un: '%' })}
+    ${m === PAIS.moeda ? '' : `<div class="campo field largo"><div class="campo-rot"><label for="f-globalTaxa">Câmbio: ${PAIS.moeda === 'BRL' ? 'reais' : 'pesos'} por 1 ${m === 'outra' ? 'unidade da moeda' : m}</label></div><div class="linha-dupla" style="margin-top:0"><input class="input" type="text" inputmode="decimal" id="f-globalTaxa" data-simples-num="globalTaxa" value="${esc(fmtIn(d.globalTaxa))}" autocomplete="off" style="flex:1 1 160px;width:auto">${m === 'outra' ? '' : `<button type="button" class="btn xs" data-acao="buscar-ptax">${ico('busca')}Buscar PTAX</button>`}</div><div class="campo-pe"><span class="dica" id="dica-taxa">${dicaTaxa(d)}</span></div></div>`}
+    ${campoNum(d, 'globalPart', 'Participação ' + PAIS.doPais + ' na receita do grupo', { un: '%' })}
     ${campoNum(d, 'globalFunc', 'Funcionários no mundo', { un: 'pessoas' })}
     </div></div>`;
 }
 function dicaTaxa(d) {
   const m = d.globalMoeda || 'USD', a = +d.globalAno || ANO - 1;
-  if (m === 'BRL') return '';
+  if (m === PAIS.moeda) return '';
   if (valorPos({ v: d.globalTaxa })) return d.globalTaxaFonte && d.globalTaxaFonte !== 'manual' ? esc(d.globalTaxaFonte) + '. Apague o valor para usar a tabela.' : 'Taxa digitada por você.' + (m === 'outra' ? '' : ' Apague o valor para usar a PTAX da tabela.');
   const t = m !== 'outra' && taxaPTAX(m, a);
-  return t ? `Usando a PTAX de ${dataBR(t.data + 'T12:00')}: R$ ${nf(t.v, 4)} (Banco Central, último dia útil de ${a}). Para outra taxa, digite aqui.`
-    : m === 'outra' ? 'Digite a taxa de câmbio do último dia útil de dezembro do ano da receita.' : `A ferramenta não tem a PTAX de ${m} para ${a}. Clique em Buscar PTAX ou digite a taxa.`;
+  const mx = PAIS.moeda === 'MXN', nt = mx ? 'FIX' : 'PTAX';
+  return t ? `Usando ${mx ? 'o FIX' : 'a PTAX'} de ${dataBR(t.data + 'T12:00')}: ${PAIS.simbolo} ${nf(t.v, 4)} (${mx ? 'Banco de México' : 'Banco Central'}, último dia útil de ${a}). Para outra taxa, digite aqui.`
+    : m === 'outra' ? 'Digite a taxa de câmbio do último dia útil de dezembro do ano da receita.' : (mx ? `A ferramenta não tem o FIX de ${a}. Digite a taxa.` : `A ferramenta não tem a PTAX de ${m} para ${a}. Clique em Buscar PTAX ou digite a taxa.`);
 }
 // a PTAX vem do Banco Central pela BrasilAPI; em dia sem cotação, a API devolve o último dia útil anterior
 async function buscarPTAX() {
   const alvo = UI.atual, d = alvo.dados, m = d.globalMoeda || 'USD', a = +d.globalAno || ANO - 1;
-  if (m === 'BRL' || m === 'outra') return toast('Para esta moeda, digite a taxa.', 'warn');
+  if (m === PAIS.moeda || m === 'outra' || !PAIS.apiCambio) return toast('Para esta moeda, digite a taxa.', 'warn');
   const hoje = new Date(), dt = a >= hoje.getFullYear() ? hoje : new Date(a, 11, 31, 12);
   const iso = dt.getFullYear() + '-' + String(dt.getMonth() + 1).padStart(2, '0') + '-' + String(dt.getDate()).padStart(2, '0');
   const dica = $('#dica-taxa'); if (dica) dica.textContent = 'Buscando no Banco Central…';
@@ -6724,31 +6808,33 @@ function formAnalise() {
   const n = d.natureza, vz = c => entraNaConta(d, c), TS = tabelaDe(d);
   UI.chaveForm = chaveForm(d);
   // campos que dependem da natureza e mudam a conta
-  const porNatureza = (n === 'pequena' || d.enquadramento ? campoSelect(d, 'enquadramento', 'Enquadramento', [['', n === 'pequena' ? 'Selecione' : 'Nenhum'], ['MEI', 'MEI'], ['ME', 'ME'], ['EPP', 'EPP'], ['Simples', 'Simples, sem saber ME ou EPP']], { rerender: true, ajuda: true }) : '')
+  const porNatureza = ((n === 'pequena' || d.enquadramento) && !PAIS.semEnquadramento ? campoSelect(d, 'enquadramento', 'Enquadramento', [['', n === 'pequena' ? 'Selecione' : 'Nenhum'], ['MEI', 'MEI'], ['ME', 'ME'], ['EPP', 'EPP'], ['Simples', 'Simples, sem saber ME ou EPP']], { rerender: true, ajuda: true }) : '')
     + (n === 'subsidiaria' && entraNaConta(d, 'tiMatriz') ? campoSelect(d, 'tiMatriz', 'Onde a TI é gerida', [['', 'Sem informação'], ['brasil', 'No Brasil'], ['matriz', 'Na matriz']], { rerender: true, ajuda: true }) : '')
     + (n === 'publico' ? campoSelect(d, 'tipoPublico', 'Tipo de órgão', [['', 'Órgão público (administração direta, autarquia, fundação pública)'], ['estatal', 'Estatal (empresa pública ou sociedade de economia mista)']], { rerender: true, largo: true }) : '');
+  const mx = paisDe(d) === 'MX';
   const ident = campoTexto(d, 'nome', 'Nome da empresa', { largo: true, extra: 'required aria-required="true"' })
-    + `<div class="campo field"><div class="campo-rot"><label for="f-cnpj">CNPJ</label>${botaoAjuda('cnpj', 'CNPJ')}</div><div class="entrada input-group com-acao"><input class="input" type="text" inputmode="numeric" id="f-cnpj" data-cnpj value="${esc(d.cnpj)}" placeholder="00.000.000/0000-00" autocomplete="off">${botaoCNPJ(d)}</div><div class="campo-pe">${infoCNPJ}</div><p class="valid" id="v-cnpj">${UI.cnpjMsg}</p></div>`
+    + campoSelect(d, 'pais', 'País', Object.entries(CONFIG.paises).map(([k, x]) => [k, x.nome]), { rerender: true, ajuda: true })
+    + (mx ? campoTexto(d, 'cnpj', 'RFC', { ajuda: true, extra: 'maxlength="13" placeholder="ABC010203XY1" spellcheck="false"', valid: esc(avisoRFC(d.cnpj)) }) : `<div class="campo field"><div class="campo-rot"><label for="f-cnpj">CNPJ</label>${botaoAjuda('cnpj', 'CNPJ')}</div><div class="entrada input-group com-acao"><input class="input" type="text" inputmode="numeric" id="f-cnpj" data-cnpj value="${esc(d.cnpj)}" placeholder="00.000.000/0000-00" autocomplete="off">${botaoCNPJ(d)}</div><div class="campo-pe">${infoCNPJ}</div><p class="valid" id="v-cnpj">${UI.cnpjMsg}</p></div>`)
     + campoSelect(d, 'natureza', 'Natureza', natOps, { rerender: true, ajuda: true })
     + (sug ? `<div class="sugestao largo">${ico('info')}<span>Sugestão pelo CNPJ: ${sug.natureza ? '<b>' + esc(PAIS.naturezas.find(x => x.id === sug.natureza).nome) + (sug.natureza === 'publico' ? (sug.tipoPublico === 'estatal' ? ' (estatal)' : ' (órgão público)') : '') + '</b>' : ''}${sug.natureza && sug.setor ? ' e ' : ''}${sug.setor ? '<b>' + esc(PAIS.filtrosSetor.find(s => s.id === sug.setor).nome) + '</b>' : ''}.</span><button type="button" class="btn xs primary" data-acao="usar-sug">Usar sugestão</button><button type="button" class="btn xs" data-acao="ignorar-sug">Ignorar</button></div>` : '')
     + (vz('setor') ? campoSelect(d, 'setor', 'Setor', setOps, { rerender: true, ajuda: true }) : '')
     + (TS && vz(TS.campo) ? campoSelect(Object.assign({}, d, { [TS.campo]: segmentoTab(d, TS) }), TS.campo, TS.rotSeg, Object.entries(TS.tabela).map(([k, x]) => [k, x.nome]), { rerender: true, largo: true }) : '')
-    + (vz('uf') ? campoSelect(d, 'uf', 'UF', [['', 'Selecione'], ...PAIS.ufs.map(u => [u, u])], { ajuda: true }) : '')
+    + (vz('uf') ? campoSelect(d, 'uf', PAIS.nomesUf ? 'Estado' : 'UF', [['', 'Selecione'], ...PAIS.ufs.map(u => [u, PAIS.nomesUf ? PAIS.nomesUf[u] : u])], { ajuda: true }) : '')
     + (vz('municipio') ? campoTexto(d, 'municipio', 'Município', { extra: 'list="dl-municipios"', valid: esc(avisoMunicipio(d)) }) + `<datalist id="dl-municipios">${opcoesMunicipios(d.uf)}</datalist>` : '')
     + porNatureza;
   const porte = (vz('faturamento') ? campoReceita(d, R) : '')
     + (vz('funcionarios') ? campoNum(d, 'funcionarios', R.func, { un: 'pessoas' }) : '')
     + (vz('usuarios') ? campoNum(d, 'usuarios', R.us, { un: 'pessoas', ph: usPh }) : '')
-    + (n === 'listada' && vz('adicoes') ? campoNum(d, 'adicoes', 'Adições do ano em software e equipamentos de informática', { pre: 'R$', largo: true }) : '')
-    + (n === 'publico' && vz('contratos') ? campoNum(d, 'contratos', rotContratos(d), { pre: 'R$', largo: true, antes: ehOrgaoPublico(d) ? seletorEtapa(d) : '' }) : '');
+    + (n === 'listada' && vz('adicoes') ? campoNum(d, 'adicoes', 'Adições do ano em software e equipamentos de informática', { pre: PAIS.simbolo, largo: true }) : '')
+    + (n === 'publico' && vz('contratos') ? campoNum(d, 'contratos', rotContratos(d), { pre: PAIS.simbolo, largo: true, antes: ehOrgaoPublico(d) ? seletorEtapa(d) : '' }) : '');
   const ti = vz('profTI') ? campoNum(d, 'profTI', rotProfTI(d), { un: 'pessoas' })
-    + campoNum(d, 'salarioTI', 'Salário médio da equipe de TI', { pre: 'R$', un: 'por mês', dica: 'Opcional.' })
+    + campoNum(d, 'salarioTI', 'Salário médio da equipe de TI', { pre: PAIS.simbolo, un: 'por mês', dica: 'Opcional.' })
     + (!vz('digital') ? '' : campoSelect(d, 'digital', 'Intensidade digital', [['', 'Automática (' + nivelDigitalAuto(d) + ')'], ['baixa', 'Baixa'], ['media', 'Média'], ['alta', 'Alta']], { ajuda: true })) : '';
   const vagas = `<div class="campo field"><div class="campo-rot"><label for="f-vagasTI">Vagas de TI abertas</label>${botaoAjuda('vagasTI', 'Vagas de TI')}</div><input class="input" type="text" inputmode="numeric" id="f-vagasTI" data-simples="vagasTI" value="${esc(d.vagasTI)}" autocomplete="off"></div>`;
   // gasto de TI real: uma linha por ano, como a receita; a primeira aparece sempre, com o ano de referência sugerido
   const rl = reais.length ? reais : [{ ano: '', v: '', o: '', meses: '12' }];
   const gasto = `<div class="campo field largo"><div class="campo-rot"><span class="rot">Gasto de TI real</span>${botaoAjuda('gastosReais', 'Gasto real')}</div>
-      <div class="rec-anos reais"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span><span>Período</span></div>${rl.map((x, i) => `<div class="rec-linha"><input class="input" type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano || (reais.length ? '' : anoDe(d)))}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off"><div class="entrada input-group com-pre"><span class="pre input-addon">R$</span><input class="input" type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || anoDe(d))}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}" autocomplete="off"></div>${seletorPeriodo(`data-real="${i}" data-parte="meses" aria-label="Período"`, x.meses)}<span class="rec-o">${botaoOrigem('real:' + i, x.o, temValor(x))}</span>${rl.length > 1 ? btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq') : '<span aria-hidden="true"></span>'}</div>`).join('')}</div>
+      <div class="rec-anos reais"><div class="rec-cab" aria-hidden="true"><span>Ano</span><span>Valor</span><span>Período</span></div>${rl.map((x, i) => `<div class="rec-linha"><input class="input" type="text" inputmode="numeric" aria-label="Ano" data-real="${i}" data-parte="ano" value="${esc(x.ano || (reais.length ? '' : anoDe(d)))}" placeholder="${anoDe(d)}" maxlength="4" autocomplete="off"><div class="entrada input-group com-pre"><span class="pre input-addon">${PAIS.simbolo}</span><input class="input" type="text" inputmode="decimal" aria-label="Gasto de TI real de ${esc(x.ano || anoDe(d))}" data-real="${i}" data-parte="v" value="${esc(fmtIn(x.v))}" autocomplete="off"></div>${seletorPeriodo(`data-real="${i}" data-parte="meses" aria-label="Período"`, x.meses)}<span class="rec-o">${botaoOrigem('real:' + i, x.o, temValor(x))}</span>${rl.length > 1 ? btnIco('lixo', 'Remover este ano', `data-acao="del-real" data-i="${i}"`, 'peq') : '<span aria-hidden="true"></span>'}</div>`).join('')}</div>
       <div class="reais-acoes"><button type="button" class="btn xs" data-acao="add-real">${ico('mais')}Adicionar ano</button>${botaoSemDado('gastosReais', d)}</div><p class="valid" id="v-reais"></p></div>`
     + (!temGastoReal(d) ? '' : `<div class="campo field largo"><label class="checkbox"><input type="checkbox" id="f-usarCalib" data-usar-calib ${emp.foraCalibracao ? '' : 'checked'}><span>Usar esta empresa no Método Personalizado<span class="dica">O gasto real entra nos percentuais do método. Vale depois de salvar.</span></span></label></div>`);
   // só registro: não muda a conta
@@ -6772,9 +6858,18 @@ function formAnalise() {
     + `<div class="rodape-form">${chipEstado()}<button type="button" class="btn primary" data-acao="salvar">${ico('salvar')}Salvar</button></div>`;
 }
 
+// RFC mexicano: 3 letras (pessoa moral) ou 4 (pessoa física), data AAMMDD e homoclave de 3 caracteres. Só avisa, nunca bloqueia
+function avisoRFC(v) {
+  const t = String(v || '').toUpperCase().replace(/[\s-]/g, '');
+  if (!t) return '';
+  const m = /^([A-ZÑ&]{3,4})(\d{2})(\d{2})(\d{2})([A-Z\d]{3})$/.exec(t);
+  if (!m) return 'Formato de RFC não reconhecido: 3 ou 4 letras, a data (AAMMDD) e 3 caracteres.';
+  if (+m[3] < 1 || +m[3] > 12 || +m[4] < 1 || +m[4] > 31) return 'A data dentro do RFC não existe: confira.';
+  return '';
+}
 function validar(d) {
   const v = {};
-  const c = cnpjDigitos(d.cnpj);
+  const c = paisDe(d) === 'BR' ? cnpjDigitos(d.cnpj) : '';
   if (c.length && !cnpjValido(c)) v.cnpj = 'CNPJ inválido: confira os dígitos.';
   else if (c.length === 14 && c.slice(8, 12) !== '0001') v.cnpjFilial = 'Este CNPJ é de uma filial (depois da barra não vem 0001). Receita e funcionários devem ser da empresa inteira no Brasil: use o CNPJ da matriz.';
   for (const k of ['faturamento', 'funcionarios', 'usuarios', 'profTI', 'salarioTI', 'adicoes', 'contratos', 'gastoDeclarado']) {
@@ -6809,7 +6904,7 @@ function seletorEscopo(d, m) {
 // no Personalizado, o cartão do resultado leva aos percentuais e empresas do método, na própria análise
 const botaoEditarPers = m => m === 'propria' ? `<button type="button" class="link-btn link editar-pers" data-acao="pers-editar">${ico('editar')}Editar percentuais e empresas</button>` : '';
 function seletorModo(m, suf = '', d = null) {
-  return `<div class="modos" role="radiogroup" aria-label="Método">${MODOS.map(v => {
+  return `<div class="modos" role="radiogroup" aria-label="Método">${metodosPais().map(v => {
     // o Personalizado sem dados pode ser escolhido: mostra "Adicionar dados" e a análise abre os campos dele
     const ok = modoDisponivel(v), semDados = !ok && v === 'propria', livre = ok || semDados, r = ok && d ? calcModo(d, v) : null;
     const val = r && !r.vazio ? fmtRS(r.F) : ok || semDados ? '' : '—';
@@ -7022,8 +7117,18 @@ function aoDigitarAnalise(e) {
     if (t.dataset.campo === 'profTI') { const td = $('#tec-dicas'); if (td) td.innerHTML = dicasTecnologia(UI.atual.dados); }
   }
 }
+// trocar o país apaga o que só vale no outro país (estado, cidade, CNPJ ou RFC, enquadramento, dados da Receita Federal) e, fora do Brasil, fixa o Método Vezen
+function mudarPais(v) {
+  const d = UI.atual.dados; if (!CONFIG.paises[v] || paisDe(d) === v) return;
+  Object.assign(d, { pais: v, uf: '', municipio: '', cnpj: '', enquadramento: '', viaCNPJ: {}, cnpjInfo: {}, viaCVM: null, cnpjBuscado: '', globalMoeda: 'USD', globalTaxa: '', globalTaxaFonte: '', fatTipo: 'liquida' });
+  if (v !== 'BR') d.modo = 'base';
+  UI.sugestao = null; UI.cnpjMsg = '';
+  marcarAlterado(); rerenderAnalise();
+}
 function aoMudarAnalise(e) {
   const t = e.target;
+  if (t.dataset.simples === 'pais') return mudarPais(t.value);
+  if (t.dataset.simples === 'cnpj' && paisDe(UI.atual.dados) === 'MX') { t.value = t.value.toUpperCase().replace(/[\s-]/g, ''); UI.atual.dados.cnpj = t.value; marcarAlterado(); const v = $('#v-cnpj'); if (v) v.textContent = avisoRFC(t.value); return; }
   if (t.hasAttribute('data-salarios')) return mudarSalarios(t.value);
   if (t.hasAttribute('data-modo')) return mudarModo(t.value);
   if (t.hasAttribute('data-anoref')) return mudarAnoRef(t.value);
@@ -7189,7 +7294,7 @@ TELAS.analise = {
   click(e) { if (e.target.closest('#tec-busca')) abrirTec(); },
   keydown(e) {
     if (e.target.closest('#tec-combo')) return teclasTec(e);
-    if (e.key === 'Enter' && e.target.id === 'f-cnpj') { e.preventDefault(); consultarCNPJ(); }
+    if (e.key === 'Enter' && e.target.id === 'f-cnpj' && UI.atual && paisDe(UI.atual.dados) === 'BR') { e.preventDefault(); consultarCNPJ(); }
   }
 };
 acoes({
@@ -7404,7 +7509,7 @@ function blocoReceitaDet(r) {
     h.push(`<div class="rec-cams">${rec.caminhos.map(c => `<div><h5>${ico({ RF: 'equipe', RG: 'globo', RE: 'porte' }[c.cod] || 'calc')}${esc(c.nome)}</h5>${contaHtml(c)}</div>`).join('')}</div>`);
   }
   const G = rec.global;
-  if (G && G.taxa) h.push(`<div class="nota alert neutral">${ico('globo')}<p>Receita global de ${fmtMoeda(G.valor, G.moeda)} (${G.ano})${G.moeda === 'BRL' ? '' : `, convertida pela ${fonteTaxa(G)}: R$ ${nf(G.taxa, 4)} por ${G.moeda === 'outra' ? 'unidade' : G.moeda}`} = ${fmtRS(G.vBRL)}.${G.share ? ` Participação do Brasil: ${fmtPct(G.share, 2)} (${G.shareFonte === 'informada' ? 'informada' : 'funcionários no Brasil ÷ funcionários no mundo'}).` : ''}</p></div>`);
+  if (G && G.taxa) h.push(`<div class="nota alert neutral">${ico('globo')}<p>Receita global de ${fmtMoeda(G.valor, G.moeda)} (${G.ano})${G.moeda === PAIS.moeda ? '' : `, convertida pela ${fonteTaxa(G)}: ${PAIS.simbolo} ${nf(G.taxa, 4)} por ${G.moeda === 'outra' ? 'unidade' : G.moeda}`} = ${fmtRS(G.vBRL)}.${G.share ? ` Participação ${PAIS.doPais}: ${fmtPct(G.share, 2)} (${G.shareFonte === 'informada' ? 'informada' : 'funcionários ' + PAIS.noPais + ' ÷ funcionários no mundo'}).` : ''}</p></div>`);
   if (rec.e1Fora) h.push(`<div class="nota alert neutral">${ico('info')}<p>A receita estimada aparece só como referência: o cálculo pela receita fica fora do resultado porque usaria os mesmos funcionários do cálculo por usuários.</p></div>`);
   h.push(rec.avisos.map(a => `<div class="alerta alert warn">${ico('alerta')}<p>${esc(a)}</p></div>`).join(''));
   return h.join('');
@@ -7543,8 +7648,8 @@ function abrirPromptIA() {
 
 /* ---------- resumo no formato do time, para colar no CRM, num e-mail ou numa proposta ---------- */
 const NATUREZA_REC = { oficial: 'DRE', terceiros: 'estimativa de terceiros, não oficial', palpite: 'palpite, sem fonte, não oficial' };
-const fmtMoeda = (v, m) => m === 'BRL' ? fmtRS(v) : fmtRS(v).replace('R$', m);
-function fonteTaxa(G) { return G.taxaFonte === 'tabela' ? 'PTAX de ' + dataBR(G.taxaData + 'T12:00') + ' do Banco Central' : G.taxaFonte === 'manual' ? 'taxa informada por você' : G.taxaFonte; }
+const fmtMoeda = (v, m) => m === PAIS.moeda ? fmtRS(v) : fmtRS(v).replace(PAIS.simbolo, m);
+function fonteTaxa(G) { return G.taxaFonte === 'tabela' ? (PAIS.moeda === 'MXN' ? 'FIX de ' + dataBR(G.taxaData + 'T12:00') + ' do Banco de México' : 'PTAX de ' + dataBR(G.taxaData + 'T12:00') + ' do Banco Central') : G.taxaFonte === 'manual' ? 'taxa informada por você' : G.taxaFonte; }
 function textoResumo(d, r) {
   const Pm = r.Pm || P(), z = r.resumo, rec = r.receita || {}, u = rec.usada, inf = rec.informada, est = rec.estimativa, G = rec.global;
   const pc = v => u ? ` (${fmtPct(v / u.v)} da receita líquida)` : '';
@@ -7662,11 +7767,11 @@ function listaEmpresasHtml() {
     <button type="button" class="btn xs danger" data-acao="excluir-sel">${ico('lixo')}Excluir</button>
     <button type="button" class="link-btn link" data-acao="limpar-sel">Limpar seleção</button></div>` : '';
   if (!L.length) return `<div class="nota alert neutral">${ico('busca')}<p>Nenhuma empresa com esses filtros. <button type="button" class="link-btn link" data-acao="limpar-filtros">Limpar filtros</button></p></div>` + barraSel;
-  const linhas = L.map(({ e, r }) => {
+  const linhas = L.map(({ e, r }) => comPais(paisDe(e.dados), () => {
     const d = e.dados, ur = ultimoReal(d), aberta = UI.atual && UI.atual.id === e.id && UI.sujo;
     return `<tr>
       <td><input type="checkbox" data-sel="${e.id}" ${UI.sel.has(e.id) ? 'checked' : ''} aria-label="Selecionar ${esc(d.nome)}"></td>
-      <td><a class="emp-nome" href="#/analise/${encodeURIComponent(e.id)}">${esc(d.nome || '(sem nome)')}</a>${aberta ? ' <span class="selo pend badge warn">alterações não salvas</span>' : ''}<div class="emp-sub">${d.cnpj ? 'CNPJ ' + esc(d.cnpj) : 'Sem CNPJ'}</div></td>
+      <td><a class="emp-nome" href="#/analise/${encodeURIComponent(e.id)}">${esc(d.nome || '(sem nome)')}</a>${aberta ? ' <span class="selo pend badge warn">alterações não salvas</span>' : ''}<div class="emp-sub">${d.cnpj ? (paisDe(d) === 'MX' ? 'RFC ' : 'CNPJ ') + esc(d.cnpj) : paisDe(d) === 'MX' ? 'Sem RFC' : 'Sem CNPJ'}</div></td>
       <td>${esc(nomeSetor(d))}<div class="emp-sub">${esc(lugarTxt(d)) || '&nbsp;'}</div></td>
       <td class="n numeric">${r.vazio ? '<span class="text-secondary">sem estimativa</span>' : `<div class="emp-val"><b>${fmtRS(r.F)}</b>${miniRegua(r)}<span class="emp-sub">${fmtRS(r.p10)} a ${fmtRS(r.p90)}</span></div>`}</td>
       <td>${r.vazio ? '' : chipConf(r)}</td>
@@ -7674,7 +7779,7 @@ function listaEmpresasHtml() {
       <td class="n numeric">${ur ? fmtRS(+ur.v) + `<div class="emp-sub">${ur.ano}${e.foraCalibracao ? ', fora da calibração' : ''}</div>` : '<span class="text-secondary">—</span>'}</td>
       <td>${dataBR(e.alteradoEm)}</td>
       <td class="acoes-cel">${btnIco('mais-v', 'Ações de ' + (d.nome || 'empresa'), `data-acao="menu-emp" data-id="${e.id}" aria-haspopup="menu" aria-expanded="false"`, 'peq fant')}</td></tr>`;
-  }).join('');
+  })).join('');
   return `<div class="table-wrap"><table class="table lista-emp"><thead><tr><th><input type="checkbox" data-sel-todas ${todas ? 'checked' : ''} aria-label="Selecionar todas"></th><th>Empresa</th><th>Setor e lugar</th><th class="n numeric">Investimento em TI</th><th>Confiança</th><th>Tipo</th><th class="n numeric">Gasto real</th><th>Atualizada</th><th><span class="sr sr-only">Ações</span></th></tr></thead><tbody>${linhas}</tbody></table></div>
     <p class="paginas"><span>${plural(L.length, 'empresa', 'empresas')}${L.length < S.empresas.length ? ' de ' + nf(S.empresas.length, 0) : ''}</span><span>A régua mostra a faixa provável em volta do valor central: quanto mais estreita, mais precisa.</span></p>` + barraSel;
 }
@@ -7712,8 +7817,12 @@ function telaComparar() {
     ['Faixa provável', x => x.r.vazio ? '—' : fmtRS(x.r.p10) + ' a ' + fmtRS(x.r.p90)], ['Confiança', x => x.r.vazio ? '—' : chipConf(x.r)], ['Método', x => nomeModo(x.r.modoCalc)],
     ['Receita líquida', x => x.r.receita && x.r.receita.usada ? fmtRS(x.r.receita.usada.v) + (x.r.receita.modo === 'informada' ? '' : ' (estimada)') : '—'], ['Conservadora', x => x.r.vazio ? '—' : fmtRS(x.r.resumo.conservadora)], ['Geral sem salários de TI', x => x.r.vazio ? '—' : fmtRS(x.r.resumo.geralSem)], ['Funcionários', x => valorPos(x.e.dados.funcionarios) ? nf(+x.e.dados.funcionarios.v, 0) : '—'],
     ['Caminhos', x => x.r.vazio ? '—' : x.r.ests.map(e => esc(e.nome)).join('<br>')], ['Gasto real', x => { const u = ultimoReal(x.e.dados); return u ? fmtRS(+u.v) + ' (' + u.ano + ')' : '—'; }]];
+  // empresas de países diferentes têm moedas diferentes: o gráfico no mesmo eixo não serve
+  const moedas = new Set(emps.map(e => paisDe(e.dados)));
+  if (moedas.size > 1) return cab + `<div class="nota alert warn">${ico('alerta')}<p>As empresas marcadas são de países diferentes, com moedas diferentes: a tabela mostra cada uma na sua moeda e o gráfico fica de fora.</p></div>`
+    + `<div class="table-wrap" style="margin-top:16px"><table class="table compact comp-tab"><thead><tr><th></th>${rs.map(x => `<th><a class="emp-nome" href="#/analise/${encodeURIComponent(x.e.id)}">${esc(x.e.dados.nome)}</a></th>`).join('')}</tr></thead><tbody>${linhas.map(([rot, f]) => `<tr><th scope="row">${rot}</th>${rs.map(x => `<td>${comPais(paisDe(x.e.dados), () => f(x))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   return cab + `<section class="painel card">${graficoComparacao(rs)}</section>
-    <div class="table-wrap" style="margin-top:16px"><table class="table compact comp-tab"><thead><tr><th></th>${rs.map(x => `<th><a class="emp-nome" href="#/analise/${encodeURIComponent(x.e.id)}">${esc(x.e.dados.nome)}</a></th>`).join('')}</tr></thead><tbody>${linhas.map(([rot, f]) => `<tr><th scope="row">${rot}</th>${rs.map(x => `<td>${f(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+    <div class="table-wrap" style="margin-top:16px"><table class="table compact comp-tab"><thead><tr><th></th>${rs.map(x => `<th><a class="emp-nome" href="#/analise/${encodeURIComponent(x.e.id)}">${esc(x.e.dados.nome)}</a></th>`).join('')}</tr></thead><tbody>${linhas.map(([rot, f]) => `<tr><th scope="row">${rot}</th>${rs.map(x => `<td>${comPais(paisDe(x.e.dados), () => f(x))}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 
 /* ---------- backup e tabela ---------- */
@@ -7726,16 +7835,20 @@ function exportarBackup() {
 }
 // as colunas e as linhas da tabela das empresas, com os números como números: o CSV e o Excel saem daqui
 function tabelaEmpresas(ids) {
-  const colunas = [{ t: 'Empresa', l: 34 }, { t: 'CNPJ', l: 20 }, { t: 'Natureza', l: 30 }, { t: 'Setor', l: 32 }, { t: 'UF', l: 6 }, { t: 'Município', l: 22 },
+  const colunas = [{ t: 'Empresa', l: 34 }, { t: 'CNPJ ou RFC', l: 20 }, { t: 'Natureza', l: 30 }, { t: 'Setor', l: 32 }, { t: 'UF', l: 6 }, { t: 'Município', l: 22 },
     { t: 'Valor central (R$)', tipo: 'rs', l: 20 }, { t: 'P10 (R$)', tipo: 'rs', l: 18 }, { t: 'P90 (R$)', tipo: 'rs', l: 18 }, { t: 'Índice de confiança', tipo: 'int', l: 12 },
     { t: 'Gasto real (R$)', tipo: 'rs', l: 18 }, { t: 'Ano do gasto real', tipo: 'ano', l: 10 }, { t: 'Data da análise', l: 16 }, { t: 'Usada na calibração', l: 12 },
     { t: 'Receita líquida usada (R$)', tipo: 'rs', l: 22 }, { t: 'Natureza da receita', l: 26 }, { t: 'Estimativa conservadora (R$)', tipo: 'rs', l: 22 }, { t: 'Geral sem salários de TI (R$)', tipo: 'rs', l: 22 },
-    { t: 'Conservadora sem salários de TI (R$)', tipo: 'rs', l: 24 }, { t: 'Salários de TI no resumo', l: 12 }, { t: 'Método', l: 20 }, { t: 'Ano de referência', tipo: 'ano', l: 10 }];
-  const linhas = S.empresas.filter(x => !ids || ids.has(x.id)).map(e => {
+    { t: 'Conservadora sem salários de TI (R$)', tipo: 'rs', l: 24 }, { t: 'Salários de TI no resumo', l: 12 }, { t: 'Método', l: 20 }, { t: 'Ano de referência', tipo: 'ano', l: 10 },
+    { t: 'País', l: 12 }, { t: 'Moeda', l: 8 }];
+  const emps = S.empresas.filter(x => !ids || ids.has(x.id));
+  // com empresas de outro país, os valores ficam na moeda de cada uma (coluna Moeda), sem o símbolo do real
+  if (emps.some(e => paisDe(e.dados) !== 'BR')) colunas.forEach(c => { if (c.tipo === 'rs') { c.tipo = 'int'; c.t = c.t.replace('(R$)', '(moeda da empresa)'); } });
+  const linhas = emps.map(e => comPais(paisDe(e.dados), () => {
     const d = e.dados, r = calc(d), u = ultimoReal(d), nat = PAIS.naturezas.find(x => x.id === d.natureza), rec = !r.vazio && r.receita.usada;
     return [d.nome, d.cnpj, nat ? nat.nome : 'Sem informação', nomeSetor(d), d.uf, d.municipio, r.vazio ? '' : r.F, r.vazio ? '' : r.p10, r.vazio ? '' : r.p90, r.vazio ? '' : r.ic, u ? +u.v : '', u ? +u.ano : '', dataBR(e.alteradoEm), e.foraCalibracao ? 'não' : 'sim',
-      rec ? rec.v : '', rec ? rotOrigem(origemReceita(r.receita), true) : '', r.vazio ? '' : r.resumo.conservadora, r.vazio ? '' : r.resumo.geralSem, r.vazio ? '' : r.resumo.conservadoraSem, d.salariosTI === 'sem' ? 'sem' : 'com', nomeModo(r.modoCalc).toLowerCase(), anoDe(d)];
-  });
+      rec ? rec.v : '', rec ? rotOrigem(origemReceita(r.receita), true) : '', r.vazio ? '' : r.resumo.conservadora, r.vazio ? '' : r.resumo.geralSem, r.vazio ? '' : r.resumo.conservadoraSem, d.salariosTI === 'sem' ? 'sem' : 'com', nomeModo(r.modoCalc).toLowerCase(), anoDe(d), PAIS.nome, PAIS.moeda];
+  }));
   return { colunas, linhas };
 }
 // o que foi informado em cada campo, de onde veio e, quando falta, o motivo
@@ -8342,11 +8455,12 @@ const SECOES_METODOS = [
     ['met-setores', 'setor', 'Parâmetros por setor'], ['met-fontes', 'doc', 'Fontes'], ['met-testes', 'testes', 'Testes de aceitação']]],
   [nomeModo('padrao'), [['cr1-metodo', 'empresas', 'Fórmula'], ['cr1-parametros', 'tabela', 'Parâmetros em uso'], ['cr1-versoes', 'historico', 'Versões']]],
   ['Método FGV', [['fgv-metodo', 'curva', 'Fórmula e fonte'], ['fgv-parametros', 'tabela', 'Parâmetros em uso']]],
-  ['Método Personalizado', [['pers-metodo', 'calib', 'Fórmula'], ['pers-dados', 'subir', 'Seus dados']]]
+  ['Método Personalizado', [['pers-metodo', 'calib', 'Fórmula'], ['pers-dados', 'subir', 'Seus dados']]],
+  ['Outros países', [['met-mexico', 'globo', 'México']]]
 ];
 const CORPO_METODOS = { 'met-inicio': metInicio, 'met-visao': metVisao, 'met-receita': metReceita, 'met-caminhos': metCaminhos, 'met-ajustes': metAjustes, 'met-incerteza': metIncerteza, 'met-juncao': metJuncao, 'met-faixa': metFaixa,
   'met-estimativas': metEstimativas, 'met-projecao': metProjecao, 'met-categorias': metCategorias, 'met-pmd': metPmd, 'met-pequenas': metPequenas, 'met-setores': metSetores, 'met-fontes': metFontes, 'met-testes': metTestes,
-  'cr1-metodo': cr1Metodo, 'cr1-parametros': cr1Parametros, 'cr1-versoes': cr1Versoes, 'fgv-metodo': fgvMetodo, 'fgv-parametros': fgvParametros, 'pers-metodo': persMetodo, 'pers-dados': persDados };
+  'cr1-metodo': cr1Metodo, 'cr1-parametros': cr1Parametros, 'cr1-versoes': cr1Versoes, 'fgv-metodo': fgvMetodo, 'fgv-parametros': fgvParametros, 'pers-metodo': persMetodo, 'pers-dados': persDados, 'met-mexico': () => comPais('MX', metMexico) };
 const ENTRADA = new Set(['pers-dados']); // a única seção em que a pessoa informa dados
 function telaMetodos() {
   if (UI.baseNova) return secaoBaseNova();
@@ -8689,6 +8803,47 @@ function cr1Versoes() {
   ${notas(['Quem precisa de percentuais diferentes usa o Método Personalizado.'])}`;
 }
 
+/* ---------- Outros países: México ---------- */
+// tudo o que muda no México em relação ao Brasil; os valores vêm de CONFIG.paises.MX, a fonte única
+function metMexico() {
+  const B = CONFIG.paises.BR.parametros, M = PAIS.parametros, N = M.nivel, nomes = { bancos: 'Bancos e financeiras', seguros: 'Seguros', tecnologia: 'Tecnologia, telecom e mídia', servicos: 'Serviços em geral', saude: 'Saúde', educacao: 'Educação', industria: 'Indústria, energia, agro e construção', comercio: 'Comércio e varejo', logistica: 'Logística e transporte', terceiro: 'Terceiro setor', outros: 'Outros ou sem informação' };
+  const mil = v => v == null ? '—' : nf(v / 1000, 0);
+  const linhas = Object.keys(nomes).map(k => { const b = B.setores[k], x = M.setores[k]; return [nomes[k], fmtPct(b.p, 1), fmtPct(x.p, 1), mil(x.rpe), x.capu == null ? '—' : nf(x.capu, 0), esc(x.scian || '—')]; });
+  const fix = Object.entries(PAIS.cambio.ptax.USD).map(([a, [v, dt]]) => [a, nf(v, 4), dataBR(dt + 'T12:00')]);
+  return `<p class="d-lead">No México vale só o Método Vezen, com as mesmas fórmulas do Brasil. Mudam os parâmetros, a moeda (peso mexicano, MX$) e as fontes. A análise escolhe o país no campo País.</p>`
+    + bloco('Nível do gasto de TI', eqs([vv('p', 'MX'), `${vv('p', 'BR')} · ${vv('k', 'MX')} ÷ ${vv('k', 'BR')}`], [vv('k', 'MX'), `${vv('k', 'BR')} · ${vv('i', 'MX')} ÷ ${vv('i', 'BR')}`], [vv('CAPU'), `${vv('p', 'MX')} · ${vv('r')} ÷ ${vv('u')}`])
+      + leg([[vv('p', 'BR'), '% da receita gasto com TI no setor, no Brasil', 'Métodos, Parâmetros por setor'], [vv('k', 'BR'), 'relação entre o gasto medido em empresas brasileiras e a mediana internacional', nf(N.kBrasil, 2)],
+        [vv('i'), 'gasto de TI do país ÷ PIB em 2025', `México ${fmtPct(N.tiPib, 2)}; Brasil ${fmtPct(N.tiPibBR, 2)}`], [vv('k', 'MX'), 'fator do México', `${nf(N.kPais, 2)} (${nf(N.kPais / N.kBrasil, 3)} do Brasil)`],
+        [vv('r'), 'receita por funcionário no setor, empresas com 51 ou mais pessoas', `MX$, ${N.anoBase}`], [vv('u'), 'usuários por funcionário', 'como no Brasil']])
+      + notas([`A conta dá ${nf(N.kBrasil * N.tiPib / N.tiPibBR, 2)}. O fator usado, ${nf(N.kPais, 2)}, fica um pouco abaixo porque o gasto mexicano tem mais equipamentos e dispositivos: só com software e serviços, a relação com o Brasil cai para 0,67.`,
+        'Gasto de TI por país: IDC, Black Book do 1º trimestre de 2026, reproduzido no estudo da ABES de 2026. PIB: FMI, 2025.',
+        'Bancos: 4,7%. A IDC mede 5,7% nas maiores empresas financeiras do México, e os bancos do Chile e da Colômbia publicam gastos de TI entre 4,8% e 5% da receita.',
+        `Sem empresas mexicanas com gasto de TI conhecido, o nível é mais incerto que no Brasil: a incerteza do caminho pela receita sobe com ${fmtPct(N.sNivel, 0)} a mais e a do caminho pelos usuários com ${fmtPct(N.sCapu, 0)} a mais, e a confiança fica mais baixa.`]))
+    + bloco('Parâmetros por setor', tabM(['Setor', ['Brasil', vv('p', 'BR')], ['México', vv('p', 'MX')], ['Receita por funcionário', `MX$ mil, ${N.anoBase}`], ['Por usuário', 'CAPU, MX$ por ano'], 'Atividades (SCIAN)'], linhas, { num: [false, true, true, true, true, false] })
+      + notas(['Receita por funcionário: INEGI, Censos Económicos 2024 (ano 2023), receita sem IVA ÷ pessoas ocupadas, nas unidades com 51 ou mais pessoas. A ferramenta leva o valor ao ano de referência com o crescimento da receita.',
+        'Bancos e seguros: receita total, que inclui as receitas financeiras. No BBVA México, a receita líquida por funcionário foi MX$ 6,59 mi em 2025.',
+        'Nas microempresas (até 10 pessoas) a receita por pessoa é cerca de um quarto da média: a estimativa pelos funcionários serve para empresas médias e grandes.']))
+    + bloco('Outros parâmetros', tabM(['Parâmetro', 'Brasil', 'México'], [
+      ['Custo total ÷ salário', nf(B.equipe.fatorCLT, 1), nf(M.equipe.fatorCLT, 1)],
+      ['Salário médio de TI, por mês', comPais('BR', () => fmtRS(B.regional.mediaNacional)), fmtRS(M.regional.mediaNacional)],
+      ['Impostos sobre vendas na receita', 'por setor', 'nenhum'],
+      ['Crescimento da receita, sem histórico', fmtPct(B.receita.g, 0), fmtPct(M.receita.g, 0)],
+      ['Crescimento do gasto de TI', fmtPct(B.crescimento.gSetor, 0), fmtPct(M.crescimento.gSetor, 0)],
+      ['Parte da equipe no gasto de TI', fmtPct(B.equipe.sPessoal, 0), fmtPct(M.equipe.sPessoal, 0) + ', do Brasil'],
+      ['Parte de investimento no gasto de TI', fmtPct(B.equipe.sCapex, 0), fmtPct(M.equipe.sCapex, 0) + ', do Brasil'],
+      ['Etapa da despesa pública que vale como gasto', 'liquidada', 'devengada']], { num: [false, false, false] })
+      + notas(['Custo total ÷ salário: contribuições ao IMSS e ao INFONAVIT, imposto estadual sobre a folha, aguinaldo e prima vacacional somam de 35% a 50% do salário bruto.',
+        `Salário médio de TI: Indeed México, desenvolvedores de software, 2026. Não há dado oficial de salário de TI nas empresas; a média da ocupação no INEGI, cerca de MX$ 11 mil, inclui trabalho informal. Na Cidade do México, ${fmtRS(M.regional.grupos[0].salario)}: o salário base de cotização do IMSS lá é 1,21 vez a média nacional.`,
+        'Receita: o INEGI mede o PIB nominal em +5,2% em 2024. Gasto de TI: a consultoria Select mede +3,7% em 2025 e +4,1% em 2026 no gasto de TIC das organizações.',
+        'Partes da equipe e do investimento: sem fonte mexicana, ficam os valores do Brasil.']))
+    + bloco('Câmbio', tabM(['Ano', ['FIX', 'pesos por dólar'], 'Data'], fix, { num: [false, true, false] })
+      + notas(['FIX do Banco de México no último dia útil de dezembro, publicado no Diário Oficial (DOF). Converte a receita global de uma subsidiária, como a PTAX no Brasil. Outras moedas: digite a taxa.']))
+    + bloco('O que não existe no México', notas(['Consulta pelo número da empresa: não há cadastro público do RFC. A ferramenta confere o formato e a data do RFC; nome, estado, setor e funcionários são digitados. O DENUE do INEGI mostra a atividade e a faixa de pessoas de cada estabelecimento.',
+      'Porte legal (MEI, ME, EPP): o porte de uma empresa mexicana não é público, então o campo Enquadramento não aparece.',
+      'Receita das companhias abertas e dos bancos pela busca: no México, a bolsa (BMV) e o supervisor dos bancos (CNBV) não têm arquivo aberto que a ferramenta possa ler. A receita é digitada, com a origem.',
+      'Métodos CR, FGV e Personalizado: os dois primeiros são estudos brasileiros, e o Personalizado usa só empresas do Brasil.']));
+}
+
 /* ---------- Método FGV ---------- */
 function fgvMetodo() {
   const F = PAIS.metodoFGV, T = F.ti;
@@ -8956,6 +9111,51 @@ const GLOSSARIO = [
   { id: 'fgv', t: 'FGV', n: 'Fundação Getulio Vargas', c: 'inst', a: ['FGV-EAESP', 'FGV EAESP'], m: 'met-setores', s: 'https://portal.fgv.br',
     d: 'Instituição brasileira de ensino e pesquisa. Sua escola de administração (FGV EAESP) faz todo ano a Pesquisa Anual do Uso de TI nas empresas.',
     u: 'A 36ª edição da pesquisa é a base do percentual de gasto de TI sobre a receita e do gasto por usuário de cada setor.' },
+  { id: 'inegi', t: 'INEGI', n: 'Instituto Nacional de Estadística y Geografía', c: 'inst', m: 'met-mexico', s: 'https://www.inegi.org.mx',
+    d: 'Instituto de estatística do México, como o IBGE no Brasil. Faz os Censos Económicos e o DENUE.',
+    u: 'Fonte da receita por funcionário de cada setor no México.' },
+  { id: 'censos-economicos', t: 'Censos Económicos', n: 'Censos Económicos 2024 do INEGI', c: 'inst', m: 'met-mexico', s: 'https://www.inegi.org.mx/programas/ce/2024/',
+    d: 'Recenseamento das unidades econômicas do México, feito a cada cinco anos. A edição de 2024 mede o ano de 2023.',
+    u: 'A receita sem IVA dividida pelas pessoas ocupadas, por setor e porte, dá a receita por funcionário no México.' },
+  { id: 'denue', t: 'DENUE', n: 'Directorio Estadístico Nacional de Unidades Económicas', c: 'inst', m: 'met-mexico', s: 'https://www.inegi.org.mx/app/mapa/denue/',
+    d: 'Cadastro do INEGI com nome, atividade, endereço e faixa de pessoas ocupadas dos estabelecimentos do México.',
+    u: 'Onde procurar a atividade e o porte de uma empresa mexicana, já que o RFC não tem consulta pública.' },
+  { id: 'scian', t: 'SCIAN', n: 'Sistema de Clasificación Industrial de América del Norte', c: 'empresa', m: 'met-mexico', s: 'https://www.inegi.org.mx/app/scian/',
+    d: 'Classificação de atividades econômicas usada no México, nos Estados Unidos e no Canadá, como a CNAE no Brasil.',
+    u: 'Os setores da ferramenta no México juntam códigos do SCIAN.' },
+  { id: 'rfc', t: 'RFC', n: 'Registro Federal de Contribuyentes', c: 'empresa', m: 'met-mexico', s: 'https://www.sat.gob.mx',
+    d: 'Código que identifica cada contribuinte no México: 12 caracteres na pessoa moral (empresa) e 13 na pessoa física, com a data de constituição ou de nascimento.',
+    u: 'Campo de identificação das empresas mexicanas. Não há consulta pública que devolva os dados da empresa.' },
+  { id: 'imss', t: 'IMSS', n: 'Instituto Mexicano del Seguro Social', c: 'inst', m: 'met-mexico', s: 'https://www.imss.gob.mx',
+    d: 'Instituto da previdência social do México, que recebe as contribuições sobre os salários.',
+    u: 'As contribuições ao IMSS entram no custo total da equipe, e o salário base de cotização dá o ajuste da Cidade do México.' },
+  { id: 'fix', t: 'FIX', n: 'Tipo de cambio FIX do Banco de México', c: 'fin', m: 'met-mexico', s: 'https://www.banxico.org.mx',
+    d: 'Cotação de referência do dólar em pesos, calculada pelo Banco de México e publicada no Diário Oficial, como a PTAX no Brasil.',
+    u: 'A ferramenta usa o FIX do último dia útil de dezembro do ano da receita global.' },
+  { id: 'idc', t: 'IDC', n: 'International Data Corporation', c: 'inst', m: 'met-mexico', s: 'https://www.idc.com',
+    d: 'Consultoria que mede o mercado de tecnologia de cada país.',
+    u: 'O gasto de TI de cada país em 2025, da IDC, dá o fator do México.' },
+  { id: 'fmi', t: 'FMI', n: 'Fundo Monetário Internacional', c: 'inst', m: 'met-mexico', s: 'https://www.imf.org',
+    d: 'Organismo internacional que publica o PIB de cada país em dólares.',
+    u: 'O PIB de 2025 divide o gasto de TI de cada país no cálculo do fator do México.' },
+  { id: 'iva', t: 'IVA', n: 'Impuesto al Valor Agregado', c: 'fin', m: 'met-mexico', s: 'https://www.sat.gob.mx',
+    d: 'Imposto sobre vendas do México. Fica fora da receita nos balanços e nos censos.',
+    u: 'Por isso, no México, a receita informada não passa por desconto de impostos sobre vendas.' },
+  { id: 'infonavit', t: 'INFONAVIT', n: 'Instituto del Fondo Nacional de la Vivienda para los Trabajadores', c: 'inst', m: 'met-mexico', s: 'https://portalmx.infonavit.org.mx',
+    d: 'Fundo de habitação dos trabalhadores do México, pago pelo empregador sobre o salário.',
+    u: 'A contribuição ao INFONAVIT entra no custo total da equipe no México.' },
+  { id: 'dof', t: 'DOF', n: 'Diario Oficial de la Federación', c: 'inst', m: 'met-mexico', s: 'https://dof.gob.mx',
+    d: 'Diário oficial do governo do México, onde saem leis, decretos e o FIX de cada dia.',
+    u: 'Fonte do FIX de fim de ano usado na conversão de moeda no México.' },
+  { id: 'bmv', t: 'BMV', n: 'Bolsa Mexicana de Valores', c: 'inst', m: 'met-mexico', s: 'https://www.bmv.com.mx',
+    d: 'Bolsa de valores do México, onde as companhias abertas publicam os balanços.',
+    u: 'Onde achar a receita oficial de uma companhia aberta mexicana.' },
+  { id: 'cnbv', t: 'CNBV', n: 'Comisión Nacional Bancaria y de Valores', c: 'inst', m: 'met-mexico', s: 'https://www.gob.mx/cnbv',
+    d: 'Órgão que supervisiona os bancos e o mercado de valores no México, como o Banco Central e a CVM juntos.',
+    u: 'Publica os números de cada banco mexicano.' },
+  { id: 'cnae', t: 'CNAE', n: 'Classificação Nacional de Atividades Econômicas', c: 'empresa', m: 'met-setores', s: 'https://concla.ibge.gov.br',
+    d: 'Classificação das atividades econômicas usada no Brasil. O CNPJ traz o código da atividade principal.',
+    u: 'A busca pelo CNPJ sugere o setor pela CNAE.' },
   { id: 'brasscom', t: 'Brasscom', n: 'Associação das empresas de TIC e de tecnologias digitais', c: 'inst', m: 'met-ajustes', s: 'https://brasscom.org.br',
     d: 'Entidade do setor de tecnologia que publica estudos sobre empregos e salários na área.',
     u: 'Fonte do salário médio de TI de cada estado.' },

@@ -41,6 +41,10 @@ Toda análise chega a dois números do ano de referência (por padrão, o últim
 
 O CR1 mede só investimento (CAPEX); o Método Vezen mede o gasto total de TI ou, se escolhido no painel, só o CAPEX. No Método Personalizado, só um lugar com pelo menos 5 empresas tem valor próprio.
 
+## Outros países
+
+Cada análise escolhe o país no campo **País**. Além do Brasil, há o **México**: só o Método Vezen, em pesos, com o RFC no lugar do CNPJ (sem busca, porque o RFC não tem consulta pública) e parâmetros mexicanos (Censos Económicos do INEGI, FIX do Banco de México e o nível do gasto de TI do Brasil ajustado pelo tamanho do mercado mexicano). Tudo está explicado em **Métodos**, Outros países, México.
+
 ## Privacidade
 
 - Os dados ficam só no navegador de quem usa, mesmo na versão publicada: não há servidor guardando nada.

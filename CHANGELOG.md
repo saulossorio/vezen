@@ -2,6 +2,22 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.4.0] - 2026-11-26
+
+### Adicionado
+- **México.** Cada análise tem o campo País. No México vale só o Método Vezen, com parâmetros mexicanos, em pesos (MX$):
+  - % da receita gasto com TI: o do Brasil × 0,50 ÷ 0,69. Os dois fatores comparam o gasto de TI de cada país com o PIB (IDC, Black Book do 1º trimestre de 2026, pela ABES; PIB de 2025 do FMI). Bancos: 4,7%.
+  - Receita por funcionário: INEGI, Censos Económicos 2024 (ano 2023), nas unidades com 51 ou mais pessoas, levada ao ano de referência a 5% ao ano. Gasto por usuário pela mesma regra do Brasil (% × receita por funcionário ÷ usuários).
+  - Receita sem desconto de impostos sobre vendas (no México o IVA já fica fora); custo total da equipe 1,4 vez o salário; salário médio de TI MX$ 16,5 mil (Cidade do México MX$ 20 mil); gasto de TI cresce 4% ao ano; câmbio pelo FIX do Banco de México; etapa devengada como a liquidada.
+  - Mais incerteza no caminho pela receita e no por usuários: sem empresas mexicanas com gasto conhecido, a confiança fica mais baixa.
+  - RFC no lugar do CNPJ, com conferência do formato e da data, sem busca (o RFC não tem consulta pública); estados mexicanos; sem enquadramento.
+- Métodos: grupo "Outros países" com a seção México (nível, parâmetros por setor, outros parâmetros, câmbio e o que não existe no México). Glossário: INEGI, Censos Económicos, DENUE, SCIAN, RFC, IMSS, INFONAVIT, FIX, DOF, IDC, FMI, IVA, BMV, CNBV e CNAE.
+- Testes `motor-paises` e `tela-paises`.
+
+### Alterado
+- Lista de empresas, comparação e Excel mostram cada empresa na sua moeda. O Excel ganhou as colunas País e Moeda; com empresas de outro país, os valores saem sem o formato de reais. A comparação de empresas de países diferentes mostra só a tabela.
+- O Método Personalizado usa só empresas do Brasil.
+
 ## [4.3.24] - 2026-11-25
 
 ### Corrigido
