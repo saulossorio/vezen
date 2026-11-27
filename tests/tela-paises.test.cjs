@@ -19,10 +19,12 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
     await ir('#/empresas');
     const chips = await p.$$eval('.comecos-met .comeco', cs => cs.map(c => c.dataset.v + ':' + [...c.querySelectorAll('.pais-chip')].map(x => x.textContent).join('')).join());
     check('cartões dos métodos com o país' + suf, chips === 'base:Brasil,padrao:Brasil,fgv:Brasil,propria:BrasilMéxico,mx:México', chips);
-    const ops = await p.$$eval('#f-filtro-pais option', os => os.map(o => o.textContent + (o.disabled ? '*' : '')).join('|'));
-    check('filtro por país: Brasil e México; os outros em breve e desabilitados' + suf, ops === 'Todos os países|Brasil|México|Argentina (em breve)*|Chile (em breve)*|Colômbia (em breve)*|Estados Unidos (em breve)*|Peru (em breve)*', ops);
-    await p.selectOption('#f-filtro-pais', 'MX'); await p.waitForTimeout(300);
-    check('filtro México mostra o Personalizado e o Vezen MX' + suf, (await p.$$eval('.comecos-met .comeco', cs => cs.map(c => c.dataset.v).join())) === 'propria,mx');
+    const ops = await p.$$eval('.filtro-pais label', ls => ls.map(l => l.textContent).join('|'));
+    const topo = await p.evaluate(() => { const h = document.querySelector('.escolha-topo h2').getBoundingClientRect(), f = document.querySelector('.escolha-topo .filtro-pais').getBoundingClientRect(); return Math.abs((h.top + h.bottom) - (f.top + f.bottom)) < 4; });
+    check('filtro por país: Todos, Brasil e México, ao lado do título' + suf, ops === 'Todos|Brasil|México' && (suf ? true : topo), ops);
+    const visiveis = () => p.$$eval('.comecos-met .comeco', cs => cs.filter(c => !c.hidden).map(c => c.dataset.v).join());
+    await p.click('.filtro-pais label:has(input[value=MX])'); await p.waitForTimeout(500);
+    check('filtro México mostra o Personalizado e o Vezen MX, sem redesenhar a tela' + suf, (await visiveis()) === 'propria,mx' && await p.$$eval('.comecos-met .comeco', cs => cs.length) === 5);
     // Personalizado aberto com o filtro México: a análise é do México e tem o campo País
     await p.click('.comecos-met .comeco[data-v=propria]'); await p.waitForTimeout(500);
     check('Personalizado pelo filtro México: análise do México, com campo País' + suf, await p.evaluate(() => UI.atual.dados.pais === 'MX' && UI.atual.dados.modo === 'propria') && await p.inputValue('#f-pais') === 'MX');
@@ -30,9 +32,9 @@ const txt = async (p, s) => ((await p.textContent(s)) || '').replace(/\s+/g, ' '
     await p.selectOption('#f-pais', 'BR'); await p.waitForTimeout(400);
     check('Personalizado: trocar para Brasil traz R$ e UF' + suf, (await txt(p, '.campo-rec .input-addon')) === 'R$' && (await p.$$eval('#f-uf option', os => os.map(o => o.textContent))).includes('SP') && await p.locator('label[for=f-cnpj]').innerText() === 'CNPJ');
     await p.evaluate(() => { UI.sujo = false; }); await ir('#/empresas');
-    await p.selectOption('#f-filtro-pais', 'BR'); await p.waitForTimeout(300);
-    check('filtro Brasil mostra os quatro métodos do Brasil' + suf, (await p.$$eval('.comecos-met .comeco', cs => cs.map(c => c.dataset.v).join())) === 'base,padrao,fgv,propria');
-    await p.selectOption('#f-filtro-pais', ''); await p.waitForTimeout(300);
+    await p.click('.filtro-pais label:has(input[value=BR])'); await p.waitForTimeout(500);
+    check('filtro Brasil mostra os quatro métodos do Brasil' + suf, (await visiveis()) === 'base,padrao,fgv,propria');
+    await p.click('.filtro-pais label:has(input[value=""])'); await p.waitForTimeout(500);
     // análise nova no Vezen MX
     await p.evaluate(() => novaAnalise()); await p.waitForTimeout(300);
     await p.click('[data-acao=escolher-modo][data-v=mx]'); await p.waitForTimeout(400);

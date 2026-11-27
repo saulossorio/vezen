@@ -3169,10 +3169,15 @@ li { margin: 3px 0; }
 .start-screen .cab { margin-bottom: 0; }
 /* escolha do método (Empresas vazia e Nova análise): tela de escolha com .action-card, não estado vazio (Grin › Estado vazio) */
 .escolha-metodo { display: flex; flex-direction: column; gap: 12px; padding-top: 8px; }
-.escolha-metodo h2 { font-size: var(--text-lg); margin-bottom: 12px; }
+.escolha-topo { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px 24px; margin-bottom: 12px; }
+.escolha-topo h2 { font-size: var(--text-lg); margin: 0; }
 .escolha-metodo .comecos { max-width: none; margin: 0; }
-.escolha-metodo .filtro-pais { max-width: 16rem; }
 .comeco .paises-chips { margin-top: auto; display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.comeco .pais-chip { color: var(--foreground); }
+.comeco .pais-chip .ico { box-sizing: border-box; width: 14px; height: 14px; padding: 0; background: none; color: var(--muted-foreground); }
+.comeco.sai { opacity: 0; transform: scale(.97); transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease); }
+.comeco.entra { animation: comeco-entra var(--dur) var(--ease); }
+@keyframes comeco-entra { from { opacity: 0; transform: scale(.97); } }
 .escolha-metodo .comecos-met { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 @media (max-width: 900px) { .escolha-metodo .comecos-met { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .escolha-metodo .vazio-modelo { margin: 16px 0 0; color: var(--muted-foreground); font-size: var(--text-base); }
@@ -3949,7 +3954,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.6.1';
+const VERSAO_APP = '4.7.0';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5714,12 +5719,11 @@ function calMinha() {
 const tiDireto = D => ({ suficiente: true, direta: true, N: 0, pg: D.pg ?? null, ps: D.ps || {}, pu: D.pu || {}, nS: {}, nSetores: Object.keys(D.ps || {}).length, psOutros: true, s: D.s || 0.5, local: null, acertoPct: 0, acertoVezen: 0, nVezen: 0 });
 const usavel = cal => !!cal && !!((cal.receita && cal.receita.suficiente) || (cal.ti && cal.ti.suficiente));
 const MODOS = ['base', 'padrao', 'fgv', 'propria', 'mx'];
-// países do filtro de métodos; os sem método ainda aparecem desabilitados
-const PAISES_METODO = [['BR', 'Brasil'], ['MX', 'México'], ['AR', 'Argentina'], ['CL', 'Chile'], ['CO', 'Colômbia'], ['US', 'Estados Unidos'], ['PE', 'Peru']];
+// países do filtro de métodos
+const PAISES_METODO = [['BR', 'Brasil'], ['MX', 'México']];
 // países em que o método vale: o Personalizado vale em todos com parâmetros (as contas são proporções; a moeda e os estados vêm do país da análise)
 const paisesDe = m => METODOS[m].paises || [METODOS[m].pais];
 const valeEm = (m, p) => paisesDe(m).includes(p);
-const temMetodo = p => MODOS.some(v => valeEm(v, p));
 const ehVezen = m => !!(METODOS[m] && METODOS[m].vezen);
 const nomeModo = m => (METODOS[m] || METODOS.base).nome, curtoModo = m => (METODOS[m] || METODOS.base).curto, clsModo = m => (METODOS[m] || METODOS.base).cls;
 const calDoModo = m => m === 'padrao' ? calPadrao() : m === 'fgv' ? PAIS.metodoFGV || null : m === 'propria' ? calMinha() : null;
@@ -6359,15 +6363,28 @@ async function confirmarSaida() {
   return false;
 }
 // limpo: a análise abre sem pedir confirmação ao sair, como a empresa modelo, que pode ser aberta de novo a qualquer hora
-// os quatro métodos em cartões: o que cada um mede e a conta. Na análise nova escolhe o método; na tela vazia de Empresas, abre a análise já com ele
-// cada cartão diz o país em que o método vale; o filtro mostra os métodos de um país (os países ainda sem método ficam desabilitados)
-function cartoesMetodo(acao = 'escolher-modo') {
-  const f = UI.filtroPais || '', nomeP = p => PAISES_METODO.find(x => x[0] === p)[1];
-  const filtro = `<div class="filtro-pais field"><label for="f-filtro-pais">País</label><select class="select" id="f-filtro-pais" data-filtro-pais><option value="">Todos os países</option>${PAISES_METODO.map(([p, n]) => `<option value="${p}"${f === p ? ' selected' : ''}${temMetodo(p) ? '' : ' disabled'}>${n}${temMetodo(p) ? '' : ' (em breve)'}</option>`).join('')}</select></div>`;
-  return filtro + `<div class="comecos comecos-met action-cards">${MODOS.filter(v => !f || valeEm(v, f)).map(v => { const M = METODOS[v], dentro = `${ico(M.ico)}<b>${M.cartao || nomeModo(v)}</b><span>${M.breve}</span><span class="paises-chips">${paisesDe(v).map(p => `<span class="badge pais-chip">${nomeP(p)}</span>`).join('')}</span>`;
-      return `<button type="button" class="comeco action-card" data-acao="${acao}" data-v="${v}">${dentro}</button>`; }).join('')}</div>`;
+// os métodos em cartões: o que cada um mede e a conta. Na análise nova escolhe o método; na tela vazia de Empresas, abre a análise já com ele
+// cada cartão diz o país em que o método vale; o filtro (ao lado do título, em escolhaMetodo) esconde os de outro país sem redesenhar a tela
+const nomePais = p => PAISES_METODO.find(x => x[0] === p)[1];
+const mostraNoFiltro = (v, f) => !f || valeEm(v, f);
+function escolhaMetodo(titulo, acao = 'escolher-modo') {
+  const f = UI.filtroPais || '';
+  const filtro = `<div class="segmented filtro-pais" role="radiogroup" aria-label="País">${[['', 'Todos'], ...PAISES_METODO].map(([p, n]) => `<label><input type="radio" name="filtro-pais" value="${p}" data-filtro-pais${f === p ? ' checked' : ''}><span>${n}</span></label>`).join('')}</div>`;
+  const cartoes = MODOS.map(v => { const M = METODOS[v];
+    return `<button type="button" class="comeco action-card" data-acao="${acao}" data-v="${v}"${mostraNoFiltro(v, f) ? '' : ' hidden'}>${ico(M.ico)}<b>${M.cartao || nomeModo(v)}</b><span>${M.breve}</span><span class="paises-chips">${paisesDe(v).map(p => `<span class="badge pais-chip">${ico('globo')}${nomePais(p)}</span>`).join('')}</span></button>`; }).join('');
+  return `<div class="escolha-topo"><h2>${titulo}</h2>${filtro}</div><div class="comecos comecos-met action-cards">${cartoes}</div>`;
 }
-function filtrarPais(v) { UI.filtroPais = v; renderAqui(); const s = $('#f-filtro-pais'); if (s) s.focus({ preventScroll: true }); }
+// os cartões que saem somem primeiro; depois entram os do país escolhido
+function filtrarPais(v) {
+  UI.filtroPais = v;
+  const cs = [...document.querySelectorAll('.comecos-met .comeco')];
+  const aplicar = () => { if (UI.filtroPais !== v) return;
+    for (const c of cs) { const ve = mostraNoFiltro(c.dataset.v, v), entra = ve && c.hidden; c.classList.remove('sai'); c.hidden = !ve;
+      if (entra && !reduzMov()) { c.classList.add('entra'); c.addEventListener('animationend', () => c.classList.remove('entra'), { once: true }); } } };
+  const saem = cs.filter(c => !c.hidden && !mostraNoFiltro(c.dataset.v, v));
+  if (!saem.length || reduzMov()) return aplicar();
+  saem.forEach(c => c.classList.add('sai')); setTimeout(aplicar, 140);
+}
 // método escolhido: a análise abre do topo; sem dados do Personalizado, o cursor vai ao percentual, senão ao nome
 // trocar de país apaga o que só vale no outro (estado, cidade, CNPJ ou RFC, enquadramento, dados da Receita Federal, câmbio)
 function trocarPais(d, p) {
@@ -7359,7 +7376,7 @@ TELAS.analise = {
   render(r) {
     const emp = UI.atual, d = emp.dados, res = r.aba === 'resultado', id = encodeURIComponent(emp.id);
     if (d.modo === '') return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">Nova análise</h1></div><div class="acoes"><a class="btn" href="#/empresas">${ico('voltar')}Voltar</a></div></header>
-    <div class="escolha-metodo"><h2>Escolha o método</h2>${cartoesMetodo()}</div>`;
+    <div class="escolha-metodo">${escolhaMetodo('Escolha o método')}</div>`;
     return `<header class="ws-cab"><div class="ws-tit"><h1 id="tit-emp">${esc(d.nome.trim() || 'Nova análise')}</h1><div class="ws-meta" id="ws-meta">${metaEmpresa(d)}</div></div><div class="acoes" id="ws-acoes">${acoesAnalise()}</div></header>
     <nav class="abas tabs" aria-label="Partes da análise"><a class="tab" href="#/analise/${id}"${res ? '' : ' aria-current="page"'}>${ico('analise')}Dados</a><a class="tab" href="#/analise/${id}/resultado"${res ? ' aria-current="page"' : ''}>${ico('detalhe')}Resultado</a></nav>
     ${res ? corpoResultado(emp) : `<div class="ws-corpo"><div class="grade-ws"><form class="form-ws" id="form" autocomplete="off" onsubmit="return false" novalidate>${formAnalise()}</form><aside class="resumo-lado" aria-label="Estimativa"><div class="cartao-res" id="painel"></div><p class="sr sr-only" id="anuncio" aria-live="polite"></p></aside></div></div>`}`;
@@ -7879,7 +7896,7 @@ function telaEmpresas() {
   const cab = `<div class="cab page-title-row"><div class="cab-txt"><h1>Empresas</h1>${n ? `<p class="sub page-description">${plural(n, 'empresa analisada', 'empresas analisadas')}.</p>` : ''}</div>
     <div class="acoes">${n ? `<button type="button" class="btn" data-acao="exp-xlsx">${ico('baixar')}Baixar Excel</button>` : ''}${n ? `<a class="btn" href="#/listas/nova">${ico('tabela')}Analisar uma lista</a><button type="button" class="btn primary" data-acao="nova">${ico('mais')}Nova análise</button>` : ''}${btnIco('mais-v', 'Mais opções', 'data-acao="menu-empresas" aria-haspopup="menu" aria-expanded="false"')}</div></div>`;
   // sem empresas: tela inicial do Grin (.start-screen), com o cabeçalho das outras telas; com empresas, a lista
-  if (!n) return `<div class="start-screen-body">${cab}<div class="escolha-metodo"><h2>Nova análise: escolha o método</h2>${cartoesMetodo('nova-modo')}
+  if (!n) return `<div class="start-screen-body">${cab}<div class="escolha-metodo">${escolhaMetodo('Nova análise: escolha o método', 'nova-modo')}
     <p class="vazio-modelo"><button type="button" class="link-btn link" data-acao="modelo">Ver empresa modelo</button></p></div></div>`;
   const f = UI.filtro, setores = [...new Set(S.empresas.map(e => e.dados.setor).filter(Boolean))];
   return cab + lembreteBackup() + `<div class="barra-ferr" role="search">

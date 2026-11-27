@@ -2,6 +2,13 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.7.0] - 2026-11-26
+
+### Alterado
+- **Filtro por país na escolha do método.** A lista com rótulo deu lugar a um controle segmentado do Grin (Todos, Brasil, México), na mesma linha do título: a escolha ocupa uma linha a menos. Trocar o país não redesenha a tela: os cartões de outro país saem e os do país escolhido entram, com as durações do Grin (sem animação para quem pede menos movimento).
+- **País de cada método mais visível.** O selo do país, no pé do cartão, tem o ícone de globo e o texto na cor principal.
+- Saíram do filtro os países sem método (Argentina, Chile, Colômbia, Estados Unidos e Peru).
+
 ## [4.6.1] - 2026-11-26
 
 ### Corrigido

@@ -43,7 +43,7 @@ O CR1 mede só investimento (CAPEX); o Vezen BR mede o gasto total de TI ou, se 
 
 ## Outros países
 
-Cada método vale num país, e a escolha do método mostra o país de cada um, com um filtro por país. No Brasil há quatro métodos (Vezen BR, CR1, FGV e Personalizado); no **México**, o **Vezen MX** e o Personalizado. O Vezen MX: em pesos, com o RFC no lugar do CNPJ (sem busca, porque o RFC não tem consulta pública), termos e parâmetros mexicanos (Censos Económicos do INEGI, FIX do Banco de México, nível do gasto de TI ajustado ao mercado mexicano). Ele está explicado inteiro em **Métodos**, Vezen MX. Argentina, Chile, Colômbia, Estados Unidos e Peru aparecem como "em breve".
+Cada método vale num país, e a escolha do método mostra o país de cada um, com um filtro por país. No Brasil há quatro métodos (Vezen BR, CR1, FGV e Personalizado); no **México**, o **Vezen MX** e o Personalizado. O Vezen MX: em pesos, com o RFC no lugar do CNPJ (sem busca, porque o RFC não tem consulta pública), termos e parâmetros mexicanos (Censos Económicos do INEGI, FIX do Banco de México, nível do gasto de TI ajustado ao mercado mexicano). Ele está explicado inteiro em **Métodos**, Vezen MX.
 
 Os segmentos são uma lista só, a mesma na análise, no pedido à IA e em todos os métodos.
 
