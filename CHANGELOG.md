@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [4.8.0] - 2026-11-26
+
+### Alterado
+- **Painel Ajuda (Grin 2.55, a mesma versão do Laika).** O botão Tour guiado da barra lateral virou o botão Ajuda, que abre um painel com o Tour guiado e, no fim, a versão do Vezen, o autor e a versão do Grin. A assinatura saiu do fim de Empresas, Métodos e Glossário. O último passo do tour aponta para Ajuda.
+
 ## [4.7.0] - 2026-11-26
 
 ### Alterado

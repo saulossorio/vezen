@@ -68,8 +68,10 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
     await p.reload(); await p.waitForTimeout(1000);
     check(`${nomeTela}: depois de visto, não abre sozinho`, await p.locator('.tour').count() === 0);
     if (nomeTela === 'celular') { await p.click('.sidebar-menu-button'); await p.waitForTimeout(500); }
-    await p.click('#lat-pe [data-acao="tour"]'); await p.waitForTimeout(400);
-    check(`${nomeTela}: a barra lateral reabre o tour`, await p.locator('.tour.show').count() === 1 && await esperaTit(titulos[0]));
+    await p.click('#lat-pe [data-popover="painel-ajuda"]'); await p.waitForTimeout(300);
+    check(`${nomeTela}: Ajuda mostra o tour e a versão`, await p.locator('#painel-ajuda.open [data-acao="tour"]').isVisible() && /Vezen \d+\.\d+\.\d+/.test(await p.locator('#painel-ajuda .help-about').innerText()));
+    await p.click('#painel-ajuda [data-acao="tour"]'); await p.waitForTimeout(400);
+    check(`${nomeTela}: Ajuda reabre o tour e fecha o painel`, await p.locator('.tour.show').count() === 1 && await esperaTit(titulos[0]) && !(await p.locator('#painel-ajuda.open').count()));
     await p.click('[data-tour="next"]'); await esperaTit(titulos[1]); await p.waitForTimeout(400);
     await p.click('[data-tour="prev"]');
     check(`${nomeTela}: Voltar volta um passo`, await esperaTit(titulos[0]));
@@ -82,8 +84,9 @@ const check = (nome, cond, info = '') => { (cond ? ok : falhas).push(nome + (inf
   await p.goto(URL); await p.waitForTimeout(500);
   check('sem tour automático para navegador automatizado', await p.locator('.tour').count() === 0);
   check('a tela vazia de Empresas não repete o tour ao lado da empresa modelo', await p.locator('.escolha-metodo [data-acao="tour"]').count() === 0 && await p.locator('.escolha-metodo [data-acao="modelo"]').count() === 1);
-  await p.click('#lat-pe [data-acao="tour"]'); await p.waitForTimeout(400);
-  check('o tour abre pela barra lateral', await p.locator('.tour.show').count() === 1);
+  check('sem assinatura no fim da tela', await p.locator('.app-footer').count() === 0);
+  await p.click('#lat-pe [data-popover="painel-ajuda"]'); await p.waitForTimeout(300); await p.click('#painel-ajuda [data-acao="tour"]'); await p.waitForTimeout(400);
+  check('o tour abre pela Ajuda, na barra lateral', await p.locator('.tour.show').count() === 1);
   await ctx.close();
 
   console.log('OK (' + ok.length + '):\n  ' + ok.join('\n  '));

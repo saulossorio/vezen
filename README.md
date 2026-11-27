@@ -22,7 +22,7 @@ O nome vem de Wezen, uma estrela da constelação do Cão Maior. Em árabe, Weze
 
 **Busca pelo CNPJ:** nada é preenchido sem o clique na lupa, dentro do campo CNPJ. A lupa fica discreta até o CNPJ estar completo e válido; aí fica verde. A busca preenche nome, estado, município e enquadramento pela Receita Federal, sugere natureza e setor (a pessoa aceita ou ignora) e marca esses campos com o selo via CNPJ. Abaixo do campo aparece o que foi preenchido, ou por que a busca falhou (CNPJ não encontrado, sem conexão, dados incompletos). A busca também traz a receita da DRE das companhias abertas, publicada na CVM, com o link para o documento, e a dos bancos, cooperativas e financeiras que não estão na CVM, do IF.data do Banco Central. Os arquivos com essas receitas são atualizados toda semana por uma tarefa do GitHub (`tools/receitas-cvm.cjs` e `tools/receitas-ifdata.cjs`).
 
-**Tour guiado:** na primeira visita, um passo a passo ensina o caminho básico fazendo: você cria a análise do Banco do Brasil, digita o CNPJ e usa a busca para preencher o que ela traz; só o que a busca não traz, como funcionários, é digitado. Feita cada ação, o tour espera o **Próximo**. Pule quando quiser e reabra em **Tour guiado**, na barra lateral.
+**Tour guiado:** na primeira visita, um passo a passo ensina o caminho básico fazendo: você cria a análise do Banco do Brasil, digita o CNPJ e usa a busca para preencher o que ela traz; só o que a busca não traz, como funcionários, é digitado. Feita cada ação, o tour espera o **Próximo**. Pule quando quiser e reabra em **Ajuda**, na barra lateral, que também mostra a versão.
 
 **Empresa modelo:** um exemplo pronto (Banco do Brasil, com dados oficiais), no menu de **Empresas**.
 

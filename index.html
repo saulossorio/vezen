@@ -6,7 +6,7 @@
 <meta name="color-scheme" content="light dark">
 <title>Vezen</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'><path d='M9.4 9.4H18.6L14 1.43Z M9.4 18.6H18.6L14 26.57Z M9.4 9.4V18.6L1.43 14Z M18.6 9.4V18.6L26.57 14Z' fill='%238dc63f'/></svg>">
-<!-- Grin 2.54, copiado de https://github.com/saulossorio/grin/releases/tag/v2.54 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
+<!-- Grin 2.55, copiado de https://github.com/saulossorio/grin/releases/tag/v2.55 (dist/grin.inline.css e dist/grin.js). Fontes Geist e Geist Mono sob a licença SIL Open Font License 1.1 (OFL), reproduzida abaixo.
 
 Copyright 2026 The Geist Project Authors (https://github.com/vercel/geist-font)
 
@@ -103,7 +103,7 @@ FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
 OTHER DEALINGS IN THE FONT SOFTWARE.
 -->
 <style id="grin">
-/* Grin 2.54 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
+/* Grin 2.55 · CSS com as fontes dentro (Geist e Geist Mono, licença SIL OFL 1.1) · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 /* ---------- styles/fonts.css ---------- */
 /* Grin: fonts. Geist and Geist Mono, variable weight 100 to 900, from the official release
@@ -1974,10 +1974,18 @@ body.tour-open .menu, body.tour-open .popover { z-index: 125; }
 .appearance .slider-end.small { font-size: 12px; }
 .appearance .slider-end.large { font-size: 18px; }
 
-/* Signature: name, version and author of the tool, and the Grin version it uses. Only on the start screen and on
-   documentation or help pages, never on working screens. Last element of the page content. The page is at least as tall
-   as the window, so with little content the signature sits at the bottom of the window; with more content it follows the
-   content and scrolls with it. Never position: fixed or sticky. */
+/* Help panel: the Ajuda button in the sidebar footer opens a popover with the help items (.menu-item: tour, documentation)
+   and, at the end, the "Sobre" block with the name, version and author of the tool and the Grin version it uses.
+   A tool shows its signature only here. Choosing an item closes the panel (popover.js). */
+.help-menu { min-width: 248px; gap: 2px; padding: 6px; }
+.help-menu .menu-item { width: 100%; }
+.help-about { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; padding: 10px 10px 6px; border-top: 1px solid var(--border-soft); color: var(--muted-foreground); font-size: var(--text-sm); }
+.help-about b { color: var(--foreground); font-weight: var(--weight-semibold); }
+.help-about a { color: inherit; }
+.help-about a:hover { color: var(--foreground); }
+
+/* Signature at the end of the page: only on documentation sites, such as the Grin site. Tools use the help panel.
+   Last element of the page content; with little content it sits at the bottom of the window. Never fixed or sticky. */
 .page-content:has(> .app-footer) { flex: 1 0 auto; padding-bottom: 20px; }
 .app-footer { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 24px; margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border-soft); color: var(--muted-foreground); font-size: var(--text-sm); }
 .app-footer b { color: var(--foreground); font-weight: var(--weight-semibold); }
@@ -1988,21 +1996,21 @@ body.tour-open .menu, body.tour-open .popover { z-index: 125; }
 /* ---------- components/start/start.css ---------- */
 /* Grin start screen (also: tela inicial, home, welcome, primeira tela). The first screen of a tool, before there is data
    to work on. It uses the same structure as every other screen: the page header (.page-header) in the same place and
-   size, the content below it with the page width, and the signature at the bottom of the window. Only the description
+   size and the content below it with the page width. The signature lives in the help panel. Only the description
    is limited to --size-prose, for line length. Nothing is centered in a narrow column, so the title and the content do
    not jump when the person moves to another screen. The free space below the content stays empty: nothing is
    stretched or added to fill it.
    Markup: <div class="page-header">…h1, p.page-description…</div>
-           <main class="page-content start-screen"><div class="start-screen-body">…</div><footer class="app-footer">…</footer></main> */
+           <main class="page-content start-screen"><div class="start-screen-body">…</div></main> */
 .start-screen-body { display: flex; flex-direction: column; gap: var(--space-4); }
 .page-header .page-description, .start-screen-body .lead { max-width: var(--size-prose); }
 </style>
 <script id="grin-js" defer>
-/* Grin 2.54 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
+/* Grin 2.55 · comportamentos em JavaScript; inclua com <script src="grin.js" defer> · https://github.com/saulossorio/grin
    Gerado por tools/bundle.mjs a partir dos arquivos do repositório. Não edite à mão. */
 'use strict';
 const Grin = (window.Grin = window.Grin || {});
-Grin.version = '2.54';
+Grin.version = '2.55';
 
 // ---------- scripts/utils.js ----------
 {
@@ -2376,7 +2384,8 @@ document.addEventListener('click', (e) => {
     hideTip();
     return;
   }
-  if (open && !open.panel.contains(e.target)) close();
+  // a click outside closes the panel, and so does choosing an item of a menu inside it (help panel)
+  if (open && (!open.panel.contains(e.target) || e.target.closest('.menu-item'))) close();
 });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { hideTip(); close(true); } });
 addEventListener('scroll', () => { if (open) place(open.panel, open.button); }, true);
@@ -3160,11 +3169,8 @@ li { margin: 3px 0; }
 .sidebar.collapsed .ponto { position: absolute; top: 6px; right: 8px; margin: 0; }
 #app { max-width: calc(var(--size-content) + 64px); margin: 0 auto; padding: 32px 32px 64px; outline: none; }
 .aviso-armaz { padding-inline: 32px; }
-/* assinatura do Grin: só na tela inicial (Empresas) e na documentação (Métodos, Glossário). A tela ocupa pelo menos a altura
-   da janela: com pouco conteúdo a assinatura fica no fim da janela; com muito, fica depois do conteúdo e rola com ele. Nunca é fixa. */
 .app-main { min-height: 100vh; }
 .app-main > #app { width: 100%; flex: 1 0 auto; } /* em coluna flex, margin auto encolheria o conteúdo */
-.app-main > .app-footer { flex: none; width: calc(100% - 64px); max-width: var(--size-content); margin: 0 auto; padding-bottom: 20px; }
 /* tela inicial (Empresas sem empresas): padrão Tela inicial do Grin, com o mesmo cabeçalho e as mesmas margens das outras telas */
 .start-screen .cab { margin-bottom: 0; }
 /* escolha do método (Empresas vazia e Nova análise): tela de escolha com .action-card, não estado vazio (Grin › Estado vazio) */
@@ -3184,7 +3190,6 @@ li { margin: 3px 0; }
 @media (max-width: 760px) {
   #app { padding: 20px 16px 64px; }
   .aviso-armaz { padding-inline: 16px; }
-  .app-main > .app-footer { width: calc(100% - 32px); }
 }
 
 /* ===================== CONTROLES: botão, campo, input-group, checkbox e segmented do Grin ===================== */
@@ -3918,7 +3923,6 @@ details[open]::details-content { block-size: auto; }
   <div class="app-main principal">
     <div id="aviso-armaz" class="aviso-armaz banner warn" hidden>O navegador não permite salvar: os dados desta sessão não ficam guardados. Exporte um backup antes de fechar.</div>
     <main id="app" tabindex="-1"></main>
-    <footer class="app-footer" id="assinatura"></footer>
   </div>
 </div>
 <input type="file" id="arquivo" accept=".json,application/json" hidden>
@@ -3926,6 +3930,7 @@ details[open]::details-content { block-size: auto; }
 <input type="file" id="arq-lista" accept=".xls,.xlsx,.csv,.tsv,.txt,.html,.htm,.parquet" hidden>
 <dialog id="dlg" class="dialog" aria-labelledby="dlg-tit"><div class="dialog-header" id="dlg-cab"><h2 id="dlg-tit"></h2><button type="button" class="btn icon ghost xs" data-acao="dlg-fechar" aria-label="Fechar"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div><div id="dlg-corpo" class="dialog-body"></div><div id="dlg-acoes" class="dialog-footer"></div></dialog>
 <div class="popover appearance" id="aparencia" data-appearance></div>
+<div class="popover help-menu" id="painel-ajuda" role="dialog" aria-label="Ajuda"></div>
 <script id="parquet">
 /* Leitor de Parquet embutido, para ler a base de empresas sem internet.
    hyparquet 1.31.5 e hyparquet-compressors 1.1.2: Copyright (c) Hyperparam. fzstd 0.1.1: Copyright (c) 2020 Arjun Barrett.
@@ -3954,7 +3959,7 @@ var Parquet=(()=>{var He=Object.defineProperty;var Yn=Object.getOwnPropertyDescr
 /* ===================== MOTOR DE CÁLCULO (sem DOM) ===================== */
 const VERSAO_DADOS = 1;
 // versão do Vezen, à vista ao lado do nome, no menu: a mesma do package.json e do CHANGELOG (o teste motor-periodo confere)
-const VERSAO_APP = '4.7.0';
+const VERSAO_APP = '4.8.0';
 const Z90 = 1.2816;
 const ENQUADRAMENTOS = ['MEI', 'ME', 'EPP', 'Simples'];
 // etapas da despesa pública: a liquidada é o gasto do ano; as outras ficam acima (dotação, empenho) ou abaixo (pago) e somam incerteza
@@ -5865,13 +5870,11 @@ async function aoMudarRota() {
     render(true);
   } finally { mudandoRota = false; }
 }
-const TELAS_ASSINATURA = ['empresas', 'metodos', 'glossario']; // tela inicial e documentação; nunca nas telas de trabalho
 // o país da tela: o da análise aberta; nas outras telas, o Brasil (cada empresa de outro país é calculada com comPais)
 function paisDaTela() { PAIS = CONFIG.paises[UI.rota.tela === 'analise' && UI.atual ? paisDe(UI.atual.dados) : 'BR']; }
 function render(rolarTopo = false) {
   paisDaTela();
   const t = TELAS[UI.rota.tela], app = $('#app');
-  $('#assinatura').hidden = !TELAS_ASSINATURA.includes(UI.rota.tela);
   app.classList.toggle('start-screen', UI.rota.tela === 'empresas' && !S.empresas.length);
   fecharPop(); Grin.hideTip();
   app.innerHTML = t.render(UI.rota);
@@ -5905,7 +5908,7 @@ function renderNav() {
   const pend = !b || (S.ultimaAlteracao && S.ultimaAlteracao > b), atencao = S.empresas.length && (!b || d > 7 || pend);
   $('#lat-pe').innerHTML = `${S.empresas.length || S.listas.length ? `<div class="lat-dados${atencao ? ' atencao' : ''}">${b ? 'Último backup ' + haDias(d) + (pend ? ', com alterações depois' : '') : 'Nenhum backup exportado ainda'}</div>
     <button type="button" class="lat-item nav-item small" data-acao="exp-menu" aria-haspopup="menu" aria-expanded="false">${ico('baixar')}<span class="rot label">Exportar</span>${atencao ? '<i class="ponto dot warn" aria-hidden="true"></i>' : ''}</button>` : ''}
-    <button type="button" class="lat-item nav-item small" data-acao="tour">${ico('mapa')}<span class="rot label">Tour guiado</span></button>
+    <button type="button" class="lat-item nav-item small" data-popover="painel-ajuda" aria-expanded="false">${ico('ajuda')}<span class="rot label">Ajuda</span></button>
     <button type="button" class="lat-item nav-item small" data-theme-toggle>${ico(escuro ? 'sol' : 'lua')}<span class="rot label">${escuro ? 'Tema claro' : 'Tema escuro'}</span></button>
     <button type="button" class="lat-item nav-item small" data-popover="aparencia" aria-expanded="false">${ico('ajustes')}<span class="rot label">Aparência</span></button>`;
 }
@@ -9903,7 +9906,7 @@ const TOUR = [
   { titulo: 'Resultado detalhado', texto: 'Cada seção explica uma parte do cálculo.', alvo: ['#app .indice-lado', '#app .res-corpo > section'] },
   { titulo: 'Listas', texto: 'Várias empresas de uma vez, a partir de uma planilha.', alvo: ['#nav a[href="#/listas"]'] },
   { titulo: 'Métodos e glossário', texto: 'Fórmulas, fontes e siglas.', alvo: ['#nav a[href="#/metodos"]'] },
-  { titulo: 'Fim do tour', texto: 'O tour pode ser repetido a partir deste menu.', alvo: ['#lat-pe [data-acao="tour"]'] }
+  { titulo: 'Fim do tour', texto: 'O tour pode ser repetido em Ajuda, que também mostra a versão.', alvo: ['#lat-pe [data-popover="painel-ajuda"]'] }
 ];
 // a busca pelo CNPJ terminou, com ou sem dados: a mensagem abaixo do campo já não é a de espera
 const buscaCnpjTerminou = () => !!UI.cnpjMsg && !UI.cnpjMsg.startsWith('Consultando');
@@ -9986,7 +9989,8 @@ window.addEventListener('resize', () => {
 window.addEventListener('hashchange', () => aoMudarRota());
 $('#arquivo').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) importarArquivoJSON(f); });
 $('#lat-ver').textContent = VERSAO_APP;
-$('#assinatura').innerHTML = `<span><b>Vezen ${VERSAO_APP}</b> · por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.54</a></span>`;
+// painel Ajuda do Grin: o tour e, no fim, a assinatura
+$('#painel-ajuda').innerHTML = `<button type="button" class="menu-item" data-acao="tour">${ico('mapa')}<span class="menu-label">Tour guiado</span></button><div class="help-about"><b>Vezen ${VERSAO_APP}</b><span>por Saúl Ossorio</span><span>Feito com <a href="https://saulossorio.github.io/grin/">Grin 2.55</a></span></div>`;
 $('#arq-base').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerBaseNova(f); });
 $('#arq-lista').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) lerArquivoLista(f); });
 
